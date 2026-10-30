@@ -13,7 +13,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +41,7 @@ public interface VidLibTool {
 
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("vidlib-tool", (command, buildContext) -> {
-		command.requires(source -> source.hasPermission(2));
+		command.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
 
 		for (var tool : REGISTRY.get().values()) {
 			var cmd = Commands.literal(tool.getId().replace('_', '-'));
@@ -55,7 +56,7 @@ public interface VidLibTool {
 	@Nullable
 	static VidLibTool of(ItemStack stack) {
 		if (stack.has(DataComponents.CUSTOM_DATA)) {
-			var toolType = stack.get(DataComponents.CUSTOM_DATA).getUnsafe().getStringOr("vidlib:tool", "");
+			var toolType = stack.get(DataComponents.CUSTOM_DATA).copyTag().getStringOr("vidlib:tool", "");
 
 			if (!toolType.isEmpty()) {
 				return VidLibTool.REGISTRY.get().get(toolType);
@@ -93,7 +94,7 @@ public interface VidLibTool {
 	Component getName();
 
 	@Nullable
-	default ResourceLocation getModel() {
+	default Identifier getModel() {
 		return null;
 	}
 
@@ -120,11 +121,16 @@ public interface VidLibTool {
 	}
 
 	default boolean useOnBlock(Player player, ItemStack item, UseItemOnBlockEvent event) {
-		return rightClick(player, item, event.getUseOnContext().getHitResult().getType() == HitResult.Type.BLOCK ? event.getUseOnContext().getHitResult() : null);
+		var context = event.getUseOnContext();
+		var hit = new BlockHitResult(context.getClickLocation(), context.getClickedFace(), context.getClickedPos(), context.isInside());
+		return rightClick(player, item, hit);
 	}
 
 	default boolean use(Player player, ItemStack item) {
-		return rightClick(player, item, player.klib$ray(500D, 1F).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY));
+		var start = player.getEyePosition(1F);
+		var end = start.add(player.getViewVector(1F).scale(500D));
+		var hit = player.level().clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.SOURCE_ONLY, player));
+		return rightClick(player, item, hit.getType() == HitResult.Type.BLOCK ? (BlockHitResult) hit : null);
 	}
 
 	default boolean useOnEntity(Player player, ItemStack item, Entity target) {

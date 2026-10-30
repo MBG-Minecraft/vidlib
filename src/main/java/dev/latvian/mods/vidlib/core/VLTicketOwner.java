@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.core.NoMixinException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface VLTicketOwner<T extends Comparable<? super T>> {
-	default ResourceLocation vl$getId() {
+	default Identifier vl$getId() {
 		throw new NoMixinException(this);
 	}
 

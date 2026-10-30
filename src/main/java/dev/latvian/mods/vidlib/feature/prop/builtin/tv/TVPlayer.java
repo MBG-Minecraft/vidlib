@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.tv;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import dev.latvian.mods.klib.util.ID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.ClientAsset;
@@ -10,7 +10,7 @@ import org.watermedia.api.player.videolan.VideoPlayer;
 import java.net.URI;
 
 public class TVPlayer {
-	public static final ClientAsset TEXTURE = new ClientAsset(ID.vidlib("prop/tv/video"));
+	public static final ClientAsset TEXTURE = new ClientAsset.ResourceTexture(ID.vidlib("prop/tv/video"));
 
 	private static URI current;
 	private static VideoPlayer player;
@@ -31,7 +31,7 @@ public class TVPlayer {
 				}));
 
 				textureWrapper = new TextureWrapper(player);
-				Minecraft.getInstance().getTextureManager().register(TEXTURE.texturePath(), textureWrapper);
+				Minecraft.getInstance().getTextureManager().register(TEXTURE.id(), textureWrapper);
 			}
 
 			player.setMuteMode(muted);

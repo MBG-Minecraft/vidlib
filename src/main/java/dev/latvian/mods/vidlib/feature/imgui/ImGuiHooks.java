@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
-import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import dev.latvian.mods.klib.CommonPaths;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.VidLibPaths;
+import dev.latvian.mods.vidlib.feature.client.SDL3Compat;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -24,8 +24,7 @@ import imgui.internal.ImGuiDockNode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWWindowContentScaleCallback;
+import org.lwjgl.sdl.SDLScancode;
 
 /**
  * Internal hooks for ImGui lifecycle management.
@@ -48,7 +47,7 @@ public class ImGuiHooks {
 		0,
 	};
 
-	public static VLImGuiImplGlfw imGuiGlfw;
+	public static VLImGuiImplSdl imGuiSdl;
 	public static VLImGuiImplGl3 imGuiGl3;
 	private static ImGuiContextStack context;
 	private static boolean active = false;
@@ -70,7 +69,7 @@ public class ImGuiHooks {
 		}
 
 		initialized = true;
-		imGuiGlfw = new VLImGuiImplGlfw(mc);
+		imGuiSdl = new VLImGuiImplSdl(mc);
 		imGuiGl3 = new VLImGuiImplGl3();
 
 		context = new ImGuiContextStack(
@@ -91,10 +90,10 @@ public class ImGuiHooks {
 		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleViewports);
 		io.setConfigDockingWithShift(false);
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
-		io.setConfigMacOSXBehaviors(Minecraft.ON_OSX);
+		io.setConfigMacOSXBehaviors(net.minecraft.util.Util.getPlatform() == net.minecraft.util.Util.OS.OSX);
 
 		imGuiGl3.init();
-		imGuiGlfw.init(mc.getWindow().getWindow(), true);
+		imGuiSdl.init(mc.getWindow().handle(), true);
 		loadFonts(resourceManager);
 		var style = ImGui.getStyle();
 		ImGui.styleColorsDark(style);
@@ -155,33 +154,24 @@ public class ImGuiHooks {
 	}
 
 	public static void trackDpiScale(Window window) {
-		var previous = new GLFWWindowContentScaleCallback[1];
-		previous[0] = GLFW.glfwSetWindowContentScaleCallback(window.getWindow(), (handle, xScale, yScale) -> {
-			dpiScale = xScale;
-			if (previous[0] != null) {
-				previous[0].invoke(handle, xScale, yScale);
-			}
-		});
+		// SDL3 removed the window content-scale callback; ImGui reads the DPI scale from the
+		// display list, so the scale is refreshed whenever a new frame starts.
 		var xScale = new float[1];
-		GLFW.glfwGetWindowContentScale(window.getWindow(), xScale, null);
+		var yScale = new float[1];
+		SDL3Compat.queryWindowContentScale(window.handle(), xScale, yScale);
 		dpiScale = xScale[0];
 	}
 
 	public static void dispose() {
 		imGuiGl3.dispose();
-		imGuiGlfw.dispose();
+		imGuiSdl.dispose();
 		context.destroy();
 		ImNodes.destroyContext();
 	}
 
 	public static void startFrame(Minecraft mc) {
 		if (!initialized) {
-			//if (mc.getOverlay() instanceof LoadingOverlay) {
-			//	return;
-			//}
-
-			init(mc, mc.getResourceManager());
-			initialized = true;
+			return;
 		}
 
 		var old = context.push();
@@ -192,11 +182,11 @@ public class ImGuiHooks {
 
 		var io = ImGui.getIO();
 
-		if (io.getKeysDown(GLFW.GLFW_KEY_LEFT_CONTROL)) {
-			io.setKeysDown(GLFW.GLFW_KEY_TAB, false);
+		if (io.getKeysDown(SDLScancode.SDL_SCANCODE_LCTRL)) {
+			io.setKeysDown(SDLScancode.SDL_SCANCODE_TAB, false);
 		}
 
-		imGuiGlfw.newFrame();
+		imGuiSdl.newFrame();
 		ImGui.newFrame();
 		active = true;
 
@@ -233,21 +223,17 @@ public class ImGuiHooks {
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
 
-		if (windowSize.x > 0F && windowSize.y > 0F) {
-			window.vl$setViewportArea(
-				(centralNodePos.x - windowPos.x) / windowSize.x,
-				(centralNodePos.y - windowPos.y) / windowSize.y,
-				centralNodeSize.x / windowSize.x,
-				(centralNodeSize.y - h) / windowSize.y
-			);
+		window.vl$setViewportArea(
+			(centralNodePos.x - windowPos.x) / windowSize.x,
+			(centralNodePos.y - windowPos.y) / windowSize.y,
+			centralNodeSize.x / windowSize.x,
+			(centralNodeSize.y - h) / windowSize.y
+		);
 
-			if (ready && window.getWidth() > 0 && window.getHeight() > 0 && (window.getWidth() != prevWidth || window.getHeight() != prevHeight)) {
-				try {
-					mc.resizeDisplay();
-				} catch (Exception ex) {
-					VidLib.LOGGER.error("Error resizing display", ex);
-				}
-			}
+		// window.vl$setViewportArea(0D, 0D, 1D, 1D);
+
+		if (window.getWidth() != 0 && window.getHeight() != 0 && (window.getWidth() != prevWidth || window.getHeight() != prevHeight)) {
+			mc.resizeGui();
 		}
 
 		old.pop();
@@ -294,11 +280,11 @@ public class ImGuiHooks {
 		// captureKeyboard = ImGui.getIO().getWantCaptureKeyboard();
 
 		if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-			GLFW.glfwWindowHint(GLFW.GLFW_TRANSPARENT_FRAMEBUFFER, GLFW.GLFW_TRUE);
-			var backupWindowPtr = GLFW.glfwGetCurrentContext();
+			SDL3Compat.glfwWindowHint(0x0002200C, 1); // GLFW_TRANSPARENT_FRAMEBUFFER
+			var backupWindowPtr = SDL3Compat.glfwGetCurrentContext();
 			ImGui.updatePlatformWindows();
 			ImGui.renderPlatformWindowsDefault();
-			GLFW.glfwMakeContextCurrent(backupWindowPtr);
+			SDL3Compat.glfwMakeContextCurrent(backupWindowPtr);
 		}
 
 		old.pop();
@@ -332,23 +318,30 @@ public class ImGuiHooks {
 		return value;
 	}
 
+	/**
+	 * The game's final image is composited onto the window through
+	 * {@code GlCommandEncoder.presentTexture}, whose destination rectangle constants are patched by
+	 * {@code GlCommandEncoderMixin} with these values, so the image lands exactly in the viewport
+	 * area between the ImGui top and bottom bars. presentTexture is the only consumer of these
+	 * helpers, so the offsets are applied unconditionally.
+	 */
 	public static int frameX(int original) {
 		var window = Minecraft.getInstance().getWindow();
-		return endingFrame ? (int) (window.vl$getXOffset() * window.vl$getUnscaledFramebufferWidth()) : original;
+		return (int) (window.vl$getXOffset() * window.vl$getUnscaledFramebufferWidth());
 	}
 
 	public static int frameY(int original) {
 		var window = Minecraft.getInstance().getWindow();
-		return endingFrame ? (int) (window.vl$getInverseYOffset() * window.vl$getUnscaledFramebufferHeight()) : original;
+		return (int) (window.vl$getInverseYOffset() * window.vl$getUnscaledFramebufferHeight());
 	}
 
 	public static int frameW(int original) {
 		var window = Minecraft.getInstance().getWindow();
-		return endingFrame ? (int) (original + window.vl$getXOffset() * window.vl$getUnscaledFramebufferWidth()) : original;
+		return original + (int) (window.vl$getXOffset() * window.vl$getUnscaledFramebufferWidth());
 	}
 
 	public static int frameH(int original) {
 		var window = Minecraft.getInstance().getWindow();
-		return endingFrame ? (int) (original + window.vl$getInverseYOffset() * window.vl$getUnscaledFramebufferHeight()) : original;
+		return original + (int) (window.vl$getInverseYOffset() * window.vl$getUnscaledFramebufferHeight());
 	}
 }

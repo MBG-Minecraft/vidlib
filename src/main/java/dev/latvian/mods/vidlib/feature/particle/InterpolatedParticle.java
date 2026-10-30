@@ -1,24 +1,33 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.klib.interpolation.Interpolation;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.EasingType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
-public class InterpolatedParticle extends TextureSheetParticle {
+/**
+ * 26.3 port: {@code TextureSheetParticle} was replaced by {@link SingleQuadParticle}, which no
+ * longer owns the size/colour/roll fields - they move into the render state via
+ * {@code QuadParticleRenderState.add(...)} - but they are still declared here so the mod's existing
+ * {@code quadSizeMod}/{@code alpha}/{@code rCol} maths keeps working verbatim.
+ */
+public class InterpolatedParticle extends SingleQuadParticle implements DepthPassQuadParticle {
 	public final Vec3 origin;
-	public final Interpolation interpolation;
+	public final EasingType ease;
 	public float relativeAge;
 	public float relativePos;
 	public float oAlpha;
 	public float oQuadSizeMod;
 	public float quadSizeMod;
+	private SingleQuadParticle.Layer forcedLayer;
 
-	public InterpolatedParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, Interpolation interpolation) {
-		super(level, x, y, z);
-		this.interpolation = interpolation;
+	public InterpolatedParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, EasingType interpolation) {
+		super(level, x, y, z, (TextureAtlasSprite) null);
+		this.ease = interpolation;
 		this.xd = xd;
 		this.yd = yd;
 		this.zd = zd;
@@ -34,8 +43,33 @@ public class InterpolatedParticle extends TextureSheetParticle {
 		this.relativePos = 0F;
 	}
 
+	/**
+	 * 26.3's {@link SingleQuadParticle} dropped {@code TextureSheetParticle#pickSprite}.
+	 */
+	public void pickSprite(SpriteSet sprites) {
+		this.setSprite(sprites.get(random));
+	}
+
+	/**
+	 * The layer this particle's quads are batched into. Overridden by subclasses that use a
+	 * different pipeline.
+	 */
+	protected SingleQuadParticle.Layer getParticleLayer() {
+		return VidLibParticleRenderTypes.TRUE_TRANSLUCENT_LAYER;
+	}
+
 	@Override
-	public ParticleRenderType getRenderType() {
+	protected SingleQuadParticle.Layer getLayer() {
+		return forcedLayer == null ? getParticleLayer() : forcedLayer;
+	}
+
+	@Override
+	public void vl$setForcedLayer(SingleQuadParticle.Layer layer) {
+		this.forcedLayer = layer;
+	}
+
+	@Override
+	public ParticleRenderType getGroup() {
 		return VidLibParticleRenderTypes.TRUE_TRANSLUCENT;
 	}
 
@@ -49,7 +83,7 @@ public class InterpolatedParticle extends TextureSheetParticle {
 		zo = z;
 
 		relativeAge = age / (float) lifetime;
-		relativePos = interpolation.interpolateClamped(relativeAge);
+		relativePos = Math.clamp(ease.apply(relativeAge), 0F, 1F);
 
 		setPos(
 			origin.x + xd * relativePos,
@@ -85,5 +119,29 @@ public class InterpolatedParticle extends TextureSheetParticle {
 	@Override
 	public float getQuadSize(float delta) {
 		return super.getQuadSize(delta) * Mth.lerp(delta, oQuadSizeMod, quadSizeMod);
+	}
+
+	/**
+	 * Subclasses pick their sprite after construction, so the quad bounds have to tolerate a
+	 * missing sprite rather than crash the render thread.
+	 */
+	@Override
+	protected float getU0() {
+		return sprite == null ? 0F : super.getU0();
+	}
+
+	@Override
+	protected float getU1() {
+		return sprite == null ? 1F : super.getU1();
+	}
+
+	@Override
+	protected float getV0() {
+		return sprite == null ? 0F : super.getV0();
+	}
+
+	@Override
+	protected float getV1() {
+		return sprite == null ? 1F : super.getV1();
 	}
 }

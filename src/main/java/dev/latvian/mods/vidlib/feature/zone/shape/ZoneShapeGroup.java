@@ -1,12 +1,13 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -19,12 +20,17 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox) implements ZoneShape {
-	public static final SimpleRegistryType<ZoneShapeGroup> TYPE = SimpleRegistryType.dynamic("group", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		ZoneShape.CODEC.listOf().fieldOf("zones").forGetter(ZoneShapeGroup::zoneShapes)
-	).apply(instance, ZoneShapeGroup::create)), KLibStreamCodecs.listOf(ZoneShape.STREAM_CODEC).map(ZoneShapeGroup::create, ZoneShapeGroup::zoneShapes));
+public record ZoneShapeGroup(List<Ref<ZoneShape>> shapes, AABB box, AAIBB intBox) implements ZoneShape {
+	public static final DynamicType<RegistryFriendlyByteBuf, ZoneShape> TYPE = DynamicType.create(
+		"group",
+		"shapes",
+		ZoneShape.CODEC.listOf(),
+		KLibStreamCodecs.listOf(ZoneShape.STREAM_CODEC),
+		ZoneShapeGroup::create,
+		ZoneShapeGroup::shapes
+	);
 
-	public static ZoneShapeGroup create(List<ZoneShape> zoneShapes) {
+	public static ZoneShapeGroup create(List<Ref<ZoneShape>> zoneShapes) {
 		double minX = Double.POSITIVE_INFINITY;
 		double minY = Double.POSITIVE_INFINITY;
 		double minZ = Double.POSITIVE_INFINITY;
@@ -39,14 +45,14 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 		int imaxZ = Integer.MIN_VALUE;
 
 		for (var zone : zoneShapes) {
-			var box = zone.toAABB();
+			var box = zone.value().toAABB();
 			minX = Math.min(minX, box.minX);
 			minY = Math.min(minY, box.minY);
 			minZ = Math.min(minZ, box.minZ);
 			maxX = Math.max(maxX, box.maxX);
 			maxY = Math.max(maxY, box.maxY);
 			maxZ = Math.max(maxZ, box.maxZ);
-			var ibox = zone.toAAIBB();
+			var ibox = zone.value().toAAIBB();
 			iminX = Math.min(iminX, ibox.minX());
 			iminY = Math.min(iminY, ibox.minY());
 			iminZ = Math.min(iminZ, ibox.minZ());
@@ -59,7 +65,7 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 
@@ -73,8 +79,8 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 	public ZoneClipResult clip(ZoneClipContext ctx) {
 		ZoneClipResult result = null;
 
-		for (var zone : zoneShapes) {
-			var clip = zone.clip(ctx);
+		for (var zone : shapes) {
+			var clip = zone.value().clip(ctx);
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {
@@ -92,8 +98,8 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 			return false;
 		}
 
-		for (var zone : zoneShapes) {
-			if (zone.contains(x, y, z)) {
+		for (var zone : shapes) {
+			if (zone.value().contains(x, y, z)) {
 				return true;
 			}
 		}
@@ -107,8 +113,8 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 			return false;
 		}
 
-		for (var zone : zoneShapes) {
-			if (zone.contains(x, y, z)) {
+		for (var zone : shapes) {
+			if (zone.value().contains(x, y, z)) {
 				return true;
 			}
 		}
@@ -122,8 +128,8 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 			return false;
 		}
 
-		for (var zone : zoneShapes) {
-			if (zone.intersects(box)) {
+		for (var zone : shapes) {
+			if (zone.value().intersects(box)) {
 				return true;
 			}
 		}
@@ -135,8 +141,8 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 	public Stream<BlockPos> getBlocks() {
 		var stream = Stream.<BlockPos>empty();
 
-		for (var zone : zoneShapes) {
-			stream = Stream.concat(stream, zone.getBlocks());
+		for (var zone : shapes) {
+			stream = Stream.concat(stream, zone.value().getBlocks());
 		}
 
 		return stream;
@@ -144,14 +150,14 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 
 	@Override
 	public VoxelShape createVoxelShape() {
-		if (zoneShapes.isEmpty()) {
+		if (shapes.isEmpty()) {
 			return Shapes.empty();
 		}
 
-		var shape = zoneShapes.getFirst().createVoxelShape();
+		var shape = shapes.getFirst().value().createVoxelShape();
 
-		for (int i = 1; i < zoneShapes.size(); i++) {
-			shape = Shapes.or(shape, zoneShapes.get(i).createVoxelShape());
+		for (int i = 1; i < shapes.size(); i++) {
+			shape = Shapes.or(shape, shapes.get(i).value().createVoxelShape());
 		}
 
 		return shape;
@@ -159,14 +165,14 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 
 	@Override
 	public VoxelShape createBlockRenderingShape(Predicate<BlockPos> predicate) {
-		if (zoneShapes.isEmpty()) {
+		if (shapes.isEmpty()) {
 			return Shapes.empty();
 		}
 
-		var shape = zoneShapes.getFirst().createBlockRenderingShape(predicate);
+		var shape = shapes.getFirst().value().createBlockRenderingShape(predicate);
 
-		for (int i = 1; i < zoneShapes.size(); i++) {
-			shape = Shapes.or(shape, zoneShapes.get(i).createBlockRenderingShape(predicate));
+		for (int i = 1; i < shapes.size(); i++) {
+			shape = Shapes.or(shape, shapes.get(i).value().createBlockRenderingShape(predicate));
 		}
 
 		return shape;
@@ -176,8 +182,8 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 	public double closestDistanceTo(Vec3 pos) {
 		var dist = Double.POSITIVE_INFINITY;
 
-		for (var shape : zoneShapes) {
-			dist = Math.min(dist, shape.closestDistanceTo(pos));
+		for (var shape : shapes) {
+			dist = Math.min(dist, shape.value().closestDistanceTo(pos));
 
 			if (dist <= 0D) {
 				return 0D;
@@ -189,14 +195,14 @@ public record ZoneShapeGroup(List<ZoneShape> zoneShapes, AABB box, AAIBB intBox)
 
 	@Override
 	public ZoneShape move(double x, double y, double z) {
-		var shapes = new ArrayList<ZoneShape>(zoneShapes.size());
+		var list = new ArrayList<Ref<ZoneShape>>(shapes.size());
 
-		for (var shape : zoneShapes) {
-			shapes.add(shape.move(x, y, z));
+		for (var shape : shapes) {
+			list.add(shape.value().move(x, y, z).ref());
 		}
 
 		var moved = box.move(x, y, z);
-		return new ZoneShapeGroup(shapes, moved, new AAIBB(Mth.floor(moved.minX), Mth.floor(moved.minY), Mth.floor(moved.minZ), Mth.ceil(moved.maxX), Mth.ceil(moved.maxY), Mth.ceil(moved.maxZ)));
+		return new ZoneShapeGroup(list, moved, new AAIBB(Mth.floor(moved.minX), Mth.floor(moved.minY), Mth.floor(moved.minZ), Mth.ceil(moved.maxX), Mth.ceil(moved.maxY), Mth.ceil(moved.maxZ)));
 	}
 
 	@Override

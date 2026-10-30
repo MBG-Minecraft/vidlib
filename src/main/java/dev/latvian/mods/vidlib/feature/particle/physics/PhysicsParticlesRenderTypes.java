@@ -1,29 +1,28 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.renderpearl.api.pipeline.BlendFunction;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import dev.latvian.mods.klib.util.ID;
+import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
 
 public interface PhysicsParticlesRenderTypes {
-	VertexFormat FORMAT = VertexFormat.builder()
-		.add("Position", VertexFormatElement.POSITION)
-		.add("Color", VertexFormatElement.COLOR)
-		.add("UV0", VertexFormatElement.UV0)
-		.add("UV2", VertexFormatElement.UV2)
-		.add("Normal", VertexFormatElement.NORMAL)
+	VertexFormat FORMAT = VertexFormat.builder(0)
+		.addAttribute("Position", com.mojang.renderpearl.api.GpuFormat.RGB32_FLOAT)
+		.addAttribute("Color", com.mojang.renderpearl.api.GpuFormat.RGBA8_UNORM)
+		.addAttribute("UV0", com.mojang.renderpearl.api.GpuFormat.RG32_FLOAT)
+		.addAttribute("UV2", com.mojang.renderpearl.api.GpuFormat.RG16_SINT)
+		.addAttribute("Normal", com.mojang.renderpearl.api.GpuFormat.RGBA8_SNORM)
 		.build();
 
-	RenderPipeline.Snippet PIPELINE_BASE = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
-		.withVertexFormat(FORMAT, VertexFormat.Mode.QUADS)
+	RenderPipeline.Snippet PIPELINE_BASE = RenderPipeline.builder(RenderPipelines.MATRICES_FOG_SNIPPET)
 		.withVertexShader(ID.vidlib("core/physics_particle"))
 		.withFragmentShader(ID.vidlib("core/physics_particle"))
-		.withSampler("Sampler0")
-		.withSampler("Sampler2")
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0_SAMPLER2)
+		.withVertexBinding(0, FORMAT)
+		.withPrimitiveTopology(com.mojang.renderpearl.api.pipeline.PrimitiveTopology.QUADS)
 		.withCull(true)
 		.buildSnippet();
 
@@ -31,68 +30,19 @@ public interface PhysicsParticlesRenderTypes {
 		.withLocation(ID.vidlib("pipeline/physics_particle/solid"))
 		.build();
 
-	RenderType SOLID = RenderType.create(
-		"physics_particle_solid",
-		1536,
-		false,
-		false,
-		SOLID_PIPELINE,
-		RenderType.CompositeState.builder()
-			.setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.createCompositeState(true)
-	);
-
 	RenderPipeline CUTOUT_MIPPED_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
 		.withLocation(ID.vidlib("pipeline/physics_particle/cutout_mipped"))
-		.withShaderDefine("ALPHA_CUTOUT", 0.5F)
+		.withShaderDefine("ALPHA_CUTOUT", 1)
 		.build();
-
-	RenderType CUTOUT_MIPPED = RenderType.create(
-		"physics_particle_cutout_mipped",
-		1536,
-		true,
-		false,
-		CUTOUT_MIPPED_PIPELINE,
-		RenderType.CompositeState.builder()
-			.setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.createCompositeState(true)
-	);
 
 	RenderPipeline CUTOUT_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
 		.withLocation(ID.vidlib("pipeline/physics_particle/cutout"))
-		.withShaderDefine("ALPHA_CUTOUT", 0.1F)
+		.withShaderDefine("ALPHA_CUTOUT", 0)
 		.build();
-
-	RenderType CUTOUT = RenderType.create(
-		"physics_particle_cutout",
-		1536,
-		false,
-		false,
-		CUTOUT_PIPELINE,
-		RenderType.CompositeState.builder()
-			.setTextureState(RenderStateShard.BLOCK_SHEET)
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.createCompositeState(true)
-	);
 
 	RenderPipeline TRANSLUCENT_PIPELINE = RenderPipeline.builder(PIPELINE_BASE)
 		.withLocation(ID.vidlib("pipeline/physics_particle/translucent"))
-		.withShaderDefine("ALPHA_CUTOUT", 0.1F)
-		.withBlend(BlendFunction.TRANSLUCENT)
+		.withShaderDefine("ALPHA_CUTOUT", 0)
+		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
 		.build();
-
-	RenderType TRANSLUCENT = RenderType.create(
-		"physics_particle_translucent",
-		1536,
-		false,
-		true,
-		TRANSLUCENT_PIPELINE,
-		RenderType.CompositeState.builder()
-			.setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOutputState(RenderStateShard.TRANSLUCENT_TARGET)
-			.createCompositeState(true)
-	);
 }

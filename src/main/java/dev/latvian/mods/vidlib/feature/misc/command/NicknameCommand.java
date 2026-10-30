@@ -7,13 +7,14 @@ import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.Collection;
 
 public interface NicknameCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("nickname", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.argument("player", EntityArgument.players())
 			.then(Commands.argument("nickname", ComponentArgument.textComponent(buildContext))
 				.executes(ctx -> nickname(EntityArgument.getOptionalPlayers(ctx, "player"), ComponentArgument.getResolvedComponent(ctx, "nickname")))

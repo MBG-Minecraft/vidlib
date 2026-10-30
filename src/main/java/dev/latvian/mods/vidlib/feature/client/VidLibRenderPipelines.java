@@ -1,139 +1,268 @@
 package dev.latvian.mods.vidlib.feature.client;
 
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
-import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.pipeline.BlendEquation;
+import com.mojang.renderpearl.api.pipeline.BlendFunction;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.CompareOp;
+import com.mojang.renderpearl.api.pipeline.DepthStencilState;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasRenderPipelines;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesRenderTypes;
-import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
-import net.minecraft.Util;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.BindGroupLayouts;
+import net.minecraft.util.Util;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 import java.util.Locale;
 import java.util.function.Function;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public interface VidLibRenderPipelines {
-	RenderPipeline GUI_DEPTH = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
+	private static String blendName(BlendFunction b) {
+		BlendEquation c = b.color();
+		BlendEquation a = b.alpha();
+		return (c.sourceFactor().name() + "/" + c.destFactor().name() + "/" + a.sourceFactor().name() + "/" + a.destFactor().name()).toLowerCase(Locale.ROOT);
+	}
+
+	RenderPipeline GUI_DEPTH = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/gui_depth"))
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+		.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, true))
+		.withCull(false)
+		.withVertexShader("core/position_tex_color")
 		.withFragmentShader(ID.vidlib("core/gui_depth"))
+		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline MASKED_GUI = RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
+	RenderPipeline MASKED_GUI = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/masked_gui"))
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER1)
+		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+		.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, true))
+		.withCull(false)
+		.withVertexShader("core/position_tex_color")
 		.withFragmentShader(ID.vidlib("core/masked_gui"))
-		.withSampler("Sampler1")
+		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline MSDF = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+	RenderPipeline MSDF = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/msdf"))
-		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+		.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, true))
+		.withCull(true)
 		.withVertexShader(ID.vidlib("core/msdf"))
 		.withFragmentShader(ID.vidlib("core/msdf"))
-		.withSampler("Sampler0")
-		.withBlend(BlendFunction.TRANSLUCENT)
-		.withCull(true)
-		.withUniform("ModelOffset", UniformType.VEC3) // Used to pass modifiers
+		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline MSDF_SEE_THROUGH = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+	RenderPipeline MSDF_SEE_THROUGH = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/msdf_see_through"))
-		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+		.withDepthStencilState(java.util.Optional.empty())
+		.withCull(true)
 		.withVertexShader(ID.vidlib("core/msdf"))
 		.withFragmentShader(ID.vidlib("core/msdf"))
-		.withSampler("Sampler0")
-		.withBlend(BlendFunction.TRANSLUCENT)
-		.withCull(true)
-		.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-		.withDepthWrite(false)
+		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline SKYBOX = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+	RenderPipeline SKYBOX = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/skybox"))
-		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withColorTargetState(ColorTargetState.DEFAULT)
+		.withCull(true)
 		.withVertexShader("core/position_tex_color")
 		.withFragmentShader("core/position_tex_color")
-		.withSampler("Sampler0")
-		.withCull(true)
+		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline SOLID_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
+	RenderPipeline SOLID_TERRAIN_NO_CULL = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/terrain/solid_no_cull"))
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.TERRAIN_INFO)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
+		.withBindGroupLayout(BindGroupLayouts.CHUNK_SECTION)
+		.withColorTargetState(ColorTargetState.DEFAULT)
+		.withDepthStencilState(DepthStencilState.DEFAULT)
 		.withCull(false)
+		.withVertexShader("core/terrain")
+		.withFragmentShader("core/terrain")
+		.withVertexBinding(0, DefaultVertexFormat.BLOCK)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline CUTOUT_MIPPED_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
+	RenderPipeline CUTOUT_MIPPED_TERRAIN_NO_CULL = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/terrain/cutout_mipped_no_cull"))
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.TERRAIN_INFO)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
+		.withBindGroupLayout(BindGroupLayouts.CHUNK_SECTION)
 		.withShaderDefine("ALPHA_CUTOUT", 0.5F)
+		.withColorTargetState(ColorTargetState.DEFAULT)
+		.withDepthStencilState(DepthStencilState.DEFAULT)
 		.withCull(false)
+		.withVertexShader("core/terrain")
+		.withFragmentShader("core/terrain")
+		.withVertexBinding(0, DefaultVertexFormat.BLOCK)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline CUTOUT_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
+	RenderPipeline CUTOUT_TERRAIN_NO_CULL = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/terrain/cutout_no_cull"))
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.TERRAIN_INFO)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
+		.withBindGroupLayout(BindGroupLayouts.CHUNK_SECTION)
 		.withShaderDefine("ALPHA_CUTOUT", 0.1F)
+		.withColorTargetState(ColorTargetState.DEFAULT)
+		.withDepthStencilState(DepthStencilState.DEFAULT)
 		.withCull(false)
+		.withVertexShader("core/terrain")
+		.withFragmentShader("core/terrain")
+		.withVertexBinding(0, DefaultVertexFormat.BLOCK)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline TRANSLUCENT_TERRAIN_NO_CULL = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
+	RenderPipeline TRANSLUCENT_TERRAIN_NO_CULL = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/terrain/translucent_no_cull"))
-		.withBlend(BlendFunction.TRANSLUCENT)
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.TERRAIN_INFO)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
+		.withBindGroupLayout(BindGroupLayouts.CHUNK_SECTION)
+		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+		.withDepthStencilState(DepthStencilState.DEFAULT)
 		.withCull(false)
+		.withVertexShader("core/terrain")
+		.withFragmentShader("core/terrain")
+		.withVertexBinding(0, DefaultVertexFormat.BLOCK)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline ADDITIVE_PARTICLE = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
+	RenderPipeline ADDITIVE_PARTICLE = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/particle/additive"))
-		.withBlend(BlendFunction.ADDITIVE)
-		.withDepthWrite(false)
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
+		.withColorTargetState(new ColorTargetState(BlendFunction.ADDITIVE))
+		.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
+		.withVertexShader("core/particle")
+		.withFragmentShader("core/particle")
+		.withVertexBinding(0, DefaultVertexFormat.PARTICLE)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline ADDITIVE_PARTICLE_ONLY_DEPTH = RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
+	RenderPipeline ADDITIVE_PARTICLE_ONLY_DEPTH = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/particle/additive_only_depth"))
-		.withBlend(BlendFunction.ADDITIVE)
-		.withColorWrite(false)
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
+		.withColorTargetState(new ColorTargetState(java.util.Optional.of(BlendFunction.ADDITIVE), com.mojang.renderpearl.api.GpuFormat.RGBA8_UNORM, ColorTargetState.WRITE_NONE))
+		.withDepthStencilState(DepthStencilState.DEFAULT)
+		.withVertexShader("core/particle")
+		.withFragmentShader("core/particle")
+		.withVertexBinding(0, DefaultVertexFormat.PARTICLE)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
 	Function<BlendFunction, RenderPipeline> CANVAS_PIPELINES = Util.memoize(blendFunction -> RenderPipeline.builder()
-		.withLocation(ID.vidlib("pipeline/canvas/" + blendFunction.sourceColor().name().toLowerCase(Locale.ROOT) + "/" + blendFunction.destColor().name().toLowerCase(Locale.ROOT) + "/" + blendFunction.sourceAlpha().name().toLowerCase(Locale.ROOT) + "/" + blendFunction.destAlpha().name().toLowerCase(Locale.ROOT) + "/"))
-		.withVertexShader("core/blit_screen")
+		.withLocation(ID.vidlib("pipeline/canvas/" + blendName(blendFunction)))
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		// 26.3 has no core/blit_screen VERTEX source ("Couldn't find source for VERTEX shader"):
+		// vanilla blits use core/screenquad for the vertex stage and blit_screen only for the
+		// fragment stage, drawn as a fullscreen 3-vertex triangle with no vertex buffer attached.
+		.withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
+		.withColorTargetState(new ColorTargetState(blendFunction))
+		.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
+		.withCull(false)
+		.withVertexShader("core/screenquad")
 		.withFragmentShader("core/blit_screen")
-		.withSampler("InSampler")
-		.withBlend(blendFunction)
-		.withDepthWrite(false)
-		.withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-		.withColorWrite(true, false)
-		.withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
+		.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
 		.build()
 	);
 
-	RenderPipeline.Snippet OUTLINE_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_COLOR_SNIPPET)
+	RenderPipeline.Snippet OUTLINE_SNIPPET = RenderPipeline.builder()
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
 		.withVertexShader("core/rendertype_outline")
 		.withFragmentShader("core/rendertype_outline")
-		.withSampler("Sampler0")
-		.withBlend(BlendFunction.TRANSLUCENT)
-		.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+		.withDepthStencilState(DepthStencilState.DEFAULT)
+		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.buildSnippet();
 
 	RenderPipeline OUTLINE_CULL = RenderPipeline.builder(OUTLINE_SNIPPET).withLocation("pipeline/outline_cull").build();
 	RenderPipeline OUTLINE_NO_CULL = RenderPipeline.builder(OUTLINE_SNIPPET).withLocation("pipeline/outline_no_cull").withCull(false).build();
 
-	RenderPipeline STONE_ENTITY_NO_CULL = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
+	RenderPipeline STONE_ENTITY_NO_CULL = RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/canvas/no_cull/stone_entity"))
-		.withFragmentShader(ID.vidlib("core/stone_entity"))
-		.withSampler("Sampler1")
+		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+		.withBindGroupLayout(BindGroupLayouts.LIGHTING)
+		.withBindGroupLayout(BindGroupLayouts.FOG)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER1)
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
+		.withColorTargetState(ColorTargetState.DEFAULT)
+		.withDepthStencilState(DepthStencilState.DEFAULT)
 		.withCull(false)
-		.withVertexFormat(DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS)
+		.withVertexShader("core/entity")
+		.withFragmentShader(ID.vidlib("core/stone_entity"))
+		.withVertexBinding(0, DefaultVertexFormat.ENTITY)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
 	@SubscribeEvent
@@ -141,6 +270,7 @@ public interface VidLibRenderPipelines {
 		event.registerPipeline(GUI_DEPTH);
 		event.registerPipeline(MASKED_GUI);
 		event.registerPipeline(MSDF);
+		event.registerPipeline(MSDF_SEE_THROUGH);
 		event.registerPipeline(SKYBOX);
 		event.registerPipeline(SOLID_TERRAIN_NO_CULL);
 		event.registerPipeline(CUTOUT_MIPPED_TERRAIN_NO_CULL);
@@ -152,16 +282,6 @@ public interface VidLibRenderPipelines {
 		event.registerPipeline(PhysicsParticlesRenderTypes.CUTOUT_PIPELINE);
 		event.registerPipeline(PhysicsParticlesRenderTypes.TRANSLUCENT_PIPELINE);
 		event.registerPipeline(STONE_ENTITY_NO_CULL);
-		CanvasRenderPipelines.register(event);
-
-		TerrainRenderLayer.SOLID.setClientValues(RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS, RenderType.solid(), TerrainRenderTypes.SOLID, TerrainRenderTypes.SOLID_NO_CULL);
-		TerrainRenderLayer.CUTOUT_MIPPED.setClientValues(RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS, RenderType.cutoutMipped(), TerrainRenderTypes.CUTOUT_MIPPED, TerrainRenderTypes.CUTOUT_MIPPED_NO_CULL);
-		TerrainRenderLayer.CUTOUT.setClientValues(RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS, RenderType.cutout(), TerrainRenderTypes.CUTOUT, TerrainRenderTypes.CUTOUT_NO_CULL);
-		TerrainRenderLayer.TRANSLUCENT.setClientValues(RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS, RenderType.translucent(), TerrainRenderTypes.TRANSLUCENT, TerrainRenderTypes.TRANSLUCENT_NO_CULL);
-		TerrainRenderLayer.TRIPWIRE.setClientValues(RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS, RenderType.tripwire(), TerrainRenderTypes.TRANSLUCENT, TerrainRenderTypes.TRANSLUCENT_NO_CULL);
-		TerrainRenderLayer.PARTICLE.setClientValues(RenderLevelStageEvent.Stage.AFTER_PARTICLES, RenderType.translucent(), TerrainRenderTypes.TRANSLUCENT, TerrainRenderTypes.TRANSLUCENT_NO_CULL);
-		TerrainRenderLayer.BRIGHT.setClientValues(null, RenderType.translucent(), BrightRenderTypes.POS_TEX_COL, BrightRenderTypes.POS_TEX_COL_NO_CULL);
-		TerrainRenderLayer.BLOOM.setClientValues(null, RenderType.translucent(), BloomRenderTypes.POS_TEX_COL, BloomRenderTypes.POS_TEX_COL_NO_CULL);
 	}
 
 	static RenderPipeline wrap(RenderPipeline original) {

@@ -4,6 +4,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -13,7 +14,7 @@ import java.util.List;
 public interface HealCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("heal", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.argument("target", EntityArgument.entities())
 			.executes(ctx -> heal(EntityArgument.getEntities(ctx, "target")))
 		)

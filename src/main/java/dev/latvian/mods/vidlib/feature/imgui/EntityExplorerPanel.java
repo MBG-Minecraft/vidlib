@@ -1,9 +1,11 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.entity.PositionType;
+import dev.latvian.mods.klib.entity.filter.PlayerProfileEntityFilter;
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
-import dev.latvian.mods.vidlib.feature.entity.filter.ProfileEntityFilter;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -11,13 +13,12 @@ import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -56,9 +57,7 @@ public class EntityExplorerPanel extends Panel {
 		if (onlyPlayers.get()) {
 			allEntities.addAll(graphics.mc.level.players());
 		} else {
-			for (var entity : graphics.mc.level.klib$allEntities()) {
-				allEntities.add(entity);
-			}
+			allEntities.addAll(graphics.mc.level.getEntities((Entity) null, net.minecraft.world.phys.AABB.INFINITE, Entity::isAlive));
 		}
 
 		var delta = graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
@@ -68,7 +67,7 @@ public class EntityExplorerPanel extends Panel {
 		ImGui.checkbox("Only Players", onlyPlayers);
 
 		if (sortByClosest.get() && allEntities.size() >= 2) {
-			var cam = graphics.mc.gameRenderer.getMainCamera().getPosition();
+			var cam = graphics.mc.gameRenderer.mainCamera().position();
 			allEntities.sort(Comparator.comparingDouble(p -> p.getEyePosition(delta).distanceToSqr(cam)));
 		}
 
@@ -156,15 +155,15 @@ public class EntityExplorerPanel extends Panel {
 
 			if (entity instanceof Player player) {
 				if (ImGui.button("Edit Player Data###vidlib-edit-player-data", -1F, 0F)) {
-					new PlayerDataConfigPanel(player.getGameProfile(), player.vl$sessionData().dataMap).open();
+					new PlayerDataConfigPanel(new NameAndId(player.getGameProfile()), player.vl$sessionData().dataMap).open();
 				}
 			}
 
 			if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.button(ImIcons.APERTURE + " Focus DoF###focus-dof")) {
 				if (entity instanceof Player player) {
-					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(new ProfileEntityFilter(player.getGameProfile()), PositionType.EYES));
+					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(new PlayerProfileEntityFilter(new NameAndId(player.getGameProfile())).ref(), PositionType.EYES).ref());
 				} else {
-					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(entity, PositionType.EYES));
+					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(entity, PositionType.EYES).ref());
 				}
 
 				DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
@@ -199,7 +198,7 @@ public class EntityExplorerPanel extends Panel {
 			if (entity instanceof Player) {
 				ImGui.sameLine();
 
-				var tags = entity.getTags();
+				var tags = entity.entityTags();
 
 				if (ImGui.button(tags.size() + " Tags###vidlib-entity-tags")) {
 					ImGui.openPopup("###vidlib-edit-tags-popup");

@@ -24,10 +24,10 @@ public record EntitySnapshot(UUID player, Vec3 position, Rotation rotation, bool
 	).apply(instance, EntitySnapshot::new)), CompositeStreamCodec.of(
 		KLibStreamCodecs.UUID, EntitySnapshot::player,
 		MCStreamCodecs.VEC3, EntitySnapshot::position,
-		Rotation.STREAM_CODEC_NO_ROLL, EntitySnapshot::rotation,
+		Rotation.STREAM_CODEC, EntitySnapshot::rotation,
 		ByteBufCodecs.BOOL, EntitySnapshot::crouching,
 		EntitySnapshot::new
-	), EntitySnapshot.class);
+	));
 
 	public static final DataType<List<EntitySnapshot>> LIST_DATA_TYPE = DATA_TYPE.listOf();
 

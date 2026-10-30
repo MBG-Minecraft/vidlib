@@ -1,15 +1,15 @@
 package dev.latvian.mods.vidlib.feature.visual;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.util.GeometryRenderLayer;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 
-public record FluidTextures(ClientAsset still, ClientAsset flowing, TerrainRenderLayer type, Color tint, CubeTextures cubeTextures) {
-	public static FluidTextures of(ClientAsset still, ClientAsset flowing, TerrainRenderLayer type, Color tint) {
+public record FluidTextures(ClientAsset.ResourceTexture still, ClientAsset.ResourceTexture flowing, GeometryRenderLayer layer, Color tint, CubeTextures cubeTextures) {
+	public static FluidTextures of(ClientAsset.ResourceTexture still, ClientAsset.ResourceTexture flowing, GeometryRenderLayer type, Color tint) {
 		return new FluidTextures(still, flowing, type, tint, new CubeTextures(
 			Optional.of(new FaceTexture(SpriteKey.block(flowing), type, true, tint, 0.5F, 0D)),
 			Optional.of(new FaceTexture(SpriteKey.block(still), type, true, tint, 1F, 0D)),
@@ -21,34 +21,34 @@ public record FluidTextures(ClientAsset still, ClientAsset flowing, TerrainRende
 		));
 	}
 
-	public static FluidTextures of(ClientAsset still, ClientAsset flowing) {
-		return of(still, flowing, TerrainRenderLayer.SOLID, Color.WHITE);
+	public static FluidTextures of(ClientAsset.ResourceTexture still, ClientAsset.ResourceTexture flowing) {
+		return of(still, flowing, GeometryRenderLayer.SOLID, Color.WHITE);
 	}
 
 	public static final FluidTextures DEBUG = of(
-		new ClientAsset(ID.vidlib("block/debug_fluid/still")),
-		new ClientAsset(ID.vidlib("block/debug_fluid/flow"))
+		new ClientAsset.ResourceTexture(ID.vidlib("block/debug_fluid/still")),
+		new ClientAsset.ResourceTexture(ID.vidlib("block/debug_fluid/flow"))
 	);
 
 	public static final FluidTextures WATER = of(
-		new ClientAsset(ResourceLocation.withDefaultNamespace("block/water_still")),
-		new ClientAsset(ResourceLocation.withDefaultNamespace("block/water_flow")),
-		TerrainRenderLayer.TRANSLUCENT,
+		new ClientAsset.ResourceTexture(Identifier.withDefaultNamespace("block/water_still")),
+		new ClientAsset.ResourceTexture(Identifier.withDefaultNamespace("block/water_flow")),
+		GeometryRenderLayer.TRANSLUCENT,
 		Color.of(0xFF3F76E4)
 	);
 
 	public static final FluidTextures LAVA = of(
-		new ClientAsset(ResourceLocation.withDefaultNamespace("block/lava_still")),
-		new ClientAsset(ResourceLocation.withDefaultNamespace("block/lava_flow"))
+		new ClientAsset.ResourceTexture(Identifier.withDefaultNamespace("block/lava_still")),
+		new ClientAsset.ResourceTexture(Identifier.withDefaultNamespace("block/lava_flow"))
 	);
 
 	public static final FluidTextures OPAQUE_WATER = of(
-		new ClientAsset(ID.vidlib("block/opaque_water/still")),
-		new ClientAsset(ID.vidlib("block/opaque_water/flow"))
+		new ClientAsset.ResourceTexture(ID.vidlib("block/opaque_water/still")),
+		new ClientAsset.ResourceTexture(ID.vidlib("block/opaque_water/flow"))
 	);
 
 	public static final FluidTextures PALE_OPAQUE_WATER = of(
-		new ClientAsset(ID.vidlib("block/pale_opaque_water/still")),
-		new ClientAsset(ID.vidlib("block/pale_opaque_water/flow"))
+		new ClientAsset.ResourceTexture(ID.vidlib("block/pale_opaque_water/still")),
+		new ClientAsset.ResourceTexture(ID.vidlib("block/pale_opaque_water/flow"))
 	);
 }

@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.math.knumber;
 
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;

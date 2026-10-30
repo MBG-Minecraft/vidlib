@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.Gradient;
-import dev.latvian.mods.klib.color.GradientReference;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.client.ImagePreProcessor;
+import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import it.unimi.dsi.fastutil.ints.Int2FloatArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2FloatMap;
 import it.unimi.dsi.fastutil.ints.Int2FloatMaps;
@@ -14,16 +14,16 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.ARGB;
+import net.minecraft.world.entity.player.PlayerModelType;
 
 import java.util.Map;
 
 public class ClothingPartImage {
-	public static NativeImage toModel(NativeImage src, PlayerSkin.Model model) {
-		if (model == PlayerSkin.Model.SLIM) {
+	public static NativeImage toModel(NativeImage src, PlayerModelType model) {
+		if (model == PlayerModelType.SLIM) {
 			var dst = new NativeImage(64, 64, true);
 			dst.copyFrom(src);
 			return dst;
@@ -34,14 +34,14 @@ public class ClothingPartImage {
 
 	public final NativeImage pixels;
 	public final Int2FloatMap gradientValues;
-	public final Map<ResourceLocation, NativeImage> gradientRefCache;
+	public final Map<String, NativeImage> gradientRefCache;
 	public final Int2ObjectMap<NativeImage> colorCache;
 
-	public ClothingPartImage(ResourceManager resourceManager, PlayerSkin.Model model, ResourceLocation asset) throws Exception {
+	public ClothingPartImage(ResourceManager resourceManager, PlayerModelType model, Identifier asset) throws Exception {
 		this.gradientRefCache = new Object2ObjectOpenHashMap<>(4);
 		this.colorCache = new Int2ObjectOpenHashMap<>(0);
 
-		var modelResource = resourceManager.getResource(asset.withPath("textures/vidlib/clothing/" + asset.getPath() + "_" + model.id() + ".png")).orElse(null);
+		var modelResource = resourceManager.getResource(asset.withPath("textures/vidlib/clothing/" + asset.getPath() + "_" + model.getSerializedName() + ".png")).orElse(null);
 		var resource = modelResource != null ? modelResource : resourceManager.getResourceOrThrow(asset.withPath("textures/vidlib/clothing/" + asset.getPath() + ".png"));
 
 		try (var in = resource.open()) {
@@ -87,8 +87,8 @@ public class ClothingPartImage {
 		}
 	}
 
-	private NativeImage remap(Gradient gradient) {
-		var g = gradient.optimize();
+	private NativeImage remap(Ref<Gradient> gradient) {
+		var g = gradient.value();
 		var remap = new Int2IntOpenHashMap();
 
 		for (var entry : gradientValues.int2FloatEntrySet()) {
@@ -99,16 +99,14 @@ public class ClothingPartImage {
 			}
 		}
 
-		return MiscClientUtils.remapImage(pixels, remap);
+		return ImagePreProcessor.remapImage(pixels, remap);
 	}
 
-	public NativeImage withGradient(Gradient gradient) {
-		if (gradient == Color.TRANSPARENT && gradientValues.isEmpty()) {
+	public NativeImage withGradient(Ref<Gradient> gradient) {
+		if (gradient == Gradient.EMPTY && gradientValues.isEmpty()) {
 			return pixels;
-		} else if (gradient instanceof GradientReference ref) {
-			return gradientRefCache.computeIfAbsent(ref.id(), id -> remap(ref));
-		} else if (gradient instanceof Color color) {
-			return colorCache.computeIfAbsent(color.argb(), id -> remap(color));
+		} else if (GradientImBuilder.isClientReference(gradient)) {
+			return gradientRefCache.computeIfAbsent(gradient.key(), _ -> remap(gradient));
 		} else {
 			return remap(gradient);
 		}

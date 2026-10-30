@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.render.BufferSupplier;
-import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeGroup;
+import dev.latvian.mods.vidlib.klib.render.BufferSupplier;
+import dev.latvian.mods.vidlib.klib.render.CuboidRenderer;
 
 public class GroupZoneRenderer implements ZoneRenderer<ZoneShapeGroup> {
 	@Override
@@ -21,7 +21,7 @@ public class GroupZoneRenderer implements ZoneRenderer<ZoneShapeGroup> {
 			CuboidRenderer.lines(ms, minX, minY, minZ, maxX, maxY, maxZ, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.WHITE);
 		}
 
-		for (var shape : group.zoneShapes()) {
+		for (var shape : group.shapes()) {
 			if (ctx.frame().isVisible(shape.toAABB())) {
 				var renderer = ZoneRenderer.get(shape.type());
 

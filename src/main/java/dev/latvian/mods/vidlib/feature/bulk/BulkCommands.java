@@ -4,11 +4,12 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 
 public class BulkCommands {
 	@AutoRegister
 	public static final ServerCommandHolder COMMAND = new ServerCommandHolder("bulk", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.literal("undo")
 			.then(Commands.literal("last")
 				.executes(ctx -> {

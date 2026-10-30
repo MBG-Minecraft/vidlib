@@ -48,21 +48,22 @@
 		"dev/latvian/mods/vidlib/core/VLBlockState"
 	],
 	"net/minecraft/network/chat/Style": [
-		"dev/latvian/mods/vidlib/core/VLStyle"
+		"dev/latvian/mods/vidlib/core/VLStyle",
+		"dev/latvian/mods/klib/core/KLibStyle"
 	],
 	"net/minecraft/network/chat/Component": [
 		"dev/latvian/mods/vidlib/core/VLComponent"
 	],
-	"net/minecraft/client/renderer/RenderType": [
+	"net/minecraft/client/renderer/rendertype/RenderType": [
 		"dev/latvian/mods/vidlib/core/VLRenderType"
 	],
 	"net/minecraft/client/renderer/entity/EntityRenderer": [
-		"dev/latvian/mods/vidlib/core/VLEntityRenderer<T, S>"
+		"dev/latvian/mods/vidlib/core/VLEntityRenderer"
 	],
-	"com/mojang/blaze3d/textures/GpuTexture": [
+	"com/mojang/renderpearl/api/textures/GpuTexture": [
 		"dev/latvian/mods/vidlib/core/VLGpuTexture"
 	],
-	"com/mojang/blaze3d/buffers/GpuBuffer": [
+	"com/mojang/renderpearl/api/buffers/GpuBuffer": [
 		"dev/latvian/mods/vidlib/core/VLGpuBuffer"
 	],
 	"net/minecraft/client/particle/ParticleEngine": [
@@ -74,7 +75,7 @@
 	"com/mojang/blaze3d/platform/Window": [
 		"dev/latvian/mods/vidlib/core/VLWindow"
 	],
-	"net/minecraft/client/gui/GuiGraphics": [
+	"net/minecraft/client/gui/GuiGraphicsExtractor": [
 		"dev/latvian/mods/vidlib/core/VLGuiGraphics"
 	],
 	"net/minecraft/client/renderer/texture/TextureAtlasSprite": [

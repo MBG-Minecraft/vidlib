@@ -4,14 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.klib.math.KMath;
-import dev.latvian.mods.klib.math.Range;
-import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.ScreenCorner;
-import dev.latvian.mods.vidlib.feature.config.BooleanConfigValue;
-import dev.latvian.mods.vidlib.feature.config.ConfigValue;
-import dev.latvian.mods.vidlib.feature.config.FloatConfigValue;
-import dev.latvian.mods.vidlib.feature.config.IntConfigValue;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
@@ -59,26 +52,6 @@ public class ScreenText {
 
 		public void addValue(String name, String value) {
 			addValue(name, value, ChatFormatting.YELLOW);
-		}
-
-		public <T> void addConfig(T instance, List<ConfigValue<T, ?>> config) {
-			for (var value : config) {
-				if (value instanceof BooleanConfigValue c) {
-					addValue(value.name, (boolean) c.getter.apply(instance));
-				} else if (value instanceof FloatConfigValue c && c.slider && c.range == Range.FULL) {
-					addValue(value.name, KMath.format(((float) c.getter.apply(instance)) * 100F) + "%", ChatFormatting.GOLD);
-				} else if (value instanceof FloatConfigValue c) {
-					addValue(value.name, (float) c.getter.apply(instance));
-				} else if (value instanceof IntConfigValue c) {
-					addValue(value.name, (int) c.getter.apply(instance));
-				} else {
-					try {
-						addValue(value.name, Cast.to(value.getter.apply(instance)), value.codec);
-					} catch (Exception ex) {
-						addValue(value.name, "Error: " + ex, ChatFormatting.RED);
-					}
-				}
-			}
 		}
 	}
 

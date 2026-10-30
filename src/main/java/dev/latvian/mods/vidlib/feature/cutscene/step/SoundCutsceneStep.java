@@ -2,19 +2,15 @@ package dev.latvian.mods.vidlib.feature.cutscene.step;
 
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
-import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.sound.StopSoundTask;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.sounds.SoundEvents;
-import org.jetbrains.annotations.Nullable;
 
 public class SoundCutsceneStep extends CutsceneStep {
 	public static final Codec<SoundCutsceneStep> CODEC = PositionedSoundData.CODEC.xmap(SoundCutsceneStep::new, s -> s.sound);
@@ -23,32 +19,6 @@ public class SoundCutsceneStep extends CutsceneStep {
 		PositionedSoundData.STREAM_CODEC, o -> o.sound,
 		SoundCutsceneStep::new
 	);
-
-	public static class Builder extends CutsceneStepImBuilder {
-		public final PositionedSoundDataImBuilder sound = new PositionedSoundDataImBuilder();
-
-		@Override
-		public void set(@Nullable CutsceneStep value) {
-			if (value instanceof SoundCutsceneStep s) {
-				sound.set(s.sound);
-			}
-		}
-
-		@Override
-		public ImUpdate imgui(ImGraphics graphics) {
-			return sound.imgui(graphics);
-		}
-
-		@Override
-		public boolean isValid() {
-			return sound.isValid();
-		}
-
-		@Override
-		public CutsceneStep build() {
-			return new SoundCutsceneStep(sound.build());
-		}
-	}
 
 	public PositionedSoundData sound;
 
@@ -90,10 +60,5 @@ public class SoundCutsceneStep extends CutsceneStep {
 				}
 			}
 		}
-	}
-
-	@Override
-	public CutsceneStepImBuilder createBuilder() {
-		return new Builder();
 	}
 }

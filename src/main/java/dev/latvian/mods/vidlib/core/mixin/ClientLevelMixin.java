@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.core.VLClientLevel;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -39,7 +39,7 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 		return vl$props;
 	}
 
-	@Inject(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getBiome(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/Holder;"))
+	@Inject(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;animateTick(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"))
 	private void vl$doAnimateTick(int posX, int posY, int posZ, int range, RandomSource random, Block block, BlockPos.MutableBlockPos blockPos, CallbackInfo ci) {
 		ClientGameEngine.INSTANCE.handleEnvironmentalEffects(minecraft, vl$level(), blockPos);
 	}

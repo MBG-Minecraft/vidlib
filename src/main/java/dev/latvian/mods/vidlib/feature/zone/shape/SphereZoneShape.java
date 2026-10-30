@@ -5,9 +5,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -15,21 +16,25 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements ZoneShape {
-	public static final SimpleRegistryType<SphereZoneShape> TYPE = SimpleRegistryType.dynamic("sphere", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		MCCodecs.VEC3.fieldOf("pos").forGetter(SphereZoneShape::pos),
-		Codec.doubleRange(0D, Double.POSITIVE_INFINITY).fieldOf("radius").forGetter(SphereZoneShape::radius)
-	).apply(instance, SphereZoneShape::new)), CompositeStreamCodec.of(
-		MCStreamCodecs.VEC3, SphereZoneShape::pos,
-		ByteBufCodecs.DOUBLE, SphereZoneShape::radius,
-		SphereZoneShape::new
-	));
+	public static final DynamicType<RegistryFriendlyByteBuf, ZoneShape> TYPE = DynamicType.create(
+		"sphere",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			MCCodecs.VEC3.fieldOf("pos").forGetter(SphereZoneShape::pos),
+			Codec.doubleRange(0D, Double.POSITIVE_INFINITY).fieldOf("radius").forGetter(SphereZoneShape::radius)
+		).apply(instance, SphereZoneShape::new)),
+		CompositeStreamCodec.of(
+			MCStreamCodecs.VEC3, SphereZoneShape::pos,
+			ByteBufCodecs.DOUBLE, SphereZoneShape::radius,
+			SphereZoneShape::new
+		)
+	);
 
 	public SphereZoneShape(Vec3 pos, double radius) {
 		this(pos, radius, new AABB(pos.x() - radius, pos.y() - radius, pos.z() - radius, pos.x() + radius, pos.y() + radius, pos.z() + radius));
 	}
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 

@@ -5,13 +5,14 @@ import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.Collection;
 
 public interface SuspensionCommands {
 	@AutoRegister
 	ServerCommandHolder SUSPEND_COMMAND = new ServerCommandHolder("suspend", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.argument("player", EntityArgument.players())
 			.executes(ctx -> suspend(EntityArgument.getPlayers(ctx, "player"), true))
 		)
@@ -19,7 +20,7 @@ public interface SuspensionCommands {
 
 	@AutoRegister
 	ServerCommandHolder UNSUSPEND_COMMAND = new ServerCommandHolder("unsuspend", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.argument("player", EntityArgument.players())
 			.executes(ctx -> suspend(EntityArgument.getPlayers(ctx, "player"), false))
 		)

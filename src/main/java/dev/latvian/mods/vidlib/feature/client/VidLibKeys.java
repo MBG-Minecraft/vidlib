@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.latvian.mods.klib.client.KLibKeys;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
@@ -9,14 +11,15 @@ import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.ArrayListDeque;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLScancode;
 
 public class VidLibKeys {
+	public static final KeyMapping.Category CATEGORY = new KeyMapping.Category(ID.vidlib("vidlib"));
+
 	public static KeyMapping freezeTickKeyMapping;
 	public static KeyMapping clearParticlesKeyMapping;
 	public static KeyMapping reloadKeyMapping;
@@ -24,11 +27,9 @@ public class VidLibKeys {
 	public static KeyMapping reloadShadersKeyMapping;
 	public static KeyMapping playerGlowKeyMapping;
 	public static KeyMapping capturePanoramaKeyMapping;
-	public static KeyMapping increaseKeyMapping;
-	public static KeyMapping decreaseKeyMapping;
 
 	private static KeyMapping register(RegisterKeyMappingsEvent event, String name, KeyModifier modifier, int defaultKey, KeyConflictContext conflict) {
-		var key = new KeyMapping(name, conflict, modifier, InputConstants.Type.KEYSYM, defaultKey, "key.categories.vidlib");
+		var key = new KeyMapping(name, conflict, modifier, InputConstants.Type.KEYBOARD.getOrCreate(defaultKey), CATEGORY);
 		event.register(key);
 		return key;
 	}
@@ -38,15 +39,15 @@ public class VidLibKeys {
 	}
 
 	public static void register(RegisterKeyMappingsEvent event) {
-		freezeTickKeyMapping = register(event, "key.vidlib.freeze_tick", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
-		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
-		reloadKeyMapping = register(event, "key.vidlib.reload", KeyModifier.NONE, GLFW.GLFW_KEY_R);
-		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
-		reloadShadersKeyMapping = register(event, "key.vidlib.reload_shaders", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
-		playerGlowKeyMapping = register(event, "key.vidlib.player_glow", KeyModifier.NONE, GLFW.GLFW_KEY_GRAVE_ACCENT);
-		capturePanoramaKeyMapping = register(event, "key.vidlib.capture_panorama", KeyModifier.NONE, GLFW.GLFW_KEY_UNKNOWN);
-		increaseKeyMapping = register(event, "key.vidlib.increase", KeyModifier.NONE, GLFW.GLFW_KEY_EQUAL);
-		decreaseKeyMapping = register(event, "key.vidlib.decrease", KeyModifier.NONE, GLFW.GLFW_KEY_MINUS);
+		event.registerCategory(CATEGORY);
+
+		freezeTickKeyMapping = register(event, "key.vidlib.freeze_tick", KeyModifier.NONE, SDLScancode.SDL_SCANCODE_UNKNOWN);
+		clearParticlesKeyMapping = register(event, "key.vidlib.clear_particles", KeyModifier.NONE, SDLScancode.SDL_SCANCODE_UNKNOWN);
+		reloadKeyMapping = register(event, "key.vidlib.reload", KeyModifier.NONE, SDLScancode.SDL_SCANCODE_R);
+		repeatLastCommandKeyMapping = register(event, "key.vidlib.repeat_last_command", KeyModifier.NONE, SDLScancode.SDL_SCANCODE_UNKNOWN);
+		reloadShadersKeyMapping = register(event, "key.vidlib.reload_shaders", KeyModifier.NONE, SDLScancode.SDL_SCANCODE_UNKNOWN);
+		playerGlowKeyMapping = register(event, "key.vidlib.player_glow", KeyModifier.NONE, SDLScancode.SDL_SCANCODE_GRAVE);
+		capturePanoramaKeyMapping = register(event, "key.vidlib.capture_panorama", KeyModifier.NONE, SDLScancode.SDL_SCANCODE_UNKNOWN);
 	}
 
 	public static void handle(Minecraft mc) {
@@ -73,27 +74,29 @@ public class VidLibKeys {
 		}
 
 		while (repeatLastCommandKeyMapping.consumeClick()) {
-			if (!mc.commandHistory().history().isEmpty()) {
-				mc.runClientCommand(((ArrayListDeque<String>) mc.commandHistory().history()).getLast());
+			var recent = mc.gui.hud.getChat().getRecentChat();
+
+			if (!recent.isEmpty()) {
+				mc.runClientCommand(recent.getLast());
 			}
 		}
 
 		while (capturePanoramaKeyMapping.consumeClick()) {
 			if (!ClientGameEngine.DISABLE_IMGUI) {
-				mc.player.displayClientMessage(Component.literal("You must have env DISABLE_IMGUI set to true").withColor(Color.RED.argb()), false);
+				mc.player.sendSystemMessage(Component.literal("You must have env DISABLE_IMGUI set to true").withColor(Color.RED.argb()));
 			} else {
-				mc.player.displayClientMessage(mc.grabPanoramixScreenshot(FMLPaths.GAMEDIR.get().toFile(), 3840, 3840), false);
+				mc.player.sendSystemMessage(mc.grabPanoramixScreenshot(FMLPaths.GAMEDIR.get().toFile()));
 			}
 		}
 
-		while (increaseKeyMapping.consumeClick()) {
+		while (KLibKeys.increaseKeyMapping.consumeClick()) {
 			mc.options.renderDistance().values().validateValue(mc.options.renderDistance().get() + 1).ifPresent(v -> {
 				mc.options.renderDistance().set(v);
 				mc.status(String.valueOf(v));
 			});
 		}
 
-		while (decreaseKeyMapping.consumeClick()) {
+		while (KLibKeys.decreaseKeyMapping.consumeClick()) {
 			mc.options.renderDistance().values().validateValue(mc.options.renderDistance().get() - 1).ifPresent(v -> {
 				mc.options.renderDistance().set(v);
 				mc.status(String.valueOf(v));
@@ -102,7 +105,7 @@ public class VidLibKeys {
 	}
 
 	public static boolean handleDebugKeys(Minecraft mc, int key) {
-		if (key == reloadShadersKeyMapping.getKey().getValue()) {
+		if (key == reloadShadersKeyMapping.getDefaultKey().getValue()) {
 			MiscClientUtils.reloadShaders(mc);
 			return true;
 		}

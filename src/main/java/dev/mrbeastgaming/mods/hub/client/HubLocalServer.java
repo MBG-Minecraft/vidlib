@@ -12,7 +12,7 @@ import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLVideo;
 
 public class HubLocalServer {
 	public static HTTPServer<HTTPRequest> webServer;
@@ -55,12 +55,12 @@ public class HubLocalServer {
 			VidLibClient.loadHub();
 
 			mc.execute(() -> {
-				if (mc.screen instanceof LinkHubUserWaitingScreen) {
-					mc.popGuiLayer();
+				if (mc.gui.screen() instanceof LinkHubUserWaitingScreen) {
+					mc.gui.popScreenLayer();
 				}
 
 				mc.toast(Component.literal("Logged In"), Component.literal(name));
-				GLFW.glfwFocusWindow(mc.getWindow().getWindow());
+				SDLVideo.SDL_RaiseWindow(mc.getWindow().handle());
 
 				if (HubUserCapabilities.get().autoUploadFiles()) {
 					VidLibClient.checkFileSync(false);
@@ -72,12 +72,12 @@ public class HubLocalServer {
 			});
 		} else {
 			mc.execute(() -> {
-				if (mc.screen instanceof LinkHubUserWaitingScreen link) {
+				if (mc.gui.screen() instanceof LinkHubUserWaitingScreen link) {
 					link.button.active = true;
 					link.setMessage(Component.literal(("Error " + response.code + "\n" + error).trim()));
 				}
 
-				GLFW.glfwFocusWindow(mc.getWindow().getWindow());
+				SDLVideo.SDL_RaiseWindow(mc.getWindow().handle());
 			});
 		}
 

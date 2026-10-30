@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
-import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.TextureSet;
 import dev.latvian.mods.vidlib.feature.imgui.builder.CompoundImBuilder;
@@ -14,10 +14,10 @@ import net.minecraft.core.ClientAsset;
 public class ClothingPartImBuilder extends CompoundImBuilder<ClothingPart> {
 	public static final ImBuilderType<ClothingPart> TYPE = ClothingPartImBuilder::new;
 	public static final TextureSet TEXTURE_SET = new TextureSet("textures/vidlib/clothing");
-	public static final ClientAsset DEFAULT_TEXTURE = new ClientAsset(ID.vidlib("vidlib/clothing/tracksuit/top"));
+	public static final ClientAsset.ResourceTexture DEFAULT_TEXTURE = new ClientAsset.ResourceTexture(ID.vidlib("vidlib/clothing/tracksuit/top"));
 
-	public final ImBuilder<ClientAsset> texture = new TextureImBuilder(TEXTURE_SET, DEFAULT_TEXTURE);
-	public final ImBuilder<Gradient> color = new GradientImBuilder();
+	public final ImBuilder<ClientAsset.ResourceTexture> texture = new TextureImBuilder(TEXTURE_SET, DEFAULT_TEXTURE);
+	public final ImBuilder<Ref<Gradient>> color = new GradientImBuilder();
 
 	public ClothingPartImBuilder() {
 		add("Texture", texture);
@@ -27,11 +27,11 @@ public class ClothingPartImBuilder extends CompoundImBuilder<ClothingPart> {
 	@Override
 	public void set(ClothingPart value) {
 		if (value != null) {
-			texture.set(new ClientAsset(value.texture().withPrefix("vidlib/clothing/")));
+			texture.set(new ClientAsset.ResourceTexture(value.texture().withPrefix("vidlib/clothing/")));
 			color.set(value.colors());
 		} else {
 			texture.set(null);
-			color.set(Color.TRANSPARENT);
+			color.set(Gradient.EMPTY);
 		}
 	}
 

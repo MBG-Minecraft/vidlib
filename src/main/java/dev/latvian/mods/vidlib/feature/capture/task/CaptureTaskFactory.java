@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.capture.task;
 
-import dev.latvian.mods.klib.io.bytes.ByteInput;
+import dev.latvian.mods.klib.io.ByteInput;
 
 import java.io.IOException;
 

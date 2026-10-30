@@ -35,7 +35,7 @@ public record SoundData(
 		SoundData::new
 	);
 
-	public static final DataType<SoundData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, SoundData.class);
+	public static final DataType<SoundData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public SoundData(Holder<SoundEvent> sound, float volume, float pitch) {
 		this(sound, SoundSource.PLAYERS, volume, pitch);

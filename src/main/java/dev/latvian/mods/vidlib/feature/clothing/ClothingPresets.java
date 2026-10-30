@@ -8,8 +8,8 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,14 +24,14 @@ public class ClothingPresets {
 
 	public static final ResourceKey<? extends Registry<ClothingSet>> ROOT_ID = ResourceKey.createRegistryKey(ID.vidlib("clothing_preset"));
 
-	public static ResourceKey<ClothingSet> createId(ResourceLocation id) {
+	public static ResourceKey<ClothingSet> createId(Identifier id) {
 		return ResourceKey.create(ROOT_ID, id);
 	}
 
-	public static final Codec<ResourceKey<ClothingSet>> KEY_CODEC = ID.CODEC.xmap(ClothingPresets::createId, ResourceKey::location);
-	public static final StreamCodec<ByteBuf, ResourceKey<ClothingSet>> KEY_STREAM_CODEC = ID.STREAM_CODEC.map(ClothingPresets::createId, ResourceKey::location);
+	public static final Codec<ResourceKey<ClothingSet>> KEY_CODEC = ID.CODEC.xmap(ClothingPresets::createId, ResourceKey::identifier);
+	public static final StreamCodec<ByteBuf, ResourceKey<ClothingSet>> KEY_STREAM_CODEC = ID.STREAM_CODEC.map(ClothingPresets::createId, ResourceKey::identifier);
 
-	public static final List<ResourceLocation> IDS = new ArrayList<>();
+	public static final List<Identifier> IDS = new ArrayList<>();
 	public static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = ID.registerSuggestionProvider(ID.vidlib("clothing_preset"), () -> IDS);
 
 	public final Map<ResourceKey<ClothingSet>, ClothingSet> map;

@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.vehicle.AbstractBoat;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;

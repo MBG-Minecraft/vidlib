@@ -1,13 +1,21 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 
+/**
+ * Base class for particles that draw with custom geometry rather than a billboarded sprite quad.
+ * <p>
+ * 1.21.5 rendered these through {@code ParticleEngine.renderParticleType} with a
+ * {@code MultiBufferSource}; 26.3 removed that path entirely, so they are now extracted into a
+ * {@link CustomParticleGroup} render state and drawn through
+ * {@link SubmitNodeCollector#submitCustomGeometry}.
+ */
 public abstract class CustomParticle extends Particle {
 	public int prevAge;
 
@@ -22,20 +30,17 @@ public abstract class CustomParticle extends Particle {
 	}
 
 	@Override
-	public void render(VertexConsumer buffer, Camera camera, float delta) {
-	}
-
-	@Override
-	public abstract void renderCustom(PoseStack ms, MultiBufferSource buffers, Camera camera, float delta);
-
-	@Override
 	public void tick() {
 		prevAge = age;
 		super.tick();
 	}
 
 	@Override
-	public ParticleRenderType getRenderType() {
-		return ParticleRenderType.CUSTOM;
+	public ParticleRenderType getGroup() {
+		return VidLibParticleRenderTypes.CUSTOM;
 	}
+
+	public abstract boolean extract(Frustum frustum, Camera camera, float delta);
+
+	public abstract void submit(SubmitNodeCollector collector, CameraRenderState cameraRenderState);
 }

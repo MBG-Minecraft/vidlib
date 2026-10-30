@@ -2,16 +2,13 @@ package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JavaOps;
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.node.Node;
-import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Objects;
 
 public interface ImBuilder<T> {
@@ -105,16 +102,6 @@ public interface ImBuilder<T> {
 
 	default String getDisplayName() {
 		return "Unknown";
-	}
-
-	default List<NodePin> getNodePins() {
-		return List.of();
-	}
-
-	@Nullable
-	default Node asNode() {
-		var pins = getNodePins();
-		return pins.isEmpty() ? null : new Node(this, pins);
 	}
 
 	default String resolve(KNumberContext ctx) {

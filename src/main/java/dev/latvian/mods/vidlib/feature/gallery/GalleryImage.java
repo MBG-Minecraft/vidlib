@@ -4,8 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -15,7 +14,7 @@ public record GalleryImage<K>(
 	GalleryImageKey<K> key,
 	String displayName,
 	@Nullable Path path,
-	ResourceLocation textureId
+	Identifier textureId
 ) {
 	public boolean deleteFile() {
 		try {
@@ -37,11 +36,11 @@ public record GalleryImage<K>(
 				tex = loadNow(mc, true);
 
 				if (tex == null) {
-					tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.texturePath());
+					tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.id());
 					mc.getTextureManager().byPath.put(textureId, tex);
 				}
 			} else {
-				tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.texturePath());
+				tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.id());
 				mc.getTextureManager().byPath.put(textureId, tex);
 				Thread.startVirtualThread(() -> loadNow(mc, false));
 			}
@@ -57,16 +56,12 @@ public record GalleryImage<K>(
 				var image = NativeImage.read(in);
 
 				if (blocking) {
-					var texture = new DynamicTexture(textureId::toString, image);
-					texture.setClamp(true);
-					texture.setFilter(key.gallery().blur, false);
+					var texture = Gallery.samplerTexture(textureId::toString, image, key.gallery().blur == net.minecraft.util.TriState.TRUE);
 					mc.getTextureManager().byPath.put(textureId, texture);
 					return texture;
 				} else {
 					mc.execute(() -> {
-						var texture = new DynamicTexture(textureId::toString, image);
-						texture.setClamp(true);
-						texture.setFilter(key.gallery().blur, false);
+						var texture = Gallery.samplerTexture(textureId::toString, image, key.gallery().blur == net.minecraft.util.TriState.TRUE);
 						mc.getTextureManager().byPath.put(textureId, texture);
 					});
 				}

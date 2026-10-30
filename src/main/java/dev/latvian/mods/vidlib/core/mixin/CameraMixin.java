@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -24,7 +25,7 @@ public abstract class CameraMixin {
 	private boolean initialized;
 
 	@Shadow
-	private BlockGetter level;
+	private Level level;
 
 	@Shadow
 	private Entity entity;
@@ -39,18 +40,22 @@ public abstract class CameraMixin {
 	protected abstract void setRotation(float yaw, float pitch, float roll);
 
 	@Shadow
-	public abstract Vec3 getPosition();
+	public abstract Vec3 position();
 
-	@Inject(method = "setup", at = @At("HEAD"), cancellable = true)
-	private void vl$setupHead(BlockGetter area, Entity entity, boolean detached, boolean inverseView, float delta, CallbackInfo ci) {
+	/**
+	 * 1.21.5 hooked {@code setup(BlockGetter, Entity, boolean, boolean, float)}. 26.3 split the
+	 * level/entity/detached inputs into their own fields and condensed it to
+	 * {@code update(DeltaTracker)}, with the partial tick coming from the delta tracker.
+	 */
+	@Inject(method = "update", at = @At("HEAD"), cancellable = true)
+	private void vl$setupHead(net.minecraft.client.DeltaTracker deltaTracker, CallbackInfo ci) {
 		var mc = Minecraft.getInstance();
 		var override = ClientGameEngine.INSTANCE.overrideCamera(mc);
 
 		if (override != null && override.overrideCamera()) {
 			this.initialized = true;
-			this.level = area;
-			this.entity = entity;
 			this.detached = false;
+			float delta = deltaTracker.getGameTimeDeltaPartialTick(false);
 			var pos = override.getCameraPosition(delta);
 			setPosition(pos);
 			var rot = override.getCameraRotation(delta, pos);
@@ -60,12 +65,12 @@ public abstract class CameraMixin {
 		}
 	}
 
-	@Inject(method = "setup", at = @At("RETURN"))
-	private void vl$setupReturn(BlockGetter area, Entity entity, boolean detached, boolean inverseView, float delta, CallbackInfo ci) {
+	@Inject(method = "update", at = @At("RETURN"))
+	private void vl$setupReturn(net.minecraft.client.DeltaTracker deltaTracker, CallbackInfo ci) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.screen == null || !mc.screen.overrideCamera()) {
-			mc.vl$applyCameraShake((Camera) (Object) this, delta);
+		if (mc.gui.screen() == null || !mc.gui.screen().overrideCamera()) {
+			mc.vl$applyCameraShake((Camera) (Object) this, deltaTracker.getGameTimeDeltaPartialTick(false));
 		}
 	}
 
@@ -74,19 +79,24 @@ public abstract class CameraMixin {
 		if (!original) {
 			var mc = Minecraft.getInstance();
 			var override = ClientGameEngine.INSTANCE.overrideCamera(mc);
-			return override != null && override.renderPlayer() && !mc.player.getBoundingBox().contains(getPosition());
+			return override != null && override.renderPlayer() && !mc.player.getBoundingBox().contains(position());
 		}
 
 		return true;
 	}
 
-	@Redirect(method = "getFluidInCamera", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/BlockGetter;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
-	private FluidState vl$getFluidState(BlockGetter blockGetter, BlockPos pos) {
-		return blockGetter instanceof Level l ? CommonGameEngine.INSTANCE.overrideFluidState(l, pos) : level.getFluidState(pos);
+	@ModifyVariable(method = "update", at = @At("STORE"), ordinal = 0)
+	private float vl$renderDistance(float renderDistance) {
+		return ClientGameEngine.INSTANCE.getFarDepth(renderDistance);
 	}
 
-	@Redirect(method = "getFluidInCamera", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;getHeight(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
+	@Redirect(method = "getFluidInCamera", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
+	private FluidState vl$getFluidState(Level level, BlockPos pos) {
+		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
+	}
+
+	@Redirect(method = "getFluidInCamera", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;getHeightForCamera(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
 	private float vl$getFluidHeight(FluidState state, BlockGetter blockGetter, BlockPos pos) {
-		return blockGetter instanceof Level l ? CommonGameEngine.INSTANCE.overrideFluidHeight(l, state, pos) : state.getHeight(blockGetter, pos);
+		return blockGetter instanceof Level l ? CommonGameEngine.INSTANCE.overrideFluidHeight(l, state, pos) : state.getHeightForCamera(blockGetter, pos);
 	}
 }

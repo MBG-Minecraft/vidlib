@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.cutscene.step;
 
 import com.mojang.serialization.Codec;
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -32,6 +32,4 @@ public abstract class CutsceneStep {
 	public void exit(CutsceneState state, KNumberContext ctx) {
 		tick(state, ctx);
 	}
-
-	public abstract CutsceneStepImBuilder createBuilder();
 }

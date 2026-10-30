@@ -11,7 +11,7 @@ public class BlockExitScreen extends ConfirmScreen {
 	public static boolean preventExit(Minecraft mc, boolean act) {
 		if (bypass) {
 			return false;
-		} else if (mc.screen instanceof BlockExitScreen) {
+		} else if (mc.gui.screen() instanceof BlockExitScreen) {
 			return true;
 		}
 
@@ -23,7 +23,7 @@ public class BlockExitScreen extends ConfirmScreen {
 			return true;
 		} else if (ProgressQueue.isBlockingExit()) {
 			if (act) {
-				mc.pushGuiLayer(new BlockExitScreen());
+				mc.gui.setScreen(new BlockExitScreen());
 			}
 
 			return true;
@@ -33,7 +33,7 @@ public class BlockExitScreen extends ConfirmScreen {
 	}
 
 	public static boolean cancelExit(Minecraft mc) {
-		return !bypass && (mc.screen instanceof BlockExitScreen || mc.level != null || ProgressQueue.isBlockingExit());
+		return !bypass && (mc.gui.screen() instanceof BlockExitScreen || mc.level != null || ProgressQueue.isBlockingExit());
 	}
 
 	private static void handle(boolean confirm) {
@@ -43,7 +43,7 @@ public class BlockExitScreen extends ConfirmScreen {
 			bypass = true;
 			mc.stop();
 		} else {
-			mc.popGuiLayer();
+			mc.gui.setScreen(null);
 		}
 	}
 

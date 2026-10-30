@@ -4,27 +4,26 @@ import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresets;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
-import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import dev.latvian.mods.vidlib.util.client.MultiBufferSourceOverride;
-import net.minecraft.Util;
+import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.ClientAsset;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.phys.Vec3;
@@ -32,40 +31,37 @@ import org.joml.SimplexNoise;
 
 public class NPCPropRenderer implements PropRenderer<NPCProp> {
 	private static final PlayerSkin[] SINGLE_SKIN = {PlayerSkins.DEFAULT_WIDE_SKINS[0]};
+	// The fake player is never added to a level, so its entity id stays at the "unassigned" 0 and
+	// Entity.getId throws in 26.3. Hand out a per-instance negative id (real ids are positive).
+	private static final java.util.concurrent.atomic.AtomicInteger NEXT_FAKE_PLAYER_ID = new java.util.concurrent.atomic.AtomicInteger(-1);
 
 	@ClientAutoRegister
-	public static final Holder HOLDER = PropRenderer.holder(NPCProp.TYPE, new NPCPropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(NPCProp.TYPE, NPCPropRenderer::new);
 
 	private RemotePlayer fakePlayer;
 
+	private static final java.util.Set<String> DEBUG_LOGGED = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
 	@Override
-	public void render(PropRenderContext<NPCProp> ctx) {
+	public void render(PropSubmitContext<NPCProp> ctx) {
 		var mc = Minecraft.getInstance();
 		var p = ctx.prop();
 		var ms = ctx.poseStack();
 		float delta = ctx.delta();
-		var buffers = ctx.frame().buffers();
 		float tick = p.getTick(delta);
 
-		if (p.stone) {
-			buffers = new MultiBufferSourceOverride(buffers, EntityRenderTypes.STONE_CUTOUT_NO_CULL, EntityRenderTypes.STONE_CUTOUT_NO_CULL);
-		}
-
-		var instances = p.getInstances();
-		var profile = PlayerProfiles.get(p.profile.getId());
+		var profile = PlayerProfiles.get(p.profile.id());
 		var modelType = PlayerSkins.getModelType(profile);
-		var playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(modelType);
-		var playerRenderState = playerRenderer.createRenderState();
+		var fakeSkinState = new AvatarRenderState();
+		fakeSkinState.skin = PlayerSkin.insecure(PlayerSkins.DEFAULT_WIDE_SKINS[0].body(), null, null, modelType);
+		AvatarRenderer<?> renderer = mc.getEntityRenderDispatcher().getRenderer(fakeSkinState);
 
 		if (fakePlayer == null) {
-			fakePlayer = new RemotePlayer((ClientLevel) ctx.prop().level, profile.profile());
+			fakePlayer = new RemotePlayer((ClientLevel) ctx.prop().level, new com.mojang.authlib.GameProfile(profile.profile().id(), profile.profile().name()));
+			fakePlayer.setId(NEXT_FAKE_PLAYER_ID.getAndDecrement());
 			fakePlayer.setHealth(20F);
 			fakePlayer.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20F);
 		}
-
-		fakePlayer.klib$setLevel(ctx.prop().level);
-		fakePlayer.tickCount = 0;
-		fakePlayer.noPhysics = true;
 
 		var pos = p.getPos(delta);
 		float pitch = p.getPitch(delta);
@@ -87,22 +83,23 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		fakePlayer.setItemSlot(EquipmentSlot.LEGS, p.legsItem);
 		fakePlayer.setItemSlot(EquipmentSlot.FEET, p.feetItem);
 		fakePlayer.setPose(pPose);
-		fakePlayer.setSwimming(pPose == Pose.SWIMMING);
+		fakePlayer.setSwimming(pPose == net.minecraft.world.entity.Pose.SWIMMING);
 
-		playerRenderer.extractRenderState(fakePlayer, playerRenderState, delta);
+		var playerRenderState = createState(renderer);
+		extractState(renderer, fakePlayer, playerRenderState, delta);
 
 		var eyePos = new Vec3(playerRenderState.x, playerRenderState.y + fakePlayer.getEyeHeight(), playerRenderState.z);
 		var blockpos = BlockPos.containing(eyePos);
-		int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
+		int light = LightCoordsUtil.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
 
 		PlayerSkin[] skins;
-		var gp = profile.profile();
+		var nameAndId = profile.profile();
 
 		var pRandomSkin = p.randomSkin;
 		var pRandomSkins = p.randomSkins;
 
-		if (!gp.getName().isEmpty() && !gp.getId().equals(Util.NIL_UUID)) {
-			SINGLE_SKIN[0] = mc.getSkinManager().getInsecureSkin(gp);
+		if (!nameAndId.name().isEmpty() && !nameAndId.id().equals(net.minecraft.util.Util.NIL_UUID)) {
+			SINGLE_SKIN[0] = PlayerSkins.getSkin(mc, nameAndId.id(), true);
 			skins = SINGLE_SKIN;
 		} else if (pRandomSkin && !pRandomSkins.isEmpty()) {
 			skins = pRandomSkins.stream().map(PlayerSkins::of).toArray(PlayerSkin[]::new);
@@ -113,6 +110,11 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			skins = SINGLE_SKIN;
 		}
 
+		if (DEBUG_LOGGED.add(p.profile.id() + "|" + nameAndId.name())) {
+			dev.latvian.mods.vidlib.VidLib.LOGGER.info("[skindbg] profile={} name='{}' uuid={} model={} body={}",
+				p.profile.id(), nameAndId.name(), nameAndId.id(), skins[0].model(), skins[0].body());
+		}
+
 		var pClothing = p.clothing;
 
 		if (ClothingPresets.ready && pClothing != PlayerClothing.NONE) {
@@ -120,20 +122,17 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 				var replacement = ClothedPlayerSkinTexture.replace(mc, skins[s], pClothing);
 
 				if (replacement != null) {
-					skins[s] = new PlayerSkin(
-						replacement,
-						null,
-						skins[s].capeTexture(),
-						skins[s].elytraTexture(),
-						skins[s].model(),
-						true
+					skins[s] = PlayerSkin.insecure(
+						new ClientAsset.DownloadedTexture(skins[s].body().id(), replacement.toString()),
+						skins[s].cape(),
+						skins[s].elytra(),
+						skins[s].model()
 					);
 				}
 			}
 		}
 
-		playerRenderState.attackTime = 0;
-
+		var instances = p.getInstances();
 		playerRenderState.showHat = true;
 		playerRenderState.showJacket = true;
 		playerRenderState.showLeftPants = true;
@@ -146,10 +145,9 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 		playerRenderState.capeLean2 = 0F;
 		var pName = p.name;
 		playerRenderState.nameTag = Empty.isEmpty(pName) ? null : pName;
-		playerRenderState.swimAmount = pPose == Pose.SWIMMING ? 1F : 0F;
-		playerRenderState.isPassenger = pPose == Pose.SITTING;
+		playerRenderState.swimAmount = pPose == net.minecraft.world.entity.Pose.SWIMMING ? 1F : 0F;
+		playerRenderState.isPassenger = pPose == net.minecraft.world.entity.Pose.SITTING;
 		playerRenderState.ageInTicks = p.breathing ? tick : 0F;
-
 		playerRenderState.walkAnimationSpeed = p.runningDistance > 0F ? 1F : 0F;
 
 		// Build a shuffled skin index array so no skin is ever duplicated.
@@ -174,6 +172,11 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			skinIndices[j] = tmp;
 		}
 
+		var collector = ctx.collector();
+		var cameraState = new net.minecraft.client.renderer.state.level.CameraRenderState();
+		cameraState.pos = mc.gameRenderer.mainCamera().position();
+		cameraState.initialized = true;
+
 		for (int i = 0; i < instances.length; i++) {
 			var npc = instances[i];
 			ms.pushPose();
@@ -191,8 +194,8 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			playerRenderState.bodyRot = yaw + KMath.lerp(npc.randomYaw, -p.randomYaw, p.randomYaw);
 			playerRenderState.xRot = pitch + KMath.lerp(npc.randomPitch, -p.randomPitch, p.randomPitch);
 			playerRenderState.skin = skins[skinIndices[i]];
-			playerRenderState.attackArm = HumanoidArm.RIGHT;
-			playerRenderState.attackTime = KMath.lerp(delta, npc.prevPunching, npc.punching) / 6F;
+			playerRenderState.mainArm = HumanoidArm.RIGHT;
+			playerRenderState.swingAnimation = 0F;
 			playerRenderState.ticksUsingItem = 0;
 
 			if (px != 0F || py != 0F || pz != 0F) {
@@ -200,7 +203,7 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			}
 
 			if (p.runningDistance > 0F) {
-				ms.mulPose(Axis.YP.rotationDegrees(playerRenderState.bodyRot));
+				ms.rotate(Axis.YP.rotationDegrees(playerRenderState.bodyRot));
 				playerRenderState.bodyRot = 0F;
 				var dist = (tick * 0.275D);
 				playerRenderState.walkAnimationPos = (float) (dist * 3.5D) + (npc.profile % instances.length);
@@ -212,21 +215,34 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 			}
 
 			if (p.bodyPitch != 0F) {
-				ms.mulPose(Axis.XN.rotationDegrees(p.bodyPitch));
+				ms.rotate(Axis.XN.rotationDegrees(p.bodyPitch));
 			}
 
 			if (roll != 0F) {
-				ms.mulPose(Axis.ZN.rotationDegrees(roll));
+				ms.rotate(Axis.ZN.rotationDegrees(roll));
 			}
 
 			float s = (float) (p.height / 1.92D);
 			ms.scale(s, s, s);
 
-			fakePlayer.swinging = false;
-			playerRenderer.render(playerRenderState, ms, buffers, light);
+			submit(renderer, playerRenderState, ms, collector, cameraState);
 			ms.popPose();
 		}
+	}
 
-		fakePlayer.klib$setLevel(null);
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private static AvatarRenderState createState(AvatarRenderer<?> renderer) {
+		return (AvatarRenderState) renderer.createRenderState();
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private static void extractState(AvatarRenderer<?> renderer, RemotePlayer player, AvatarRenderState state, float delta) {
+		((AvatarRenderer) renderer).extractRenderState((AbstractClientPlayer) (Object) player, state, delta);
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private static void submit(AvatarRenderer<?> renderer, AvatarRenderState state, com.mojang.blaze3d.vertex.PoseStack ms, net.minecraft.client.renderer.SubmitNodeCollector collector, net.minecraft.client.renderer.state.level.CameraRenderState camera) {
+		var poseStack = (com.mojang.blaze3d.vertex.PoseStack) ms;
+		renderer.submit(state, poseStack, collector, camera);
 	}
 }

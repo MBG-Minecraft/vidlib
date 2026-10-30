@@ -20,7 +20,7 @@ public class TextureSet {
 
 	public final String prefix;
 	public final List<String> paths;
-	private List<ClientAsset> list;
+	private List<ClientAsset.ResourceTexture> list;
 	private int lastReload;
 
 	public TextureSet(String prefix, List<String> paths) {
@@ -34,7 +34,7 @@ public class TextureSet {
 		this(path + "/", List.of(path));
 	}
 
-	public List<ClientAsset> get(Minecraft mc) {
+	public List<ClientAsset.ResourceTexture> get(Minecraft mc) {
 		int reload = mc.vl$reloadCount();
 
 		if (lastReload != reload) {
@@ -51,7 +51,7 @@ public class TextureSet {
 				}
 			}
 
-			list.sort((a, b) -> a.id().compareNamespaced(b.id()));
+			list.sort((a, b) -> a.id().compareTo(b.id()));
 			list = List.copyOf(list);
 		}
 

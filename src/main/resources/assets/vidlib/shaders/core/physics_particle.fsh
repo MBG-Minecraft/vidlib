@@ -1,13 +1,15 @@
-#version 150
+#version 330
+#extension GL_ARB_separate_shader_objects : require
+
+#include < minecraft:fog.glsl >
+#include < minecraft:dynamictransforms.glsl >
 
 uniform sampler2D Sampler0;
 
-uniform vec4 ColorModulator;
+layout(location = 6) in vec2 texCoord0;
+layout(location = 2) in vec4 vertexColor;
 
-in vec2 texCoord0;
-in vec4 vertexColor;
-
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 void main() {
 	vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;

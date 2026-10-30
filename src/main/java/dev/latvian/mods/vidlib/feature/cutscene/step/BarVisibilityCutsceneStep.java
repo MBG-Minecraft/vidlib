@@ -2,16 +2,12 @@ package dev.latvian.mods.vidlib.feature.cutscene.step;
 
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.knumber.KNumber;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import org.jetbrains.annotations.Nullable;
 
 public class BarVisibilityCutsceneStep extends CutsceneStep {
 	public static final Codec<BarVisibilityCutsceneStep> CODEC = KNumber.CODEC.xmap(BarVisibilityCutsceneStep::new, s -> s.visibility);
@@ -21,35 +17,9 @@ public class BarVisibilityCutsceneStep extends CutsceneStep {
 		BarVisibilityCutsceneStep::new
 	);
 
-	public static class Builder extends CutsceneStepImBuilder {
-		public final ImBuilder<KNumber> visibility = KNumberImBuilder.create(1D);
+	public final Ref<KNumber> visibility;
 
-		@Override
-		public void set(@Nullable CutsceneStep value) {
-			if (value instanceof BarVisibilityCutsceneStep s) {
-				visibility.set(s.visibility);
-			}
-		}
-
-		@Override
-		public ImUpdate imgui(ImGraphics graphics) {
-			return visibility.imgui(graphics);
-		}
-
-		@Override
-		public boolean isValid() {
-			return visibility.isValid();
-		}
-
-		@Override
-		public CutsceneStep build() {
-			return new BarVisibilityCutsceneStep(visibility.build());
-		}
-	}
-
-	public final KNumber visibility;
-
-	public BarVisibilityCutsceneStep(KNumber visibility) {
+	public BarVisibilityCutsceneStep(Ref<KNumber> visibility) {
 		this.visibility = visibility;
 	}
 
@@ -73,15 +43,10 @@ public class BarVisibilityCutsceneStep extends CutsceneStep {
 
 	@Override
 	public void tick(CutsceneState state, KNumberContext ctx) {
-		var v = visibility.getOrNaN(ctx);
+		var v = visibility.value().getOrNaN(ctx);
 
 		if (!Double.isNaN(v)) {
 			state.barVisibility = (float) v;
 		}
-	}
-
-	@Override
-	public CutsceneStepImBuilder createBuilder() {
-		return new Builder();
 	}
 }

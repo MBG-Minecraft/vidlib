@@ -5,11 +5,12 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 public interface StaffNoteCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("staff-note", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.argument("text", StringArgumentType.greedyString())
 			.executes(ctx -> note(ctx.getSource().getPlayerOrException(), StringArgumentType.getString(ctx, "text")))
 		)
@@ -18,7 +19,7 @@ public interface StaffNoteCommand {
 	static int note(ServerPlayer player, String text) {
 		var payload = new CreateNotePayload(new Note(player, text, NoteVisibility.STAFF));
 
-		for (var p : player.server.getPlayerList().getPlayers()) {
+		for (var p : player.level().getServer().getPlayerList().getPlayers()) {
 			if (p == player || p.isStaffOrTalent()) {
 				p.s2c(payload);
 			}

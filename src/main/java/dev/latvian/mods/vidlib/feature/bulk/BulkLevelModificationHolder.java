@@ -1,5 +1,10 @@
 package dev.latvian.mods.vidlib.feature.bulk;
 
+import dev.latvian.mods.klib.bulk.BlockModificationBuilder;
+import dev.latvian.mods.klib.bulk.BlockModificationConsumer;
+import dev.latvian.mods.klib.bulk.BlockPalette;
+import dev.latvian.mods.klib.bulk.BulkLevelModification;
+import dev.latvian.mods.klib.bulk.SectionData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
@@ -14,7 +19,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 
-import java.util.HashSet;
 import java.util.List;
 
 public class BulkLevelModificationHolder implements BlockModificationConsumer {
@@ -68,10 +72,11 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 	}
 
 	public int apply(Level level, BulkLevelModification modification, boolean undoable, boolean future) {
-		var sectionSet = new HashSet<SectionPos>();
+		var sectionSet = new LongOpenHashSet();
 		modification.collectSections(level, sectionSet);
 
-		for (var pos : sectionSet) {
+		for (var posNum : sectionSet) {
+			var pos = SectionPos.of(posNum);
 			var sectionData = new SectionData(pos);
 
 			if (!level.isOutsideBuildHeight(pos.center()) && level.getChunk(pos.getX(), pos.getZ()) instanceof LevelChunk levelChunk) {
@@ -126,7 +131,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 			boolean rup = false;
 			boolean rnorth = false;
 			boolean rsouth = false;
-			var toClient = server ? new OptimizedModificationBuilder() : null;
+			var toClient = server ? new BlockModificationBuilder() : null;
 
 			for (int y = 0; y < 16; y++) {
 				for (int x = 0; x < 16; x++) {

@@ -79,7 +79,7 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	}
 
 	@Override
-	public void createFireworks(double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, List<FireworkExplosion> explosions) {
+	public void createFireworks(double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, List<FireworkExplosion> explosions, boolean playSound) {
 		s2c(new CreateFireworksPayload(x, y, z, xSpeed, ySpeed, zSpeed, explosions));
 	}
 

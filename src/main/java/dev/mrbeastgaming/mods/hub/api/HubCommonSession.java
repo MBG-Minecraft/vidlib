@@ -12,7 +12,7 @@ import dev.mrbeastgaming.mods.hub.api.gateway.HubCommonGateway;
 import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
 import dev.mrbeastgaming.mods.hub.file.HubUploadContext;
 import dev.mrbeastgaming.mods.hub.file.HubUploadResponseItem;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.util.List;
 import java.util.UUID;

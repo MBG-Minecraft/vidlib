@@ -45,7 +45,7 @@ public abstract class InventoryMixin {
 	}
 
 	@Nullable
-	@ModifyExpressionValue(method = "dropAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"))
+	@ModifyExpressionValue(method = "dropAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;createItemStackToDrop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"))
 	private ItemEntity vl$drop(@Nullable ItemEntity entity) {
 		if (entity != null) {
 			CommonGameEngine.INSTANCE.modifyDroppedItem(player, entity);

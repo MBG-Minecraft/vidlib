@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.renderpearl.api.textures.GpuTexture;
 import dev.latvian.mods.vidlib.core.VLSpriteContents;
 import dev.latvian.mods.vidlib.feature.visual.DynamicSpriteTexture;
 import net.minecraft.client.renderer.texture.SpriteContents;
@@ -36,20 +36,20 @@ public class SpriteContentsMixin implements VLSpriteContents {
 		vl$dynamicSpriteTexture = texture;
 	}
 
-	@Inject(method = "upload", at = @At("RETURN"))
-	private void vl$upload(int x, int y, int sourceX, int sourceY, NativeImage[] images, GpuTexture texture, CallbackInfo ci) {
-		if (vl$dynamicSpriteTexture != null && vl$dynamicSpriteTexture.initialized) {
+	@Inject(method = "uploadFirstFrame", at = @At("RETURN"))
+	private void vl$uploadFirstFrame(GpuTexture destination, int level, CallbackInfo ci) {
+		if (vl$dynamicSpriteTexture != null && vl$dynamicSpriteTexture.initialized && level < this.byMipLevel.length) {
 			var target = vl$dynamicSpriteTexture.getTexture();
 
-			for (int i = 0; i < this.byMipLevel.length; i++) {
+			if (target != null) {
 				// NeoForge: Skip uploading if the texture would be made invalid by mip level
-				if ((this.width >> i) <= 0 || (this.height >> i) <= 0) {
-					break;
+				if ((this.width >> level) <= 0 || (this.height >> level) <= 0) {
+					return;
 				}
 
 				RenderSystem.getDevice()
 					.createCommandEncoder()
-					.writeToTexture(target, images[i], i, 0, 0, this.width >> i, this.height >> i, sourceX >> i, sourceY >> i);
+					.writeToTexture(target, this.byMipLevel[level], level, 0, 0, 0);
 			}
 		}
 	}

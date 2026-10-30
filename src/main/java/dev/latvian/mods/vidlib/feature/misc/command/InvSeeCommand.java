@@ -6,6 +6,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -14,12 +16,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 public interface InvSeeCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("invsee", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.argument("player", EntityArgument.player())
 			.executes(ctx -> invsee(ctx.getSource().getPlayerOrException(), EntityArgument.getPlayer(ctx, "player")))
 		)
@@ -101,11 +102,9 @@ public interface InvSeeCommand {
 						} else if (slot >= 45 && slot < 54) {
 							player.getInventory().setItem(slot - 45, stack);
 						} else {
-							ItemHandlerHelper.giveItemToPlayer(player, stack);
-							return;
+							player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
+							setChanged();
 						}
-
-						setChanged();
 					}
 
 					@Override

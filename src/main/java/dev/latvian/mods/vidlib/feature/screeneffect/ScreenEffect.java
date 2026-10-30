@@ -2,13 +2,11 @@ package dev.latvian.mods.vidlib.feature.screeneffect;
 
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.registry.CustomRegistryValue;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberrationEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorOverlayEffect;
@@ -16,28 +14,28 @@ import dev.latvian.mods.vidlib.feature.screeneffect.effect.FocusedChromaticAberr
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
-public interface ScreenEffect extends SimpleRegistryEntry {
-	SimpleRegistry<ScreenEffect> REGISTRY = SimpleRegistry.create(ID.vidlib("screen_effect"), c -> VLPlatformHelper.CURRENT.collectScreenEffects(c));
+public interface ScreenEffect extends CustomRegistryValue<RegistryFriendlyByteBuf, ScreenEffect> {
+	CustomRegistry<RegistryFriendlyByteBuf, ScreenEffect> REGISTRY = CustomRegistry.create("screen_effect");
 
-	Codec<ScreenEffect> CODEC = REGISTRY.codec();
-	StreamCodec<RegistryFriendlyByteBuf, ScreenEffect> STREAM_CODEC = REGISTRY.streamCodec();
-	DataType<ScreenEffect> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ScreenEffect.class);
+	Codec<Ref<ScreenEffect>> CODEC = REGISTRY.codec();
+	StreamCodec<RegistryFriendlyByteBuf, Ref<ScreenEffect>> STREAM_CODEC = REGISTRY.streamCodec();
+	DataType<Ref<ScreenEffect>> DATA_TYPE = REGISTRY.dataType();
 
-	static void builtinTypes(SimpleRegistryCollector<ScreenEffect> registry) {
+	static void builtInTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenEffect> registry) {
 		registry.register(ColorEffect.TYPE);
 		registry.register(ColorOverlayEffect.TYPE);
 		registry.register(FocusedChromaticAberrationEffect.TYPE);
 		registry.register(AngledChromaticAberrationEffect.TYPE);
 	}
 
+	@Override
+	default CustomRegistry<RegistryFriendlyByteBuf, ScreenEffect> getRegistry() {
+		return REGISTRY;
+	}
+
 	String getName();
 
 	ImIcon getIcon();
-
-	@Override
-	default SimpleRegistryType<?> type() {
-		return REGISTRY.getType(this);
-	}
 
 	ScreenEffectInstance createInstance();
 }

@@ -16,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.Collection;
@@ -44,7 +45,7 @@ public class VoteCommands {
 			)
 		)
 		.then(Commands.literal("open-screen")
-			.requires(source -> source.hasPermission(2))
+			.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 			.then(Commands.argument("player", EntityArgument.players())
 				.then(Commands.literal("yes-no")
 					.then(Commands.argument("extra-data", CompoundTagArgument.compoundTag())

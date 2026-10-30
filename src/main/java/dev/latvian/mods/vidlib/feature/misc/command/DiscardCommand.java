@@ -5,6 +5,7 @@ import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
@@ -13,7 +14,7 @@ import java.util.Collection;
 public interface DiscardCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("discard", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.argument("entity", EntityArgument.entities())
 			.executes(ctx -> discard(ctx.getSource().getLevel(), EntityArgument.getEntities(ctx, "entity")))
 		)

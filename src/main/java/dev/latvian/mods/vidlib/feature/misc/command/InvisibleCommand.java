@@ -5,13 +5,14 @@ import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
 public interface InvisibleCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("invisible", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.argument("player", EntityArgument.player())
 			.executes(ctx -> invisible(EntityArgument.getPlayer(ctx, "player")))
 		)

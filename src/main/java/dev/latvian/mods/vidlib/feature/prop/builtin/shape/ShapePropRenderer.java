@@ -11,15 +11,17 @@ import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
 import dev.latvian.mods.vidlib.feature.client.RenderLightLayer;
 import dev.latvian.mods.vidlib.feature.client.TerrainRenderTypes;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
-import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
+import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
+import dev.latvian.mods.vidlib.klib.shape.Shapes;
+import dev.latvian.mods.vidlib.klib.vertex.PoseTransforms;
 
 public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 	@ClientAutoRegister
-	public static final Holder HOLDER = PropRenderer.holder(ShapeProp.TYPE, new ShapePropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(ShapeProp.TYPE, ShapePropRenderer::new);
 
 	@Override
-	public void render(PropRenderContext<ShapeProp> ctx) {
+	public void render(PropSubmitContext<ShapeProp> ctx) {
 		var ms = ctx.poseStack();
 		var buffers = ctx.frame().buffers();
 		var prop = ctx.prop();
@@ -27,43 +29,43 @@ public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 		float sw = (float) prop.width;
 		float sh = (float) prop.height;
 
-		ms.mulPose(Axis.YP.rotationDegrees(prop.getYaw(ctx.delta())));
-		ms.mulPose(Axis.XP.rotationDegrees(prop.getPitch(ctx.delta())));
+		ms.rotate(Axis.YP.rotationDegrees(prop.getYaw(ctx.delta())));
+		ms.rotate(Axis.XP.rotationDegrees(prop.getPitch(ctx.delta())));
 		ms.translate(0F, sh / 2F, 0F);
 
 		if (sw != 1F || sh != 1F) {
 			ms.scale(sw, sh, sw);
 		}
 
-		var lc = prop.canInteract && ctx.frame().mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? Color.WHITE : prop.outlineColor.get(progress);
+		var lc = prop.canInteract && ctx.frame().mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? Color.WHITE : prop.outlineColor.value().get(progress);
 
 		if (lc.alpha() > 0) {
 			if (prop.lightLayer == RenderLightLayer.BLOOM) {
 				Bloom.markActive();
-				prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(BloomRenderTypes.POS_COL_BUFFER_SUPPLIER.quadsCull(BloomRenderTypes.overridePosCol(buffers))).withColor(lc));
+				Shapes.buildQuads(prop.shape.value(), 0F, 0F, 0F, PoseTransforms.transform(ms.last(), BloomRenderTypes.POS_COL_BUFFER_SUPPLIER.quadsCull(BloomRenderTypes.overridePosCol(buffers))).withColor(lc));
 			} else {
-				prop.shape.buildLines(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.LINES)).withColor(lc));
+				Shapes.buildLines(prop.shape.value(), 0F, 0F, 0F, PoseTransforms.transform(ms.last(), buffers.getBuffer(DebugRenderTypes.LINES)).withColor(lc));
 			}
 		}
 
-		var c = prop.color.get(progress);
+		var c = prop.color.value().get(progress);
 
 		if (c.alpha() > 0) {
 			if (prop.texture != Empty.TEXTURE) {
 				if (prop.lightLayer == RenderLightLayer.BLOOM) {
 					Bloom.markActive();
-					prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
+					Shapes.buildQuads(prop.shape.value(), 0F, 0F, 0F, PoseTransforms.transform(ms.last(), buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
 				} else {
-					var callback = ms.last().transform(buffers.getBuffer(TerrainRenderTypes.TRANSLUCENT_NO_CULL.apply(prop.texture))).withColor(c).withLight(LightUV.FULLBRIGHT);
-					prop.shape.buildQuads(0F, 0F, 0F, callback);
+					var callback = PoseTransforms.transform(ms.last(), buffers.getBuffer(TerrainRenderTypes.TRANSLUCENT_NO_CULL.apply(prop.texture))).withColor(c).withLight(LightUV.FULLBRIGHT);
+					Shapes.buildQuads(prop.shape.value(), 0F, 0F, 0F, callback);
 				}
 			} else {
 				if (prop.lightLayer == RenderLightLayer.BLOOM) {
 					Bloom.markActive();
-					prop.shape.buildQuads(0F, 0F, 0F, ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
+					Shapes.buildQuads(prop.shape.value(), 0F, 0F, 0F, PoseTransforms.transform(ms.last(), buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c));
 				} else {
-					var callback = ms.last().transform(buffers.getBuffer(DebugRenderTypes.QUADS_NO_CULL_NO_DEPTH)).withColor(c);
-					prop.shape.buildQuads(0F, 0F, 0F, callback);
+					var callback = PoseTransforms.transform(ms.last(), buffers.getBuffer(DebugRenderTypes.QUADS_NO_CULL_NO_DEPTH)).withColor(c);
+					Shapes.buildQuads(prop.shape.value(), 0F, 0F, 0F, callback);
 				}
 			}
 		}

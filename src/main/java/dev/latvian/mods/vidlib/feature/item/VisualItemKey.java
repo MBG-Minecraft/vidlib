@@ -17,37 +17,41 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public record VisualItemKey(Holder<Item> item, DataComponentPatch visualPatch) {
 	public static final Map<ResourceKey<Item>, Map<DataComponentPatch, VisualItemKey>> CACHE = new Reference2ObjectOpenHashMap<>();
 
-	public static final Set<DataComponentType<?>> VISUAL_KEYS = new ReferenceOpenHashSet<>(Set.of(
+	public static final Set<DataComponentType<?>> VISUAL_KEYS = new ReferenceOpenHashSet<>(List.of(
 		DataComponents.ITEM_MODEL,
 		DataComponents.CUSTOM_MODEL_DATA,
 		DataComponents.DYED_COLOR,
-		DataComponents.MAP_COLOR,
+		DataComponents.MAP_ID,
+		DataComponents.MAP_DECORATIONS,
 		DataComponents.POTION_CONTENTS,
 		DataComponents.TRIM,
 		DataComponents.FIREWORK_EXPLOSION,
 		DataComponents.BANNER_PATTERNS,
 		DataComponents.BASE_COLOR
-	));
+	).toArray(new DataComponentType<?>[0]));
 
 	public static DataComponentPatch visual(DataComponentPatch patch) {
 		DataComponentPatch.Builder newPatch = null;
 
-		for (var entry : patch.entrySet()) {
-			if (VISUAL_KEYS.contains(entry.getKey())) {
+		for (var type : patch.keySet()) {
+			if (VISUAL_KEYS.contains(type)) {
 				if (newPatch == null) {
 					newPatch = DataComponentPatch.builder();
 				}
 
-				if (entry.getValue().isPresent()) {
-					newPatch.set(entry.getKey(), Cast.to(entry.getValue().get()));
+				var value = patch.getPatch(type);
+
+				if (value != null) {
+					newPatch.set(type, Cast.to(value));
 				} else {
-					newPatch.remove(entry.getKey());
+					newPatch.remove(type);
 				}
 			}
 		}
@@ -62,7 +66,7 @@ public record VisualItemKey(Holder<Item> item, DataComponentPatch visualPatch) {
 			return AIR;
 		}
 
-		var key = holder.getKey();
+		var key = holder.key();
 		var patchCache = CACHE.computeIfAbsent(key, k -> new Object2ObjectOpenHashMap<>());
 		var itemKey = patchCache.get(visualPatch);
 
@@ -79,7 +83,7 @@ public record VisualItemKey(Holder<Item> item, DataComponentPatch visualPatch) {
 			return AIR;
 		}
 
-		return create(stack.getItemHolder(), visual(stack.getComponentsPatch()));
+		return create(stack.typeHolder(), visual(stack.getComponentsPatch()));
 	}
 
 	public static final Codec<VisualItemKey> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -88,8 +92,8 @@ public record VisualItemKey(Holder<Item> item, DataComponentPatch visualPatch) {
 	).apply(instance, VisualItemKey::create));
 
 	public String toString() {
-		var key = item.getKey();
-		return key.location().getNamespace() + "_" + key.location().getPath().replace('/', '_').replace('.', '_');
+		var key = item.key();
+		return key.identifier().getNamespace() + "_" + key.identifier().getPath().replace('/', '_').replace('.', '_');
 	}
 
 	public ItemStack toItemStack() {

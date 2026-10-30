@@ -1,12 +1,12 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
+import dev.latvian.mods.klib.block.filter.BlockFilter;
+import dev.latvian.mods.klib.bulk.BlockModificationBuilder;
+import dev.latvian.mods.klib.bulk.BulkLevelModification;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
-import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
-import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceArrayMap;
@@ -27,7 +27,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.Utf8String;
 import net.minecraft.network.VarInt;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FastBufferedInputStream;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -163,7 +163,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 
 		for (int i = 0; i < paletteCount; i++) {
 			var key = VarInt.read(buf);
-			var id = ResourceLocation.parse(Utf8String.read(buf, Short.MAX_VALUE));
+			var id = Identifier.parse(Utf8String.read(buf, Short.MAX_VALUE));
 			var state = BuiltInRegistries.BLOCK.getValue(id).defaultBlockState();
 			var diffCount = VarInt.read(buf);
 
@@ -209,8 +209,8 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		}
 	}
 
-	public static StructureHolder capture(Level level, BlockPos from, BlockPos to, @Nullable BlockFilter filter, boolean onlyExposed, boolean forRendering) {
-		if (filter == BlockFilter.ANY.instance()) {
+	public static StructureHolder capture(Level level, BlockPos from, BlockPos to, @Nullable Ref<BlockFilter> filter, boolean onlyExposed, boolean forRendering) {
+		if (filter == BlockFilter.ANY) {
 			filter = null;
 		}
 
@@ -231,7 +231,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 			var state = level.getBlockState(pos);
 
 			if (forRendering ? BlockUtils.isVisible(state) : !state.is(Blocks.STRUCTURE_VOID)) {
-				if (filter == null || filter.test(level, pos, state)) {
+				if (filter == null || filter.value().test(level, pos, state)) {
 					if (onlyExposed && !BlockUtils.isBlockExposed(level, partialCache, pos.getX(), pos.getY(), pos.getZ(), partialMutablePos)) {
 						continue;
 					}
@@ -307,12 +307,12 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		return new StructureHolder(offsetBlocks, size);
 	}
 
-	public BulkLevelModification createModification() {
+	public Ref<BulkLevelModification> createModification() {
 		if (empty()) {
 			return BulkLevelModification.NONE;
 		}
 
-		var builder = new OptimizedModificationBuilder();
+		var builder = new BlockModificationBuilder();
 
 		for (var entry : blocks.long2ObjectEntrySet()) {
 			var pos = BlockPos.of(entry.getLongKey());
@@ -323,7 +323,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		return builder.build();
 	}
 
-	public BulkLevelModification createModification(
+	public Ref<BulkLevelModification> createModification(
 		BlockPos pos,
 		BlockPos offset,
 		Mirror mirror,
@@ -334,7 +334,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 			return BulkLevelModification.NONE;
 		}
 
-		var builder = new OptimizedModificationBuilder();
+		var builder = new BlockModificationBuilder();
 
 		for (var entry : blocks.long2ObjectEntrySet()) {
 			var blockPos = StructureTemplate.transform(BlockPos.of(entry.getLongKey()).offset(offset), mirror, rotation, rotationPivot).offset(pos);
@@ -475,7 +475,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 	public void toVStruct(ByteBuf buf) {
 		VarInt.write(buf, 0); // Binary Indicator
 		VarInt.write(buf, 0); // Format Version
-		VarInt.write(buf, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+		VarInt.write(buf, SharedConstants.getCurrentVersion().dataVersion().version());
 		VarInt.write(buf, blocks.size());
 
 		if (blocks.isEmpty()) {

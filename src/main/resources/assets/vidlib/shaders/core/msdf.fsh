@@ -1,16 +1,14 @@
-#version 150
+#version 330
+#extension GL_ARB_separate_shader_objects : require
 
-#define SQRT_2 1.4142135623730950488
+#include < minecraft:dynamictransforms.glsl >
 
 uniform sampler2D Sampler0;
 
-uniform vec4 ColorModulator;
-uniform vec3 ModelOffset;
+layout(location = 6) in vec2 texCoord0;
+layout(location = 2) in vec4 vertexColor;
 
-in vec2 texCoord0;
-in vec4 vertexColor;
-
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 float median(float red, float green, float blue) {
 	return max(min(red, green), min(max(red, green), blue));

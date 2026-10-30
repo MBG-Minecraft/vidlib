@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import imgui.ImGui;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,7 +64,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 			graphics.setItemSpacing(4F, 4F);
 			ImGui.pushID("###remove");
 
-			if (graphics.imageButton(VidLibTextures.TRASH.texturePath(), 40F, 40F, UV.FULL, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
+			if (graphics.imageButton(VidLibTextures.TRASH.id(), 40F, 40F, UV.FULL, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
 				if (selected != null) {
 					set(null);
 					update = ImUpdate.FULL;

@@ -70,8 +70,6 @@ public class VidLibMod {
 		if (PlatformHelper.CURRENT.getSide().isClient()) {
 			VidLib.initClient();
 		}
-
-		VidLib.buildRegistries();
 	}
 
 	private static void printDependencies(IModInfo mod, int level) {

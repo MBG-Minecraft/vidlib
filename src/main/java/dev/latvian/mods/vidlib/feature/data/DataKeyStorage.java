@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
@@ -11,9 +13,11 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
+import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,6 +31,8 @@ public class DataKeyStorage {
 	final Map<String, DataKey<?>> synced;
 	public final StreamCodec<RegistryFriendlyByteBuf, DataMapValue> valueStreamCodec;
 	public final StreamCodec<RegistryFriendlyByteBuf, List<DataMapValue>> valueListStreamCodec;
+	public final Codec<DataKey<?>> dataKeyCodec;
+	public final StreamCodec<ByteBuf, DataKey<?>> dataKeyStreamCodec;
 
 	public DataKeyStorage(String name) {
 		this.name = name;
@@ -64,6 +70,26 @@ public class DataKeyStorage {
 		};
 
 		this.valueListStreamCodec = KLibStreamCodecs.listOf(valueStreamCodec);
+
+		this.dataKeyCodec = Codec.STRING.comapFlatMap(key -> {
+			var dataKey = all.get(key);
+
+			if (dataKey != null) {
+				return DataResult.success(dataKey);
+			} else {
+				return DataResult.error(() -> name + " data key '" + key + "' not found");
+			}
+		}, DataKey::id);
+
+		this.dataKeyStreamCodec = ByteBufCodecs.STRING_UTF8.map(s -> {
+			var dataKey = all.get(s);
+
+			if (dataKey != null) {
+				return dataKey;
+			} else {
+				throw new NullPointerException("Data key '" + s + "' not found");
+			}
+		}, DataKey::id);
 	}
 
 	public <T> DataKey.Builder<T> builder(String id, DataType<T> type, T defaultValue) {

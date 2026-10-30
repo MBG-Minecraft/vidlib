@@ -1,10 +1,15 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.blaze3d.buffers.Std140Builder;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.entity.EntityUtils;
+import dev.latvian.mods.klib.icon.Icon;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
@@ -13,12 +18,10 @@ import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import dev.latvian.mods.vidlib.feature.clock.Clock;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
-import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -29,13 +32,11 @@ import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
-import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
@@ -44,7 +45,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.components.toasts.AdvancementToast;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
@@ -57,9 +58,8 @@ import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.FogParameters;
+import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.ClientAsset;
@@ -67,7 +67,8 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -77,6 +78,8 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerModelType;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -90,6 +93,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -105,7 +109,7 @@ public class ClientGameEngine {
 
 	public void collectClientFeatures(Reference2IntMap<Feature> map) {
 		for (var mod : ModList.get().getMods()) {
-			map.put(Feature.create(ResourceLocation.fromNamespaceAndPath("mod", mod.getModId())), 1);
+			map.put(Feature.create(Identifier.fromNamespaceAndPath("mod", mod.getModId())), 1);
 		}
 
 		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);
@@ -122,15 +126,15 @@ public class ClientGameEngine {
 
 	public boolean canSeePlayerInList(LocalPlayer self, PlayerInfo playerInfo) {
 		if (CommonGameEngine.INSTANCE.privacyMode()) {
-			return playerInfo.getProfile().getId().equals(self.getGameProfile().getId());
+			return playerInfo.getProfile().id().equals(self.getGameProfile().id());
 		}
 
-		var sessionData = self.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId());
-		return !CommonGameEngine.INSTANCE.isPlayerStaff(sessionData.getTags(), playerInfo.getGameMode());
+		var sessionData = self.vl$sessionData().getClientSessionData(playerInfo.getProfile().id());
+		return !CommonGameEngine.INSTANCE.isPlayerStaff(sessionData.dataMap.get(InternalPlayerData.PLAYER_TAGS), playerInfo.getGameMode());
 	}
 
 	public Component getPlayerListName(Minecraft mc, PlayerInfo playerInfo, Component fallback) {
-		var nickname = mc.player.vl$sessionData().getClientSessionData(playerInfo.getProfile().getId()).dataMap.get(InternalPlayerData.NICKNAME);
+		var nickname = mc.player.vl$sessionData().getClientSessionData(playerInfo.getProfile().id()).dataMap.get(InternalPlayerData.NICKNAME);
 		return Empty.isEmpty(nickname) ? fallback : nickname;
 	}
 
@@ -175,7 +179,7 @@ public class ClientGameEngine {
 		return null;
 	}
 
-	public Icon getPlumbob(Player player) {
+	public Ref<Icon> getPlumbob(Player player) {
 		return player.get(InternalPlayerData.PLUMBOB);
 	}
 
@@ -203,17 +207,17 @@ public class ClientGameEngine {
 	}
 
 	public PlayerSkin overridePlayerSkin(AbstractClientPlayer player, PlayerSkin original) {
-		var skinTexture = original.texture();
+		Identifier skinTexture = original.body().id();
 		var skinModel = original.model();
-		var capeTexture = original.capeTexture();
-		var elytraTexture = original.elytraTexture();
+		Identifier capeTexture = original.cape() == null ? null : original.cape().id();
+		Identifier elytraTexture = original.elytra() == null ? null : original.elytra().id();
 		var override = false;
 
 		var skinOverride = overrideSkin(player);
 
-		if (skinOverride != null && (!skinOverride.asset().texturePath().equals(skinTexture) || skinOverride.slim() != (original.model() == PlayerSkin.Model.SLIM))) {
-			skinTexture = skinOverride.asset().texturePath();
-			skinModel = skinOverride.slim() ? PlayerSkin.Model.SLIM : PlayerSkin.Model.WIDE;
+		if (skinOverride != null && (!skinOverride.asset().id().equals(skinTexture) || skinOverride.slim() != (original.model() == PlayerModelType.SLIM))) {
+			skinTexture = skinOverride.asset().id();
+			skinModel = skinOverride.slim() ? PlayerModelType.SLIM : PlayerModelType.WIDE;
 			override = true;
 		}
 
@@ -225,20 +229,20 @@ public class ClientGameEngine {
 		} else {
 			var capeOverride = overrideCape(player);
 
-			if (capeOverride != null && !capeOverride.texturePath().equals(capeTexture)) {
-				capeTexture = capeOverride.equals(VidLibTextures.MISSING) ? null : capeOverride.texturePath();
+			if (capeOverride != null && !capeOverride.id().equals(capeTexture)) {
+				capeTexture = capeOverride.equals(VidLibTextures.MISSING) ? null : capeOverride.id();
 				override = true;
 			}
 		}
 
 		var elytraOverride = overrideElytra(player);
 
-		if (elytraOverride != null && !elytraOverride.texturePath().equals(elytraTexture)) {
-			elytraTexture = elytraOverride.texturePath();
+		if (elytraOverride != null && !elytraOverride.id().equals(elytraTexture)) {
+			elytraTexture = elytraOverride.id();
 			override = true;
 		}
 
-		var replacement = ClothedPlayerSkinTexture.replace(player.clientLevel.minecraft, skinTexture, skinModel, getClothing(player));
+		var replacement = ClothedPlayerSkinTexture.replace(Minecraft.getInstance(), skinTexture, skinModel, getClothing(player));
 
 		if (replacement != null) {
 			skinTexture = replacement;
@@ -247,10 +251,9 @@ public class ClientGameEngine {
 
 		if (override) {
 			return new PlayerSkin(
-				skinTexture,
-				null,
-				capeTexture,
-				elytraTexture,
+				new ClientAsset.ResourceTexture(skinTexture),
+				capeTexture == null ? null : new ClientAsset.ResourceTexture(capeTexture),
+				elytraTexture == null ? null : new ClientAsset.ResourceTexture(elytraTexture),
 				skinModel,
 				true
 			);
@@ -259,7 +262,7 @@ public class ClientGameEngine {
 		}
 	}
 
-	public ResourceLocation getSkybox(Minecraft mc) {
+	public Identifier getSkybox(Minecraft mc) {
 		return mc.getSkybox();
 	}
 
@@ -267,20 +270,27 @@ public class ClientGameEngine {
 		return false;
 	}
 
+	/**
+	 * 26.3 replaced {@code net.minecraft.client.renderer.fog.FogData} with
+	 * {@link FogData} (see {@code net.minecraft.client.renderer.fog.FogRenderer}), which is
+	 * uploaded into the fog UBO instead of being read by the render system directly.
+	 * <p>
+	 * A {@code null} return value still means "no override — use vanilla fog".
+	 */
 	@Nullable
-	public FogParameters getFog() {
-		return disableFog() ? FogParameters.NO_FOG : null;
+	public FogData getFog() {
+		return disableFog() ? disabledFog() : null;
 	}
 
 	@Nullable
-	public FogParameters getFluidFog() {
+	public FogData getFluidFog() {
 		return null;
 	}
 
-	public FogParameters getShaderFog(FogParameters original) {
+	public FogData getShaderFog(FogData original) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE) {
+		if (mc.gameRenderer.mainCamera().getFluidInCamera() != FogType.NONE) {
 			var fg = getFluidFog();
 			return fg == null ? original : fg;
 		}
@@ -294,6 +304,56 @@ public class ClientGameEngine {
 		return fg != null ? fg : original;
 	}
 
+	/**
+	 * The 26.3 equivalent of the old {@code FogParameters.NO_FOG}: every fog distance is pushed
+	 * out to {@code Float.MAX_VALUE} so that no fog is applied at all.
+	 */
+	public static FogData disabledFog() {
+		var fog = new FogData();
+		fog.environmentalStart = Float.MAX_VALUE;
+		fog.environmentalEnd = Float.MAX_VALUE;
+		fog.renderDistanceStart = Float.MAX_VALUE;
+		fog.renderDistanceEnd = Float.MAX_VALUE;
+		fog.skyEnd = Float.MAX_VALUE;
+		fog.cloudEnd = Float.MAX_VALUE;
+		return fog;
+	}
+
+	/**
+	 * Applies a (possibly overridden) {@link FogData} and re-packs the terrain fog UBO slice.
+	 * <p>
+	 * 26.3 uploads fog data to the GPU through {@code FogRenderer.updateBuffer(FogData)} before
+	 * {@code LevelRenderer.render(...)} is entered, so an override has to be written both back into
+	 * the render state (which drives the sky pass and the main-target clear colour) and into the
+	 * already-uploaded {@link GpuBufferSlice}.
+	 */
+	public static void applyFog(FogData fog, FogData renderStateFog, @Nullable GpuBufferSlice fogBuffer) {
+		renderStateFog.environmentalStart = fog.environmentalStart;
+		renderStateFog.environmentalEnd = fog.environmentalEnd;
+		renderStateFog.renderDistanceStart = fog.renderDistanceStart;
+		renderStateFog.renderDistanceEnd = fog.renderDistanceEnd;
+		renderStateFog.skyEnd = fog.skyEnd;
+		renderStateFog.cloudEnd = fog.cloudEnd;
+		renderStateFog.color.set(fog.color);
+
+		if (fogBuffer == null) {
+			return;
+		}
+
+		try (GpuBufferSlice.MappedView view = fogBuffer.map(false, true)) {
+			ByteBuffer buffer = view.data();
+			buffer.position(0);
+			Std140Builder.intoBuffer(buffer)
+				.putVec4(fog.color)
+				.putFloat(fog.environmentalStart)
+				.putFloat(fog.environmentalEnd)
+				.putFloat(fog.renderDistanceStart)
+				.putFloat(fog.renderDistanceEnd)
+				.putFloat(fog.skyEnd)
+				.putFloat(fog.cloudEnd);
+		}
+	}
+
 	public List<ChancedParticle> getEnvironmentEffects(Minecraft mc, ClientLevel level, BlockPos pos) {
 		return List.of();
 	}
@@ -303,15 +363,17 @@ public class ClientGameEngine {
 		var ctx = level.getGlobalContext();
 
 		if (!effects.isEmpty()) {
-			for (var effect : effects) {
-				var chance = effect.chance().getOr(ctx, 0D);
+			var random = level.getRandom();
 
-				if (level.random.roll((float) chance)) {
+			for (var effect : effects) {
+				var chance = effect.chance().value().getOr(ctx, 0D);
+
+				if (random.nextFloat() < chance) {
 					level.addParticle(
 						effect.particle(),
-						pos.getX() + level.random.nextFloat(),
-						pos.getY() + level.random.nextFloat(),
-						pos.getZ() + level.random.nextFloat(),
+						pos.getX() + random.nextFloat(),
+						pos.getY() + random.nextFloat(),
+						pos.getZ() + random.nextFloat(),
 						0.0, 0.0, 0.0
 					);
 				}
@@ -438,7 +500,7 @@ public class ClientGameEngine {
 		}
 
 		ImGui.separator();
-		ImGui.text(graphics.mc.fpsString.split(" ", 2)[0] + " FPS");
+		ImGui.text(graphics.mc.getFps() + " FPS");
 		ImGui.separator();
 
 		if (graphics.player != null) {
@@ -453,28 +515,7 @@ public class ClientGameEngine {
 				return;
 			}
 
-			for (var clock : Clock.REGISTRY) {
-				if (clock.screen().isPresent()) {
-					var screen = clock.screen().get();
-					var value = graphics.session.clocks.get(clock.id());
-
-					if (value != null && screen.visible().test(graphics.player)) {
-						var string = screen.format().formatted(value.second() / 60, value.second() % 60);
-						var color = screen.color().lerp(switch (value.type()) {
-							case FINISHED -> 1F;
-							case FLASHING -> 0.65F + Mth.cos((graphics.session.tick) * 0.85F) * 0.35F;
-							default -> 0F;
-						}, Clock.RED);
-
-						graphics.pushStack();
-						graphics.setStyleCol(ImGuiCol.Text, color);
-						ImGui.text(string);
-						graphics.popStack();
-						ImGui.separator();
-						return;
-					}
-				}
-			}
+			// Clocks
 		}
 	}
 
@@ -500,7 +541,7 @@ public class ClientGameEngine {
 				session.worldBorderOverride.setSize(b.size());
 
 				if (moving) {
-					session.worldBorderOverride.lerpSizeBetween(b.size(), b.size() + Math.signum(session.worldBorderOverrideEnd.size() - session.worldBorderOverrideStart.size()), 1L);
+					session.worldBorderOverride.lerpSizeBetween(b.size(), b.size() + Math.signum(session.worldBorderOverrideEnd.size() - session.worldBorderOverrideStart.size()), 1L, level.getGameTime());
 				} else {
 					session.worldBorderOverride.setSize(b.size());
 				}
@@ -539,13 +580,11 @@ public class ClientGameEngine {
 	}
 
 	public boolean allowCoordinateDisplay(Minecraft mc) {
-		return mc.isLocalServer() || mc.player.hasPermissions(2);
+		return mc.isLocalServer() || mc.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
 
 	public boolean hideGui(Minecraft mc) {
-		if (mc.options.hideGui) {
-			return true;
-		} else if (mc.screen != null && mc.screen.hideGui()) {
+		if (mc.gui.hud.isHidden()) {
 			return true;
 		} else if (mc.player == null) {
 			return false;
@@ -582,10 +621,33 @@ public class ClientGameEngine {
 		return true;
 	}
 
-	public void renderOverlays(Minecraft mc, Gui gui, GuiGraphics graphics, DeltaTracker deltaTracker) {
+	public void renderOverlays(Minecraft mc, Gui gui, GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		if (getRenderSuspendedOverlay() && mc.player.vl$sessionData().suspended) {
-			gui.renderTextureOverlay(graphics, Gui.POWDER_SNOW_OUTLINE_LOCATION, 1F);
+			renderSuspendedOverlay(mc, graphics);
 		}
+	}
+
+	/**
+	 * The former {@code Gui.POWDER_SNOW_OUTLINE_LOCATION} — 26.3 removed both the constant and
+	 * {@code Gui.renderTextureOverlay(...)}, so the full-screen tint is drawn directly with
+	 * {@link GuiGraphicsExtractor#blit}.
+	 */
+	private static final Identifier SUSPENDED_OVERLAY_LOCATION = Identifier.withDefaultNamespace("textures/misc/powder_snow_outline.png");
+
+	private static void renderSuspendedOverlay(Minecraft mc, GuiGraphicsExtractor graphics) {
+		var texture = mc.getTextureManager().getTexture(SUSPENDED_OVERLAY_LOCATION);
+		graphics.blit(
+			texture.getTextureView(),
+			texture.getSampler(),
+			0,
+			0,
+			graphics.guiWidth(),
+			graphics.guiHeight(),
+			0F,
+			1F,
+			0F,
+			1F
+		);
 	}
 
 	public boolean getRenderSuspendedOverlay() {
@@ -643,13 +705,13 @@ public class ClientGameEngine {
 		}
 
 		var list = new ArrayList<String>();
-		list.add("Minecraft " + SharedConstants.getCurrentVersion().getName() + " (" + mc.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + ")");
-		list.add(mc.fpsString);
+		list.add("Minecraft " + SharedConstants.getCurrentVersion().name() + " (" + mc.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + ")");
+		list.add(mc.getFps() + " fps");
 
 		var blockpos = mc.getCameraEntity().blockPosition();
 		var entity = mc.getCameraEntity();
 		var direction = entity.getDirection();
-		var chunkpos = new ChunkPos(blockpos);
+		var chunkpos = new ChunkPos(blockpos.getX(), blockpos.getZ());
 
 		if (!Objects.equals(overlay.lastPos, chunkpos)) {
 			overlay.lastPos = chunkpos;
@@ -667,7 +729,7 @@ public class ClientGameEngine {
 
 		list.add(String.format(Locale.ROOT, "Facing: %s (%s) (%.1f / %.1f)", direction, s, Mth.wrapDegrees(entity.getYRot()), Mth.wrapDegrees(entity.getXRot())));
 		list.add(String.format(Locale.ROOT, "XYZ: %.3f / %.5f / %.3f", mc.getCameraEntity().getX(), mc.getCameraEntity().getY(), mc.getCameraEntity().getZ()));
-		list.add(String.format(Locale.ROOT, "Chunk: %d %d %d [%d %d in r.%d.%d.mca]", chunkpos.x, SectionPos.blockToSectionCoord(blockpos.getY()), chunkpos.z, chunkpos.getRegionLocalX(), chunkpos.getRegionLocalZ(), chunkpos.getRegionX(), chunkpos.getRegionZ()));
+		list.add(String.format(Locale.ROOT, "Chunk: %d %d %d [%d %d in r.%d.%d.mca]", chunkpos.x(), SectionPos.blockToSectionCoord(blockpos.getY()), chunkpos.z(), chunkpos.getRegionLocalX(), chunkpos.getRegionLocalZ(), chunkpos.getRegionX(), chunkpos.getRegionZ()));
 		list.add(String.format(Locale.ROOT, "Block: %d %d %d [%d %d %d]", blockpos.getX(), blockpos.getY(), blockpos.getZ(), blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15));
 
 		var levelchunk = overlay.getClientChunk();
@@ -682,11 +744,16 @@ public class ClientGameEngine {
 
 			if (mc.level.isInsideBuildHeight(blockpos.getY())) {
 				var biome = mc.level.getBiome(blockpos);
-				list.add("Biome: " + overlay.printBiome(biome));
+				list.add("Biome: " + biome.unwrap().map(key -> key.identifier().toString(), l -> "[unregistered " + l + "]"));
 			}
 		}
 
-		list.add(mc.levelRenderer.getEntityStatistics().replace("E:", "Entities:"));
+		var entityStatistics = mc.levelExtractor.entityStatistics();
+
+		if (entityStatistics != null) {
+			list.add(entityStatistics.replace("E:", "Entities:"));
+		}
+
 		return list;
 	}
 
@@ -771,13 +838,13 @@ public class ClientGameEngine {
 		return cam == null ? null : cam.getWeatherOverride();
 	}
 
-	public boolean drawItemStackSize(GuiGraphics graphics, ItemStack stack, Font font, @Nullable String text, int x, int y) {
+	public boolean drawItemStackSize(GuiGraphicsExtractor graphics, ItemStack stack, Font font, @Nullable String text, int x, int y) {
 		if (text != null && text.isEmpty()) {
 			return true;
 		}
 
 		if (stack.getCount() != 1 || text != null) {
-			var s = text != null ? text : MiscClientUtils.formatNumber(stack.getCount());
+			var s = text != null ? text : StringUtils.formatPower(stack.getCount());
 			MiscClientUtils.drawStackSize(graphics, font, s, x, y, 0xFFFFFFFF, true);
 		}
 
@@ -790,8 +857,8 @@ public class ClientGameEngine {
 
 	@Nullable
 	public CameraOverride overrideCamera(Minecraft mc) {
-		if (mc.screen != null && mc.screen.overrideCamera()) {
-			return mc.screen;
+		if (mc.gui.screen() != null && mc.gui.screen().overrideCamera()) {
+			return mc.gui.screen();
 		} else if (mc.player != null && mc.player.vl$sessionData().cameraOverride != null) {
 			return mc.player.vl$sessionData().cameraOverride;
 		} else {
@@ -833,7 +900,7 @@ public class ClientGameEngine {
 		if (connection == null) {
 			return List.of();
 		} else if (mc.player != null && canViewOnlinePlayerNames(mc.player)) {
-			return connection.getOnlinePlayers().stream().map(p -> p.getProfile().getName()).toList();
+			return connection.getOnlinePlayers().stream().map(p -> p.getProfile().name()).toList();
 		} else {
 			return List.of(mc.getUser().getName());
 		}

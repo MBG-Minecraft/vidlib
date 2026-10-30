@@ -22,6 +22,8 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL32.glDrawElementsBaseVertex;
+import static org.lwjgl.opengl.GL33C.GL_SAMPLER_BINDING;
+import static org.lwjgl.opengl.GL33C.glBindSampler;
 
 public class VLImGuiImplGl3 {
 	// OpenGL Data
@@ -52,6 +54,7 @@ public class VLImGuiImplGl3 {
 	private final int[] lastActiveTexture = new int[1];
 	private final int[] lastProgram = new int[1];
 	private final int[] lastTexture = new int[1];
+	private final int[] lastSampler = new int[1];
 	private final int[] lastArrayBuffer = new int[1];
 	private final int[] lastVertexArrayObject = new int[1];
 	private final int[] lastFramebuffer = new int[1];
@@ -267,6 +270,12 @@ public class VLImGuiImplGl3 {
 	private void backupGlState() {
 		glGetIntegerv(GL_ACTIVE_TEXTURE, this.lastActiveTexture);
 		glActiveTexture(GL_TEXTURE0);
+		glGetIntegerv(GL_SAMPLER_BINDING, this.lastSampler);
+		// 26.3 pipelines bind GL sampler objects to the texture units; a leftover sampler (for
+		// example a depth-comparison sampler) corrupts ImGui's font atlas sampling - text would
+		// sample to black/transparent while solid fills (which multiply a black background colour)
+		// still look correct. Unbind it for the ImGui pass and restore afterwards.
+		glBindSampler(0, 0);
 		glGetIntegerv(GL_CURRENT_PROGRAM, this.lastProgram);
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, this.lastTexture);
 		glGetIntegerv(GL_ARRAY_BUFFER_BINDING, this.lastArrayBuffer);
@@ -290,6 +299,7 @@ public class VLImGuiImplGl3 {
 	private void restoreModifiedGlState() {
 		glUseProgram(this.lastProgram[0]);
 		glBindTexture(GL_TEXTURE_2D, this.lastTexture[0]);
+		glBindSampler(0, this.lastSampler[0]);
 		glActiveTexture(this.lastActiveTexture[0]);
 		glBindVertexArray(this.lastVertexArrayObject[0]);
 		glBindFramebuffer(GL_FRAMEBUFFER, this.lastFramebuffer[0]);

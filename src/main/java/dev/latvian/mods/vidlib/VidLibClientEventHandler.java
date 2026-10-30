@@ -2,38 +2,25 @@ package dev.latvian.mods.vidlib;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.platform.PlatformHelper;
-import dev.latvian.mods.klib.render.BufferSupplier;
-import dev.latvian.mods.klib.render.CuboidRenderer;
-import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
+import dev.latvian.mods.vidlib.client.VidLibWorldRenderState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
-import dev.latvian.mods.vidlib.feature.bloom.Bloom;
-import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
-import dev.latvian.mods.vidlib.feature.clock.Clock;
-import dev.latvian.mods.vidlib.feature.clock.ClockFont;
-import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresetLoader;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
-import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderer;
-import dev.latvian.mods.vidlib.feature.font.MSDFFont;
-import dev.latvian.mods.vidlib.feature.gradient.ClientGradientLoader;
-import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.item.RainbowItemTint;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ClientModListPayload;
@@ -53,14 +40,10 @@ import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
-import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
-import dev.latvian.mods.vidlib.feature.zone.renderer.ZoneRenderer;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
-import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
@@ -73,6 +56,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -89,8 +73,8 @@ import net.neoforged.neoforge.client.event.CalculateDetachedCameraDistanceEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientResourceLoadFinishedEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
@@ -99,11 +83,10 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.client.event.RenderHighlightEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RenderNameTagEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
 import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
@@ -151,12 +134,8 @@ public class VidLibClientEventHandler {
 		event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.Loader());
 		event.addListener(ID.vidlib("clothing_preset"), new ClothingPresetLoader());
 		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader());
-		event.addListener(ID.vidlib("gradient"), new ClientGradientLoader());
-		event.addListener(ID.vidlib("clock_font"), new ClockFont.Loader());
-		event.addListener(ID.vidlib("clock"), new Clock.Loader());
 		event.addListener(ID.vidlib("skybox"), new SkyboxData.Loader());
 		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
-		event.addListener(ID.vidlib("msdf"), new MSDFFont.Loader());
 
 		event.addDependency(ID.vidlib("gradient"), ID.vidlib("clothing_preset"));
 		event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
@@ -173,7 +152,7 @@ public class VidLibClientEventHandler {
 		for (var s : ClientAutoRegister.SCANNED.get()) {
 			if (s.value() instanceof EntityRendererHolder<?> holder) {
 				holder.register(event);
-			} else if (s.value() instanceof BlockEntityRendererHolder<?> holder) {
+			} else if (s.value() instanceof BlockEntityRendererHolder<?, ?> holder) {
 				holder.register(event);
 			}
 		}
@@ -276,131 +255,21 @@ public class VidLibClientEventHandler {
 		Minecraft.getInstance().vl$renderSetup(event);
 	}
 
-	@SubscribeEvent(priority = EventPriority.LOW)
-	public static void postFrameGraphSetup(FrameGraphSetupEvent event) {
-		CanvasImpl.createHandles(Minecraft.getInstance(), event.getFrameGrapBuilder(), event.getRenderTargetDescriptor());
+	@SubscribeEvent
+	public static void extract(ExtractLevelRenderStateEvent event) {
+		var state = new VidLibWorldRenderState();
+
+		if (state.extract(event)) {
+			event.getRenderState().setRenderData(VidLibEntityRenderStates.WORLD_KEY, state);
+		}
 	}
 
-	@SubscribeEvent(priority = EventPriority.HIGH)
-	public static void renderWorld(RenderLevelStageEvent event) {
-		var mc = Minecraft.getInstance();
+	@SubscribeEvent
+	public static void submit(SubmitCustomGeometryEvent event) {
+		var state = event.getLevelRenderState().getRenderData(VidLibEntityRenderStates.WORLD_KEY);
 
-		if (mc.level == null || mc.player == null) {
-			return;
-		}
-
-		var session = mc.player.vl$sessionData();
-		var frame = new FrameInfo(mc, session, event);
-		FrameInfo.CURRENT = frame;
-
-		var ms = frame.poseStack();
-
-		if (session.fluidPlane != null && frame.layer() != null) {
-			FluidPlaneRenderer.render(frame, session.fluidPlane);
-		}
-
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
-			Canvas.MAIN_BEFORE_PARTICLES.copyColorFrom(mc.getMainRenderTarget());
-			Canvas.MAIN_BEFORE_PARTICLES.copyDepthFrom(mc.getMainRenderTarget());
-		} else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
-			Canvas.MAIN_AFTER_PARTICLES.copyColorFrom(mc.getMainRenderTarget());
-			Canvas.MAIN_AFTER_PARTICLES.copyDepthFrom(mc.getMainRenderTarget());
-		}
-
-		if (frame.layer() == TerrainRenderLayer.CUTOUT) {
-			if (ClockRenderer.VISIBLE.get()) {
-				for (var clock : Clock.REGISTRY) {
-					if (!clock.locations().isEmpty()) {
-						var value = session.clocks.get(clock.id());
-
-						if (value != null) {
-							for (var location : clock.locations()) {
-								if (location.dimension() == mc.level.dimension() && location.visible().test(mc.player)) {
-									ClockRenderer.render(frame, value, location);
-								}
-							}
-						}
-					}
-				}
-			}
-		} else if (frame.layer() == TerrainRenderLayer.PARTICLE) {
-			if (VidLibClientOptions.getShowZones()) {
-				ZoneRenderer.renderAll(frame);
-			} else {
-				ZoneRenderer.renderSolid(frame);
-			}
-
-			if (VidLibClientOptions.getShowAnchor()) {
-				var areas = mc.getAnchor().shapes().get(mc.level.dimension());
-
-				if (areas != null && !areas.isEmpty()) {
-					var color = Color.YELLOW.withAlpha(80);
-					var buffers = frame.buffers();
-					var cull = true;
-
-					for (var a : areas) {
-						float minX = frame.x(a.minX() + 0.5D);
-						float minY = frame.y(a.minY() + 0.5D);
-						float minZ = frame.z(a.minZ() + 0.5D);
-						float maxX = frame.x(a.maxX() + 0.5D);
-						float maxY = frame.y(a.maxY() + 0.5D);
-						float maxZ = frame.z(a.maxZ() + 0.5D);
-
-						CuboidRenderer.frame(ms, minX, minY, minZ, maxX, maxY, maxZ, buffers, BufferSupplier.DEBUG_NO_DEPTH, cull, color, Color.YELLOW, 1F, 1F);
-					}
-				}
-			}
-
-			if (!session.serverDataMap.get(InternalServerData.HIDE_PLUMBOBS)) {
-				PlumbobRenderer.render(mc, frame);
-			}
-
-			var tool = VidLibTool.of(mc.player);
-
-			if (tool != null) {
-				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, frame.screenDelta());
-				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.TEMP, 1F);
-				Visuals.TEMP.clear();
-			}
-
-			if (mc.getEntityRenderDispatcher().shouldRenderHitBoxes() || !ClientProps.OPEN_PROPS.isEmpty()) {
-				mc.level.getProps().renderDebug(frame);
-				ClientProps.OPEN_PROPS.clear();
-			}
-
-			Visuals.FRAME_DEBUG.copyFrom(Visuals.TICK_DEBUG);
-
-			if (Visuals.FRAME_DEBUG.hasAny()) {
-				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().getPosition(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.FRAME_DEBUG, 1F);
-				Visuals.FRAME_DEBUG.clear();
-			}
-		}
-
-		mc.level.getProps().renderAll(frame, ms);
-
-		if (frame.layer() != null) {
-			GhostStructure.render(frame);
-
-			var tool = VidLibTool.of(mc.player);
-			if (tool != null) {
-				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, frame.screenDelta());
-
-				for (var cube : Visuals.TEMP.texturedCubes()) {
-					TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube, Color.WHITE);
-				}
-
-				Visuals.TEMP.clear();
-			}
-
-			if (!VidLibClientOptions.getShowZones()) {
-				ZoneRenderer.renderVisible(frame);
-			}
-
-			PhysicsParticleManager.render(frame);
-		}
-
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) {
-			Bloom.CANVAS.copyDepthFrom(mc.getMainRenderTarget());
+		if (state != null) {
+			state.submit(event);
 		}
 	}
 
@@ -432,17 +301,17 @@ public class VidLibClientEventHandler {
 					int x = 1;
 					int y = 2;
 					graphics.fill(x, y, x + mc.font.width(component) + 3, y + 11, 0xA0000000);
-					graphics.drawString(mc.font, component, x + 2, y + 2, 0xFFFFFFFF, true);
+					graphics.text(mc.font, component, x + 2, y + 2, 0xFFFFFFFF, true);
 				} else {
 					ScreenText.RENDER.topLeft.add(component);
 				}
 			}
 		}
 
-		boolean primitiveF3Open = mc.gui.getDebugOverlay().showDebugScreen() && ClientGameEngine.INSTANCE.primitiveF3(mc);
+		boolean primitiveF3Open = mc.gui.hud.getDebugOverlay().showDebugScreen() && ClientGameEngine.INSTANCE.primitiveF3(mc);
 
 		if ((primitiveF3Open || VidLibClientOptions.getShowCoordinates()) && ClientGameEngine.INSTANCE.allowCoordinateDisplay(mc)) {
-			var pos = mc.gameRenderer.getMainCamera().getPosition();
+			var pos = mc.gameRenderer.mainCamera().position();
 			var x = Component.literal("%.01f".formatted(pos.x)).withColor(0xFF7070);
 			var y = Component.literal("%.01f".formatted(pos.y - mc.player.getEyeHeight())).withColor(0x7CFF70);
 			var z = Component.literal("%.01f".formatted(pos.z)).withColor(0x70BCFF);
@@ -468,7 +337,7 @@ public class VidLibClientEventHandler {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
 			ScreenText.RENDER.ops = mc.jsonOps();
 
-			if (mc.screen == null || mc.screen instanceof ChatScreen) {
+			if (mc.gui.screen() == null || mc.gui.screen() instanceof ChatScreen) {
 				NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(ScreenText.RENDER));
 
 				var zoneClip = session.zoneClip;
@@ -503,16 +372,16 @@ public class VidLibClientEventHandler {
 					}
 				}
 
-				graphics.pose().pushPose();
-				graphics.pose().translate(0F, 0F, 800F);
+				;
+				graphics.pose().translate(0F, 0F);
 
-				if (mc.screen instanceof ChatScreen) {
+				if (mc.gui.screen() instanceof ChatScreen) {
 					ScreenTextRenderer.render(graphics, ScreenText.RENDER, mc.font, 0, 0, width, height - 14, 0x40000000, 0x70FFFFFF);
 				} else {
 					ScreenTextRenderer.render(graphics, ScreenText.RENDER, mc.font, 0, 0, width, height, 0xA0000000, 0xFFFFFFFF);
 				}
 
-				graphics.pose().popPose();
+				;
 			}
 		}
 	}
@@ -533,36 +402,44 @@ public class VidLibClientEventHandler {
 		 */
 	}
 
-	@SubscribeEvent
-	public static void renderBlockHighlight(RenderHighlightEvent.Block event) {
+	/**
+	 * Replacement for NeoForge 1.21.5's {@code RenderHighlightEvent.Block}, which no longer exists in
+	 * 26.3: the block outline is now submitted through {@code LevelRenderer#submitBlockOutline}, so
+	 * this hook is driven by {@code LevelRendererMixin} with the outlined block position.
+	 *
+	 * @return {@code true} when the vanilla block outline must be suppressed
+	 */
+	public static boolean renderBlockHighlight(BlockPos blockPos) {
 		var mc = Minecraft.getInstance();
 
 		if (mc.player != null && mc.level != null) {
-			if (!EntityUtils.isSpectatorOrCreative(mc.player) && mc.level.getBlockState(event.getTarget().getBlockPos()).is(Blocks.BARRIER)) {
-				event.setCanceled(true);
-				return;
+			if (!EntityUtils.isSpectatorOrCreative(mc.player) && mc.level.getBlockState(blockPos).is(Blocks.BARRIER)) {
+				return true;
 			}
 
 			var tool = VidLibTool.of(mc.player);
 
 			if (tool != null) {
-				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, event.getDeltaTracker().getGameTimeDeltaPartialTick(true));
+				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 
-				if (Visuals.TEMP.contains(event.getTarget().getBlockPos())) {
-					event.setCanceled(true);
+				if (Visuals.TEMP.contains(blockPos)) {
+					return true;
 				}
 
 				Visuals.TEMP.clear();
 			}
 		}
+
+		return false;
 	}
 
-	@SubscribeEvent(priority = EventPriority.LOWEST)
-	public static void debugText(CustomizeGuiOverlayEvent.DebugText event) {
+	/**
+	 * Replacement for NeoForge 1.21.5's {@code CustomizeGuiOverlayEvent.DebugText}, which no longer
+	 * exists in 26.3: the debug overlay is entry-driven and no longer exposes modifiable line lists,
+	 * so this hook is driven by {@code DebugScreenOverlayMixin} with the vanilla lists instead.
+	 */
+	public static void debugText(List<String> left, List<String> right) {
 		var mc = Minecraft.getInstance();
-
-		var left = event.getLeft();
-		var right = event.getRight();
 
 		if (ClientGameEngine.INSTANCE.primitiveF3(mc)) {
 			left.clear();
@@ -610,7 +487,7 @@ public class VidLibClientEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void renderPlayerPre(RenderPlayerEvent.Pre event) {
+	public static void renderPlayerPre(RenderPlayerEvent.Pre<?> event) {
 		if (event.getRenderState().isSpectator) {
 			event.setCanceled(true);
 			return;
@@ -693,7 +570,7 @@ public class VidLibClientEventHandler {
 		if (event.getAction() == InputConstants.PRESS) {
 			var mc = Minecraft.getInstance();
 
-			if (mc.player != null && mc.screen == null && mc.isWindowActive() && mc.hitResult instanceof PropHitResult hit && !ClientProps.isPropHidden(hit.prop)) {
+			if (mc.player != null && mc.gui.screen() == null && mc.isWindowActive() && mc.hitResult instanceof PropHitResult hit && !ClientProps.isPropHidden(hit.prop)) {
 				boolean cancel = hit.prop.onClientInteraction(mc.player, event.getButton(), hit.getLocation(), hit.getDirection());
 
 				if (cancel) {

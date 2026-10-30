@@ -25,47 +25,74 @@
 				}
 			],
 			"output": "swap",
-			"uniforms": [
-				{
-					"name": "InverseViewProjectionMat",
-					"type": "matrix4x4"
-				},
-				{
-					"name": "FocusPos",
-					"type": "vec3"
-				},
-				{
-					"name": "FocusRange",
-					"type": "float"
-				},
-				{
-					"name": "BlurRange",
-					"type": "float"
-				},
-				{
-					"name": "Strength",
-					"type": "float"
-				},
-				{
-					"name": "Shape",
-					"type": "int"
-				},
-				{
-					"name": "DebugNearCol",
-					"type": "vec4"
-				},
-				{
-					"name": "DebugFarCol",
-					"type": "vec4"
-				},
-				{
-					"name": "BlurMode",
-					"type": "int"
-				}
-			]
+			"uniforms": {
+				"InverseViewProjectionMat": [
+					{
+						"name": "InverseViewProjectionMat",
+						"type": "matrix4x4",
+						"value": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+					}
+				],
+				"FocusPos": [
+					{
+						"name": "FocusPos",
+						"type": "vec3",
+						"value": [0.0, 0.0, 0.0]
+					}
+				],
+				"FocusRange": [
+					{
+						"name": "FocusRange",
+						"type": "float",
+						"value": 0.0
+					}
+				],
+				"BlurRange": [
+					{
+						"name": "BlurRange",
+						"type": "float",
+						"value": 0.0
+					}
+				],
+				"Strength": [
+					{
+						"name": "Strength",
+						"type": "float",
+						"value": 0.0
+					}
+				],
+				"Shape": [
+					{
+						"name": "Shape",
+						"type": "int",
+						"value": 0
+					}
+				],
+				"DebugNearCol": [
+					{
+						"name": "DebugNearCol",
+						"type": "vec4",
+						"value": [0.0, 0.0, 0.0, 1.0]
+					}
+				],
+				"DebugFarCol": [
+					{
+						"name": "DebugFarCol",
+						"type": "vec4",
+						"value": [0.0, 0.0, 0.0, 1.0]
+					}
+				],
+				"BlurMode": [
+					{
+						"name": "BlurMode",
+						"type": "int",
+						"value": 0
+					}
+				]
+			}
 		},
 		{
-			"vertex_shader": "minecraft:post/blit",
+			"vertex_shader": "minecraft:core/screenquad",
 			"fragment_shader": "minecraft:post/blit",
 			"inputs": [
 				{
@@ -74,13 +101,15 @@
 				}
 			],
 			"output": "vidlib:depth_of_field",
-			"uniforms": [
-				{
-					"name": "ColorModulate",
-					"type": "vec4",
-					"values": [1.0, 1.0, 1.0, 1.0]
-				}
-			]
+			"uniforms": {
+				"BlitConfig": [
+					{
+						"name": "ColorModulate",
+						"type": "vec4",
+						"value": [1.0, 1.0, 1.0, 1.0]
+					}
+				]
+			}
 		}
 	]
 }

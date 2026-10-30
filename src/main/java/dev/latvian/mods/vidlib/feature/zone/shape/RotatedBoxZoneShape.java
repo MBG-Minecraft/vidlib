@@ -8,10 +8,11 @@ import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -52,19 +53,23 @@ public record RotatedBoxZoneShape(Vec3 pos, Vector3f size, Rotation rotation, Ma
 		return new RotatedBoxZoneShape(pos, size, rotation, matrix, imatrix, box, List.of(new AABB(-hsx, -hsy, -hsz, hsx, hsy, hsz)));
 	}
 
-	public static final SimpleRegistryType<RotatedBoxZoneShape> TYPE = SimpleRegistryType.dynamic("rotated_box", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		MCCodecs.VEC3.fieldOf("pos").forGetter(RotatedBoxZoneShape::pos),
-		JOMLCodecs.VEC3S.fieldOf("size").forGetter(RotatedBoxZoneShape::size),
-		Rotation.CODEC.fieldOf("rotation").forGetter(RotatedBoxZoneShape::rotation)
-	).apply(instance, RotatedBoxZoneShape::of)), CompositeStreamCodec.of(
-		MCStreamCodecs.VEC3, RotatedBoxZoneShape::pos,
-		JOMLStreamCodecs.VEC3S, RotatedBoxZoneShape::size,
-		Rotation.STREAM_CODEC, RotatedBoxZoneShape::rotation,
-		RotatedBoxZoneShape::of
-	));
+	public static final DynamicType<RegistryFriendlyByteBuf, ZoneShape> TYPE = DynamicType.create(
+		"rotated_box",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			MCCodecs.VEC3.fieldOf("pos").forGetter(RotatedBoxZoneShape::pos),
+			JOMLCodecs.VEC3S.fieldOf("size").forGetter(RotatedBoxZoneShape::size),
+			Rotation.CODEC.fieldOf("rotation").forGetter(RotatedBoxZoneShape::rotation)
+		).apply(instance, RotatedBoxZoneShape::of)),
+		CompositeStreamCodec.of(
+			MCStreamCodecs.VEC3, RotatedBoxZoneShape::pos,
+			JOMLStreamCodecs.VEC3S, RotatedBoxZoneShape::size,
+			Rotation.STREAM_CODEC, RotatedBoxZoneShape::rotation,
+			RotatedBoxZoneShape::of
+		)
+	);
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 

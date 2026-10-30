@@ -3,14 +3,13 @@ package dev.latvian.mods.vidlib.feature.zone;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -36,7 +35,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ZoneContainer> DIRECT_STREAM_CODEC = new StreamCodec<>() {
 		@Override
 		public ZoneContainer decode(RegistryFriendlyByteBuf buf) {
-			var id = ResourceLocation.STREAM_CODEC.decode(buf);
+			var id = Identifier.STREAM_CODEC.decode(buf);
 			int flags = buf.readVarInt();
 
 			var dimension = ((flags & FLAG_NOT_OVERWORLD) != 0) ? MCStreamCodecs.DIMENSION.decode(buf) : Level.OVERWORLD;
@@ -63,7 +62,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 
 		@Override
 		public void encode(RegistryFriendlyByteBuf buf, ZoneContainer value) {
-			ResourceLocation.STREAM_CODEC.encode(buf, value.id);
+			Identifier.STREAM_CODEC.encode(buf, value.id);
 
 			int flags = 0;
 
@@ -103,10 +102,9 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 
 	public static final VLRegistry<ZoneContainer> REGISTRY = VLRegistry.createServer("zone_container", ZoneContainer.class);
 	public static final DataType<ZoneContainer> DATA_TYPE = REGISTRY.dataType();
-	public static final CommandDataType<ZoneContainer> COMMAND = CommandDataType.of(DATA_TYPE);
 
 	ActiveZones parent;
-	public final ResourceLocation id;
+	public final Identifier id;
 	public final ResourceKey<Level> dimension;
 	public final List<Zone> zones;
 	public final Set<String> tags;
@@ -116,7 +114,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	private AABB boundingBox;
 	private AAIBB intBoundingBox;
 
-	public ZoneContainer(ResourceLocation id, ResourceKey<Level> dimension) {
+	public ZoneContainer(Identifier id, ResourceKey<Level> dimension) {
 		this.id = id;
 		this.dimension = dimension;
 		this.zones = new ArrayList<>();
@@ -129,7 +127,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	}
 
 	public ZoneContainer add(ZoneVolume zoneVolume) {
-		var instance = zoneVolume.shape().createInstance(this, zoneVolume);
+		var instance = zoneVolume.shape().value().createInstance(this, zoneVolume);
 		instance.index = zones.size();
 
 		instance.tags.add(id.toString());
@@ -169,7 +167,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	@Nullable
 	public Zone getFirst(Vec3 pos) {
 		for (var instance : zones) {
-			if (instance.volume.shape().contains(pos)) {
+			if (instance.volume.shape().value().contains(pos)) {
 				return instance;
 			}
 		}
@@ -181,7 +179,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		var list = new ArrayList<Zone>(1);
 
 		for (var instance : zones) {
-			if (instance.volume.shape().contains(pos)) {
+			if (instance.volume.shape().value().contains(pos)) {
 				list.add(instance);
 			}
 		}
@@ -192,7 +190,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	@Nullable
 	public Zone getFirst(AABB box) {
 		for (var instance : zones) {
-			if (instance.volume.shape().intersects(box)) {
+			if (instance.volume.shape().value().intersects(box)) {
 				return instance;
 			}
 		}
@@ -204,7 +202,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		var list = new ArrayList<Zone>(1);
 
 		for (var instance : zones) {
-			if (instance.volume.shape().intersects(box)) {
+			if (instance.volume.shape().value().intersects(box)) {
 				list.add(instance);
 			}
 		}
@@ -255,7 +253,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 			double maxZ = Double.NEGATIVE_INFINITY;
 
 			for (var instance : zones) {
-				var box = instance.volume.shape().toAABB();
+				var box = instance.volume.shape().value().toAABB();
 				minX = Math.min(minX, box.minX);
 				minY = Math.min(minY, box.minY);
 				minZ = Math.min(minZ, box.minZ);
@@ -281,7 +279,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 			int maxZ = Integer.MIN_VALUE;
 
 			for (var instance : zones) {
-				var box = instance.volume.shape().toAAIBB();
+				var box = instance.volume.shape().value().toAAIBB();
 				minX = Math.min(minX, box.minX());
 				minY = Math.min(minY, box.minY());
 				minZ = Math.min(minZ, box.minZ());
@@ -302,13 +300,13 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 			return null;
 		} else if (zones.size() == 1) {
 			var instance = zones.getFirst();
-			return instance.volume.shape().clip(new ZoneClipContext(instance, ctx));
+			return instance.volume.shape().value().clip(new ZoneClipContext(instance, ctx));
 		}
 
 		ZoneClipResult result = null;
 
 		for (var instance : zones) {
-			var clip = instance.volume.shape().clip(new ZoneClipContext(instance, ctx));
+			var clip = instance.volume.shape().value().clip(new ZoneClipContext(instance, ctx));
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {
@@ -328,11 +326,11 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 
 		if (toAABB().contains(x, y, z)) {
 			if (zones.size() == 1) {
-				return zones.getFirst().volume.shape().contains(x, y, z);
+				return zones.getFirst().volume.shape().value().contains(x, y, z);
 			}
 
 			for (var instance : zones) {
-				if (instance.volume.shape().contains(x, y, z)) {
+				if (instance.volume.shape().value().contains(x, y, z)) {
 					return true;
 				}
 			}
@@ -349,11 +347,11 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 
 		if (toAABB().contains(x, y, z)) {
 			if (zones.size() == 1) {
-				return zones.getFirst().volume.shape().contains(x, y, z);
+				return zones.getFirst().volume.shape().value().contains(x, y, z);
 			}
 
 			for (var instance : zones) {
-				if (instance.volume.shape().contains(x, y, z)) {
+				if (instance.volume.shape().value().contains(x, y, z)) {
 					return true;
 				}
 			}
@@ -367,11 +365,11 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		if (zones.isEmpty()) {
 			return false;
 		} else if (zones.size() == 1) {
-			return zones.getFirst().volume.shape().intersects(box);
+			return zones.getFirst().volume.shape().value().intersects(box);
 		}
 
 		for (var instance : zones) {
-			if (instance.volume.shape().intersects(box)) {
+			if (instance.volume.shape().value().intersects(box)) {
 				return true;
 			}
 		}
@@ -382,13 +380,13 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	@Override
 	public Stream<BlockPos> getBlocks() {
 		if (zones.size() == 1) {
-			return zones.getFirst().volume.shape().getBlocks();
+			return zones.getFirst().volume.shape().value().getBlocks();
 		}
 
 		var stream = Stream.<BlockPos>empty();
 
 		for (var instance : zones) {
-			stream = Stream.concat(stream, instance.volume.shape().getBlocks());
+			stream = Stream.concat(stream, instance.volume.shape().value().getBlocks());
 		}
 
 		return stream;
@@ -400,10 +398,10 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 			return Shapes.empty();
 		}
 
-		var shape = zones.getFirst().volume.shape().createVoxelShape();
+		var shape = zones.getFirst().volume.shape().value().createVoxelShape();
 
 		for (int i = 1; i < zones.size(); i++) {
-			shape = Shapes.or(shape, zones.get(i).volume.shape().createVoxelShape());
+			shape = Shapes.or(shape, zones.get(i).volume.shape().value().createVoxelShape());
 		}
 
 		return shape;
@@ -415,10 +413,10 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 			return Shapes.empty();
 		}
 
-		var shape = zones.getFirst().volume.shape().createBlockRenderingShape(predicate);
+		var shape = zones.getFirst().volume.shape().value().createBlockRenderingShape(predicate);
 
 		for (int i = 1; i < zones.size(); i++) {
-			shape = Shapes.or(shape, zones.get(i).volume.shape().createBlockRenderingShape(predicate));
+			shape = Shapes.or(shape, zones.get(i).volume.shape().value().createBlockRenderingShape(predicate));
 		}
 
 		return shape;
@@ -427,13 +425,13 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	@Override
 	public double closestDistanceTo(Vec3 pos) {
 		if (zones.size() == 1) {
-			return zones.getFirst().volume.shape().closestDistanceTo(pos);
+			return zones.getFirst().volume.shape().value().closestDistanceTo(pos);
 		}
 
 		var dist = Double.POSITIVE_INFINITY;
 
 		for (var instance : zones) {
-			dist = Math.min(dist, instance.volume.shape().closestDistanceTo(pos));
+			dist = Math.min(dist, instance.volume.shape().value().closestDistanceTo(pos));
 
 			if (dist <= 0D) {
 				return 0D;

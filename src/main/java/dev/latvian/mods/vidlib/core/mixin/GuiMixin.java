@@ -1,103 +1,35 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.latvian.mods.vidlib.feature.client.SleepScreen;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.GameType;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.annotation.Nullable;
-
+/**
+ * 1.21.5 hooked both of these through {@code Minecraft}: the social-interactions screen was
+ * suppressed from {@code Minecraft.handleKeybinds} (via {@code Minecraft.setScreen}), and the
+ * in-bed chat screen was wrapped in {@code Minecraft.tick} (via the {@code InBedChatScreen}
+ * constructor). 26.3 moved both methods onto {@link Gui} itself, so they now live here.
+ */
 @Mixin(Gui.class)
-public abstract class GuiMixin {
-	@Shadow
-	@Final
-	private Minecraft minecraft;
-
-	@Shadow
-	@Nullable
-	private Component overlayMessageString;
-
-	@Redirect(method = "renderTabList", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;isLocalServer()Z"))
-	private boolean vl$renderTabList(Minecraft instance) {
-		return false;
+public class GuiMixin {
+	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", ordinal = 1))
+	private void vl$openSocialInteractionsScreen(Gui instance, Screen old) {
 	}
 
-	@Inject(method = "renderCameraOverlays", at = @At("HEAD"))
-	private void vl$renderCameraOverlays(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-		ClientGameEngine.INSTANCE.renderOverlays(minecraft, (Gui) (Object) this, graphics, deltaTracker);
-	}
-
-	/**
-	 * @author Lat
-	 * @reason Yeet
-	 */
-	@Overwrite
-	protected void renderSpyglassOverlay(GuiGraphics guiGraphics, float scopeScale) {
-	}
-
-	@Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
-	private void vl$renderCrosshair(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-		if (ClientGameEngine.INSTANCE.hideCrosshair(minecraft)) {
-			ci.cancel();
+	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;openScreen(Lnet/minecraft/client/gui/components/ChatComponent$ChatMethod;Lnet/minecraft/client/gui/screens/ChatScreen$ChatConstructor;)V"))
+	private void vl$sleepScreen(ChatComponent instance, ChatComponent.ChatMethod method, ChatScreen.ChatConstructor<?> constructor, Operation<Void> original) {
+		if (ClientGameEngine.INSTANCE.removeChatFromSleepScreen()) {
+			original.call(instance, method, (ChatScreen.ChatConstructor<ChatScreen>) (prefix, secure) -> new SleepScreen());
+		} else {
+			original.call(instance, method, constructor);
 		}
-	}
-
-	@Inject(method = "renderOverlayMessage", at = @At("HEAD"), cancellable = true)
-	private void vl$renderOverlayMessage(GuiGraphics graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-		if (overlayMessageString != null && ClientGameEngine.INSTANCE.hideActionBarText(minecraft, overlayMessageString)) {
-			ci.cancel();
-		}
-	}
-
-	@ModifyExpressionValue(method = {"lambda$new$8", "lambda$new$9"}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
-	private static boolean vl$hideGui(boolean original, @Local(argsOnly = true) Minecraft mc) {
-		return ClientGameEngine.INSTANCE.hideGui(mc);
-	}
-
-	@ModifyExpressionValue(method = "renderHearts", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelData;isHardcore()Z"))
-	private boolean vl$isHardcore(boolean original) {
-		return ClientGameEngine.INSTANCE.renderHardcoreHearts(original);
-	}
-
-	@ModifyExpressionValue(method = {
-		"maybeRenderPlayerHealth",
-		"renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V",
-		"lambda$new$4",
-		"lambda$new$3"
-	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;canHurtPlayer()Z"))
-	private boolean vl$isSurvival(boolean original) {
-		return original || ClientGameEngine.INSTANCE.renderSpectatedUI(minecraft);
-	}
-
-	@ModifyExpressionValue(method = {
-		"renderCrosshair",
-		"renderHotbar",
-		"maybeRenderSelectedItemName",
-		"maybeRenderSpectatorTooltip"
-	}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;getPlayerMode()Lnet/minecraft/world/level/GameType;"))
-	private GameType vl$getGameMode(GameType original) {
-		return ClientGameEngine.INSTANCE.renderSpectatedUI(minecraft) ? GameType.SURVIVAL : original;
-	}
-
-	@ModifyExpressionValue(method = "maybeRenderSpectatorTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"))
-	private boolean vl$isSpectator(boolean original) {
-		if (ClientGameEngine.INSTANCE.renderSpectatedUI(minecraft)) {
-			return false;
-		}
-
-		return original;
 	}
 }

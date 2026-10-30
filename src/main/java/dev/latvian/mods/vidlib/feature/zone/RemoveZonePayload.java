@@ -7,9 +7,9 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public record RemoveZonePayload(ResourceLocation zone, int index) implements SimplePacketPayload {
+public record RemoveZonePayload(Identifier zone, int index) implements SimplePacketPayload {
 	@AutoPacket
 	public static final VidLibPacketType<RemoveZonePayload> TYPE = VidLibPacketType.internal("zone/remove", CompositeStreamCodec.of(
 		ID.STREAM_CODEC, RemoveZonePayload::zone,

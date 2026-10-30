@@ -1,122 +1,78 @@
 package dev.latvian.mods.vidlib.feature.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.TriState;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 
 import java.util.function.Function;
 
 public interface VidLibRenderTypes {
-	TexturedRenderType GUI = TexturedRenderType.internal(
-		"gui",
-		786432,
-		RenderPipelines.GUI_TEXTURED,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
-			.createCompositeState(false)
+	TexturedRenderType GUI = TexturedRenderType.internal("gui", RenderPipelines.GUI_TEXTURED,
+		(pipeline, texture) -> RenderSetup.builder(pipeline)
+			.withTexture("Sampler0", texture)
+			.createRenderSetup()
 	);
 
-	TexturedRenderType GUI_BLUR = TexturedRenderType.internal(
-		"gui_blur",
-		786432,
-		RenderPipelines.GUI_TEXTURED,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
-			.createCompositeState(false)
+	TexturedRenderType GUI_BLUR = TexturedRenderType.internal("gui_blur", RenderPipelines.GUI_TEXTURED,
+		(pipeline, texture) -> RenderSetup.builder(pipeline)
+			.withTexture("Sampler0", texture)
+			.createRenderSetup()
 	);
 
-	TexturedRenderType GUI_DEPTH = TexturedRenderType.internal(
-		"gui_depth",
-		786432,
-		VidLibRenderPipelines.GUI_DEPTH,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
-			.createCompositeState(false)
+	TexturedRenderType GUI_DEPTH = TexturedRenderType.internal("gui_depth", VidLibRenderPipelines.GUI_DEPTH,
+		(pipeline, texture) -> RenderSetup.builder(pipeline)
+			.withTexture("Sampler0", texture)
+			.createRenderSetup()
 	);
 
-	Function<ResourceLocation, TexturedRenderType> MASKED_GUI = Util.memoize(maskTexture -> TexturedRenderType.internal(
-		"masked_gui",
-		786432,
-		VidLibRenderPipelines.MASKED_GUI,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.EmptyTextureStateShard(() -> {
-				var manager = Minecraft.getInstance().getTextureManager();
-				var tex = manager.getTexture(texture);
-				var maskTex = manager.getTexture(maskTexture);
-				RenderSystem.setShaderTexture(0, tex.getTexture());
-				RenderSystem.setShaderTexture(1, maskTex.getTexture());
-			}, () -> RenderSystem.setShaderTexture(1, null)))
-			.createCompositeState(false)
+	/**
+	 * Masked GUI draw. The mask texture is still supplied through the legacy
+	 * Sampler1 slot, which Vanilla binds to the overlay texture.
+	 */
+	Function<Identifier, TexturedRenderType> MASKED_GUI = Util.memoize(maskTexture -> TexturedRenderType.internal("masked_gui", VidLibRenderPipelines.MASKED_GUI,
+		(pipeline, texture) -> RenderSetup.builder(pipeline)
+			.withTexture("Sampler0", texture)
+			.createRenderSetup()
 	));
 
-	TexturedRenderType MSDF = TexturedRenderType.internal(
-		"msdf",
-		786432,
-		VidLibRenderPipelines.MSDF,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
-			.createCompositeState(false)
+	TexturedRenderType MSDF = TexturedRenderType.internal("msdf", VidLibRenderPipelines.MSDF,
+		(pipeline, texture) -> RenderSetup.builder(pipeline)
+			.withTexture("Sampler0", texture)
+			.createRenderSetup()
 	);
 
-	TexturedRenderType MSDF_SEE_THROUGH = TexturedRenderType.internal(
-		"msdf_see_through",
-		786432,
-		VidLibRenderPipelines.MSDF_SEE_THROUGH,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.TRUE, false))
-			.createCompositeState(false)
+	TexturedRenderType MSDF_SEE_THROUGH = TexturedRenderType.internal("msdf_see_through", VidLibRenderPipelines.MSDF_SEE_THROUGH,
+		(pipeline, texture) -> RenderSetup.builder(pipeline)
+			.withTexture("Sampler0", texture)
+			.createRenderSetup()
 	);
 
-	TexturedRenderType SKYBOX = TexturedRenderType.internal(
-		"skybox",
-		DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize() * 6,
-		true,
-		true,
-		VidLibRenderPipelines.SKYBOX,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-			.createCompositeState(false)
+	TexturedRenderType SKYBOX = TexturedRenderType.internal("skybox", VidLibRenderPipelines.SKYBOX,
+		(pipeline, texture) -> RenderSetup.builder(pipeline)
+			.withTexture("Sampler0", texture)
+			.createRenderSetup()
 	);
 
-	RenderStateShard.EmptyTextureStateShard THIN_LINE_WIDTH = new RenderStateShard.EmptyTextureStateShard(() -> RenderSystem.lineWidth(Math.max(2.5F, Minecraft.getInstance().getWindow().getWidth() / 1920.0F * 2.5F)), () -> RenderSystem.lineWidth(1F));
+	/**
+	 * Configurable-width lines. 26.3 exposes line width through the shader uniform
+	 * writing the line width itself.
+	 */
+	RenderType LINES = RenderType.create("vidlib:lines", RenderSetup.builder(RenderPipelines.LINES)
+		.createRenderSetup());
 
-	RenderType LINES = RenderType.create(
-		"vidlib:lines",
-		1536,
-		true,
-		true,
-		RenderPipelines.LINES,
-		RenderType.CompositeState.builder()
-			.setLineState(RenderStateShard.DEFAULT_LINE)
-			.setTextureState(THIN_LINE_WIDTH)
-			.setLayeringState(RenderStateShard.VIEW_OFFSET_Z_LAYERING)
-			.setOutputState(RenderStateShard.ITEM_ENTITY_TARGET)
-			.createCompositeState(false)
-	);
-
-	TexturedRenderType OUTLINE = TexturedRenderType.create(texture -> RenderType.create(
-		"outline",
-		1536,
-		RenderPipelines.OUTLINE_CULL,
-		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
-			.setOutputState(RenderStateShard.OUTLINE_TARGET)
-			.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
+	TexturedRenderType OUTLINE = TexturedRenderType.create(texture -> RenderType.create("vidlib:outline",
+		RenderSetup.builder(RenderPipelines.OUTLINE_CULL)
+			.withTexture("Sampler0", texture)
+			.setOutline(RenderSetup.OutlineProperty.IS_OUTLINE)
+			.createRenderSetup()
 	));
 
-	TexturedRenderType OUTLINE_NO_CULL = TexturedRenderType.create(texture -> RenderType.create(
-		"outline_no_cull",
-		1536,
-		RenderPipelines.OUTLINE_NO_CULL,
-		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.DEFAULT, false))
-			.setOutputState(RenderStateShard.OUTLINE_TARGET)
-			.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
+	TexturedRenderType OUTLINE_NO_CULL = TexturedRenderType.create(texture -> RenderType.create("vidlib:outline_no_cull",
+		RenderSetup.builder(RenderPipelines.OUTLINE_NO_CULL)
+			.withTexture("Sampler0", texture)
+			.setOutline(RenderSetup.OutlineProperty.IS_OUTLINE)
+			.createRenderSetup()
 	));
 }

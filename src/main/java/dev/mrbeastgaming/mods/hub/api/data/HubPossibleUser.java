@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibCodecs;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +31,6 @@ public record HubPossibleUser(
 	}
 
 	public static HubPossibleUser of(GameProfile profile) {
-		return new HubPossibleUser(Optional.empty(), profile.getId(), profile.getName());
+		return new HubPossibleUser(Optional.empty(), profile.id(), profile.name());
 	}
 }

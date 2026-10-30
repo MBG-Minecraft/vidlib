@@ -1,9 +1,9 @@
 package dev.latvian.mods.replay.api;
 
-import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.klib.platform.PlatformModInfo;
-import dev.latvian.mods.vidlib.util.PackSyncMeta;
-import net.minecraft.Util;
+import dev.latvian.mods.klib.util.PackSyncMeta;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -29,7 +29,7 @@ public interface ReplayFileInfo {
 	}
 
 	@Nullable
-	default GameProfile getRecordedBy() {
+	default NameAndId getRecordedBy() {
 		return null;
 	}
 

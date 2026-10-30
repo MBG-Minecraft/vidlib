@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.klib.io.checksum.MD5;
 import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.util.client.BuiltInImages;
 import dev.latvian.mods.klib.util.net.HttpResponseData;
 import dev.latvian.mods.klib.util.net.NetUtils;
 import dev.latvian.mods.vidlib.VidLib;
@@ -11,7 +12,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import javax.imageio.ImageIO;
@@ -59,7 +60,7 @@ public class URITextures {
 	}
 
 	@Nullable
-	public static NativeImage load(URI uri) throws IOException, InterruptedException {
+	public static NativeImage load(URI uri) throws Exception {
 		if (!uri.isAbsolute()) {
 			return null;
 		}
@@ -145,10 +146,10 @@ public class URITextures {
 	public static Entry get(Minecraft mc, URI uri) {
 		return CACHE.computeIfAbsent(uri, key -> {
 			var hash = MD5.TYPE.digest(key.toString().getBytes(StandardCharsets.UTF_8)).toString();
-			var entry = new Entry(key, new ClientAsset(ID.vidlib("uri/" + hash)));
+			var entry = new Entry(key, new ClientAsset.ResourceTexture(ID.vidlib("uri/" + hash)));
 			entry.texture = new DynamicTexture(entry, BuiltInImages.loading());
 
-			mc.getTextureManager().register(entry.asset.texturePath(), entry.texture);
+			mc.getTextureManager().register(entry.asset.id(), entry.texture);
 
 			if (key.isAbsolute()) {
 				CompletableFuture.runAsync(() -> {
@@ -158,7 +159,7 @@ public class URITextures {
 						if (image != null) {
 							mc.execute(() -> {
 								entry.texture = new DynamicTexture(entry, image);
-								mc.getTextureManager().register(entry.asset.texturePath(), entry.texture);
+								mc.getTextureManager().register(entry.asset.id(), entry.texture);
 							});
 						}
 					} catch (Exception ex) {
@@ -171,11 +172,11 @@ public class URITextures {
 		});
 	}
 
-	public static ResourceLocation getTexture(Minecraft mc, URI uri) {
-		return get(mc, uri).asset.texturePath();
+	public static Identifier getTexture(Minecraft mc, URI uri) {
+		return get(mc, uri).asset.id();
 	}
 
-	public static int gl(Minecraft mc, @Nullable URI uri, ResourceLocation fallback) {
+	public static int gl(Minecraft mc, @Nullable URI uri, Identifier fallback) {
 		if (uri != null) {
 			return URITextures.get(mc, uri).texture.getTexture().vl$getHandle();
 		} else {

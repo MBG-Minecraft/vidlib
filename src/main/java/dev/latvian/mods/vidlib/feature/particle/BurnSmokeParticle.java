@@ -5,23 +5,25 @@ import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Mth;
 import org.joml.SimplexNoise;
 
-public class BurnSmokeParticle extends TextureSheetParticle {
+public class BurnSmokeParticle extends SingleQuadParticle implements DepthPassQuadParticle {
 	public static ParticleProvider<VidLibParticles.SimpleParticleType> create(SpriteSet spriteSet) {
-		return (type, level, x, y, z, xd, yd, zd) -> new BurnSmokeParticle(level, x, y, z, xd, yd, zd, spriteSet);
+		return (type, level, x, y, z, xd, yd, zd, random) -> new BurnSmokeParticle(level, x, y, z, xd, yd, zd, spriteSet);
 	}
 
 	private final float random1;
 	private final float random2;
 	private final float random3;
 	private float oQuadSize;
+	private SingleQuadParticle.Layer forcedLayer;
 
 	public BurnSmokeParticle(ClientLevel level, double x, double y, double z, double velocityX, double velocityY, double velocityZ, SpriteSet spriteSet) {
-		super(level, x, y, z);
+		super(level, x, y, z, (TextureAtlasSprite) null);
 
 		this.pickSprite(spriteSet);
 		// this.sprite = MinecraftClient.getInstance().getSpriteAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE).apply(TEXTURE);
@@ -44,14 +46,31 @@ public class BurnSmokeParticle extends TextureSheetParticle {
 		this.rCol = this.gCol = this.bCol = KMath.lerp(random2, 0.13F, 0.23F);
 
 		if (random.nextFloat() < 0.04F) {
-			var col = ClientGradients.FIRE_1.sample(random);
+			var col = ClientGradients.FIRE_1.value().sample(random);
 			setColor(col.redf(), col.greenf(), col.bluef());
 		}
 	}
 
+	/**
+	 * 26.3's {@link SingleQuadParticle} dropped {@code TextureSheetParticle#pickSprite}.
+	 */
+	public void pickSprite(SpriteSet sprites) {
+		this.setSprite(sprites.get(random));
+	}
+
 	@Override
-	public ParticleRenderType getRenderType() {
-		return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+	protected SingleQuadParticle.Layer getLayer() {
+		return SingleQuadParticle.Layer.OPAQUE;
+	}
+
+	@Override
+	public void vl$setForcedLayer(SingleQuadParticle.Layer layer) {
+		this.forcedLayer = layer;
+	}
+
+	@Override
+	public ParticleRenderType getGroup() {
+		return ParticleRenderType.SINGLE_QUADS;
 	}
 
 	@Override
@@ -80,7 +99,7 @@ public class BurnSmokeParticle extends TextureSheetParticle {
 	}
 
 	@Override
-	protected int getLightColor(float tint) {
+	protected int getLightCoords(float partialTick) {
 		return 15728880;
 	}
 }

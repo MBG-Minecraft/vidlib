@@ -1,11 +1,8 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.core.VLClientPlayPacketListener;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
-import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
-import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.ItemScreen;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
@@ -14,6 +11,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
@@ -23,7 +21,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Set;
 
@@ -43,8 +40,8 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 	@Unique
 	private Boolean vl$isReplayCamera;
 
-	public LocalPlayerMixin(ClientLevel clientLevel, GameProfile gameProfile) {
-		super(clientLevel, gameProfile);
+	public LocalPlayerMixin(ClientLevel clientLevel, NameAndId NameAndId) {
+		super(clientLevel, new com.mojang.authlib.GameProfile(NameAndId.id(), NameAndId.name()));
 	}
 
 	@Override
@@ -57,7 +54,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 	}
 
 	@Override
-	public Set<String> getTags() {
+	public Set<String> entityTags() {
 		return vl$sessionData().getTags();
 	}
 
@@ -66,7 +63,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 		var s = ItemScreen.create((LocalPlayer) (Object) this, stack, hand);
 
 		if (s != null) {
-			minecraft.setScreen(s);
+			minecraft.gui.setScreen(s);
 			ci.cancel();
 		}
 	}
@@ -74,7 +71,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 	@Override
 	public boolean isReplayCamera() {
 		if (vl$isReplayCamera == null) {
-			vl$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || getScoreboardName().equals("Replay_Viewer") || getGameProfile().getProperties().containsKey("IsReplayViewer");
+			vl$isReplayCamera = ((Object) this).getClass() != LocalPlayer.class || getScoreboardName().equals("Replay_Viewer") || getGameProfile().properties().containsKey("IsReplayViewer");
 		}
 
 		return vl$isReplayCamera;
@@ -83,12 +80,5 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 	@ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Abilities;getFlyingSpeed()F"))
 	private float vl$getFlyingSpeed(float original) {
 		return original * CommonGameEngine.INSTANCE.getFlightSpeedModifier(vl$self());
-	}
-
-	@Inject(method = "drop", at = @At("HEAD"), cancellable = true)
-	private void vl$drop(boolean fullStack, CallbackInfoReturnable<Boolean> cir) {
-		if (PlayerActionHandler.handle(this, PlayerActionType.DROP, true)) {
-			cir.setReturnValue(false);
-		}
 	}
 }

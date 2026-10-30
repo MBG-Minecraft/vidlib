@@ -3,16 +3,12 @@ package dev.latvian.mods.vidlib.feature.imgui;
 import com.mojang.blaze3d.platform.TextureUtil;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.feature.bloom.Bloom;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasPanel;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
-import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
 import dev.latvian.mods.vidlib.feature.decal.DecalPanel;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlanePanel;
 import dev.latvian.mods.vidlib.feature.environment.MapTextureOverridePanel;
 import dev.latvian.mods.vidlib.feature.environment.WorldBorderPanel;
-import dev.latvian.mods.vidlib.feature.font.MSDFFont;
 import dev.latvian.mods.vidlib.feature.gallery.LowQualityPlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerHeads;
@@ -25,7 +21,6 @@ import dev.latvian.mods.vidlib.feature.note.NotePanel;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueueImGui;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
@@ -50,9 +45,10 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.players.NameAndId;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.LinkedHashMap;
@@ -80,7 +76,7 @@ public class BuiltInImGui {
 				if (session.user == null) {
 					LinkHubUserScreen.open(graphics.mc);
 				} else {
-					if (Screen.hasShiftDown()) {
+					if (graphics.mc.hasShiftDown()) {
 						LinkHubUserScreen.open(graphics.mc);
 					} else if (session.minecraftLink == null) {
 						LinkMinecraftScreen.handle(graphics.mc, true);
@@ -100,7 +96,6 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.SLASH, "Command History", CommandHistoryPanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Server Stopwatch", GlobalStopwatchPanel.INSTANCE).enabled(graphics.inGame));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "New Stopwatch", g -> StopwatchPanel.openNew()));
-		list.add(MenuItem.menu(ImIcons.APERTURE, "Canvas", CanvasPanel::menu));
 		list.add(MenuItem.item(ImIcons.MUSIC_NOTE, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
 		list.add(MenuItem.SEPARATOR);
 		list.add(MenuItem.item(ImIcons.CAMERA, "Cutscene Builder", CutsceneBuilderPanel.INSTANCE).enabled(graphics.isAdmin));
@@ -116,7 +111,7 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.WRENCH, "Server Data", ServerDataConfigPanel.INSTANCE).enabled(graphics.isAdmin));
 
 		if (graphics.player != null) {
-			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(graphics.player.getGameProfile(), graphics.player.vl$sessionData().dataMap).open()).enabled(graphics.isAdmin));
+			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(new NameAndId(graphics.player.getGameProfile()), graphics.player.vl$sessionData().dataMap).open()).enabled(graphics.isAdmin));
 		}
 
 		list.add(ClientSkybox.MENU_ITEM.enabled(graphics.isAdmin));
@@ -151,11 +146,13 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.SEPARATOR);
 
-		list.add(MenuItem.item(ImIcons.APERTURE, "Capture Frustum", graphics.mc.levelRenderer.getCapturedFrustum() != null, g -> {
-			if (g.mc.levelRenderer.getCapturedFrustum() != null) {
-				g.mc.levelRenderer.killFrustum();
+		list.add(MenuItem.item(ImIcons.APERTURE, "Capture Frustum", graphics.mc.gameRenderer.mainCamera().getCapturedFrustum() != null, g -> {
+			var camera = g.mc.gameRenderer.mainCamera();
+
+			if (camera.getCapturedFrustum() != null) {
+				camera.killFrustum();
 			} else {
-				g.mc.levelRenderer.captureFrustum();
+				camera.captureFrustum();
 			}
 		}).enabled(graphics.inGame));
 
@@ -191,8 +188,6 @@ public class BuiltInImGui {
 			}
 		}));
 
-		list.add(MenuItem.sliderFloat("MSDF Debug Text", MSDFFont.DEBUG_SIZE::get, MSDFFont.DEBUG_SIZE::set, 0F, 200F));
-
 		if (PlatformHelper.CURRENT.isDevEnv()) {
 			list.add(MenuItem.item(ImIcons.SCHEDULE, "Post Main Menu Event", g -> NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(g.mc, true))));
 		}
@@ -211,12 +206,11 @@ public class BuiltInImGui {
 	});
 
 	public static final MenuItem SHOW = MenuItem.menu(ImIcons.VISIBLE, "Show", (graphics, list) -> {
-		list.add(MenuItem.item(ImIcons.SELECT, "Entity Hitboxes", graphics.mc.getEntityRenderDispatcher().shouldRenderHitBoxes(), g -> g.mc.getEntityRenderDispatcher().setRenderHitBoxes(!g.mc.getEntityRenderDispatcher().shouldRenderHitBoxes())).enabled(graphics.inGame));
-
-		list.add(MenuItem.item(ImIcons.SELECT, "Chunk Borders", graphics.mc.debugRenderer.renderChunkborder, g -> g.mc.debugRenderer.switchRenderChunkborder()).enabled(graphics.inGame));
-		list.add(MenuItem.item(ImIcons.SELECT, "Octree", graphics.mc.debugRenderer.renderOctree, g -> g.mc.debugRenderer.toggleRenderOctree()).enabled(graphics.inGame));
-		list.add(MenuItem.item(ImIcons.SELECT, "Section Path", graphics.mc.sectionPath, g -> g.mc.sectionPath = !g.mc.sectionPath).enabled(graphics.inGame));
-		list.add(MenuItem.item(ImIcons.SELECT, "Section Visibility", graphics.mc.sectionVisibility, g -> g.mc.sectionVisibility = !g.mc.sectionVisibility).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Entity Hitboxes", graphics.mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES), g -> g.mc.debugEntries.toggleStatus(DebugScreenEntries.ENTITY_HITBOXES)).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Chunk Borders", graphics.mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.CHUNK_BORDERS), g -> g.mc.debugEntries.toggleStatus(DebugScreenEntries.CHUNK_BORDERS)).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Octree", graphics.mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.CHUNK_SECTION_OCTREE), g -> g.mc.debugEntries.toggleStatus(DebugScreenEntries.CHUNK_SECTION_OCTREE)).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Section Path", graphics.mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.CHUNK_SECTION_PATHS), g -> g.mc.debugEntries.toggleStatus(DebugScreenEntries.CHUNK_SECTION_PATHS)).enabled(graphics.inGame));
+		list.add(MenuItem.item(ImIcons.SELECT, "Section Visibility", graphics.mc.debugEntries.isCurrentlyEnabled(DebugScreenEntries.CHUNK_SECTION_VISIBILITY), g -> g.mc.debugEntries.toggleStatus(DebugScreenEntries.CHUNK_SECTION_VISIBILITY)).enabled(graphics.inGame));
 
 		list.add(MenuItem.SEPARATOR);
 
@@ -254,8 +248,6 @@ public class BuiltInImGui {
 		}
 
 		list.add(MenuItem.item(ImIcons.STAR, "Physics Particles", PhysicsParticleManager.VISIBLE).enabled(graphics.isAdmin));
-		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Clocks", ClockRenderer.VISIBLE).enabled(graphics.isAdmin));
-		list.add(MenuItem.item(ImIcons.SUN, "Bloom", Bloom.VISIBLE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Ghost Structures", GhostStructure.VISIBLE_CONFIG).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.LOCATION, "Waypoints", ClientWaypoints.VISIBLE).enabled(graphics.inGame));
 
@@ -270,26 +262,11 @@ public class BuiltInImGui {
 		var registry = g1.mc.player.connection.levels();
 
 		for (var dimension : registry) {
-			list1.add(MenuItem.item(dimension.location().toString(), g -> g.mc.runClientCommand("execute in " + dimension.location() + " run tp @s ~ ~ ~")).disabled(g1.isReplay));
+			list1.add(MenuItem.item(dimension.identifier().toString(), g -> g.mc.runClientCommand("execute in " + dimension.identifier() + " run tp @s ~ ~ ~")).disabled(g1.isReplay));
 		}
 	});
 
 	public static final MenuItem WARP = MenuItem.menu(ImIcons.LOCATION, "Warp", (graphics, list) -> {
-		for (var location : CommonGameEngine.INSTANCE.getWarpLocations()) {
-			if (!location.admin() || graphics.isAdmin) {
-				list.add(MenuItem.item(
-					ImIcons.LOCATION,
-					location.displayName(),
-					location.pos().apply(graphics.mc).closerToCenterThan(graphics.player.position(), 100D),
-					g -> g.mc.runClientCommand("warp " + location.id())
-				));
-			}
-		}
-
-		if (graphics.inGame && !graphics.isReplay) {
-			// list.add(WARP_TO_DIMENSIONS.enabled(graphics.isAdmin));
-		}
-
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.WarpDropdown(graphics, list));
 	});
 

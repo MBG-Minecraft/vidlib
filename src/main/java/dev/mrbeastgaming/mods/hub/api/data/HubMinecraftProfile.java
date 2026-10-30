@@ -5,7 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.Hex32;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.util.UUID;
 

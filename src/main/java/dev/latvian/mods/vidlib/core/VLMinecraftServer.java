@@ -4,8 +4,6 @@ import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import dev.latvian.mods.vidlib.feature.clock.ClockValue;
-import dev.latvian.mods.vidlib.feature.clock.SyncClocksPayload;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
@@ -23,7 +21,7 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import dev.latvian.mods.vidlib.util.PauseType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,7 +35,6 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public interface VLMinecraftServer extends VLMinecraftEnvironment {
@@ -150,47 +147,14 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 
 		if (maxFakeLag > 0 && minFakeLag >= 0) {
 			try {
-				Thread.sleep(Mth.ceil(vl$level().random.nextRange(minFakeLag, maxFakeLag)));
+				Thread.sleep(Mth.ceil(vl$level().getRandom().nextIntBetweenInclusive(minFakeLag, maxFakeLag)));
 			} catch (Exception ignore) {
 			}
 		}
 	}
 
-	default void setClock(ResourceLocation id, ClockValue value) {
-		var map = vl$getClocks();
-
-		if (!Objects.equals(map.put(id, value), value)) {
-			s2c(new SyncClocksPayload(map));
-		}
-	}
-
-	default void resetClock(ResourceLocation id) {
-		var map = vl$getClocks();
-
-		if (map.remove(id) != null) {
-			s2c(new SyncClocksPayload(map));
-		}
-	}
-
-	default void resetAllClocks() {
-		var map = vl$getClocks();
-
-		if (!map.isEmpty()) {
-			map.clear();
-			s2c(new SyncClocksPayload(map));
-		}
-	}
-
-	default void setClock(ResourceLocation id, int second) {
-		setClock(id, new ClockValue(second, second <= 0 ? ClockValue.Type.FINISHED : second <= 10 ? ClockValue.Type.FLASHING : ClockValue.Type.NORMAL));
-	}
-
-	default void setClock(ResourceLocation id, int second, int maxSecond) {
-		setClock(id, new ClockValue(second, second >= maxSecond ? ClockValue.Type.FINISHED : second >= (maxSecond - 10) ? ClockValue.Type.FLASHING : ClockValue.Type.NORMAL));
-	}
-
 	@Override
-	default void removeZone(ResourceLocation zone, int index) {
+	default void removeZone(Identifier zone, int index) {
 		var container = ZoneContainer.REGISTRY.get(zone);
 
 		if (container != null) {
@@ -205,7 +169,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default void updateZone(ResourceLocation zone, int index, ZoneVolume zoneVolumeData) {
+	default void updateZone(Identifier zone, int index, ZoneVolume zoneVolumeData) {
 		var container = ZoneContainer.REGISTRY.get(zone);
 
 		if (container != null) {

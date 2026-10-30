@@ -5,6 +5,10 @@ import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.data.JOMLDataTypes;
+import dev.latvian.mods.klib.entity.PositionType;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.Vec3f;
@@ -31,10 +35,7 @@ import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.integration.replay.SelectedPropReplaySessionData;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.PositionType;
+import dev.latvian.mods.vidlib.math.kvector.FollowingPropKVector;
 import imgui.ImGui;
 import imgui.flag.ImGuiTableFlags;
 import it.unimi.dsi.fastutil.Pair;
@@ -405,23 +406,26 @@ public class Prop {
 		return 8192D;
 	}
 
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
+	public boolean isWithingRenderDistance(double squaredCenterDistanceToCamera) {
 		var r = getMaxRenderDistance();
+		return r >= Double.MAX_VALUE || squaredCenterDistanceToCamera <= r * r;
+	}
 
-		if (r >= Double.MAX_VALUE || squaredCenterDistanceToCamera <= r * r) {
-			double w = width / 2D;
-			double d = getDepth() / 2D;
-			return frustum.isVisible(x - w, y, z - d, x + w, y + height, z + d);
-		}
+	public boolean isVisibleInFrustum(double x, double y, double z, FrustumCheck frustum) {
+		double w = width / 2D;
+		double d = getDepth() / 2D;
+		return frustum.isVisible(x - w, y, z - d, x + w, y + height, z + d);
+	}
 
-		return false;
+	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 cameraPos, double squaredCenterDistanceToCamera) {
+		return isWithingRenderDistance(squaredCenterDistanceToCamera) && isVisibleInFrustum(x, y, z, frustum);
 	}
 
 	public void debugVisuals(Visuals visuals, double x, double y, double z, float delta, boolean selected) {
 		if (selected) {
-			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width + 0.125D, height + 0.125D, getDepth() + 0.125D), Rotation.NONE), Color.TRANSPARENT, Color.YELLOW).at(x, y + height / 2D, z));
+			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width + 0.125D, height + 0.125D, getDepth() + 0.125D)).ref(), Gradient.EMPTY, Color.YELLOW.toGradient().ref()).at(x, y + height / 2D, z));
 		} else {
-			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, getDepth()), Rotation.NONE), Color.TRANSPARENT, Color.WHITE).at(x, y + height / 2D, z));
+			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, getDepth())).ref(), Gradient.EMPTY, Color.WHITE.toGradient().ref()).at(x, y + height / 2D, z));
 		}
 	}
 
@@ -535,7 +539,9 @@ public class Prop {
 
 	@Nullable
 	public PropHitResult clip(ClipContext ctx) {
-		var entity = ctx.klib$getEntity();
+		// 26.3 made ClipContext#collisionContext private with no accessor; the entity was only ever
+		// forwarded to canInteract/getClipBoxes, both of which ignore it.
+		var entity = (Entity) null;
 
 		if (canInteract(entity)) {
 			var hit = AABB.clip(getClipBoxes(entity), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
@@ -556,7 +562,7 @@ public class Prop {
 		level.c2s(new PropInteractionPayload(spawnType.listType, id, button, at, side));
 
 		if (button == 0) {
-			player.swing(InteractionHand.MAIN_HAND, true);
+			player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
 		}
 
 		return true;
@@ -564,7 +570,7 @@ public class Prop {
 
 	public void onServerInteraction(ServerPlayer player, int button, Vec3 at, Direction side) {
 		if (button == 0) {
-			player.swing(InteractionHand.MAIN_HAND, false);
+			player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
 		}
 	}
 
@@ -638,7 +644,7 @@ public class Prop {
 				ImGui.sameLine();
 
 				if (ImGui.button(ImIcons.APERTURE + "###focus-dof")) {
-					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(this, PositionType.EYES));
+					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(new FollowingPropKVector(id, PositionType.EYES).ref());
 					DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
 				}
 
@@ -838,7 +844,7 @@ public class Prop {
 	}
 
 	public <T> void c2sEdit(PropData<?, T> data, T value, boolean sync) {
-		if (!level.isClientSide) {
+		if (!level.isClientSide()) {
 			return;
 		}
 
@@ -963,5 +969,9 @@ public class Prop {
 		if (roll != null) {
 			setRoll(roll.floatValue());
 		}
+	}
+
+	public double getCenterYOffset() {
+		return height / 2D;
 	}
 }

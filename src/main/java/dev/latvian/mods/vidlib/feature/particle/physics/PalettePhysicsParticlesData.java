@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.block.BlockStatePalette;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.registry.Ref;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -12,7 +13,7 @@ import net.minecraft.network.codec.StreamCodec;
 
 import java.util.List;
 
-public record PalettePhysicsParticlesData(PhysicsParticleData data, long seed, BlockStatePalette palette, List<BlockPos> positions) {
+public record PalettePhysicsParticlesData(PhysicsParticleData data, long seed, Ref<BlockStatePalette> palette, List<BlockPos> positions) {
 	public static final Codec<PalettePhysicsParticlesData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		PhysicsParticleData.CODEC.fieldOf("data").forGetter(PalettePhysicsParticlesData::data),
 		Codec.LONG.optionalFieldOf("seed", 0L).forGetter(PalettePhysicsParticlesData::seed),

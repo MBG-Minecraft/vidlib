@@ -13,9 +13,7 @@ public enum TerrainRenderLayer implements StringRepresentable {
 	CUTOUT("cutout"),
 	TRANSLUCENT("translucent"),
 	TRIPWIRE("tripwire"),
-	PARTICLE("particle"),
-	BRIGHT("bright"),
-	BLOOM("bloom");
+	PARTICLE("particle");
 
 	public static final TerrainRenderLayer[] ALL = values();
 	public static final Codec<TerrainRenderLayer> CODEC = KLibCodecs.anyEnum(ALL);

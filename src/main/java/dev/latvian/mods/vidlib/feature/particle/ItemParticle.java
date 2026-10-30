@@ -4,8 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.math.KMath;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 
 public class ItemParticle extends CustomParticle {
 	private final ItemParticleOptions options;
@@ -17,14 +16,19 @@ public class ItemParticle extends CustomParticle {
 	}
 
 	@Override
-	public void renderCustom(PoseStack ms, MultiBufferSource buffers, Camera camera, float delta) {
+	public void renderCustom(PoseStack ms, SubmitNodeCollector collector, Camera camera, float delta) {
+
+	}
+
+	@Override
+	public void renderCustom(PoseStack ms, ParticleGeometryBuffers buffers, Camera camera, float delta) {
 		float time = KMath.lerp(delta, prevAge, age);
 
 		if (time >= lifetime - 1F) {
 			return;
 		}
 
-		var cameraPos = camera.getPosition();
+		var cameraPos = camera.position();
 		var rx = (float) (KMath.lerp(delta, xo, x) - cameraPos.x);
 		var ry = (float) (KMath.lerp(delta, yo, y) - cameraPos.y);
 		var rz = (float) (KMath.lerp(delta, zo, z) - cameraPos.z);
@@ -33,10 +37,5 @@ public class ItemParticle extends CustomParticle {
 		ms.translate(rx, ry, rz);
 		// FIXME
 		ms.popPose();
-	}
-
-	@Override
-	public AABB getRenderBoundingBox(float partialTicks) {
-		return KMath.infiniteAABB();
 	}
 }

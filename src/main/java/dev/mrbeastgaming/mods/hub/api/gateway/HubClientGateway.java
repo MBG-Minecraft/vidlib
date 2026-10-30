@@ -18,9 +18,9 @@ import dev.mrbeastgaming.mods.hub.api.data.HubGatewayInfo;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserFlags;
 import dev.mrbeastgaming.mods.hub.client.HubWorldsPanel;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nullable;
@@ -121,7 +121,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 		HubClientSession.CURRENT.servers = event.params() == null ? List.of() : HubGameServer.LIST_CODEC.parse(HubAPI.jsonOps(), event.params()).getOrThrow();
 
 		mc.execute(() -> {
-			if (mc.screen instanceof VLJoinMultiplayerScreen screen) {
+			if (mc.gui.screen() instanceof VLJoinMultiplayerScreen screen) {
 				screen.vl$refresh();
 			}
 		});

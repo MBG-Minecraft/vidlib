@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,7 +15,7 @@ public interface SyncCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("sync", (command, buildContext) -> command
 		.then(Commands.argument("player", EntityArgument.players())
-			.requires(source -> source.hasPermission(2))
+			.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 			.executes(ctx -> sync(EntityArgument.getPlayers(ctx, "player")))
 		)
 		.executes(ctx -> sync(List.of(ctx.getSource().getPlayerOrException())))

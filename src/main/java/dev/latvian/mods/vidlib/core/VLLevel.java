@@ -2,12 +2,14 @@ package dev.latvian.mods.vidlib.core;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
+import dev.latvian.mods.klib.bulk.BlockModificationBuilder;
+import dev.latvian.mods.klib.bulk.BlockModificationConsumer;
+import dev.latvian.mods.klib.bulk.BulkLevelModification;
+import dev.latvian.mods.klib.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.klib.core.NoMixinException;
-import dev.latvian.mods.vidlib.feature.bulk.BlockModificationConsumer;
-import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
-import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationBundle;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationHolder;
-import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModification;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
@@ -15,7 +17,6 @@ import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.util.PauseType;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -75,7 +76,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		var undoable = vl$getUndoableModifications();
 
 		if (!undoable.isEmpty()) {
-			var builder = new OptimizedModificationBuilder();
+			var builder = new BlockModificationBuilder();
 			undoable.getLast().modification().undo((Level) this, builder);
 			undoable.removeLast();
 			return bulkModify(false, builder.build());
@@ -85,7 +86,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	default int undoAllModifications() {
-		var builder = new OptimizedModificationBuilder();
+		var builder = new BlockModificationBuilder();
 		var undoable = vl$getUndoableModifications();
 
 		for (int i = undoable.size() - 1; i >= 0; i--) {
@@ -97,7 +98,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	}
 
 	default int undoAllFutureModifications(boolean everything) {
-		var builder = new OptimizedModificationBuilder();
+		var builder = new BlockModificationBuilder();
 		var undoable = vl$getUndoableModifications();
 		var gameTime = vl$level().getGameTime();
 
@@ -116,21 +117,21 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 			return 0;
 		}
 
-		return new BulkLevelModificationHolder().apply((Level) this, result, false, true);
+		return new BulkLevelModificationHolder().apply((Level) this, result.value(), false, true);
 	}
 
-	default int bulkModify(boolean undoable, BulkLevelModification modification) {
+	default int bulkModify(boolean undoable, Ref<BulkLevelModification> modification) {
 		if (modification == BulkLevelModification.NONE) {
 			return 0;
 		}
 
-		return new BulkLevelModificationHolder().apply((Level) this, modification, undoable, false);
+		return new BulkLevelModificationHolder().apply((Level) this, modification.value(), undoable, false);
 	}
 
 	default int bulkModify(boolean undoable, Consumer<BlockModificationConsumer> modifications) {
 		var m = new BulkLevelModificationBundle(new ArrayList<>());
 		modifications.accept(m);
-		return bulkModify(undoable, m);
+		return bulkModify(undoable, m.ref());
 	}
 
 	default boolean vl$isReplayLevel() {

@@ -11,6 +11,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +31,7 @@ import java.util.zip.ZipOutputStream;
 public interface ZipCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("zip", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.argument("custom-name", StringArgumentType.greedyString())
 			.executes(ctx -> zip(ctx.getSource(), StringArgumentType.getString(ctx, "custom-name")))
 		)

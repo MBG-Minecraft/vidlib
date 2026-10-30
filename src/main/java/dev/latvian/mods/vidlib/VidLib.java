@@ -1,22 +1,16 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.platform.PlatformHelper;
+import dev.latvian.mods.klib.registry.CustomRegistryCollector;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.replay.api.ReplayMarkerGroup;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
 import dev.latvian.mods.vidlib.feature.ffmpeg.FFMPEGBinaries;
-import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
@@ -32,7 +26,6 @@ public class VidLib {
 
 	public static void init() {
 		VidLib.LOGGER.info("VidLib " + VERSION + " loaded");
-		VidLibDataTypes.register();
 		Runtime.getRuntime().addShutdownHook(new Thread(HubServerGateway::stopGateway, "Stop-Server-Hub-Gateway"));
 
 		if (PlatformHelper.CURRENT.isDevEnv()) {
@@ -46,17 +39,11 @@ public class VidLib {
 		VidLibClient.init();
 	}
 
-	public static void buildRegistries() {
-		KNumber.REGISTRY.build();
-		KVector.REGISTRY.build();
-		EntityFilter.REGISTRY.build();
-		BlockFilter.REGISTRY.build();
-		ZoneShape.REGISTRY.build();
-		Icon.REGISTRY.build();
-		ScreenShakeType.REGISTRY.build();
-		BulkLevelModification.REGISTRY.build();
-		ScreenEffect.REGISTRY.build();
-		EntityNumber.REGISTRY.build();
+	public static void builtInRegistries(CustomRegistryCollector registry) {
+		var platform = VLPlatformHelper.CURRENT;
+		registry.register(ZoneShape.REGISTRY, platform::collectZoneShapeTypes);
+		registry.register(ScreenShakeType.REGISTRY, platform::collectScreenShakeTypes);
+		registry.register(ScreenEffect.REGISTRY, platform::collectScreenEffectTypes);
 	}
 
 	public static void sync(ServerPlayer player, int syncType) {

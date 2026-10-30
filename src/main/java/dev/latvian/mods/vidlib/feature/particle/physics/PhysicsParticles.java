@@ -2,16 +2,17 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Split;
+import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.klib.vertex.function.AdditiveRandomVertexFunction;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.block.VidLibBlockStateClientProperties;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
@@ -58,10 +59,18 @@ public class PhysicsParticles {
 		this.state = Blocks.AIR.defaultBlockState();
 	}
 
+	/**
+	 * 26.3 replaced {@code BlockColors#getColor} with per-state {@link net.minecraft.client.color.block.BlockTintSource}s.
+	 */
+	private int vl$tint(BlockState state) {
+		var source = blockColors.getTintSource(state, 0);
+		return source == null ? -1 : source.colorAsTerrainParticle(state, level, at);
+	}
+
 	public void spawn() {
 		var clientProperties = VidLibBlockStateClientProperties.of(state);
 		var manager = clientProperties.getManager();
-		float density1 = data.ignoreBlockDensity ? data.density : (data.density * state.klib$getDensity());
+		float density1 = data.ignoreBlockDensity ? data.density : (data.density * BlockUtils.getDensity(state));
 		int count = (int) density1;
 
 		if (density1 - count > 0) {
@@ -71,7 +80,7 @@ public class PhysicsParticles {
 		}
 
 		if (count > 0) {
-			var tint = blockColors.getColor(state, level, at, 0);
+			var tint = vl$tint(state);
 			var identity = new Matrix4f();
 			identity.rotateY((float) Math.toRadians(data.direction));
 			identity.rotateX((float) Math.toRadians(-data.tilt));

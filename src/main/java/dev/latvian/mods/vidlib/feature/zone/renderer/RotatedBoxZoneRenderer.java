@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.zone.renderer;
 
 import com.mojang.math.Axis;
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.render.BufferSupplier;
-import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.vidlib.feature.zone.shape.RotatedBoxZoneShape;
+import dev.latvian.mods.vidlib.klib.render.BufferSupplier;
+import dev.latvian.mods.vidlib.klib.render.CuboidRenderer;
 
 public class RotatedBoxZoneRenderer implements ZoneRenderer<RotatedBoxZoneShape> {
 	@Override
@@ -24,9 +24,9 @@ public class RotatedBoxZoneRenderer implements ZoneRenderer<RotatedBoxZoneShape>
 
 		ms.pushPose();
 		ctx.frame().translate(shape.pos());
-		ms.mulPose(Axis.YN.rotation(shape.rotation().yawRad()));
-		ms.mulPose(Axis.XN.rotation(shape.rotation().pitchRad()));
-		ms.mulPose(Axis.ZN.rotation(shape.rotation().roll()));
+		ms.rotate(Axis.YN.rotation(shape.rotation().yawRad()));
+		ms.rotate(Axis.XN.rotation(shape.rotation().pitchRad()));
+		ms.rotate(Axis.ZN.rotation(shape.rotation().roll()));
 		ms.scale(shape.size().x(), shape.size().y(), shape.size().z());
 		CuboidRenderer.quadsAndLines(ms, -0.5F, -0.5F, -0.5F, 0.5F, 0.5F, 0.5F, ctx.buffers(), BufferSupplier.DEBUG_NO_DEPTH, false, ctx.color(), ctx.outlineColor());
 		ms.popPose();

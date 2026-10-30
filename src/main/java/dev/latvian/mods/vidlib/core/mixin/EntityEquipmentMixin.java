@@ -41,7 +41,7 @@ public class EntityEquipmentMixin {
 	}
 
 	@Nullable
-	@ModifyExpressionValue(method = "dropAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"))
+	@ModifyExpressionValue(method = "dropAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;createItemStackToDrop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"))
 	private ItemEntity vl$drop(@Nullable ItemEntity entity, @Local(argsOnly = true) LivingEntity parent) {
 		if (entity != null) {
 			CommonGameEngine.INSTANCE.modifyDroppedItem(parent, entity);

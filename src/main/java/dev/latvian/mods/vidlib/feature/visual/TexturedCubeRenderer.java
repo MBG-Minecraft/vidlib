@@ -26,7 +26,6 @@ public class TexturedCubeRenderer {
 		var mc = frame.mc();
 		var ms = frame.poseStack();
 		var msp = ms.last();
-		var m = msp.pose();
 		var buffers = frame.buffers();
 		var n = frame.tempNormal();
 
@@ -64,46 +63,46 @@ public class TexturedCubeRenderer {
 			float td = uvScale <= 0F ? 1F : (maxZ - minZ) * uvScale;
 
 			var texture = DynamicSpriteTexture.get(mc, face.sprite());
-			var buffer = buffers.getBuffer(TerrainRenderTypes.get(face.layer(), face.cull()).apply(texture));
+			var buffer = buffers.getVertexConsumer(TerrainRenderTypes.get(face.layer(), face.cull()).apply(texture));
 
 			msp.transformNormal(Directions.ALL[direction].getUnitVec3f(), n);
 
 			switch (direction) {
 				case 0 -> {
-					buffer.addVertex(m, minX, minY, minZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, maxX, minY, minZ).setColor(colR, colG, colB, colA).setUv(tw, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, maxX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(tw, td).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, minX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, td).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, minY, minZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, minY, minZ).setColor(colR, colG, colB, colA).setUv(tw, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(tw, td).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, td).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
 				}
 				case 1 -> {
-					buffer.addVertex(m, minX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, minX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, td).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, maxX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(tw, td).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, maxX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(tw, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, td).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(tw, td).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(tw, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
 				}
 				case 2 -> {
-					buffer.addVertex(m, minX, minY, minZ).setColor(colR, colG, colB, colA).setUv(tw, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, minX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(tw, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, maxX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, maxX, minY, minZ).setColor(colR, colG, colB, colA).setUv(0F, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, minY, minZ).setColor(colR, colG, colB, colA).setUv(tw, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(tw, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, minY, minZ).setColor(colR, colG, colB, colA).setUv(0F, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
 				}
 				case 3 -> {
-					buffer.addVertex(m, maxX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(tw, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, maxX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(tw, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, minX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, minX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(tw, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(tw, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
 				}
 				case 4 -> {
-					buffer.addVertex(m, minX, minY, minZ).setColor(colR, colG, colB, colA).setUv(0F, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, minX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(td, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, minX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(td, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, minX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, minY, minZ).setColor(colR, colG, colB, colA).setUv(0F, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(td, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(td, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, minX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
 				}
 				case 5 -> {
-					buffer.addVertex(m, maxX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(td, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, maxX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, maxX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
-					buffer.addVertex(m, maxX, minY, minZ).setColor(colR, colG, colB, colA).setUv(td, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, maxY, minZ).setColor(colR, colG, colB, colA).setUv(td, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, maxY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, 0F).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, minY, maxZ).setColor(colR, colG, colB, colA).setUv(0F, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
+					buffer.addVertex(msp, maxX, minY, minZ).setColor(colR, colG, colB, colA).setUv(td, th).setUv2(lu, lv).setNormal(n.x, n.y, n.z);
 				}
 			}
 		}

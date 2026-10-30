@@ -32,5 +32,5 @@ public record FogOverride(Range range, int shape, Color color) {
 		FogOverride::new
 	);
 
-	public static final DataType<FogOverride> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, FogOverride.class);
+	public static final DataType<FogOverride> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 }

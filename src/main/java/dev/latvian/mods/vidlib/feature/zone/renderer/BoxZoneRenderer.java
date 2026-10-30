@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
-import dev.latvian.mods.klib.render.BufferSupplier;
-import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
+import dev.latvian.mods.vidlib.klib.render.BufferSupplier;
+import dev.latvian.mods.vidlib.klib.render.CuboidRenderer;
 
 public class BoxZoneRenderer implements ZoneRenderer<ZoneShape> {
 	public static final BoxZoneRenderer INSTANCE = new BoxZoneRenderer();

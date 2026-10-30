@@ -1,7 +1,7 @@
 package dev.mrbeastgaming.mods.hub;
 
 import dev.latvian.mods.klib.util.Lazy;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.nio.file.Path;
 

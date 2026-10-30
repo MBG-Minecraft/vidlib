@@ -6,7 +6,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -40,28 +39,28 @@ public abstract class PauseScreenMixin extends Screen {
 		return original;
 	}
 
-	@Inject(method = "addFeedbackButtons", at = @At("HEAD"))
-	private static void vl$addFeedbackButtonsHead(Screen lastScreen, GridLayout.RowHelper rowHelper, CallbackInfo ci, @Share("buttonList") LocalRef<List<Button>> buttonList) {
+	/**
+	 * 26.3 renamed {@code addFeedbackButtons} to {@code createPauseMenu} and moved the
+	 * feedback/bug-report row onto a {@code LinearLayout} instead of the {@code GridLayout.RowHelper}.
+	 */
+	@Inject(method = "createPauseMenu", at = @At("HEAD"))
+	private void vl$addFeedbackButtonsHead(CallbackInfo ci, @Share("buttonList") LocalRef<List<Button>> buttonList) {
 		buttonList.set(new ArrayList<>());
 	}
 
-	@ModifyExpressionValue(method = "addFeedbackButtons", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout$RowHelper;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;"))
+	@ModifyExpressionValue(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;"))
 	private static <T extends LayoutElement> T vl$addButton(T original, @Share("buttonList") LocalRef<List<Button>> buttonList) {
-		buttonList.get().add((Button) original);
+		if (original instanceof Button button) {
+			buttonList.get().add(button);
+		}
+
 		return original;
 	}
 
-	@Inject(method = "addFeedbackButtons", at = @At("RETURN"))
-	private static void vl$addFeedbackButtonsReturn(Screen lastScreen, GridLayout.RowHelper rowHelper, CallbackInfo ci, @Share("buttonList") LocalRef<List<Button>> buttonList) {
+	@Inject(method = "createPauseMenu", at = @At("RETURN"))
+	private void vl$addFeedbackButtonsReturn(CallbackInfo ci, @Share("buttonList") LocalRef<List<Button>> buttonList) {
 		for (var button : buttonList.get()) {
 			button.active = false;
 		}
 	}
-
-	/*
-	@Inject(method = "renderBackground", at = @At("RETURN"))
-	private void vl$renderBackground(GuiGraphics graphics, int mx, int my, float delta, CallbackInfo ci) {
-		graphics.fill(0, 0, width, height, 0xFF000000);
-	}
-	 */
 }

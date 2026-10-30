@@ -12,23 +12,23 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
+import net.minecraft.server.players.NameAndId;
 
 import java.util.Optional;
 
-public record NPCParticleOptions(String npc, boolean relativePosition, int extraLifespan, Optional<GameProfile> profile) implements ParticleOptions {
+public record NPCParticleOptions(String npc, boolean relativePosition, int extraLifespan, Optional<NameAndId> profile) implements ParticleOptions {
 	public static final MapCodec<NPCParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("npc").forGetter(NPCParticleOptions::npc),
 		Codec.BOOL.optionalFieldOf("relative_position", false).forGetter(NPCParticleOptions::relativePosition),
 		KLibCodecs.TICKS.optionalFieldOf("extra_lifespan", 0).forGetter(NPCParticleOptions::extraLifespan),
-		ExtraCodecs.GAME_PROFILE.optionalFieldOf("profile").forGetter(NPCParticleOptions::profile)
+		NameAndId.CODEC.optionalFieldOf("profile").forGetter(NPCParticleOptions::profile)
 	).apply(instance, NPCParticleOptions::new));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, NPCParticleOptions> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.STRING_UTF8, NPCParticleOptions::npc,
 		ByteBufCodecs.BOOL, NPCParticleOptions::relativePosition,
 		ByteBufCodecs.VAR_INT, NPCParticleOptions::extraLifespan,
-		ByteBufCodecs.optional(ByteBufCodecs.GAME_PROFILE), NPCParticleOptions::profile,
+		ByteBufCodecs.GAME_PROFILE.map(NameAndId::new, profile -> new GameProfile(profile.id(), profile.name())).apply(ByteBufCodecs::optional), NPCParticleOptions::profile,
 		NPCParticleOptions::new
 	);
 

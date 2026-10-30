@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.capture;
 
+import dev.latvian.mods.klib.io.ByteOutput;
 import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.IOUtils;
-import dev.latvian.mods.klib.io.bytes.ByteOutput;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Timestamp;
 import dev.latvian.mods.vidlib.VidLib;

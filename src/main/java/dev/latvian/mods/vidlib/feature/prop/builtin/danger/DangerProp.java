@@ -8,7 +8,6 @@ import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
-import net.minecraft.world.phys.Vec3;
 
 public class DangerProp extends Prop {
 	@AutoRegister
@@ -37,7 +36,7 @@ public class DangerProp extends Prop {
 	}
 
 	@Override
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
+	public boolean isVisibleInFrustum(double x, double y, double z, FrustumCheck frustum) {
 		return true;
 	}
 }

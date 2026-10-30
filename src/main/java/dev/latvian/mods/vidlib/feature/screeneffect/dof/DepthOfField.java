@@ -1,14 +1,9 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.math.ClientMatrices;
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.math.Vec3f;
-import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import imgui.type.ImBoolean;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
@@ -33,6 +28,7 @@ public class DepthOfField {
 	private static int uShape = 0;
 	private static int uBlurMode = 0;
 
+	/*
 	@ClientAutoRegister
 	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("depth_of_field"), builder -> {
 		builder.setTickCallback(DepthOfField::tick);
@@ -47,6 +43,7 @@ public class DepthOfField {
 		builder.addUniform(CanvasUniform.vec4("DebugNearCol", u -> u.set(DEBUG_NEAR_COLOR.build())));
 		builder.addUniform(CanvasUniform.vec4("DebugFarCol", u -> u.set(DEBUG_FAR_COLOR.build())));
 	});
+	 */
 
 	public static Vec3 prevFocusPosition = null;
 	public static Vec3 focusPosition = null;
@@ -65,10 +62,10 @@ public class DepthOfField {
 			return;
 		}
 
-		focusPosition = data.focus().get(mc.level.getGlobalContext());
+		focusPosition = data.focus().value().get(mc.level.getGlobalContext());
 
 		if (focusPosition == null) {
-			focusPosition = mc.gameRenderer.getMainCamera().getPosition();
+			focusPosition = mc.gameRenderer.mainCamera().position();
 		}
 	}
 
@@ -85,8 +82,8 @@ public class DepthOfField {
 
 		var vec = prevFocusPosition.lerp(focusPosition, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 
-		CANVAS.markActive();
-		var cam = mc.gameRenderer.getMainCamera().getPosition();
+		// CANVAS.markActive();
+		var cam = mc.gameRenderer.mainCamera().position();
 
 		uFocusPos = new Vec3f((float) (vec.x - cam.x), (float) (vec.y - cam.y), (float) (vec.z - cam.z));
 		uFocusRange = Math.max(data.focusRange(), 0F);

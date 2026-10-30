@@ -2,24 +2,26 @@ package dev.latvian.mods.vidlib.feature.skybox;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
+import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
-import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.ClientAsset;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public record SkyboxData(
-	ResourceLocation id,
-	Optional<ResourceLocation> texture,
+	Identifier id,
+	Optional<ClientAsset.ResourceTexture> texture,
 	float rotation,
 	float rotating,
 	Color tint,
@@ -31,7 +33,7 @@ public record SkyboxData(
 ) {
 	public static final Codec<SkyboxData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ID.CODEC.fieldOf("id").forGetter(SkyboxData::id),
-		ID.CODEC.optionalFieldOf("texture").forGetter(SkyboxData::texture),
+		ClientAsset.ResourceTexture.CODEC.optionalFieldOf("texture").forGetter(SkyboxData::texture),
 		Codec.FLOAT.optionalFieldOf("rotation", 0F).forGetter(SkyboxData::rotation),
 		Codec.FLOAT.optionalFieldOf("rotating", 0F).forGetter(SkyboxData::rotating),
 		Color.CODEC.optionalFieldOf("tint", Color.WHITE).forGetter(SkyboxData::tint),
@@ -42,11 +44,25 @@ public record SkyboxData(
 		Rotation.CODEC.optionalFieldOf("celestial_rotation").forGetter(SkyboxData::celestialRotation)
 	).apply(instance, SkyboxData::new));
 
+	public static final StreamCodec<RegistryFriendlyByteBuf, SkyboxData> STREAM_CODEC = CompositeStreamCodec.of(
+		ID.STREAM_CODEC, SkyboxData::id,
+		ByteBufCodecs.optional(ClientAsset.ResourceTexture.STREAM_CODEC), SkyboxData::texture,
+		ByteBufCodecs.FLOAT, SkyboxData::rotation,
+		ByteBufCodecs.FLOAT, SkyboxData::rotating,
+		Color.STREAM_CODEC, SkyboxData::tint,
+		ByteBufCodecs.BOOL, SkyboxData::celestials,
+		ByteBufCodecs.BOOL, SkyboxData::sun,
+		ByteBufCodecs.BOOL, SkyboxData::moon,
+		ByteBufCodecs.optional(ByteBufCodecs.FLOAT), SkyboxData::stars,
+		ByteBufCodecs.optional(Rotation.STREAM_CODEC), SkyboxData::celestialRotation,
+		SkyboxData::new
+	);
+
+	public static final DataType<SkyboxData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
+
 	public static final VLRegistry<SkyboxData> REGISTRY = VLRegistry.createClient("skybox", SkyboxData.class);
 
-	public static final List<ResourceLocation> SKYBOX_IDS = new ArrayList<>();
-	public static final DataType<ResourceLocation> ID_DATA_TYPE = DataType.of(ID.CODEC, ID.STREAM_CODEC, ResourceLocation.class);
-	public static final CommandDataType<ResourceLocation> COMMAND = CommandDataType.of(ID_DATA_TYPE).suggestsIDs(() -> SKYBOX_IDS);
+	public static final DataType<Identifier> ID_DATA_TYPE = DataType.of(ID.CODEC, ID.STREAM_CODEC);
 
 	public static class Loader extends JsonRegistryReloadListener<SkyboxData> {
 		public Loader() {
@@ -54,11 +70,11 @@ public record SkyboxData(
 		}
 
 		@Override
-		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, SkyboxData> map) {
+		protected void apply(ResourceManager resourceManager, Map<Identifier, SkyboxData> map) {
 			super.apply(resourceManager, map);
 			SKYBOX_IDS.clear();
 			SKYBOX_IDS.addAll(map.keySet());
-			SKYBOX_IDS.sort(ResourceLocation::compareNamespaced);
+			SKYBOX_IDS.sort(Identifier::compareNamespaced);
 		}
 	}
 }

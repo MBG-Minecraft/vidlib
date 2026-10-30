@@ -1,37 +1,53 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLParticleEngine;
+import dev.latvian.mods.vidlib.feature.particle.CustomParticleGroup;
+import dev.latvian.mods.vidlib.feature.particle.SortedQuadParticleGroup;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticleRenderTypes;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.ParticleResources;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.data.AtlasIds;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayDeque;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.function.Function;
 
+/**
+ * 26.3 port of VidLib's {@code ParticleEngine} hooks.
+ * <p>
+ * The engine no longer renders anything: it only
+ * {@link ParticleEngine#extract(net.minecraft.client.renderer.state.level.ParticlesRenderState, Frustum, Camera, float)}
+ * per-frame state. Two hooks are therefore needed:
+ * <ul>
+ * <li> extending {@code RENDER_ORDER} so VidLib's own particle groups get extracted at all; </li>
+ * <li> creating VidLib's {@link ParticleGroup}s (distance-sorted quads + the custom-geometry group)
+ *      when a particle with one of those render types is queued. </li>
+ * </ul>
+ * The 1.21.5 sprite-set mixins (which allowed particle JSONs for unregistered particle types via
+ * {@code ParticleEngine.loadParticleDescription}) were dropped: that method no longer exists on
+ * {@code ParticleEngine} - it lives on {@code ParticleResources} in 26.3 - and all four of VidLib's
+ * particle JSONs ({@code burn_smoke, spark, wind, fire}) already have registered particle types, so
+ * vanilla's own sprite-set loading covers them.
+ */
 @Mixin(ParticleEngine.class)
 public abstract class ParticleEngineMixin implements VLParticleEngine {
 	@Shadow
@@ -39,67 +55,45 @@ public abstract class ParticleEngineMixin implements VLParticleEngine {
 
 	@Shadow
 	@Final
-	private Map<ResourceLocation, ParticleEngine.MutableSpriteSet> spriteSets;
-
-	@Shadow
-	@Final
-	private TextureAtlas textureAtlas;
-
-	private ResourceLocation lastSpriteSetId;
+	private ParticleResources resourceManager;
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Map;computeIfAbsent(Ljava/lang/Object;Ljava/util/function/Function;)Ljava/lang/Object;"))
-	private <K, V> V vl$createQueue(Map<K, V> instance, K key, Function<? super K, ? extends V> factory) {
-		return instance.computeIfAbsent(key, k -> Cast.to(new ArrayDeque<>(16384)));
-	}
-
-	@Inject(method = "renderParticleType(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/particle/ParticleRenderType;Ljava/util/Queue;Lnet/minecraft/client/renderer/culling/Frustum;)V", at = @At("HEAD"))
-	private static void vl$renderParticleTypePre(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource, ParticleRenderType particleType, Queue<Particle> particles, Frustum frustum, CallbackInfo ci) {
-		VidLibParticleRenderTypes.vl$renderParticleTypePre(particleType);
-	}
-
-	@Redirect(method = "renderParticleType(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/particle/ParticleRenderType;Ljava/util/Queue;Lnet/minecraft/client/renderer/culling/Frustum;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/Particle;render(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"))
-	private static void vl$renderParticle(Particle instance, VertexConsumer vertexConsumer, Camera camera, float v) {
-		if (VidLibParticleRenderTypes.addDefaultParticle(instance)) {
-			instance.render(vertexConsumer, camera, v);
+	private <K, V> V vl$createGroup(Map<K, V> instance, K key, Function<? super K, ? extends V> factory) {
+		if (key instanceof ParticleRenderType type && !VidLibParticleRenderTypes.isVanillaType(type)) {
+			return Cast.to(createVidLibParticleGroup(type));
 		}
+
+		return instance.computeIfAbsent(key, factory);
 	}
 
-	@Inject(method = "renderParticleType(Lnet/minecraft/client/Camera;FLnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/particle/ParticleRenderType;Ljava/util/Queue;Lnet/minecraft/client/renderer/culling/Frustum;)V", at = @At("RETURN"))
-	private static void vl$renderParticleTypePost(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource, ParticleRenderType particleType, Queue<Particle> particles, Frustum frustum, CallbackInfo ci) {
-		VidLibParticleRenderTypes.vl$renderParticleTypePost(camera, partialTick, bufferSource, particleType);
-	}
-
-	@ModifyExpressionValue(method = "loadParticleDescription", at = @At(value = "INVOKE", target = "Ljava/util/Map;containsKey(Ljava/lang/Object;)Z"))
-	private static boolean vl$loadParticleDescription(boolean original) {
-		return true;
-	}
-
-	@ModifyExpressionValue(method = "lambda$reload$6", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine$1ParticleDefinition;id()Lnet/minecraft/resources/ResourceLocation;"))
-	private ResourceLocation vl$getLastId(ResourceLocation id) {
-		lastSpriteSetId = id;
-		return id;
-	}
-
-	@Redirect(method = "lambda$reload$6", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/ParticleEngine$MutableSpriteSet;rebind(Ljava/util/List;)V"))
-	private void vl$rebind(ParticleEngine.MutableSpriteSet instance, List<TextureAtlasSprite> sprites) {
-		if (instance != null) {
-			instance.rebind(sprites);
-		} else {
-			var set = new ParticleEngine.MutableSpriteSet();
-			set.rebind(sprites);
-			spriteSets.put(lastSpriteSetId, set);
-			VidLib.LOGGER.info("ParticleType-less SpriteSet " + lastSpriteSetId + " found");
+	@Unique
+	private ParticleGroup<?> createVidLibParticleGroup(ParticleRenderType type) {
+		if (type == VidLibParticleRenderTypes.CUSTOM) {
+			return new CustomParticleGroup(Cast.to(this), type);
 		}
+
+		return new SortedQuadParticleGroup(Cast.to(this), type);
+	}
+
+	@ModifyExpressionValue(method = "extract", at = @At(value = "FIELD", target = "Lnet/minecraft/client/particle/ParticleEngine;particleRenderOrder:Ljava/util/List;"))
+	private List<ParticleRenderType> vl$renderOrder(List<ParticleRenderType> original) {
+		return VidLibParticleRenderTypes.renderOrder();
 	}
 
 	@Override
 	public TextureAtlas getTextureAtlas() {
-		return textureAtlas;
+		return Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.PARTICLES);
 	}
 
 	@Override
 	@Nullable
-	public SpriteSet getSpriteSet(ResourceLocation id) {
-		return spriteSets.get(id);
+	public SpriteSet getSpriteSet(Identifier id) {
+		try {
+			Field field = ParticleResources.class.getDeclaredField("spriteSets");
+			field.setAccessible(true);
+			return Cast.to(((Map<?, ?>) field.get(resourceManager)).get(id));
+		} catch (Throwable ignored) {
+			return null;
+		}
 	}
 }

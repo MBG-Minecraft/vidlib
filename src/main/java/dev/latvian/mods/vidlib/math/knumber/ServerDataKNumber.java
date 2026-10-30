@@ -1,86 +1,33 @@
 package dev.latvian.mods.vidlib.math.knumber;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.knumber.KNumber;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
-import dev.latvian.mods.vidlib.feature.imgui.node.NodePin;
-import dev.latvian.mods.vidlib.feature.imgui.node.NodePinType;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import net.minecraft.network.codec.ByteBufCodecs;
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Objects;
-
-public record ServerDataKNumber(DataKey<?> dataKey) implements KNumber, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<ServerDataKNumber> TYPE = SimpleRegistryType.dynamic("server_data", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Codec.STRING.fieldOf("key").forGetter(ServerDataKNumber::key)
-	).apply(instance, ServerDataKNumber::new)), ByteBufCodecs.STRING_UTF8.map(ServerDataKNumber::new, ServerDataKNumber::key));
-
-	public static class Builder implements KNumberImBuilder {
-		public static final ImBuilderHolder<KNumber> TYPE = ImBuilderHolder.of("Server Data", Builder::new);
-
-		public final EnumImBuilder<DataKey<?>> key = new EnumImBuilder<>(DataKey.SERVER.all.values()).withNameGetter(DataKey::id);
-
-		@Override
-		public ImBuilderHolder<?> holder() {
-			return TYPE;
-		}
-
-		@Override
-		public void set(KNumber value) {
-			if (value instanceof ServerDataKNumber n) {
-				key.set(n.dataKey);
-			}
-		}
-
-		@Override
-		public ImUpdate imgui(ImGraphics graphics) {
-			return key.imguiKey(graphics, "Key", "key");
-		}
-
-		@Override
-		public boolean isValid() {
-			return key.isValid();
-		}
-
-		@Override
-		public KNumber build() {
-			return new ServerDataKNumber(key.build());
-		}
-
-		@Override
-		public List<NodePin> getNodePins() {
-			return NodePinType.NUMBER.singleOutput;
-		}
-	}
-
-	@ApiStatus.Internal
-	public ServerDataKNumber(String key) {
-		this(Objects.requireNonNull(DataKey.SERVER.all.get(key), "Server data key " + key + " not found"));
-	}
+public record ServerDataKNumber(DataKey<?> dataKey) implements KNumber {
+	public static final DynamicType<RegistryFriendlyByteBuf, KNumber> TYPE = DynamicType.create(
+		"player_data",
+		"key",
+		DataKey.PLAYER.dataKeyCodec,
+		DataKey.PLAYER.dataKeyStreamCodec,
+		PlayerDataKNumber::new,
+		PlayerDataKNumber::dataKey
+	);
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public DynamicType<RegistryFriendlyByteBuf, KNumber> type() {
 		return TYPE;
-	}
-
-	public String key() {
-		return dataKey.id();
 	}
 
 	@Override
 	@Nullable
 	public Double get(KNumberContext ctx) {
-		var data = ctx.getServerData(dataKey);
+		var data = ctx.level.get(dataKey);
 
 		if (data == null) {
 			return null;
@@ -93,16 +40,11 @@ public record ServerDataKNumber(DataKey<?> dataKey) implements KNumber, ImBuilde
 	@Override
 	@NotNull
 	public String toString() {
-		return "$" + key();
+		return "$" + dataKey.id();
 	}
 
 	@Override
-	public boolean isLiteral() {
+	public boolean isStringLiteral() {
 		return true;
-	}
-
-	@Override
-	public ImBuilderWithHolder<?> createImBuilder() {
-		return new Builder();
 	}
 }

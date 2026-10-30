@@ -7,11 +7,12 @@ import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.server.permissions.Permissions;
 
 public interface TVCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("tv", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.literal("play")
 			.then(Commands.literal("url")
 				.then(Commands.argument("url", StringArgumentType.greedyString())

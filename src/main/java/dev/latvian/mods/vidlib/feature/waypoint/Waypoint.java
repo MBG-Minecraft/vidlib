@@ -7,11 +7,12 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.entity.filter.EntityFilter;
+import dev.latvian.mods.klib.icon.Icon;
+import dev.latvian.mods.klib.icon.TextureIcon;
+import dev.latvian.mods.klib.kvector.KVector;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.icon.Icon;
-import dev.latvian.mods.vidlib.feature.icon.TextureIcon;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.core.Position;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -25,10 +26,10 @@ import java.util.List;
 
 public record Waypoint(
 	String id,
-	EntityFilter visible,
+	Ref<EntityFilter> visible,
 	ResourceKey<Level> dimension,
-	KVector position,
-	Icon icon,
+	Ref<KVector> position,
+	Ref<Icon> icon,
 	float alpha,
 	double minDistance,
 	double midDistance,
@@ -38,12 +39,12 @@ public record Waypoint(
 	boolean showDistance,
 	boolean ignoreHeight
 ) {
-	public static final Icon DEFAULT_ICON = new TextureIcon(VidLibTextures.DEFAULT_MARKER);
+	public static final Ref<Icon> DEFAULT_ICON = new TextureIcon(VidLibTextures.DEFAULT_MARKER).ref();
 	public static final Component DEFAULT_LABEL = Component.empty();
 
 	public static final Codec<Waypoint> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.STRING.optionalFieldOf("id", "").forGetter(Waypoint::id),
-		EntityFilter.CODEC.optionalFieldOf("visible", EntityFilter.ANY.instance()).forGetter(Waypoint::visible),
+		EntityFilter.CODEC.optionalFieldOf("visible", EntityFilter.ANY).forGetter(Waypoint::visible),
 		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Waypoint::dimension),
 		KVector.CODEC.fieldOf("position").forGetter(Waypoint::position),
 		Icon.CODEC.optionalFieldOf("icon", DEFAULT_ICON).forGetter(Waypoint::icon),
@@ -60,7 +61,7 @@ public record Waypoint(
 	public static final StreamCodec<RegistryFriendlyByteBuf, Waypoint> STREAM_CODEC = CompositeStreamCodec.of(
 		ByteBufCodecs.STRING_UTF8, Waypoint::id,
 		ByteBufCodecs.VAR_INT, Waypoint::getFlags,
-		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.ANY.instance()), Waypoint::visible,
+		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.ANY), Waypoint::visible,
 		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Waypoint::dimension,
 		KVector.STREAM_CODEC, Waypoint::position,
 		KLibStreamCodecs.optional(Icon.STREAM_CODEC, DEFAULT_ICON), Waypoint::icon,
@@ -72,15 +73,15 @@ public record Waypoint(
 		Waypoint::new
 	);
 
-	public static final DataType<Waypoint> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Waypoint.class);
+	public static final DataType<Waypoint> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 	public static final DataType<List<Waypoint>> LIST_DATA_TYPE = DATA_TYPE.listOf();
 
 	public static class Builder {
 		private String id = "";
-		private EntityFilter visible = EntityFilter.ANY.instance();
+		private Ref<EntityFilter> visible = EntityFilter.ANY;
 		private ResourceKey<Level> dimension = Level.OVERWORLD;
-		private KVector position = KVector.ZERO;
-		private Icon icon = DEFAULT_ICON;
+		private Ref<KVector> position = KVector.ZERO;
+		private Ref<Icon> icon = DEFAULT_ICON;
 		private float alpha = 255F;
 		private double minDistance = 0D;
 		private double midDistance = 0D;
@@ -113,7 +114,7 @@ public record Waypoint(
 			return this;
 		}
 
-		public Builder visible(EntityFilter value) {
+		public Builder visible(Ref<EntityFilter> value) {
 			visible = value;
 			return this;
 		}
@@ -123,16 +124,16 @@ public record Waypoint(
 			return this;
 		}
 
-		public Builder position(KVector value) {
+		public Builder position(Ref<KVector> value) {
 			position = value;
 			return this;
 		}
 
 		public Builder position(Position position) {
-			return position(KVector.of(position));
+			return position(KVector.of(position).ref());
 		}
 
-		public Builder icon(Icon value) {
+		public Builder icon(Ref<Icon> value) {
 			icon = value;
 			return this;
 		}
@@ -173,10 +174,10 @@ public record Waypoint(
 	private Waypoint(
 		String id,
 		int flags,
-		EntityFilter filter,
+		Ref<EntityFilter> filter,
 		ResourceKey<Level> dimension,
-		KVector position,
-		Icon icon,
+		Ref<KVector> position,
+		Ref<Icon> icon,
 		float alpha,
 		double minDistance,
 		double midDistance,

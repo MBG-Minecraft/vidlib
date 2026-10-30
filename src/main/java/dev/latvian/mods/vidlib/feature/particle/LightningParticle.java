@@ -2,18 +2,16 @@ package dev.latvian.mods.vidlib.feature.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
 import dev.latvian.mods.klib.vertex.VertexCallback;
-import dev.latvian.mods.vidlib.feature.bloom.Bloom;
-import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
-import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3d;
 import org.joml.Vector3d;
@@ -28,8 +26,8 @@ public class LightningParticle extends CustomParticle {
 	public final float[] prevDist;
 	public final float[] angles;
 	public final float[] dist;
-	public final Gradient color;
-	public final Gradient outlineColor;
+	public final Ref<Gradient> color;
+	public final Ref<Gradient> outlineColor;
 	public final Vector3d target;
 	private final Matrix3d matrix;
 
@@ -54,8 +52,8 @@ public class LightningParticle extends CustomParticle {
 			dist[i] = random.nextFloat() * options.spread();
 		}
 
-		this.color = options.color().optimize();
-		this.outlineColor = options.outlineColor().optimize();
+		this.color = options.color();
+		this.outlineColor = options.outlineColor();
 		this.target = new Vector3d();
 		this.matrix = new Matrix3d();
 		this.prevRadiusMod = radiusMod = 0F;
@@ -99,8 +97,8 @@ public class LightningParticle extends CustomParticle {
 			ms.translate(prevPoint.x, prevPoint.y, prevPoint.z);
 
 			var rot = Rotation.compute(new Vec3(prevPoint.x, prevPoint.y, prevPoint.z), new Vec3(point.x, point.y, point.z));
-			ms.mulPose(Axis.YP.rotationDegrees(-rot.yawDeg()));
-			ms.mulPose(Axis.XP.rotationDegrees(90 + rot.pitchDeg()));
+			ms.rotate(Axis.YP.rotationDegrees(-rot.yawDeg()));
+			ms.rotate(Axis.XP.rotationDegrees(90 + rot.pitchDeg()));
 
 			quads(startRadius, endRadius, 0F, (float) prevPoint.distance(point), ms.last().transform(buffer));
 			ms.popPose();
@@ -113,15 +111,15 @@ public class LightningParticle extends CustomParticle {
 		ms.translate(prevPoint.x, prevPoint.y, prevPoint.z);
 
 		var rot = Rotation.compute(new Vec3(prevPoint.x, prevPoint.y, prevPoint.z), new Vec3(point.x, point.y, point.z));
-		ms.mulPose(Axis.YP.rotationDegrees(-rot.yawDeg()));
-		ms.mulPose(Axis.XP.rotationDegrees(90 + rot.pitchDeg()));
+		ms.rotate(Axis.YP.rotationDegrees(-rot.yawDeg()));
+		ms.rotate(Axis.XP.rotationDegrees(90 + rot.pitchDeg()));
 
 		quads(options.radius() * rmod, options.endingRadius() * rmod, 0F, (float) prevPoint.distance(point), ms.last().transform(buffer));
 		ms.popPose();
 	}
 
 	@Override
-	public void renderCustom(PoseStack ms, MultiBufferSource buffers, Camera camera, float delta) {
+	public void submit(SubmitNodeCollector collector, CameraRenderState cameraRenderState) {
 		if (length <= 0F) {
 			return;
 		}
@@ -132,7 +130,7 @@ public class LightningParticle extends CustomParticle {
 			return;
 		}
 
-		var cameraPos = camera.getPosition();
+		var cameraPos = camera.position();
 		var rx = (float) (KMath.lerp(delta, xo, x) - cameraPos.x);
 		var ry = (float) (KMath.lerp(delta, yo, y) - cameraPos.y);
 		var rz = (float) (KMath.lerp(delta, zo, z) - cameraPos.z);
@@ -147,14 +145,14 @@ public class LightningParticle extends CustomParticle {
 		matrix.rotateY(Math.toRadians(-direction.yawDeg()));
 		matrix.rotateX(Math.toRadians(90 + direction.pitchDeg()));
 
-		var brightBuffer = buffers.getBuffer(DebugRenderTypes.QUADS_NO_CULL).withColor(color.get(time / (float) lifetime));
+		var brightBuffer = buffers.getBuffer(DebugRenderTypes.QUADS_NO_CULL).withColor(color.value().get(time / (float) lifetime));
 		renderSegments(ms, prevPoint, point, delta, brightBuffer);
 
 		point.set(0D, 0D, 0D);
 
-		Bloom.markActive();
-		var bloomBuffer = buffers.getBuffer(BloomRenderTypes.DEFAULT_POS_COL_NO_CULL).withColor(outlineColor.get(time / (float) lifetime));
-		renderSegments(ms, prevPoint, point, delta, bloomBuffer);
+		// FIXME Bloom.markActive();
+		// var bloomBuffer = buffers.getBuffer(BloomRenderTypes.DEFAULT_POS_COL_NO_CULL).withColor(outlineColor.value().get(time / (float) lifetime));
+		// renderSegments(ms, prevPoint, point, delta, bloomBuffer);
 
 		ms.popPose();
 	}
@@ -176,13 +174,5 @@ public class LightningParticle extends CustomParticle {
 		callback.acceptPos(+er, maxY, +er).acceptTex(0F, 0F).acceptNormal(1F, 0F, 0F);
 		callback.acceptPos(+sr, minY, +sr).acceptTex(0F, 1F).acceptNormal(1F, 0F, 0F);
 		callback.acceptPos(+sr, minY, -sr).acceptTex(1F, 1F).acceptNormal(1F, 0F, 0F);
-	}
-
-	@Override
-	public AABB getRenderBoundingBox(float delta) {
-		var rx = KMath.lerp(delta, xo, x);
-		var ry = KMath.lerp(delta, yo, y);
-		var rz = KMath.lerp(delta, zo, z);
-		return new AABB(rx - length, ry - length, rz - length, rx + length, ry + length, rz + length);
 	}
 }

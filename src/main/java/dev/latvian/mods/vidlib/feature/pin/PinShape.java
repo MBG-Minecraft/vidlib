@@ -4,22 +4,21 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
+import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
 public enum PinShape implements StringRepresentable {
-	PIN(ID.vidlib("pin"), "Pin", false, VidLibTextures.CIRCLE.texturePath(), 103, 137, 308),
-	PIN_CROSS(ID.vidlib("pin_cross"), "Pin with Cross", false, VidLibTextures.CIRCLE.texturePath(), 103, 137, 308),
-	SQUARE("square", "Full Square", true, null, VidLibTextures.SQUARE.texturePath(), ID.vidlib("textures/misc/pin/icon/square.png"), 0, 0, 512),
-	CIRCLE("circle", "Full Circle", true, null, VidLibTextures.CIRCLE.texturePath(), ID.vidlib("textures/misc/pin/icon/circle.png"), 0, 0, 512),
-	ARROW(ID.vidlib("arrow"), "Arrow", true, VidLibTextures.SQUARE.texturePath(), 0, 0, 512),
-	ARROW_OFFSET(ID.vidlib("arrow_offset"), "Arrow (Offset)", true, VidLibTextures.SQUARE.texturePath(), 50, 0, 412),
+	PIN(ID.vidlib("pin"), "Pin", false, VidLibTextures.CIRCLE.id(), 103, 137, 308),
+	PIN_CROSS(ID.vidlib("pin_cross"), "Pin with Cross", false, VidLibTextures.CIRCLE.id(), 103, 137, 308),
+	SQUARE("square", "Full Square", true, null, VidLibTextures.SQUARE.id(), ID.vidlib("textures/misc/pin/icon/square.png"), 0, 0, 512),
+	CIRCLE("circle", "Full Circle", true, null, VidLibTextures.CIRCLE.id(), ID.vidlib("textures/misc/pin/icon/circle.png"), 0, 0, 512),
+	ARROW(ID.vidlib("arrow"), "Arrow", true, VidLibTextures.SQUARE.id(), 0, 0, 512),
+	ARROW_OFFSET(ID.vidlib("arrow_offset"), "Arrow (Offset)", true, VidLibTextures.SQUARE.id(), 50, 0, 412),
 
 	;
 
@@ -29,26 +28,26 @@ public enum PinShape implements StringRepresentable {
 	public final String id;
 	public final String displayName;
 	public final boolean transparentBackground;
-	public final ResourceLocation overlayTexture;
-	public final ResourceLocation maskTexture;
-	public final ResourceLocation iconTexture;
-	public final TexturedRenderType maskedRenderType;
+	public final Identifier overlayTexture;
+	public final Identifier maskTexture;
+	public final Identifier iconTexture;
+	public final com.mojang.renderpearl.api.pipeline.RenderPipeline maskedRenderType;
 	public final int x, y, size;
 
-	PinShape(String id, String displayName, boolean transparentBackground, @Nullable ResourceLocation overlayTexture, ResourceLocation maskTexture, ResourceLocation iconTexture, int x, int y, int size) {
+	PinShape(String id, String displayName, boolean transparentBackground, @Nullable Identifier overlayTexture, Identifier maskTexture, Identifier iconTexture, int x, int y, int size) {
 		this.id = id;
 		this.displayName = displayName;
 		this.transparentBackground = transparentBackground;
 		this.overlayTexture = overlayTexture;
 		this.maskTexture = maskTexture;
 		this.iconTexture = iconTexture;
-		this.maskedRenderType = VidLibRenderTypes.MASKED_GUI.apply(maskTexture);
+		this.maskedRenderType = VidLibRenderPipelines.MASKED_GUI;
 		this.x = x;
 		this.y = y;
 		this.size = size;
 	}
 
-	PinShape(ResourceLocation id, String displayName, boolean transparentBackground, ResourceLocation maskTexture, int x, int y, int size) {
+	PinShape(Identifier id, String displayName, boolean transparentBackground, Identifier maskTexture, int x, int y, int size) {
 		this(id.getPath(), displayName, transparentBackground, id.withPath(s -> "textures/misc/pin/" + s + ".png"), maskTexture, id.withPath(s -> "textures/misc/pin/icon/" + s + ".png"), x, y, size);
 	}
 

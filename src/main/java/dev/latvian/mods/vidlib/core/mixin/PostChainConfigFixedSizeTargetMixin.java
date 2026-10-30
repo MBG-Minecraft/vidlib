@@ -6,10 +6,13 @@ import net.minecraft.client.renderer.PostChainConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(PostChainConfig.FixedSizedTarget.class)
+@Mixin(PostChainConfig.InternalTarget.class)
 public class PostChainConfigFixedSizeTargetMixin {
-	@ModifyExpressionValue(method = "lambda$static$0", at = @At(value = "FIELD", target = "Lnet/minecraft/util/ExtraCodecs;POSITIVE_INT:Lcom/mojang/serialization/Codec;"))
-	private static Codec<Integer> vl$negativeWidth(Codec<Integer> original) {
+	@ModifyExpressionValue(method = "lambda$static$0", at = {
+		@At(value = "FIELD", target = "Lnet/minecraft/util/ExtraCodecs;POSITIVE_INT:Lcom/mojang/serialization/Codec;", ordinal = 0),
+		@At(value = "FIELD", target = "Lnet/minecraft/util/ExtraCodecs;POSITIVE_INT:Lcom/mojang/serialization/Codec;", ordinal = 1)
+	})
+	private static Codec<Integer> vl$negativeSize(Codec<Integer> original) {
 		return Codec.INT;
 	}
 }

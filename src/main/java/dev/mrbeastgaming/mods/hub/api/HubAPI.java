@@ -39,7 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 public interface HubAPI {
-	URI URI_BASE = URI.create(Optional.ofNullable(System.getenv("MBG_HUB_API_BASE")).orElse("https://hub.mrbeastmc.com"));
+	URI URI_BASE = URI.create(Optional.ofNullable(System.getenv("MBG_HUB_API_BASE")).orElse("https://hub.mrbeastmc.com/"));
 	Codec<URI> URI_BASE_CODEC = KLibCodecs.relativeURI(URI_BASE);
 	Codec<URI> WS_URI_BASE_CODEC = KLibCodecs.webSocketURI(URI_BASE_CODEC);
 

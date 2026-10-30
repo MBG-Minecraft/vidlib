@@ -1,15 +1,15 @@
 package dev.latvian.mods.vidlib.feature.capture.task;
 
-import dev.latvian.mods.klib.io.bytes.ByteInput;
-import dev.latvian.mods.klib.io.bytes.ByteOutput;
+import dev.latvian.mods.klib.io.ByteInput;
+import dev.latvian.mods.klib.io.ByteOutput;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Timestamp;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
 
-public record CoreGamePacketTask(Timestamp time, ResourceLocation type, byte[] data) implements CaptureTask {
+public record CoreGamePacketTask(Timestamp time, Identifier type, byte[] data) implements CaptureTask {
 	public CoreGamePacketTask(ByteInput in) throws IOException {
 		this(Timestamp.read(in), ID.idFromString(in.readUTF()), in.readByteArray());
 	}

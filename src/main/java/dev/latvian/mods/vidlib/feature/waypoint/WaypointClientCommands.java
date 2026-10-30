@@ -5,7 +5,6 @@ import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
@@ -32,7 +31,7 @@ public interface WaypointClientCommands {
 
 								var waypoint = new Waypoint.Builder()
 									.id(id)
-									.position(KVector.of(position))
+									.position(position)
 									.label(label)
 									.distance(6D, 20D, 0D)
 									.build();

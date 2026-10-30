@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.TickThrottler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +19,7 @@ public abstract class ServerGamePacketListenerImplMixin implements VLServerPlayP
 	 * @reason Yeet
 	 */
 	@Overwrite
-	private void detectRateSpam() {
+	private void detectRateSpam(TickThrottler throttler) {
 	}
 
 	@WrapOperation(method = "removePlayerFromWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))

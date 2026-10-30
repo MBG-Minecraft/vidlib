@@ -76,7 +76,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 		var json = new JsonObject();
 		json.addProperty("uuid", entity.getUUID().toString());
 		json.addProperty("name", entity.getScoreboardName());
-		json.addProperty("dimension", entity.level().dimension().location().toString());
+		json.addProperty("dimension", entity.level().dimension().identifier().toString());
 		return json;
 	}
 
@@ -98,7 +98,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 			var json = new JsonObject();
 			json.add("player", entityToJson(player));
 			gateway.send("player_logged_out", json);
-			gateway.sendSize(player.server.getPlayerCount() - (offset ? 1 : 0));
+			gateway.sendSize(player.level().getServer().getPlayerCount() - (offset ? 1 : 0));
 		}
 	}
 
@@ -108,8 +108,8 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 		if (gateway != null) {
 			var json = new JsonObject();
 			json.add("player", entityToJson(player));
-			json.addProperty("from_dimension", fromDim.location().toString());
-			json.addProperty("to_dimension", toDim.location().toString());
+			json.addProperty("from_dimension", fromDim.identifier().toString());
+			json.addProperty("to_dimension", toDim.identifier().toString());
 			gateway.send("player_changed_dimension", json);
 		}
 	}

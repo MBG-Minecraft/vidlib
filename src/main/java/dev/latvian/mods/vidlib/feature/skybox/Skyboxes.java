@@ -1,21 +1,21 @@
 package dev.latvian.mods.vidlib.feature.skybox;
 
 import dev.latvian.mods.klib.util.ID;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface Skyboxes {
-	ResourceLocation VANILLA = ID.mc("vanilla");
+	Identifier VANILLA = ID.mc("vanilla");
 
-	ResourceLocation DAY = ID.mc("day");
-	ResourceLocation DAY_WITH_CELESTIALS = ID.mc("day_with_celestials");
-	ResourceLocation NIGHT = ID.mc("night");
-	ResourceLocation NIGHT_WITH_CELESTIALS = ID.mc("night_with_celestials");
-	ResourceLocation STORM = ID.mc("storm");
-	ResourceLocation DOOM = ID.mc("doom");
-	ResourceLocation BRIGHT_NIGHT = ID.mc("bright_night");
+	Identifier DAY = ID.mc("day");
+	Identifier DAY_WITH_CELESTIALS = ID.mc("day_with_celestials");
+	Identifier NIGHT = ID.mc("night");
+	Identifier NIGHT_WITH_CELESTIALS = ID.mc("night_with_celestials");
+	Identifier STORM = ID.mc("storm");
+	Identifier DOOM = ID.mc("doom");
+	Identifier BRIGHT_NIGHT = ID.mc("bright_night");
 
-	ResourceLocation BLACK_VOID = ID.mc("void/black");
-	ResourceLocation WHITE_VOID = ID.mc("void/white");
-	ResourceLocation GREEN_VOID = ID.mc("void/green");
-	ResourceLocation BLUE_VOID = ID.mc("void/blue");
+	Identifier BLACK_VOID = ID.mc("void/black");
+	Identifier WHITE_VOID = ID.mc("void/white");
+	Identifier GREEN_VOID = ID.mc("void/green");
+	Identifier BLUE_VOID = ID.mc("void/blue");
 }

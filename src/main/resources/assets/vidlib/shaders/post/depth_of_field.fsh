@@ -3,18 +3,49 @@
 uniform sampler2D InSampler;
 uniform sampler2D InDepthSampler;
 
-uniform mat4 InverseViewProjectionMat;
-uniform vec3 FocusPos;
-uniform float FocusRange;
-uniform float BlurRange;
-uniform float Strength;
-uniform int Shape;
-uniform vec4 DebugNearCol;
-uniform vec4 DebugFarCol;
-uniform int BlurMode;
+layout(std140) uniform SamplerInfo {
+	vec2 OutSize;
+	vec2 InSize;
+};
 
-in vec2 texCoord;
-in vec2 oneTexel;
+layout(std140) uniform InverseViewProjectionMat {
+	mat4 inverseViewProjectionMat;
+};
+
+layout(std140) uniform FocusPos {
+	vec3 focusPos;
+};
+
+layout(std140) uniform FocusRange {
+	float focusRange;
+};
+
+layout(std140) uniform BlurRange {
+	float blurRange;
+};
+
+layout(std140) uniform Strength {
+	float strength;
+};
+
+layout(std140) uniform Shape {
+	int shape;
+};
+
+layout(std140) uniform DebugNearCol {
+	vec4 debugNearCol;
+};
+
+layout(std140) uniform DebugFarCol {
+	vec4 debugFarCol;
+};
+
+layout(std140) uniform BlurMode {
+	int blurMode;
+};
+
+layout (location = 0) in vec2 texCoord;
+layout (location = 1) in vec2 oneTexel;
 
 layout (location = 0) out vec4 fragColor;
 
@@ -24,15 +55,15 @@ float blurAt(in vec2 coord) {
 	clipPos.xy = coord * 2.0 - 1.0;
 	clipPos.z = depth * 2.0 - 1.0;
 	clipPos.w = 1.0;
-	vec4 homogenousPos = InverseViewProjectionMat * clipPos;
+	vec4 homogenousPos = inverseViewProjectionMat * clipPos;
 	vec3 worldPos = homogenousPos.xyz / homogenousPos.w;
-	vec3 diff = worldPos - FocusPos;
-	float distSq = Shape == 1 ? dot(diff.xz, diff.xz) : dot(diff, diff);
+	vec3 diff = worldPos - focusPos;
+	float distSq = shape == 1 ? dot(diff.xz, diff.xz) : dot(diff, diff);
 
-	if (distSq < FocusRange * FocusRange) {
+	if (distSq < focusRange * focusRange) {
 		return 0.0;
-	} else if (distSq < BlurRange * BlurRange) {
-		return (sqrt(distSq) - FocusRange) / (BlurRange - FocusRange);
+	} else if (distSq < blurRange * blurRange) {
+		return (sqrt(distSq) - focusRange) / (blurRange - focusRange);
 	} else {
 		return 1.0;
 	}
@@ -41,12 +72,12 @@ float blurAt(in vec2 coord) {
 void main() {
 	float blur = blurAt(texCoord);
 
-	if (Strength <= 0.0) {
-		fragColor = mix(DebugNearCol, DebugFarCol, blur);
+	if (strength <= 0.0) {
+		fragColor = mix(debugNearCol, debugFarCol, blur);
 		return;
 	}
 
-	float size = Strength * blur;
+	float size = strength * blur;
 
 	if (size <= 0.0) {
 		discard;
@@ -67,7 +98,7 @@ void main() {
 			float dist = x * x + y * y;
 			vec2 texCoord2 = texCoord + oneTexel * vec2(x, y);
 
-			if (dist <= maxDist && BlurMode == 0 ? (blurAt(texCoord2) >= blur) : BlurMode == 1 ? (blurAt(texCoord2) > 0.0) : BlurMode == 2) {
+			if (dist <= maxDist && (blurMode == 0 ? (blurAt(texCoord2) >= blur) : blurMode == 1 ? (blurAt(texCoord2) > 0.0) : blurMode == 2)) {
 				vec4 c = texture(InSampler, texCoord2);
 
 				if (c.a > 0.0) {

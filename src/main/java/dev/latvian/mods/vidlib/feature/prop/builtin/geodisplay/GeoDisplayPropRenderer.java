@@ -1,17 +1,16 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.geckolib.renderer.base.GeoRenderState;
+import com.geckolib.renderer.base.RenderPassInfo;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.feature.prop.geo.GeoPropRenderer;
 import dev.latvian.mods.vidlib.integration.VidLibGeoDataTickets;
 import net.minecraft.client.Minecraft;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
 
-public class GeoDisplayPropRenderer extends GeoPropRenderer<GeoDisplayProp> {
+public class GeoDisplayPropRenderer extends GeoPropRenderer<GeoDisplayProp, Void> {
 	@ClientAutoRegister
-	public static final Holder HOLDER = PropRenderer.holder(GeoDisplayProp.TYPE, new GeoDisplayPropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(GeoDisplayProp.TYPE, GeoDisplayPropRenderer::new);
 
 	public GeoDisplayPropRenderer() {
 		super(new GeoDisplayPropModel());
@@ -21,24 +20,17 @@ public class GeoDisplayPropRenderer extends GeoPropRenderer<GeoDisplayProp> {
 	public void extractRenderState(Minecraft mc, GeoDisplayProp prop, GeoRenderState state, float delta) {
 		super.extractRenderState(mc, prop, state, delta);
 		state.addGeckolibData(VidLibGeoDataTickets.MODEL, prop.model);
-		state.addGeckolibData(VidLibGeoDataTickets.TEXTURE, prop.texture.texturePath());
+		state.addGeckolibData(VidLibGeoDataTickets.TEXTURE, prop.texture.id());
 	}
 
 	@Override
-	public void adjustPositionForRender(GeoRenderState state, PoseStack ms, BakedGeoModel model, boolean isReRender) {
-		super.adjustPositionForRender(state, ms, model, isReRender);
-	}
+	public void scaleModelForRender(RenderPassInfo<GeoRenderState> renderPassInfo, float widthScale, float heightScale) {
+		super.scaleModelForRender(renderPassInfo, widthScale, heightScale);
 
-	@Override
-	public void scaleModelForRender(GeoRenderState state, float widthScale, float heightScale, PoseStack poseStack, BakedGeoModel model, boolean isReRender) {
-		super.scaleModelForRender(state, widthScale, heightScale, poseStack, model, isReRender);
+		var s = renderPassInfo.renderState().getGeckolibData(VidLibGeoDataTickets.HEIGHT);
 
-		if (!isReRender) {
-			var s = state.getGeckolibData(VidLibGeoDataTickets.HEIGHT);
-
-			if (s != null && s != 1F) {
-				poseStack.scale(s, s, s);
-			}
+		if (s != null && s != 1F) {
+			renderPassInfo.poseStack().scale(s, s, s);
 		}
 	}
 }

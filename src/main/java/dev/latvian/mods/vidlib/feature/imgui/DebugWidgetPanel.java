@@ -5,27 +5,24 @@ import dev.latvian.mods.klib.interpolation.BezierPreset;
 import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.IOUtils;
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Async;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
 import dev.latvian.mods.klib.util.Hex32;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.client.AsyncFileSelector;
 import dev.latvian.mods.vidlib.feature.client.URITextures;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilterImBuilder;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.TransformationListImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.interpolation.InterpolationImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -33,13 +30,6 @@ import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
-import dev.latvian.mods.vidlib.feature.sound.PositionedSoundDataImBuilder;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.knumber.KNumberImBuilder;
-import dev.latvian.mods.vidlib.math.knumber.KNumberNodeImBuilder;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.KVectorImBuilder;
 import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.HubProjectReplaysResponse;
@@ -65,9 +55,11 @@ import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 
 import java.io.BufferedOutputStream;
@@ -83,6 +75,26 @@ import java.util.UUID;
 
 public class DebugWidgetPanel extends Panel {
 	public static final DebugWidgetPanel INSTANCE = new DebugWidgetPanel();
+
+	/**
+	 * Replaces the removed {@code AbstractContainerScreen#getSlotUnderMouse()}: 26.3 only keeps the
+	 * hovered slot in a protected field, so the vanilla hit test is replicated here against the
+	 * standard container origin.
+	 */
+	private static @Nullable Slot getHoveredSlot(AbstractContainerScreen<?> screen, double mouseX, double mouseY) {
+		int left = (screen.width - 176) / 2;
+		int top = (screen.height - 166) / 2;
+
+		for (var slot : screen.getMenu().slots) {
+			if (slot.isActive()
+				&& mouseX >= slot.x - 1 + left && mouseX < slot.x + 18 + left
+				&& mouseY >= slot.y - 1 + top && mouseY < slot.y + 18 + top) {
+				return slot;
+			}
+		}
+
+		return null;
+	}
 
 	public final ImInt intData = new ImInt();
 	public final ImInt intData2 = new ImInt();
@@ -106,18 +118,11 @@ public class DebugWidgetPanel extends Panel {
 	public final ImString stringData = new ImString();
 	public final ImString multiLineStringData = new ImString();
 	public final ImBoolean booleanData = new ImBoolean();
-	public final ImBuilder<Interpolation> interpolationBuilder = InterpolationImBuilder.create();
+	public final ImBuilder<Ref<Interpolation>> interpolationBuilder = InterpolationImBuilder.create();
 	public final GradientImBuilder gradient1 = new GradientImBuilder();
 	public final GradientImBuilder gradient2 = new GradientImBuilder();
-	public final ImBuilder<KNumber> numberBuilder = KNumberImBuilder.create(0D);
-	public final ImBuilder<KVector> vectorBuilder = KVectorImBuilder.create();
-	public final ImBuilder<EntityFilter> entityFilterBuilder = EntityFilterImBuilder.create();
-	public final ImBuilder<BlockFilter> blockFilterBuilder = BlockFilterImBuilder.create();
-	public final PositionedSoundDataImBuilder soundBuilder = new PositionedSoundDataImBuilder();
 	public final ImBuilder<ParticleOptions> particleBuilder = ParticleOptionsImBuilder.create();
 	public final GameProfileImBuilder profileBuilder = new GameProfileImBuilder();
-	public final TransformationListImBuilder transformationListBuilder = new TransformationListImBuilder();
-	public final ImBuilder<KNumber> numberBuilder2 = new KNumberNodeImBuilder();
 	public final GalleryImageImBuilder galleryImageBuilder = new GalleryImageImBuilder(Gallery.ALL.get().values());
 	public final ProgressQueue errorQueue = new ProgressQueue("Error Test Queue");
 
@@ -126,8 +131,8 @@ public class DebugWidgetPanel extends Panel {
 
 	private DebugWidgetPanel() {
 		super("widget-debug", "Widget Debug");
-		gradient1.set(Color.BLACK.gradient(Color.WHITE));
-		gradient2.set(Color.YELLOW.gradient(Color.RED));
+		gradient1.set(Color.BLACK.gradient(Color.WHITE).ref());
+		gradient2.set(Color.YELLOW.gradient(Color.RED).ref());
 	}
 
 	@Override
@@ -358,7 +363,7 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 
 		ImGui.text("Image");
-		var sprite = mc.getBlockAtlas().getSprite(ResourceLocation.withDefaultNamespace("block/campfire_fire"));
+		var sprite = mc.getBlockAtlas().getSprite(Identifier.withDefaultNamespace("block/campfire_fire"));
 		ImGui.image(mc.getBlockAtlas().getTexture().vl$getHandle(), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
 		ImGui.separator();
 		ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, 128F, 128F, 0F, 0F, 1F, 1F);
@@ -410,27 +415,9 @@ public class DebugWidgetPanel extends Panel {
 		gradient1.imguiKey(graphics, "Gradient 1", "gradient-1");
 		gradient2.imguiKey(graphics, "Gradient 2", "gradient-2");
 		ImGui.separator();
-		numberBuilder.imguiKey(graphics, "KNumber", "knumber");
-		ImGui.text("Result: " + (numberBuilder.isValid() ? String.valueOf(numberBuilder.build().get(ctx)) : "Invalid"));
-		ImGui.separator();
-		vectorBuilder.imguiKey(graphics, "KVector", "kvector");
-		ImGui.text("Result: " + (vectorBuilder.isValid() ? String.valueOf(vectorBuilder.build().get(ctx)) : "Invalid"));
-
-		ImGui.separator();
-		entityFilterBuilder.imguiKey(graphics, "Entity Filter", "entity-filter");
-		ImGui.separator();
-		blockFilterBuilder.imguiKey(graphics, "Block Filter", "block-filter");
-		ImGui.separator();
-		soundBuilder.imguiKey(graphics, "Positioned Sound", "positioned-sound");
-		ImGui.separator();
 		particleBuilder.imguiKey(graphics, "Particle", "particle");
 		ImGui.separator();
 		profileBuilder.imguiKey(graphics, "Profile", "profile");
-		ImGui.separator();
-		transformationListBuilder.imguiKey(graphics, "Transformation List", "transformation-list");
-		ImGui.separator();
-		numberBuilder2.imguiKey(graphics, "KNumber Node Editor", "knumber-node-editor");
-		ImGui.text("Result: " + (numberBuilder2.isValid() ? String.valueOf(numberBuilder2.build().get(ctx)) : "Invalid"));
 		ImGui.separator();
 		galleryImageBuilder.imguiKey(graphics, "Gallery Image", "gallery-image");
 		var selectedGalleryImage = galleryImageBuilder.isValid() ? galleryImageBuilder.build() : null;
@@ -445,9 +432,15 @@ public class DebugWidgetPanel extends Panel {
 
 		ImGui.separator();
 
-		if (mc.screen instanceof AbstractContainerScreen<?> screen && screen.getSlotUnderMouse() != null && !screen.getSlotUnderMouse().getItem().isEmpty()) {
-			currentStack = screen.getSlotUnderMouse().getItem();
-			currentStackKey = VisualItemKey.of(currentStack);
+		if (mc.gui.screen() instanceof AbstractContainerScreen<?> screen) {
+			var mouseX = mc.mouseHandler.getScaledXPos(mc.getWindow());
+			var mouseY = mc.mouseHandler.getScaledYPos(mc.getWindow());
+			var hovered = getHoveredSlot(screen, mouseX, mouseY);
+
+			if (hovered != null && !hovered.getItem().isEmpty()) {
+				currentStack = hovered.getItem();
+				currentStackKey = VisualItemKey.of(currentStack);
+			}
 		}
 
 		if (currentStackKey != VisualItemKey.AIR) {
@@ -663,7 +656,7 @@ public class DebugWidgetPanel extends Panel {
 
 		ImGui.separator();
 
-		var screenShakeInterpolation = ScreenShake.DEFAULT.interpolation();
+		var screenShakeInterpolation = ScreenShake.DEFAULT.ease();
 
 		if (ImPlot.beginPlot("Default Screen Shake Interpolation###default-screen-shake-interpolation-plot", "X", "Y", new ImVec2(300F, 150F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
 			var xdata = new Double[100];
@@ -671,7 +664,7 @@ public class DebugWidgetPanel extends Panel {
 
 			for (int i = 0; i < 100; i++) {
 				xdata[i] = (double) i;
-				ydata[i] = screenShakeInterpolation.interpolate(i / 100D) * 100D;
+				ydata[i] = screenShakeInterpolation.apply(i / 100F) * 100D;
 			}
 
 			ImPlot.plotLine("Y###1", xdata, ydata);

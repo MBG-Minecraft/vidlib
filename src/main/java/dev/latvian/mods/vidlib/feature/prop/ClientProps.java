@@ -1,32 +1,36 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.klib.gl.GLDebugLog;
-import dev.latvian.mods.klib.math.KMath;
-import dev.latvian.mods.klib.render.BufferSupplier;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
-import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class ClientProps extends Props<ClientLevel> {
+	public record PropWithState<P extends Prop, S extends PropRenderState<P>>(P prop, S state) {
+		public S extractCore(PropExtractContext ctx) {
+			state.extractCore(prop, ctx);
+			return state;
+		}
+
+		public void extract(PropExtractContext ctx) {
+			state.extract(prop, ctx);
+		}
+
+		public void submit(PropSubmitContext ctx) {
+			state.submit(ctx);
+		}
+	}
+
 	public static final ImBoolean VISIBLE = new ImBoolean(true);
 	public static final IntSet OPEN_PROPS = new IntOpenHashSet();
 	public static final IntSet HIDDEN_PROPS = new IntOpenHashSet();
@@ -43,58 +47,32 @@ public class ClientProps extends Props<ClientLevel> {
 		level.getProps().reloadAll();
 	}
 
-	@AutoInit(AutoInit.Type.ASSETS_CLOSED)
-	public static void assetsClosed() {
-		for (var holder : PropRenderer.ALL.get().values()) {
-			if (holder.unit() instanceof AutoCloseable c) {
-				try {
-					c.close();
-				} catch (Exception ex) {
-					VidLib.LOGGER.error("Error closing resources of " + holder.type() + " renderer", ex);
-				}
-			}
-		}
-	}
-
-	public final Map<RenderLevelStageEvent.Stage, List<RenderedProp<?>>> stages;
-	public final Set<PropRenderer<?>> unitRenderers;
-	private final List<PropRenderContext<?>> sortedProps;
+	public final List<PropWithState<?, ?>> all;
 
 	public ClientProps(ClientLevel level) {
 		super(level);
-		this.stages = new Reference2ObjectOpenHashMap<>();
-		this.sortedProps = new ArrayList<>();
-		this.unitRenderers = new ReferenceOpenHashSet<>();
+		this.all = new LinkedList<>();
 	}
 
 	@Override
 	protected void onAdded(Prop prop) {
-		var holder = PropRenderer.ALL.get().get(prop.type);
+		var factory = PropRenderState.BY_TYPE.get().get(prop.type);
 
-		if (holder == null) {
+		if (factory == null) {
 			return;
 		}
 
-		var renderer = holder.rendererFactory().apply(prop);
+		var state = factory.create();
 
-		if (renderer == PropRenderer.INVISIBLE) {
+		if (state == null) {
 			return;
 		}
 
-		if (renderer == holder.unit()) {
-			unitRenderers.add(renderer);
-		}
-
-		var renderedProp = new RenderedProp(prop, renderer);
-
-		for (var stage : renderer.getStages(Cast.to(prop))) {
-			stages.computeIfAbsent(stage, k -> new LinkedList<>()).add(renderedProp);
-		}
+		all.add(new PropWithState(prop, state));
 	}
 
 	public void reloadAll() {
-		stages.clear();
-		unitRenderers.clear();
+		all.clear();
 
 		for (var list : propLists.values()) {
 			for (var prop : list) {
@@ -146,79 +124,76 @@ public class ClientProps extends Props<ClientLevel> {
 		if (ReplayProp.MAP != null && ReplayProp.LIST != null && !tick) {
 			levelProps.map.values().removeIf(prop -> prop.removed == PropRemoveType.TIME_TRAVEL);
 		}
+
+		all.removeIf(pws -> pws.prop.isRemoved());
 	}
 
-	public void setupAll(Minecraft mc, FrameGraphSetupEvent event) {
-		for (var renderer : unitRenderers) {
-			renderer.setup(mc, event);
-		}
-	}
-
-	public void renderAll(FrameInfo frame, PoseStack ms) {
-		var cam = frame.camera().getPosition();
-		float delta = frame.worldDelta();
-
-		var list = stages.get(frame.stage());
-
-		if (list == null || list.isEmpty()) {
-			return;
+	@Nullable
+	public List<PropRenderState<?>> extractAll(PropExtractContext ctx) {
+		if (all.isEmpty() || !VISIBLE.get()) {
+			return null;
 		}
 
-		GLDebugLog.pushGroup("[VidLib] Render Props " + frame.stage());
-		var props = list.iterator();
+		List<PropRenderState<?>> states = null;
+		List<PropRenderState<?>> sortedStates = null;
 
-		while (props.hasNext()) {
-			var renderedProp = props.next();
-			var prop = renderedProp.prop();
-			var renderer = renderedProp.renderer();
+		for (var propWithState : all) {
+			var prop = propWithState.prop();
 
 			if (prop.isRemoved()) {
-				props.remove();
 				continue;
-			} else if (!VISIBLE.get() || prop.isTimeTraveling(frame.gameTime())) {
+			} else if (prop.isTimeTraveling(ctx.gameTime())) {
 				continue;
 			} else if (isPropHidden(prop)) {
 				continue;
 			}
 
-			double x = KMath.lerp(delta, prop.prevPos.x, prop.pos.x);
-			double y = KMath.lerp(delta, prop.prevPos.y, prop.pos.y);
-			double z = KMath.lerp(delta, prop.prevPos.z, prop.pos.z);
-			double cd = cam.distanceToSqr(x, y + prop.height / 2D, z);
+			var state = propWithState.extractCore(ctx);
 
-			if (prop.isVisible(x, y, z, frame, cam, cd)) {
-				var ctx = new PropRenderContext(prop, renderer, x, y, z, cd, ms, frame, delta);
+			if (prop.isVisible(state.x, state.y, state.z, ctx, ctx.cameraPos(), state.squaredDistanceToCamera)) {
+				propWithState.extract(ctx);
 
-				if (renderer.shouldSort(ctx)) {
-					sortedProps.add(ctx);
+				if (state.invisible) {
+					continue;
+				}
+
+				if (state.shouldSort) {
+					if (sortedStates == null) {
+						sortedStates = new ArrayList<>();
+					}
+
+					sortedStates.add(state);
 				} else {
-					GLDebugLog.pushGroup("[VidLib] " + prop);
-					ctx.render();
-					GLDebugLog.popGroup();
+					if (states == null) {
+						states = new ArrayList<>(all.size());
+					}
+
+					states.add(state);
 				}
 			}
 		}
 
-		if (!sortedProps.isEmpty()) {
-			if (sortedProps.size() >= 2) {
-				sortedProps.sort(PropRenderContext.COMPARATOR);
+		// Might not be required anymore
+
+		if (sortedStates != null) {
+			if (sortedStates.size() >= 2) {
+				sortedStates.sort(PropRenderState.COMPARATOR);
 			}
 
-			for (var p : sortedProps) {
-				GLDebugLog.pushGroup("[VidLib] " + p.prop());
-				p.render();
-				GLDebugLog.popGroup();
+			if (states == null) {
+				states = sortedStates;
+			} else {
+				states.addAll(sortedStates);
 			}
-
-			sortedProps.clear();
 		}
 
-		GLDebugLog.popGroup();
+		return states;
 	}
 
+	/*
 	public void renderDebug(FrameInfo frame) {
 		var ms = frame.poseStack();
-		var cam = frame.camera().getPosition();
+		var cam = frame.camera().position();
 		var delta = frame.worldDelta();
 
 		for (var list : propLists.values()) {
@@ -231,7 +206,7 @@ public class ClientProps extends Props<ClientLevel> {
 				if (prop.isVisible(x, y, z, frame, cam, cd)) {
 					boolean selected = !HIDE_OUTLINE.get() && OPEN_PROPS.contains(prop.id);
 
-					if (selected || frame.mc().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
+					if (selected || frame.mc().debugEntries.isCurrentlyEnabled(net.minecraft.client.gui.components.debug.DebugScreenEntries.ENTITY_HITBOXES)) {
 						var progress = prop.getDebugVisualsProgress(delta);
 
 						if (progress >= 0F && progress <= 1F) {
@@ -249,4 +224,5 @@ public class ClientProps extends Props<ClientLevel> {
 		MiscClientUtils.renderVisuals(ms, cam, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, DEBUG_VISUALS, 1F);
 		DEBUG_VISUALS.clear();
 	}
+	 */
 }

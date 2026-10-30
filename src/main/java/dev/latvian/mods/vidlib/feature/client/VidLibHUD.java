@@ -3,10 +3,8 @@ package dev.latvian.mods.vidlib.feature.client;
 import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.replay.api.ReplayAPI;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasImpl;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
-import dev.latvian.mods.vidlib.feature.font.MSDFFont;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
@@ -16,7 +14,7 @@ import dev.latvian.mods.vidlib.util.NameDrawType;
 import imgui.type.ImFloat;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -26,7 +24,6 @@ import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.ReadOnlyScoreInfo;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
@@ -34,12 +31,12 @@ import java.util.ArrayList;
 public interface VidLibHUD {
 	ImFloat NAME_SCALE = new ImFloat(1F);
 
-	static void drawPlayerNames(GuiGraphics graphics, DeltaTracker deltaTracker) {
+	static void drawPlayerNames(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		var mc = Minecraft.getInstance();
 		var level = mc.level;
 		var self = mc.player;
 
-		if (level == null || self == null || mc.options.hideGui || mc.screen != null && mc.screen.hidePlayerNames()) {
+		if (level == null || self == null || ClientGameEngine.INSTANCE.hideGui(mc) || mc.gui.screen() != null && mc.gui.screen().hidePlayerNames()) {
 			return;
 		}
 
@@ -61,7 +58,7 @@ public interface VidLibHUD {
 			return;
 		}
 
-		var cam = mc.gameRenderer.getMainCamera().getPosition();
+		var cam = mc.gameRenderer.mainCamera().position();
 		double minDist = mc.get(InternalServerData.NAME_DRAW_MIN_DIST);
 		double midDist = mc.get(InternalServerData.NAME_DRAW_MID_DIST);
 		double maxDist = mc.get(InternalServerData.NAME_DRAW_MAX_DIST);
@@ -130,13 +127,16 @@ public interface VidLibHUD {
 					if (renderName) {
 						lines.addAll(mc.font.split(player.getDisplayName(), 1000));
 
-						var scoreboard = player.getScoreboard();
+						var scoreboard = mc.level.getScoreboard();
 						var objective = scoreboard.getDisplayObjective(DisplaySlot.BELOW_NAME);
 
 						if (objective != null) {
-							ReadOnlyScoreInfo readonlyscoreinfo = scoreboard.getPlayerScoreInfo(player, objective);
-							Component component = ReadOnlyScoreInfo.safeFormatValue(readonlyscoreinfo, objective.numberFormatOrDefault(StyledFormat.NO_STYLE));
-							lines.addAll(mc.font.split(Component.empty().append(component).append(CommonComponents.SPACE).append(objective.getDisplayName()), 1000));
+							var readonlyscoreinfo = scoreboard.getPlayerScoreInfo(player, objective);
+
+							if (readonlyscoreinfo != null) {
+								Component component = readonlyscoreinfo.formatValue(objective.numberFormatOrDefault(StyledFormat.NO_STYLE));
+								lines.addAll(mc.font.split(Component.empty().append(component).append(CommonComponents.SPACE).append(objective.getDisplayName()), 1000));
+							}
 						}
 
 						NeoForge.EVENT_BUS.post(new HUDNameEvent(player, mc.font, lines));
@@ -145,11 +145,11 @@ public interface VidLibHUD {
 					float health = renderHealth ? EntityUtils.getRelativeHealth(player) : -1F;
 
 					if (health != -1F) {
-						graphics.pose().pushPose();
-						graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
-						graphics.pose().scale(scale, scale, 1F);
+						graphics.pose().pushMatrix();
+						graphics.pose().translate(wpos.x(), wpos.y() - 2F);
+						graphics.pose().scale(scale, scale);
 						graphics.healthBarWithText(mc.font, -20, -3, 40, 6, lines, health, alpha);
-						graphics.pose().popPose();
+						graphics.pose().popMatrix();
 					}
 				}
 			}
@@ -195,30 +195,28 @@ public interface VidLibHUD {
 
 						float health = renderHealth ? prop.getDisplayHealth(delta) : -1F;
 
-						graphics.pose().pushPose();
-						graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
-						graphics.pose().scale(scale, scale, 1F);
+						graphics.pose().pushMatrix();
+						graphics.pose().translate(wpos.x(), wpos.y() - 2F);
+						graphics.pose().scale(scale, scale);
 						graphics.healthBarWithText(mc.font, -20, -3, 40, 6, lines, health, alpha);
-						graphics.pose().popPose();
+						graphics.pose().popMatrix();
 					}
 				}
 			}
 		}
 	}
 
-	static void drawAboveBossOverlay(GuiGraphics graphics, DeltaTracker deltaTracker) {
+	static void drawAboveBossOverlay(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		var mc = Minecraft.getInstance();
 		ProgressBarRenderer.draw(mc, graphics, deltaTracker);
-		CanvasImpl.drawPreview(mc, graphics);
 	}
 
-	static void drawBelowAll(GuiGraphics graphics, DeltaTracker deltaTracker) {
+	static void drawBelowAll(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		ClientWaypoints.draw(graphics, deltaTracker);
 		drawPlayerNames(graphics, deltaTracker);
-		MSDFFont.drawDebugText(graphics, deltaTracker);
 	}
 
-	static void drawAboveAll(GuiGraphics graphics, DeltaTracker deltaTracker) {
+	static void drawAboveAll(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		var mc = Minecraft.getInstance();
 		int width = graphics.guiWidth();
 		int height = graphics.guiHeight();
@@ -227,17 +225,17 @@ public interface VidLibHUD {
 			var text = ClientGameEngine.INSTANCE.blockedScreenText(mc.player);
 
 			if (text != null) {
-				graphics.fill(0, 0, width, height, 990, 0xFF000000);
-				graphics.pose().pushPose();
-				graphics.pose().translate(width / 2F, height / 3F, 1000F);
+				graphics.fillGradient(0, 0, width, height, 990, 0xFF000000);
+				graphics.pose().pushMatrix();
+				graphics.pose().translate(width / 2F, height / 3F);
 
 				var lines = mc.font.split(text, width * 4 / 5);
 
 				for (int i = 0; i < lines.size(); i++) {
-					graphics.drawString(mc.font, lines.get(i), -mc.font.width(lines.get(i)) / 2, -4 + i * 10, 0xFFFFFFFF);
+					graphics.text(mc.font, lines.get(i), -mc.font.width(lines.get(i)) / 2, -4 + i * 10, 0xFFFFFFFF);
 				}
 
-				graphics.pose().popPose();
+				graphics.pose().popMatrix();
 			} else {
 				Pins.draw(graphics, deltaTracker);
 
@@ -250,7 +248,7 @@ public interface VidLibHUD {
 		}
 	}
 
-	static void drawInformationHUD(GuiGraphics graphics, DeltaTracker deltaTracker) {
+	static void drawInformationHUD(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		var mc = Minecraft.getInstance();
 
 		if (mc.player == null) {
@@ -265,7 +263,7 @@ public interface VidLibHUD {
 
 		Profiler.get().push("vidlib");
 		Profiler.get().push("information_hud");
-		var font = mc.gui.getFont();
+		var font = mc.font;
 
 		int maxWidth = 0;
 
@@ -276,7 +274,7 @@ public interface VidLibHUD {
 		int xoff = (graphics.guiWidth() - maxWidth) / 2;
 		int yoff = 8;
 
-		TooltipRenderUtil.renderTooltipBackground(graphics, xoff, yoff, maxWidth, info.size() * 10 - 2, 0, null);
+		TooltipRenderUtil.extractTooltipBackground(graphics, xoff, yoff, maxWidth, info.size() * 10 - 2, null);
 
 		for (int l = 0; l < info.size(); l++) {
 			var line = info.get(l);
@@ -287,7 +285,7 @@ public interface VidLibHUD {
 				center = true;
 			}
 
-			graphics.drawString(font, line, xoff + (center ? (maxWidth - font.width(line)) / 2 : 0), yoff + l * 10, 0xFFFFFFFF);
+			graphics.text(font, line, xoff + (center ? (maxWidth - font.width(line)) / 2 : 0), yoff + l * 10, 0xFFFFFFFF);
 		}
 
 		Profiler.get().pop();

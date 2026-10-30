@@ -12,7 +12,6 @@ public class VidLibClient {
 	public static int levelTick = 0;
 
 	public static void init() {
-		MiscUtils.CLIENT_PLAYER.setValue(() -> Minecraft.getInstance().player);
 		loadHub();
 		Runtime.getRuntime().addShutdownHook(new Thread(HubClientGateway::stopGateway, "Stop-Client-Hub-Gateway"));
 	}

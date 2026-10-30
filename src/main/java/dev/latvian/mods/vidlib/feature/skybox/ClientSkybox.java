@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class ClientSkybox {
 	}).remainOpen(true);
 
 	public final SkyboxData data;
-	public final ResourceLocation texture;
+	public final Identifier texture;
 	public SkyboxTexture skyboxTexture;
 
 	public ClientSkybox(SkyboxData data) {
@@ -79,8 +79,9 @@ public class ClientSkybox {
 				return skyboxTexture;
 			}
 
-			skyboxTexture = new SkyboxTexture(this, id);
-			mc.getTextureManager().registerAndLoad(skyboxTexture.resourceId(), skyboxTexture);
+			var tex = new SkyboxTexture(this, id);
+			mc.getTextureManager().registerAndLoad(tex.resourceId(), tex);
+			skyboxTexture = tex;
 		}
 
 		return skyboxTexture;

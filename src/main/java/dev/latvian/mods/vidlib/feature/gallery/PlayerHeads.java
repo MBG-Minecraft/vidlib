@@ -1,19 +1,15 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
-import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.klib.texture.LightUV;
-import dev.latvian.mods.klib.texture.OverlayUV;
+import com.mojang.renderpearl.api.GpuFormat;
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.klib.util.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.feature.client.FramebufferUtils;
-import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.TexturedRenderType;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
@@ -22,17 +18,18 @@ import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
 import imgui.ImGui;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.TriState;
+import net.minecraft.util.Util;
+import net.minecraft.world.entity.player.PlayerSkin;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
@@ -41,6 +38,8 @@ import org.joml.Quaternionf;
 import java.util.UUID;
 
 public interface PlayerHeads {
+	int SIZE = 256;
+
 	@ClientAutoRegister
 	Gallery<UUID> GALLERY_NO_LAYERS = Gallery.ofUUIDKey("player_heads_no_layers", () -> VidLibPaths.USER.get().resolve("player-heads-no-layers"), TriState.TRUE);
 
@@ -49,8 +48,8 @@ public interface PlayerHeads {
 		public static final GameProfileImBuilder UNIT = new GameProfileImBuilder();
 
 		@Override
-		public ResourceLocation getIcon() {
-			return VidLibTextures.DEFAULT_PLAYER_HEAD.texturePath();
+		public Identifier getIcon() {
+			return VidLibTextures.DEFAULT_PLAYER_HEAD.id();
 		}
 
 		@Override
@@ -70,12 +69,12 @@ public interface PlayerHeads {
 			}
 
 			if (ImGui.beginPopup("###select-profile")) {
-				if (UNIT.profileSelector(graphics, profile -> !profile.equals(PlayerProfile.EMPTY_GAME_PROFILE) && !GALLERY.images.containsKey(profile.getId())).isFull() && UNIT.isValid()) {
+				if (UNIT.profileSelector(graphics, profile -> !profile.equals(PlayerProfile.EMPTY_GAME_PROFILE) && !GALLERY.images.containsKey(profile.id())).isFull() && UNIT.isValid()) {
 					var profile = UNIT.build();
 
 					if (profile != null && !PlayerProfile.EMPTY_GAME_PROFILE.equals(profile)) {
 						try {
-							builder.set(get(graphics.mc, profile.getId()));
+							builder.set(get(graphics.mc, profile.id()));
 							builder.fullUpdate = true;
 							ImGui.closeCurrentPopup();
 						} catch (Exception ex) {
@@ -89,21 +88,13 @@ public interface PlayerHeads {
 		}
 	});
 
-	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("PlayerHeadsCanvas", 1024, 1024, true));
+	Lazy<RenderTarget> RENDER_TARGET = Lazy.of(() -> new TextureTarget("PlayerHeadsCanvas", SIZE, SIZE, GpuFormat.RGBA8_UNORM, GpuFormat.D32_FLOAT));
 
-	TexturedRenderType RENDER_TYPE = TexturedRenderType.internal(
-		"player_head",
-		1536,
-		true,
-		true,
-		RenderPipelines.ENTITY_CUTOUT_NO_CULL,
-		texture -> RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOverlayState(RenderStateShard.OVERLAY)
-			.setOutputState(new RenderStateShard.OutputStateShard("player_head", RENDER_TARGET))
-			.createCompositeState(false)
-	);
+	TexturedRenderType RENDER_TYPE = TexturedRenderType.internal("player_head", RenderPipelines.ENTITY_CUTOUT, texture -> RenderSetup.builder(RenderPipelines.ENTITY_CUTOUT)
+		.withTexture("Sampler0", texture)
+		.useLightmap()
+		.useOverlay()
+		.createRenderSetup());
 
 	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {
 		return get(GALLERY, mc, uuid, true, null);
@@ -134,68 +125,69 @@ public interface PlayerHeads {
 	}
 
 	private static NativeImage render(Minecraft mc, UUID uuid, String name, boolean layers, PlayerSkin skin) {
-		render(mc, RENDER_TYPE, skin, 0.45F, layers);
-		return FramebufferUtils.capture(RENDER_TARGET.get());
+		return OffscreenRenderer.image(SIZE, SIZE, true, offscreenPose(layers), offscreen -> submitHead(offscreen, mc, skin, layers));
 	}
 
-	static void render(Minecraft mc, TexturedRenderType type, UUID uuid, float zoom) {
-		render(mc, type, uuid, zoom, true);
+	static void render(Minecraft mc, UUID uuid, float zoom) {
+		render(mc, uuid, zoom, true);
 	}
 
-	static void render(Minecraft mc, TexturedRenderType type, UUID uuid, float zoom, boolean layers) {
-		render(mc, type, PlayerSkins.getSkin(mc, uuid, true), zoom, layers);
+	static void render(Minecraft mc, UUID uuid, float zoom, boolean layers) {
+		render(mc, PlayerSkins.getSkin(mc, uuid, true), zoom, layers);
 	}
 
-	static void render(Minecraft mc, TexturedRenderType type, PlayerSkin playerSkin, float zoom) {
-		render(mc, type, playerSkin, zoom, true);
+	static void render(Minecraft mc, PlayerSkin playerSkin, float zoom) {
+		render(mc, playerSkin, zoom, true);
 	}
 
-	static void render(Minecraft mc, TexturedRenderType type, PlayerSkin playerSkin, float zoom, boolean layers) {
-		var gpu = RenderSystem.getDevice();
-
-		var projectionMatrix = new Matrix4f(RenderSystem.getProjectionMatrix());
+	static void render(Minecraft mc, PlayerSkin playerSkin, float zoom, boolean layers) {
+		var projectionMatrix = RenderSystem.getProjectionMatrixBuffer();
 		var projectionType = RenderSystem.getProjectionType();
-		RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(-zoom, zoom, zoom, -zoom, -10F, 10F), ProjectionType.ORTHOGRAPHIC);
+		var camera = new Matrix4f().setOrtho(-zoom, zoom, zoom, -zoom, -10F, 10F);
 		Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
 		modelViewStack.pushMatrix();
 		modelViewStack.identity();
-		// modelViewStack.translate(0F, 0F, 0F);
 		modelViewStack.rotate(new Quaternionf().rotationXYZ((float) Math.toRadians(25D), (float) Math.toRadians(45D), (float) Math.PI));
-		// modelViewStack.scale(1F, 1F, -1F);
-		Lighting.setupForEntityInInventory();
 
-		var buffers = mc.renderBuffers().bufferSource();
-		var playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(playerSkin.model());
-		var playerRenderState = playerRenderer.createRenderState();
-		playerRenderState.skin = playerSkin;
+		try {
+			OffscreenRenderer.render(SIZE, SIZE, true, offscreenPose(layers), offscreen -> submitHead(offscreen, mc, playerSkin, layers), target -> {
+				RenderSystem.setProjectionMatrix(RenderSystem.getDynamicUniforms().writeTransform(camera), com.mojang.blaze3d.ProjectionType.ORTHOGRAPHIC);
+				return null;
+			});
+		} finally {
+			modelViewStack.popMatrix();
+			RenderSystem.setProjectionMatrix(projectionMatrix, projectionType);
+		}
+	}
 
-		var renderType = type.apply(playerRenderer.getTextureLocation(playerRenderState));
-		var renderTarget = renderType.getRenderTarget();
-		gpu.createCommandEncoder().clearColorAndDepthTextures(renderTarget.getColorTexture(), 0, renderTarget.getDepthTexture(), 1D);
+	private static java.util.function.Consumer<PoseStack> offscreenPose(boolean layers) {
+		return ms -> {
+			ms.scale(-1F, 1F, -1F);
+			ms.translate(0F, 0.25F, 0F);
+		};
+	}
 
-		var buffer = buffers.getBuffer(renderType);
-		var model = playerRenderer.getModel();
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private static void submitHead(OffscreenRenderer offscreen, Minecraft mc, PlayerSkin playerSkin, boolean layers) {
+		var state = new AvatarRenderState();
+		state.skin = playerSkin;
+		state.showHat = layers;
 
-		playerRenderState.showHat = layers;
-		model.setupAnim(playerRenderState);
-		model.setAllVisible(false);
+		AvatarRenderer renderer = (AvatarRenderer) mc.getEntityRenderDispatcher().getRenderer(state);
+		var model = (net.minecraft.client.model.player.PlayerModel) renderer.getModel();
+		model.setupAnim(state);
 		model.head.visible = true;
 		model.hat.visible = layers;
 
 		var ms = new PoseStack();
 		ms.scale(-1F, 1F, -1F);
 		ms.translate(0F, 0.25F, 0F);
-		model.renderToBuffer(ms, buffer, LightUV.FULLBRIGHT.packed(), OverlayUV.NORMAL.packed());
-		playerRenderer.render(playerRenderState, ms, buffers, LightUV.FULLBRIGHT.packed());
-		buffers.endBatch(renderType);
-
-		modelViewStack.popMatrix();
-		RenderSystem.setProjectionMatrix(projectionMatrix, projectionType);
+		renderer.submit(state, ms, offscreen, new CameraRenderState());
 	}
 
 	static AbstractTexture getTexture(Minecraft mc, @Nullable UUID uuid) {
 		if (uuid == null || uuid.equals(Util.NIL_UUID)) {
-			return mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_HEAD.texturePath());
+			return mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_HEAD.id());
 		}
 
 		return get(mc, uuid).load(mc, false);

@@ -7,6 +7,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Collection;
@@ -15,13 +16,13 @@ import java.util.List;
 public interface CameraCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("camera", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.literal("shake")
 			.then(Commands.literal("add")
 				.then(Commands.literal("basic")
 					.then(Commands.argument("player", EntityArgument.players())
-						.then(Commands.argument("data", ScreenShake.COMMAND.argument(buildContext))
-							.executes(ctx -> addBasic(EntityArgument.getPlayers(ctx, "player"), ScreenShake.COMMAND.get(ctx, "data")))
+						.then(Commands.argument("data", ScreenShake.DATA_TYPE.argument(buildContext))
+							.executes(ctx -> addBasic(EntityArgument.getPlayers(ctx, "player"), ScreenShake.DATA_TYPE.get(ctx, "data")))
 						)
 						.executes(ctx -> addBasic(EntityArgument.getPlayers(ctx, "player"), ScreenShake.DEFAULT))
 					)
@@ -30,8 +31,8 @@ public interface CameraCommands {
 					.then(Commands.argument("player", EntityArgument.players())
 						.then(Commands.argument("at", Vec3Argument.vec3())
 							.then(Commands.argument("max-distance", DoubleArgumentType.doubleArg())
-								.then(Commands.argument("data", ScreenShake.COMMAND.argument(buildContext))
-									.executes(ctx -> addAt(EntityArgument.getPlayers(ctx, "player"), Vec3Argument.getVec3(ctx, "at"), DoubleArgumentType.getDouble(ctx, "max-distance"), ScreenShake.COMMAND.get(ctx, "data")))
+								.then(Commands.argument("data", ScreenShake.DATA_TYPE.argument(buildContext))
+									.executes(ctx -> addAt(EntityArgument.getPlayers(ctx, "player"), Vec3Argument.getVec3(ctx, "at"), DoubleArgumentType.getDouble(ctx, "max-distance"), ScreenShake.DATA_TYPE.get(ctx, "data")))
 								)
 								.executes(ctx -> addAt(EntityArgument.getPlayers(ctx, "player"), Vec3Argument.getVec3(ctx, "at"), DoubleArgumentType.getDouble(ctx, "max-distance"), ScreenShake.DEFAULT))
 							)

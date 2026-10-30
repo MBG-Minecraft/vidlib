@@ -1,18 +1,18 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
 import dev.latvian.mods.klib.util.PathIDGenerator;
+import dev.latvian.mods.klib.util.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.AsyncFileSelector;
-import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.nio.file.Files;
 
 public record GalleryFileUploader<K>(PathIDGenerator<K> randomId, ImagePreProcessor preProcessor) implements GalleryUploader<K> {
 	@Override
-	public ResourceLocation getIcon() {
-		return VidLibTextures.FOLDER.texturePath();
+	public Identifier getIcon() {
+		return VidLibTextures.FOLDER.id();
 	}
 
 	@Override

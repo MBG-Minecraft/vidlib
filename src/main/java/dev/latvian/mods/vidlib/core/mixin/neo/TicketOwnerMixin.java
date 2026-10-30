@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin.neo;
 
 import dev.latvian.mods.vidlib.core.VLTicketOwner;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public abstract class TicketOwnerMixin<T extends Comparable<? super T>> implements VLTicketOwner<T> {
 	@Override
 	@Accessor("id")
-	public abstract ResourceLocation vl$getId();
+	public abstract Identifier vl$getId();
 
 	@Override
 	@Accessor("owner")

@@ -9,7 +9,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import net.minecraft.server.players.NameAndId;
 
 import java.util.Locale;
 
@@ -32,7 +32,7 @@ public interface NPCCommands {
 			.then(Commands.argument("username", StringArgumentType.word())
 				.executes(ctx -> {
 					var mc = Minecraft.getInstance();
-					var profile = SkullBlockEntity.fetchGameProfile(StringArgumentType.getString(ctx, "username")).join().get();
+					var profile = new NameAndId(mc.services().profileResolver().fetchByName(StringArgumentType.getString(ctx, "username")).orElseThrow());
 
 					mc.status(Component.literal("3..."));
 					mc.schedule(20, () -> mc.status(Component.literal("2...")));

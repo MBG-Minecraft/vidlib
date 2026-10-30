@@ -52,13 +52,13 @@ public class TitleScreenMixin {
 		return original;
 	}
 
-	@ModifyExpressionValue(method = "createNormalMenuOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 1))
+	@ModifyExpressionValue(method = "createNormalMenuOptions", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/TitleScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;", ordinal = 2))
 	private GuiEventListener vl$createMultiPlayerButton(GuiEventListener original) {
 		vl$mpButton = (AbstractWidget) original;
 		return original;
 	}
 
-	@WrapOperation(method = "lambda$init$4", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;stop()V"))
+	@WrapOperation(method = "lambda$init$5", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;stop()V"))
 	private void vl$stop(Minecraft mc, Operation<Void> original) {
 		if (!BlockExitScreen.preventExit(mc, true)) {
 			original.call(mc);

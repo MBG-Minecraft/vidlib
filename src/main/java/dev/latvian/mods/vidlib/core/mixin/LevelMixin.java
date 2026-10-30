@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.google.gson.JsonElement;
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.core.VLLevel;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.util.PauseType;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;

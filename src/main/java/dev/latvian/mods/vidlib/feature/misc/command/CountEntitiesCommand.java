@@ -7,6 +7,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -14,7 +15,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 public interface CountEntitiesCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("count-entities", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.argument("filter", EntityArgument.entities())
 			.executes(ctx -> countEntities(ctx.getSource(), EntityArgument.getEntities(ctx, "filter")))
 		)

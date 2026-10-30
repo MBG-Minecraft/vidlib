@@ -1,20 +1,19 @@
 package dev.latvian.mods.vidlib.feature.prop.geo;
 
+import com.geckolib.animatable.GeoAnimatable;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.animatable.GeoAnimatable;
-import software.bernie.geckolib.constant.dataticket.SerializableDataTicket;
 
 public interface GeoProp extends GeoAnimatable {
 	@ApiStatus.NonExtendable
 	@Nullable
-	default <D> D getAnimData(SerializableDataTicket<D> dataTicket) {
+	default <D> D getAnimData(com.geckolib.constant.dataticket.DataTicket<D> dataTicket) {
 		return getAnimatableInstanceCache().getManagerForId(((Prop) this).id).getAnimatableData(dataTicket);
 	}
 
 	@ApiStatus.NonExtendable
-	default <D> void setAnimData(SerializableDataTicket<D> dataTicket, D data) {
+	default <D> void setAnimData(com.geckolib.constant.dataticket.DataTicket<D> dataTicket, D data) {
 		var prop = (Prop) this;
 
 		if (prop.level.isClientSide()) {
@@ -69,8 +68,7 @@ public interface GeoProp extends GeoAnimatable {
 		}
 	}
 
-	@Override
-	default double getTick(@Nullable Object entity) {
+	default double getTick(Object entity) {
 		return ((Prop) this).tick;
 	}
 }

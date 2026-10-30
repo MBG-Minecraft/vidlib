@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
@@ -69,7 +70,7 @@ public final class AsyncFileSelector {
 			}
 		};
 
-		if (Minecraft.ON_OSX) {
+		if (Util.getPlatform() == Util.OS.OSX) {
 			// MacOS needs dialogs to be run from the main thread
 			Minecraft.getInstance().execute(runnable);
 		} else {

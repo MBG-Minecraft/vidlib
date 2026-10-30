@@ -7,7 +7,7 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -34,7 +34,7 @@ public abstract class CommandSourceStackMixin implements VLCommandSourceStack {
 	private void broadcastToAdmins(Component message) {
 		var component = Component.translatable("chat.type.admin", getDisplayName(), message).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
 
-		if (server.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
+		if (server.getGameRules().get(GameRules.SEND_COMMAND_FEEDBACK)) {
 			for (var player : server.getPlayerList().getPlayers()) {
 				if (player.commandSource() != source && CommonGameEngine.INSTANCE.getReceiveCommandFeedback(server, player)) {
 					player.sendSystemMessage(component);
@@ -42,7 +42,7 @@ public abstract class CommandSourceStackMixin implements VLCommandSourceStack {
 			}
 		}
 
-		if (source != server && server.getGameRules().getBoolean(GameRules.RULE_LOGADMINCOMMANDS)) {
+		if (source != server && server.getGameRules().get(GameRules.LOG_ADMIN_COMMANDS)) {
 			server.sendSystemMessage(component);
 		}
 	}

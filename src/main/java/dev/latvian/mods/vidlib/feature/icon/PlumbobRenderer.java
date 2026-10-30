@@ -1,18 +1,20 @@
 package dev.latvian.mods.vidlib.feature.icon;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.latvian.mods.klib.icon.Icon;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.icon.renderer.IconRenderer;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.klib.render.MultiBufferSource;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 public class PlumbobRenderer {
 	public static void render(Minecraft mc, FrameInfo frame) {
@@ -31,16 +33,16 @@ public class PlumbobRenderer {
 
 			float pdelta = player == mc.player ? frame.screenDelta() : frame.worldDelta();
 
-			var source = mc.renderBuffers().bufferSource();
+			var source = frame.buffers();
 			var blockpos = BlockPos.containing(player.getLightProbePosition(pdelta));
-			int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
+			int light = net.minecraft.util.LightCoordsUtil.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
 
 			render(mc, h, player.getEyePosition(pdelta), ms, frame.worldDelta(), source, light, player.isCrouching(), !Empty.isEmpty(ClientGameEngine.INSTANCE.getScoreText(player)));
 		}
 	}
 
-	public static void render(Minecraft mc, Icon icon, Vec3 pos, PoseStack ms, float delta, MultiBufferSource buffers, int light, boolean crouching, boolean scoreText) {
-		var cam = mc.gameRenderer.getMainCamera().getPosition();
+	public static void render(Minecraft mc, Ref<Icon> icon, Vec3 pos, PoseStack ms, float delta, MultiBufferSource buffers, int light, boolean crouching, boolean scoreText) {
+		var cam = mc.gameRenderer.mainCamera().position();
 
 		if (KMath.sq(pos.x - cam.x) + KMath.sq(pos.z - cam.z) <= 0.01D * 0.01D) {
 			return;
@@ -55,7 +57,8 @@ public class PlumbobRenderer {
 		ms.pushPose();
 		ms.translate(pos.x - cam.x, pos.y - cam.y + y, pos.z - cam.z);
 		ms.translate(0F, y, 0F);
-		ms.mulPose(mc.gameRenderer.getMainCamera().rotation());
+		// 26.3 removed PoseStack#mulPose(Quaternionf); the camera rotation is applied as a matrix.
+		ms.mulPose(new Matrix4f().rotation(mc.gameRenderer.mainCamera().rotation()));
 		ms.scale(0.4F, 0.4F, 0.4F);
 
 		IconRenderer.render(icon, mc, ms, delta, buffers, light, OverlayTexture.NO_OVERLAY);

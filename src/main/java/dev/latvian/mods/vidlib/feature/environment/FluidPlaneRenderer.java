@@ -1,24 +1,12 @@
 package dev.latvian.mods.vidlib.feature.environment;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.latvian.mods.klib.gl.StaticBuffers;
-import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.client.TerrainRenderTypes;
-import dev.latvian.mods.vidlib.feature.visual.DynamicSpriteTexture;
-import dev.latvian.mods.vidlib.feature.visual.ResolvedCubeTextures;
-import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.util.Mth;
 
 import java.util.Map;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
 
 public class FluidPlaneRenderer {
 	public static final Map<ClientAsset, StaticBuffers> BUFFERS = new Object2ObjectOpenHashMap<>();
@@ -39,6 +27,7 @@ public class FluidPlaneRenderer {
 		builder.addVertex(maxX, 0F, minZ).setColor(colR, colG, colB, colA).setUv(maxX - minX, 0F).setUv2(lu, lv).setNormal(0F, 1F, 0F);
 	}
 
+	/*
 	public static void render(FrameInfo frame, FluidPlane fluidPlane) {
 		var mc = frame.mc();
 		var tex = ResolvedCubeTextures.resolve(fluidPlane.fluid().textures().cubeTextures());
@@ -69,7 +58,7 @@ public class FluidPlaneRenderer {
 					buffers = StaticBuffers.empty(format);
 
 					try (var memory = new ByteBufferBuilder(format.getVertexSize() * 4 * (r * r + 4))) {
-						var bufferBuilder = new BufferBuilder(memory, VertexFormat.Mode.QUADS, format);
+						var bufferBuilder = new BufferBuilder(memory, PrimitiveTopology.QUADS, format);
 
 						appendPlane(bufferBuilder, -s, -r, -r, r + 1F, colR, colG, colB, colA, lu, lv); // Left
 						appendPlane(bufferBuilder, r + 1F, -r, s + 1F, r + 1F, colR, colG, colB, colA, lu, lv); // Right
@@ -111,30 +100,34 @@ public class FluidPlaneRenderer {
 					frame.z(z)
 				);
 
-				renderType.setupRenderState();
+				var device = RenderSystem.getDevice();
+				var renderTarget = mc.gameRenderer.mainRenderTarget();
+				var blockAtlas = mc.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS);
+				var atlasSampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR);
+				var lightmap = mc.gameRenderer.lightmap();
+				var depthView = renderTarget.getDepthTextureView();
 
-				var renderTarget = renderType.getRenderTarget();
-
-				try (var renderPass = RenderSystem.getDevice()
-					.createCommandEncoder()
-					.createRenderPass(
-						renderTarget.getColorTexture(),
-						OptionalInt.empty(),
-						renderTarget.useDepth ? renderTarget.getDepthTexture() : null,
-						OptionalDouble.empty()
-					)
-				) {
-					renderPass.setPipeline(renderType.getRenderPipeline());
-					renderPass.bindSampler("Sampler0", RenderSystem.getShaderTexture(0));
-					renderPass.bindSampler("Sampler2", RenderSystem.getShaderTexture(2));
-					buffers.setIndexBuffer(renderPass, renderType.getRenderPipeline());
-					renderPass.setVertexBuffer(0, buffers.vertexBuffer());
-					renderPass.drawIndexed(0, buffers.indexCount());
+				try (var renderPass = device.createCommandEncoder().createRenderPass(
+					() -> "VidLib Fluid Plane",
+					renderTarget.getColorTextureView(),
+					Optional.empty(),
+					depthView,
+					OptionalDouble.empty()
+				)) {
+					RenderSystem.bindDefaultUniforms(renderPass);
+					renderPass.setPipeline(RenderSystem.getCompiledPipeline(renderType.pipeline()));
+					renderPass.setUniform("DynamicTransforms", RenderSystem.getDynamicUniforms().writeTransform(RenderSystem.getModelViewMatrixCopy()));
+					renderPass.setUniform("TerrainUniform", RenderSystem.getDynamicUniforms().writeTerrainTransform(RenderSystem.getModelViewMatrixCopy(), blockAtlas.getTextureView().getWidth(0), blockAtlas.getTextureView().getHeight(0)));
+					renderPass.setUniform("Sampler0", blockAtlas.getTextureView(), atlasSampler);
+					renderPass.setUniform("Sampler2", lightmap, atlasSampler);
+					buffers.setIndexBuffer(renderPass, renderType.pipeline());
+					renderPass.setVertexBuffer(0, buffers.vertexBuffer().slice());
+					renderPass.drawIndexed(buffers.indexCount(), 1, 0, 0, 0);
 				}
 
-				renderType.clearRenderState();
 				modelViewMatrix.popMatrix();
 			}
 		}
 	}
+	 */
 }

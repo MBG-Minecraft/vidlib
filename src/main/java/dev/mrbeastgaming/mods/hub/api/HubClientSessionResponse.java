@@ -12,7 +12,7 @@ import dev.mrbeastgaming.mods.hub.api.data.HubProject;
 import dev.mrbeastgaming.mods.hub.api.data.HubResponseContext;
 import dev.mrbeastgaming.mods.hub.api.data.HubUser;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.util.List;
 import java.util.Optional;

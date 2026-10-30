@@ -3,11 +3,9 @@ package dev.latvian.mods.vidlib.feature.structure;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Transformation;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.textures.FilterMode;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.gl.StaticBuffers;
 import dev.latvian.mods.klib.util.Async;
@@ -18,37 +16,37 @@ import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.registry.RegistryRef;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import dev.latvian.mods.vidlib.util.VLBiomes;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.BlockQuadOutput;
+import net.minecraft.client.renderer.block.FluidRenderer;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.data.AtlasIds;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.neoforge.client.model.pipeline.TransformingVertexPipeline;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.OptionalInt;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class StructureRenderer implements WithCache {
-	private static final EnumMap<TerrainRenderLayer, CachedLayer> EMPTY_LAYERS = new EnumMap<>(TerrainRenderLayer.class);
+	private static final EnumMap<ChunkSectionLayer, CachedLayer> EMPTY_LAYERS = new EnumMap<>(ChunkSectionLayer.class);
 
 	private record StateModel(BlockPos pos, BlockState state, BlockStateModel model, long seed) {
 	}
@@ -56,27 +54,42 @@ public class StructureRenderer implements WithCache {
 	private record FluidModel(BlockPos pos, BlockState state, FluidState fluid) {
 	}
 
-	private record BuildingLayer(ByteBufferBuilder memory, BufferBuilder bufferBuilder, RenderType type, Map<StateModel, List<BlockModelPart>> parts, List<FluidModel> fluids, int sort) {
+	private static final class BuildingLayer {
+		private final ByteBufferBuilder memory;
+		private BufferBuilder bufferBuilder;
+		private final ChunkSectionLayer sectionLayer;
+		private final Map<StateModel, List<BlockStateModelPart>> parts;
+		private final List<FluidModel> fluids;
+		private final int sort;
+
 		private static final BuildingLayer[] EMPTY = new BuildingLayer[0];
-	}
 
-	private record CachedLayer(TerrainRenderLayer layer, RenderType type, StaticBuffers buffer) {
-	}
-
-	public static class FluidTransformingVertexPipeline extends TransformingVertexPipeline {
-		public FluidTransformingVertexPipeline(VertexConsumer parent, Transformation transformation) {
-			super(parent, transformation);
-		}
-
-		public int wrap() {
-			return 0xFFFFFFFF;
+		private BuildingLayer(ByteBufferBuilder memory, BufferBuilder bufferBuilder, ChunkSectionLayer sectionLayer, Map<StateModel, List<BlockStateModelPart>> parts, List<FluidModel> fluids, int sort) {
+			this.memory = memory;
+			this.bufferBuilder = bufferBuilder;
+			this.sectionLayer = sectionLayer;
+			this.parts = parts;
+			this.fluids = fluids;
+			this.sort = sort;
 		}
 	}
 
-	private static final Map<ResourceLocation, StructureRenderer> RUNTIME_RENDERERS = new HashMap<>();
+	private record CachedLayer(ChunkSectionLayer sectionLayer, StaticBuffers buffer) {
+	}
+
+	/**
+	 * Legacy hook: {@link dev.latvian.mods.vidlib.core.mixin.LiquidBlockRendererMixin} no longer has a
+	 * target to hook (26.3 replaced {@code LiquidBlockRenderer} with {@code FluidRenderer}), so the
+	 * vertex pipeline is inert here.
+	 */
+	@Deprecated
+	public static class FluidTransformingVertexPipeline {
+	}
+
+	private static final Map<Identifier, StructureRenderer> RUNTIME_RENDERERS = new HashMap<>();
 	private static Integer renderingAll = null;
 
-	public static StructureRenderer create(ResourceLocation id, Supplier<StructureHolder> structure) {
+	public static StructureRenderer create(Identifier id, Supplier<StructureHolder> structure) {
 		var oldRenderer = RUNTIME_RENDERERS.get(id);
 
 		if (oldRenderer != null) {
@@ -93,15 +106,15 @@ public class StructureRenderer implements WithCache {
 		return create(ref.id(), StructureHolder.refSupplier(ref));
 	}
 
-	public static StructureRenderer create(ResourceLocation id, ResourceLocation structure) {
+	public static StructureRenderer create(Identifier id, Identifier structure) {
 		return create(id, StructureHolder.refSupplier(StructureStorage.CLIENT.ref(structure)));
 	}
 
-	public static StructureRenderer create(ResourceLocation id) {
+	public static StructureRenderer create(Identifier id) {
 		return create(id, id);
 	}
 
-	private static StructureRenderer createGhost(ResourceLocation structure) {
+	private static StructureRenderer createGhost(Identifier structure) {
 		return new StructureRenderer(structure, StructureHolder.refSupplier(StructureStorage.CLIENT.ref(structure)));
 	}
 
@@ -138,16 +151,16 @@ public class StructureRenderer implements WithCache {
 		return renderingAll;
 	}
 
-	public static final Codec<StructureRenderer> GHOST_CODEC = ResourceLocation.CODEC.xmap(StructureRenderer::createGhost, r -> r.id);
+	public static final Codec<StructureRenderer> GHOST_CODEC = Identifier.CODEC.xmap(StructureRenderer::createGhost, r -> r.id);
 
-	public final ResourceLocation id;
+	public final Identifier id;
 	private final Supplier<StructureHolder> structureProvider;
 	public BlockPos origin;
 
-	private EnumMap<TerrainRenderLayer, CachedLayer> layers = null;
+	private EnumMap<ChunkSectionLayer, CachedLayer> layers = null;
 	private boolean rendering = false;
 
-	private StructureRenderer(ResourceLocation id, Supplier<StructureHolder> structureProvider) {
+	private StructureRenderer(Identifier id, Supplier<StructureHolder> structureProvider) {
 		this.id = id;
 		this.structureProvider = structureProvider;
 		this.origin = BlockPos.ZERO;
@@ -179,59 +192,63 @@ public class StructureRenderer implements WithCache {
 
 	private void buildLayers(Minecraft mc, StructureHolder structure, StructureRendererData data, Executor renderExecutor, Executor backgroundExecutor) {
 		var start = System.currentTimeMillis();
-		var blockRenderer = mc.getBlockRenderer();
+		var blockModelSet = mc.getModelManager().getBlockStateModelSet();
+		var fluidModelSet = mc.getModelManager().getFluidStateModelSet();
 		var random = RandomSource.create();
 
 		var level = new StructureRendererLevel(structure.blocks(), data.skyLight(), data.blockLight(), VLBiomes.VOID);
+		var layerMap = new Reference2ObjectOpenHashMap<ChunkSectionLayer, BuildingLayer>();
 
-		var allTypes = RenderType.chunkBufferLayers();
-		var layerMap = new Reference2ObjectOpenHashMap<RenderType, BuildingLayer>(allTypes.size());
-		var layerSorting = new Reference2IntOpenHashMap<RenderType>(allTypes.size());
+		var blockRenderer = new ModelBlockRenderer(true, data.cull(), mc.getBlockColors());
+		var fluidRenderer = new FluidRenderer(fluidModelSet);
 
-		for (int i = 0; i < allTypes.size(); i++) {
-			layerSorting.put(allTypes.get(i), i);
-		}
+		BlockQuadOutput quadOutput = (x, y, z, quad, instance) -> {
+			var builder = getOrBeginLayer(layerMap, quad.materialInfo().layer());
+			builder.putBlockBakedQuad(x, y, z, quad, instance);
+		};
+
+		FluidRenderer.Output fluidOutput = l -> getOrBeginLayer(layerMap, l);
 
 		for (var entry : structure.blocks().long2ObjectEntrySet()) {
 			var pos = BlockPos.of(entry.getLongKey());
 			var state = entry.getValue();
+			var seed = state.getSeed(pos);
+			random.setSeed(seed);
 
-			var stateModel = new StateModel(pos, state, blockRenderer.getBlockModel(state), state.getSeed(pos));
-			random.setSeed(stateModel.seed);
+			var parts = new ArrayList<BlockStateModelPart>();
+			blockModelSet.get(state).collectParts(random, parts);
 
-			for (var part : stateModel.model.collectParts(random)) {
-				var type = part.getRenderType(state);
-				var layer = layerMap.get(type);
-
-				if (layer == null) {
-					var memory = new ByteBufferBuilder(65536);
-					var bufferBuilder = new BufferBuilder(memory, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-					layer = new BuildingLayer(memory, bufferBuilder, type, new Reference2ObjectArrayMap<>(1), new ArrayList<>(), layerSorting.getOrDefault(type, 9999));
-					layerMap.put(type, layer);
+			if (!parts.isEmpty()) {
+				try {
+					blockRenderer.tesselateBlock(
+						quadOutput,
+						pos.getX(),
+						pos.getY(),
+						pos.getZ(),
+						level,
+						pos,
+						state,
+						blockModelSet.get(state),
+						seed
+					);
+				} catch (Throwable ex) {
+					VidLib.LOGGER.info("Error rendering " + state.getBlock().getName().getString() + " structure block at " + pos, ex);
 				}
-
-				layer.parts.computeIfAbsent(stateModel, k -> new ArrayList<>(1)).add(part);
 			}
 
 			var fluidState = state.getFluidState();
 
 			if (!fluidState.isEmpty()) {
-				var type = ItemBlockRenderTypes.getRenderLayer(fluidState);
-				var layer = layerMap.get(type);
-
-				if (layer == null) {
-					var memory = new ByteBufferBuilder(65536);
-					var bufferBuilder = new BufferBuilder(memory, VertexFormat.Mode.QUADS, DefaultVertexFormat.BLOCK);
-					layer = new BuildingLayer(memory, bufferBuilder, type, new Reference2ObjectArrayMap<>(1), new ArrayList<>(), layerSorting.getOrDefault(type, 9999));
-					layerMap.put(type, layer);
+				try {
+					fluidRenderer.tesselate(level, pos, fluidOutput, state, fluidState);
+				} catch (Throwable ex) {
+					VidLib.LOGGER.info("Error rendering " + state.getBlock().getName().getString() + " structure fluid at " + pos, ex);
 				}
-
-				layer.fluids.add(new FluidModel(pos, state, fluidState));
 			}
 		}
 
 		var buildingLayerArray = layerMap.values().toArray(BuildingLayer.EMPTY);
-		Arrays.sort(buildingLayerArray, Comparator.comparingInt(BuildingLayer::sort));
+		Arrays.sort(buildingLayerArray, (a, b) -> Integer.compare(a.sort, b.sort));
 
 		var poseStack = new PoseStack();
 
@@ -240,34 +257,6 @@ public class StructureRenderer implements WithCache {
 			var y = data.centerY() ? -structure.size().getY() / 2D : 0D;
 			var z = data.centerZ() ? -structure.size().getZ() / 2D : 0D;
 			poseStack.translate(x, y, z);
-		}
-
-		for (var layer : buildingLayerArray) {
-			for (var entry : layer.parts.entrySet()) {
-				var model = entry.getKey();
-				var parts = entry.getValue();
-
-				poseStack.pushPose();
-				poseStack.translate(model.pos.getX(), model.pos.getY(), model.pos.getZ());
-
-				try {
-					blockRenderer.renderBatched(model.state, model.pos, level, poseStack, layer.bufferBuilder, data.cull(), parts);
-				} catch (Throwable ex) {
-					VidLib.LOGGER.info("Error rendering " + model.state.getBlock().getName().getString() + " structure block at " + model.pos, ex);
-				}
-
-				poseStack.popPose();
-			}
-
-			if (!layer.fluids.isEmpty()) {
-				for (var model : layer.fluids) {
-					poseStack.pushPose();
-					// poseStack.translate(model.pos.getX(), model.pos.getY(), model.pos.getZ());
-					var buffer = new FluidTransformingVertexPipeline(layer.bufferBuilder, new Transformation(poseStack.last().pose()));
-					blockRenderer.renderLiquid(model.pos, level, buffer, model.state, model.fluid);
-					poseStack.popPose();
-				}
-			}
 		}
 
 		var time = System.currentTimeMillis() - start;
@@ -279,24 +268,53 @@ public class StructureRenderer implements WithCache {
 		}
 	}
 
+	private static BufferBuilder getOrBeginLayer(
+		Map<ChunkSectionLayer, BuildingLayer> layerMap,
+		ChunkSectionLayer sectionLayer
+	) {
+		var layer = layerMap.get(sectionLayer);
+
+		if (layer == null) {
+			var memory = new ByteBufferBuilder(Math.max(sectionLayer.bufferSize(), 65536));
+			layer = new BuildingLayer(memory, null, sectionLayer, new Reference2ObjectArrayMap<>(1), new ArrayList<>(), sectionLayer.ordinal());
+			layerMap.put(sectionLayer, layer);
+		}
+
+		if (layer.bufferBuilder == null) {
+			var builder = new BufferBuilder(layer.memory, PrimitiveTopology.QUADS, sectionLayer.vertexFormat());
+			layer.bufferBuilder = builder;
+			return builder;
+		}
+
+		return layer.bufferBuilder;
+	}
+
 	private void upload(BuildingLayer[] buildingLayerArray, long buildTime) {
 		long start = System.currentTimeMillis();
 
 		var layers0 = new EnumMap<>(EMPTY_LAYERS);
 
 		for (var layer : buildingLayerArray) {
-			try (var meshData = layer.bufferBuilder.build()) {
+			var builder = layer.bufferBuilder;
+
+			if (builder == null) {
+				layer.memory.close();
+				continue;
+			}
+
+			try (var meshData = builder.build()) {
 				if (meshData != null) {
 					try (var memory = new ByteBufferBuilder(6)) {
-						if (layer.type.sortOnUpload()) {
+						if (layer.sectionLayer.translucent()) {
 							meshData.sortQuads(memory, RenderSystem.getProjectionType().vertexSorting());
 						}
 
 						var cachedBuffers = StaticBuffers.of(meshData, () -> "StructureRenderer");
-						var terrainLayer = TerrainRenderLayer.fromBlockRenderType(layer.type);
-						layers0.put(terrainLayer, new CachedLayer(terrainLayer, layer.type, cachedBuffers));
+						layers0.put(layer.sectionLayer, new CachedLayer(layer.sectionLayer, cachedBuffers));
 					}
 				}
+			} catch (Throwable ex) {
+				VidLib.LOGGER.error("Error uploading structure layer " + layer.sectionLayer, ex);
 			}
 
 			layer.memory.close();
@@ -306,7 +324,7 @@ public class StructureRenderer implements WithCache {
 
 		long time = System.currentTimeMillis() - start;
 
-		if (!FMLLoader.isProduction()) {
+		if (!FMLLoader.getCurrent().isProduction()) {
 			VidLib.LOGGER.info("%s took %,d ms to build and %,d ms to upload".formatted(id, buildTime, time));
 		}
 
@@ -351,31 +369,51 @@ public class StructureRenderer implements WithCache {
 			return;
 		}
 
-		var modelViewMatrix = RenderSystem.getModelViewStack();
-		modelViewMatrix.pushMatrix();
-		modelViewMatrix.mul(ms.last().pose());
-		layer.type.setupRenderState();
+		var mc = Minecraft.getInstance();
+		var mainTarget = mc.gameRenderer.mainRenderTarget();
+		var atlas = mc.getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS);
 
-		var renderTarget = layer.type.getRenderTarget();
+		var modelViewStack = RenderSystem.getModelViewStack();
+		modelViewStack.pushMatrix();
+		modelViewStack.mul(ms.last().pose());
 
-		try (var renderPass = RenderSystem.getDevice()
-			.createCommandEncoder()
-			.createRenderPass(
-				renderTarget.getColorTexture(),
-				OptionalInt.empty(),
-				renderTarget.useDepth ? renderTarget.getDepthTexture() : null,
-				OptionalDouble.empty()
-			)
-		) {
-			renderPass.setPipeline(layer.type.getRenderPipeline());
-			renderPass.bindSampler("Sampler0", RenderSystem.getShaderTexture(0));
-			renderPass.bindSampler("Sampler2", RenderSystem.getShaderTexture(2));
-			layer.buffer.setIndexBuffer(renderPass, layer.type.getRenderPipeline());
-			renderPass.setVertexBuffer(0, layer.buffer.vertexBuffer());
-			renderPass.drawIndexed(0, layer.buffer.indexCount());
+		try {
+			var modelView = RenderSystem.getModelViewMatrixCopy();
+			var atlasView = atlas.getTextureView();
+			int atlasWidth = atlasView == null ? 0 : atlasView.getWidth(0);
+			int atlasHeight = atlasView == null ? 0 : atlasView.getHeight(0);
+
+			var terrainTransform = RenderSystem.getDynamicUniforms()
+				.writeTerrainTransform(modelView, atlasWidth, atlasHeight);
+
+			var autoIndices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
+			var defaultIndexBuffer = autoIndices.getBuffer(layer.buffer.indexCount());
+
+			var pipeline = layer.sectionLayer.pipeline(false);
+
+			try (var renderPass = RenderSystem.getDevice()
+				.createCommandEncoder()
+				.createRenderPass(
+					() -> "StructureRenderer",
+					mainTarget.getColorTextureView(),
+					Optional.empty(),
+					mainTarget.getDepthTextureView(),
+					OptionalDouble.empty()
+				)
+			) {
+				RenderSystem.bindDefaultUniforms(renderPass);
+				renderPass.setUniform("TerrainUniform", terrainTransform);
+				renderPass.setUniform("Sampler0", atlasView, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR, true));
+				renderPass.setUniform("Sampler2", mc.gameRenderer.lightmap(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+
+				renderPass.setPipeline(RenderSystem.getCompiledPipeline(pipeline));
+				layer.buffer.setIndexBuffer(renderPass, pipeline);
+				var vertexBuffer = layer.buffer.vertexBuffer().slice();
+				renderPass.setVertexBuffer(0, vertexBuffer);
+				renderPass.drawIndexed(layer.buffer.indexCount(), 1, 0, 0, 0);
+			}
+		} finally {
+			modelViewStack.popMatrix();
 		}
-
-		layer.type.clearRenderState();
-		modelViewMatrix.popMatrix();
 	}
 }

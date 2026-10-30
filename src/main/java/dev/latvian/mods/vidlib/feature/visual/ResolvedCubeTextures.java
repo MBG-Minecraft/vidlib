@@ -1,19 +1,17 @@
 package dev.latvian.mods.vidlib.feature.visual;
 
-import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
+import dev.latvian.mods.klib.util.GeometryRenderLayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, List<FaceTexture> faces) {
+public record ResolvedCubeTextures(@Nullable GeometryRenderLayer commonLayer, List<FaceTexture> faces) {
 	public static final ResolvedCubeTextures EMPTY = new ResolvedCubeTextures(null, FaceTexture.EMPTY);
-	public static final ResolvedCubeTextures WHITE = new ResolvedCubeTextures(TerrainRenderLayer.SOLID, FaceTexture.WHITE);
-	public static final ResolvedCubeTextures BRIGHT = new ResolvedCubeTextures(TerrainRenderLayer.BRIGHT, FaceTexture.WHITE);
-	public static final ResolvedCubeTextures BLOOM = new ResolvedCubeTextures(TerrainRenderLayer.BLOOM, FaceTexture.BLOOM);
+	public static final ResolvedCubeTextures WHITE = new ResolvedCubeTextures(GeometryRenderLayer.NONE, FaceTexture.WHITE);
 
-	public static TerrainRenderLayer commonLayer(List<FaceTexture> faces) {
-		TerrainRenderLayer commonLayer = null;
+	public static GeometryRenderLayer commonLayer(List<FaceTexture> faces) {
+		GeometryRenderLayer commonLayer = null;
 
 		for (var face : faces) {
 			if (face == FaceTexture.EMPTY) {
@@ -50,7 +48,7 @@ public record ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, Lis
 		return new ResolvedCubeTextures(commonLayer(faces), faces);
 	}
 
-	public ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, FaceTexture face) {
+	public ResolvedCubeTextures(@Nullable GeometryRenderLayer commonLayer, FaceTexture face) {
 		this(commonLayer, List.of(face, face, face, face, face, face));
 	}
 
@@ -77,7 +75,7 @@ public record ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, Lis
 		return new ResolvedCubeTextures(commonLayer(faces), faces);
 	}
 
-	public boolean anyIn(TerrainRenderLayer layer) {
+	public boolean anyIn(GeometryRenderLayer layer) {
 		if (commonLayer == layer) {
 			return true;
 		}
@@ -91,7 +89,7 @@ public record ResolvedCubeTextures(@Nullable TerrainRenderLayer commonLayer, Lis
 		return false;
 	}
 
-	public ResolvedCubeTextures filter(TerrainRenderLayer filter, boolean onlyUp) {
+	public ResolvedCubeTextures filter(GeometryRenderLayer filter, boolean onlyUp) {
 		if (commonLayer != null && commonLayer == filter) {
 			return this;
 		}

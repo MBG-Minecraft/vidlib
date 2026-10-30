@@ -2,8 +2,8 @@
 
 uniform sampler2D InSampler;
 
-in vec2 texCoord;
-in vec2 oneTexel;
+layout (location = 0) in vec2 texCoord;
+layout (location = 1) in vec2 oneTexel;
 
 layout (location = 0) out vec4 fragColor;
 

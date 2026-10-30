@@ -13,13 +13,14 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 
 public interface PlayerDataCommand {
 	SuggestionProvider<CommandSourceStack> SESSION_NAMES = (ctx, builder) -> SharedSuggestionProvider.suggest(PlatformHelper.CURRENT.getLevel(ctx.getSource()).getEnvironment().vl$getAllSessionData().stream().map(SessionData::getName), builder);
 
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("player-data", (command, buildContext) -> {
-		command.requires(source -> source.hasPermission(2));
+		command.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
 
 		command.then(Commands.literal("preload-all")
 			.executes(ctx -> {
@@ -36,7 +37,7 @@ public interface PlayerDataCommand {
 		playerCmd.then(Commands.literal("erase")
 			.executes(ctx -> {
 				for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
-					ctx.getSource().getServer().vl$eraseServerSession(player.getId());
+					ctx.getSource().getServer().vl$eraseServerSession(player.id());
 				}
 
 				return 1;
@@ -49,12 +50,12 @@ public interface PlayerDataCommand {
 			cmd.then(Commands.literal("get")
 				.executes(ctx -> {
 					for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
-						var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.getId());
+						var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.id());
 
 						ctx.getSource().sendSuccess(() -> {
 							var value = playerData.dataMap.get(key);
 							var nbt = key.type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
-							return Component.literal(player.getName() + ": ").append(NbtUtils.toPrettyComponent(nbt));
+							return Component.literal(player.name() + ": ").append(NbtUtils.toPrettyComponent(nbt));
 						}, false);
 					}
 
@@ -63,12 +64,12 @@ public interface PlayerDataCommand {
 			);
 
 			cmd.then(Commands.literal("set")
-				.then(Commands.argument("value", key.command().argument(buildContext))
+				.then(Commands.argument("value", key.type().argument(buildContext))
 					.executes(ctx -> {
-						var value = key.command().get(ctx, "value");
+						var value = key.type().get(ctx, "value");
 
 						for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
-							var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.getId());
+							var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.id());
 							playerData.dataMap.set(key, Cast.to(value));
 						}
 
@@ -80,7 +81,7 @@ public interface PlayerDataCommand {
 			cmd.then(Commands.literal("reset")
 				.executes(ctx -> {
 					for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
-						var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.getId());
+						var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.id());
 						playerData.dataMap.set(key, Cast.to(key.defaultValue()));
 					}
 

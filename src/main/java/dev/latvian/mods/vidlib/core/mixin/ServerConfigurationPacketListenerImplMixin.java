@@ -26,7 +26,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin implements VLSe
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void vl$init(MinecraftServer server, Connection connection, CommonListenerCookie cookie, CallbackInfo ci) {
-		vl$sessionData(server.vl$getOrLoadServerSession(cookie.gameProfile().getId()));
+		vl$sessionData(server.vl$getOrLoadServerSession(cookie.gameProfile().id()));
 	}
 
 	@Override

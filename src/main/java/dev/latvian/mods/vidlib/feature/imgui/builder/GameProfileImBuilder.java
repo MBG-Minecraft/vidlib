@@ -1,9 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
-import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gallery.LowQualityPlayerBodies;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerBodies;
@@ -14,15 +12,17 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public class GameProfileImBuilder implements ImBuilder<GameProfile> {
-	public static final ImBuilderType<GameProfile> TYPE = GameProfileImBuilder::new;
+public class GameProfileImBuilder implements ImBuilder<NameAndId> {
+	public static final ImBuilderType<NameAndId> TYPE = GameProfileImBuilder::new;
+	private static final NameAndId EMPTY_PROFILE = new NameAndId(Util.NIL_UUID, "");
 
 	private static final Lazy<String> VALID_NAME_CHARS = Lazy.of(() -> {
 		int min = 33;
@@ -40,7 +40,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	public final ImString name;
 
 	private final ImBoolean ignoreNPCs = new ImBoolean(false);
-	private GameProfile profile;
+	private NameAndId profile;
 
 	public GameProfileImBuilder() {
 		this.name = new ImString(16);
@@ -54,9 +54,9 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	}
 
 	@Override
-	public void set(GameProfile v) {
-		if (v != null && !v.getName().isEmpty() && !v.getId().equals(Util.NIL_UUID)) {
-			name.set(v.getName());
+	public void set(NameAndId v) {
+		if (v != null && !v.name().isEmpty() && !v.id().equals(Util.NIL_UUID)) {
+			name.set(v.name());
 			profile = v;
 		} else {
 			name.set("");
@@ -71,17 +71,17 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		appendMainIcon(graphics);
 		ImGui.sameLine();
 
-		boolean select = ImGui.button(profile == null ? "Select..." : profile.getName());
+		boolean select = ImGui.button(profile == null ? "Select..." : profile.name());
 
 		if (profile != null && ImGui.isItemHovered()) {
-			graphics.tooltip(profile.getId().toString());
+			graphics.tooltip(profile.id().toString());
 		}
 
 		if (select) {
 			ImGui.openPopup("###select-profile");
 
 			if (profile != null) {
-				name.set(profile.getName());
+				name.set(profile.name());
 			} else {
 				name.set("");
 			}
@@ -100,14 +100,14 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 		return update;
 	}
 
-	public ImUpdate profileSelector(ImGraphics graphics, @Nullable Predicate<GameProfile> filter) {
+	public ImUpdate profileSelector(ImGraphics graphics, @Nullable Predicate<NameAndId> filter) {
 		var update = ImUpdate.NONE;
 
 		if (ImGui.beginListBox("###existing", -1F, 180F)) {
 			ImGui.setNextItemWidth(-1F);
 			ImGui.inputTextWithHint("###search", "Search...", search);
 
-			if (filter == null || filter.test(PlayerProfile.EMPTY_GAME_PROFILE)) {
+			if (filter == null || filter.test(EMPTY_PROFILE)) {
 				appendIcon(graphics.mc, Util.NIL_UUID);
 
 				ImGui.sameLine();
@@ -118,19 +118,19 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 			}
 
 			for (var p : PlayerProfiles.getAllKnown()) {
-				if (ignoreNPCs.get() && (p.profile().getId().version() == 2 || p.profile().getId().equals(Util.NIL_UUID))) {
+				if (ignoreNPCs.get() && (p.profile().id().version() == 2 || p.profile().id().equals(Util.NIL_UUID))) {
 					continue;
 				}
 
-				if (filter == null || filter.test(p.profile())) {
-					if (search.isNotEmpty() && !p.profile().getName().contains(search.get())) {
+				if (filter == null || filter.test(new NameAndId(p.profile()))) {
+					if (search.isNotEmpty() && !p.profile().name().contains(search.get())) {
 						continue;
 					}
-					appendIcon(graphics.mc, p.profile().getId());
+					appendIcon(graphics.mc, p.profile().id());
 					ImGui.sameLine();
 
-					if (ImGui.selectable(p.profile().getName(), profile != null && p.profile().getId().equals(profile.getId()))) {
-						profile = p.profile();
+					if (ImGui.selectable(p.profile().name(), profile != null && p.profile().id().equals(profile.id()))) {
+						profile = new NameAndId(p.profile());
 						update = ImUpdate.FULL;
 					}
 				}
@@ -157,7 +157,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 					profile = null;
 					VidLib.LOGGER.error("Failed to fetch profile '" + nameStr + "'");
 				} else {
-					profile = p.profile();
+					profile = new NameAndId(p.profile());
 				}
 			}
 
@@ -174,11 +174,11 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	}
 
 	private void appendMainIcon(ImGraphics graphics) {
-		var tex = LowQualityPlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.getId());
+		var tex = LowQualityPlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.id());
 		ImGui.image(tex.getTexture().vl$getHandle(), ImGui.getFrameHeight(), ImGui.getFrameHeight());
 
 		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
-			var texHD = PlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.getId());
+			var texHD = PlayerBodies.getTexture(graphics.mc, profile == null ? null : profile.id());
 			ImGui.image(texHD.getTexture().vl$getHandle(), 128F, 128F);
 			graphics.endTooltip();
 		}
@@ -195,7 +195,7 @@ public class GameProfileImBuilder implements ImBuilder<GameProfile> {
 	}
 
 	@Override
-	public GameProfile build() {
-		return profile == null ? PlayerProfile.EMPTY_GAME_PROFILE : profile;
+	public NameAndId build() {
+		return profile == null ? EMPTY_PROFILE : profile;
 	}
 }

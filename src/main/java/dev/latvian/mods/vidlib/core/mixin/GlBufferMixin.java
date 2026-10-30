@@ -1,13 +1,14 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import com.mojang.blaze3d.opengl.GlBuffer;
-import dev.latvian.mods.vidlib.core.VLGpuBuffer;
+import com.mojang.renderpearl.backend.opengl.GlBuffer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
+/**
+ * Kept for the VIDL `GpuBuffer` handle accessor, which now lives in {@link GpuBufferMixin}
+ * (both target the same OpenGL implementation since 26.3 moved GpuBuffer to renderpearl as an
+ * interface). This class stays registered so the mixin config is stable and holds the
+ * documentation for the change.
+ */
 @Mixin(GlBuffer.class)
-public abstract class GlBufferMixin implements VLGpuBuffer {
-	@Override
-	@Accessor("handle")
-	public abstract int vl$getHandle();
+public class GlBufferMixin {
 }

@@ -25,8 +25,8 @@ import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldsResponse;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImString;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Util;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

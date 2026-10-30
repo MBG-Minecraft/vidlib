@@ -7,8 +7,9 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.entity.filter.EntityFilter;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
 import dev.latvian.mods.vidlib.feature.visual.CubeTextures;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import net.minecraft.nbt.CompoundTag;
@@ -20,11 +21,11 @@ import java.util.Optional;
 import java.util.Set;
 
 public record ZoneVolume(
-	ZoneShape shape,
+	Ref<ZoneShape> shape,
 	Color color,
-	EntityFilter entityFilter,
+	Ref<EntityFilter> entityFilter,
 	CompoundTag data,
-	EntityFilter solid,
+	Ref<EntityFilter> solid,
 	Set<String> tags,
 	boolean forceLoaded,
 	Optional<ZoneFluid> fluid,
@@ -34,9 +35,9 @@ public record ZoneVolume(
 	public static final Codec<ZoneVolume> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ZoneShape.CODEC.fieldOf("shape").forGetter(ZoneVolume::shape),
 		Color.CODEC.optionalFieldOf("color", Color.CYAN).forGetter(ZoneVolume::color),
-		EntityFilter.CODEC.optionalFieldOf("entity_filter", EntityFilter.PLAYER.instance()).forGetter(ZoneVolume::entityFilter),
+		EntityFilter.CODEC.optionalFieldOf("entity_filter", EntityFilter.PLAYER).forGetter(ZoneVolume::entityFilter),
 		CompoundTag.CODEC.optionalFieldOf("data", Empty.COMPOUND_TAG).forGetter(ZoneVolume::data),
-		EntityFilter.CODEC.optionalFieldOf("solid", EntityFilter.NONE.instance()).forGetter(ZoneVolume::solid),
+		EntityFilter.CODEC.optionalFieldOf("solid", EntityFilter.NONE).forGetter(ZoneVolume::solid),
 		KLibCodecs.setOf(Codec.STRING).optionalFieldOf("tags", Set.of()).forGetter(ZoneVolume::tags),
 		Codec.BOOL.optionalFieldOf("force_loaded", false).forGetter(ZoneVolume::forceLoaded),
 		ZoneFluid.CODEC.optionalFieldOf("fluid").forGetter(ZoneVolume::fluid),
@@ -58,13 +59,13 @@ public record ZoneVolume(
 		ZoneVolume::new
 	);
 
-	public ZoneVolume(ZoneShape shape, Color color, EntityFilter entityFilter, CompoundTag data) {
+	public ZoneVolume(Ref<ZoneShape> shape, Color color, Ref<EntityFilter> entityFilter, CompoundTag data) {
 		this(
 			shape,
 			color,
 			entityFilter,
 			data,
-			EntityFilter.NONE.instance(),
+			EntityFilter.NONE,
 			Set.of(),
 			false,
 			Optional.empty(),
@@ -73,16 +74,16 @@ public record ZoneVolume(
 		);
 	}
 
-	public ZoneVolume(ZoneShape shape, Color color) {
+	public ZoneVolume(Ref<ZoneShape> shape, Color color) {
 		this(
 			shape,
 			color,
-			EntityFilter.PLAYER.instance(),
+			EntityFilter.PLAYER,
 			Empty.COMPOUND_TAG
 		);
 	}
 
-	public ZoneVolume withShape(ZoneShape shape) {
+	public ZoneVolume withShape(Ref<ZoneShape> shape) {
 		return new ZoneVolume(shape, color, entityFilter, data, solid, tags, forceLoaded, fluid, textures, fog);
 	}
 
@@ -91,7 +92,7 @@ public record ZoneVolume(
 	}
 
 	public boolean isSolid() {
-		return solid != EntityFilter.NONE.instance();
+		return solid != EntityFilter.NONE;
 	}
 
 	public boolean isVisible() {

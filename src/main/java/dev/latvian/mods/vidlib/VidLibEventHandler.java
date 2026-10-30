@@ -1,20 +1,21 @@
 package dev.latvian.mods.vidlib;
 
+import dev.latvian.mods.klib.command.CustomRegistryRegistryEvent;
+import dev.latvian.mods.klib.entity.filter.EntityFilterTypeRegistryEvent;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
+import dev.latvian.mods.vidlib.feature.entity.filter.VidLibEntityFilters;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
-import dev.latvian.mods.vidlib.feature.registry.GenericVLRegistry;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
@@ -55,6 +56,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerXpEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
@@ -85,7 +87,7 @@ public class VidLibEventHandler {
 			}
 
 			for (var item : BuiltInRegistries.ITEM) {
-				var mod = item.builtInRegistryHolder().getKey().location().getNamespace();
+				var mod = item.builtInRegistryHolder().key().identifier().getNamespace();
 
 				if (mod.equals("video") || mod.equals(VidLib.ID)) {
 					event.accept(item.getDefaultInstance());
@@ -113,10 +115,20 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddServerReloadListenersEvent event) {
-		event.addListener(ID.vidlib("location"), new Location.Loader(Location.REGISTRY));
 		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.SERVER_BY_DIMENSION, true));
 		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.SERVER));
 		event.addListener(ID.vidlib("cutscene"), new Cutscene.Loader());
+	}
+
+	@SubscribeEvent
+	public static void registries(CustomRegistryRegistryEvent event) {
+		VidLib.builtInRegistries(event.getRegistry());
+	}
+
+
+	@SubscribeEvent
+	public static void registries(EntityFilterTypeRegistryEvent event) {
+		VidLibEntityFilters.register(event.getCollector());
 	}
 
 	@SubscribeEvent
@@ -137,7 +149,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.server.vl$playerJoined(player);
+			((ServerLevel) player.level()).getServer().vl$playerJoined(player);
 			HubServerGateway.playerLoggedIn(player);
 		}
 	}
@@ -145,7 +157,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.server.vl$playerLeft(player);
+			((ServerLevel) player.level()).getServer().vl$playerLeft(player);
 			HubServerGateway.playerLoggedOut(player, true);
 		}
 	}
@@ -193,8 +205,6 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void serverStopped(ServerStoppedEvent event) {
-		GenericVLRegistry.releaseServerHolders();
-
 		var packetCapture = event.getServer().vl$getPacketCapture(false);
 
 		if (packetCapture != null) {
@@ -252,7 +262,7 @@ public class VidLibEventHandler {
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
-	public static void preBreakBlock(BlockEvent.BreakEvent event) {
+	public static void preBreakBlock(BreakBlockEvent event) {
 		if (event.getPlayer().vl$isSuspended()) {
 			event.setCanceled(true);
 		}
@@ -339,7 +349,7 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void serverTagsUpdated(TagsUpdatedEvent event) {
-		if (event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.SERVER_DATA_LOAD) {
+		if (event instanceof TagsUpdatedEvent.ServerDataLoad) {
 			// datapacks loaded?
 		}
 	}

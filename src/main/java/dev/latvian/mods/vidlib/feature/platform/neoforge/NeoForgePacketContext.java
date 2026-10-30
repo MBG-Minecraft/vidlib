@@ -29,12 +29,7 @@ public record NeoForgePacketContext(VidLibPacketPayloadContainer payload, IPaylo
 
 	@Override
 	public CompletableFuture<Void> enqueueWork(Runnable task) {
-		if (listener().getMainThreadEventLoop().isSameThread()) {
-			task.run();
-			return CompletableFuture.completedFuture(null);
-		}
-
-		return listener().getMainThreadEventLoop().submit(task).exceptionally(ex -> {
+		return parent.enqueueWork(task).exceptionally(ex -> {
 			VidLib.LOGGER.error("Failed to process a synchronized task of the payload: %s".formatted(getClass().getName()), ex);
 			return null;
 		});
@@ -42,11 +37,7 @@ public record NeoForgePacketContext(VidLibPacketPayloadContainer payload, IPaylo
 
 	@Override
 	public <T> CompletableFuture<T> enqueueWork(Supplier<T> task) {
-		if (listener().getMainThreadEventLoop().isSameThread()) {
-			return CompletableFuture.completedFuture(task.get());
-		}
-
-		return listener().getMainThreadEventLoop().submit(task).exceptionally(ex -> {
+		return parent.enqueueWork(task).exceptionally(ex -> {
 			VidLib.LOGGER.error("Failed to process a synchronized task of the payload: %s".formatted(getClass().getName()), ex);
 			return null;
 		});

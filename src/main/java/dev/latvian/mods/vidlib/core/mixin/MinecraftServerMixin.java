@@ -1,26 +1,24 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.VLMinecraftServer;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.session.RemovePlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
@@ -58,9 +56,6 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 
 	@Unique
 	private DataMap vl$serverDataMap;
-
-	@Unique
-	private final Map<ResourceLocation, ClockValue> vl$clocks = new Object2ObjectOpenHashMap<>();
 
 	@Unique
 	private final KNumberVariables vl$globalVariables = new KNumberVariables();
@@ -128,11 +123,6 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Overwrite
 	public final ServerLevel overworld() {
 		return vl$overworld;
-	}
-
-	@Override
-	public Map<ResourceLocation, ClockValue> vl$getClocks() {
-		return vl$clocks;
 	}
 
 	@Override

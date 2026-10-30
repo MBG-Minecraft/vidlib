@@ -25,7 +25,7 @@ public abstract class ChunkMapMixin implements VLChunkMap {
 	@Override
 	public void vl$reloadChunks() {
 		for (var pos : LongSets.unmodifiable(updatingChunkMap.keySet())) {
-			scheduleChunkLoad(new ChunkPos(pos));
+			scheduleChunkLoad(new ChunkPos(ChunkPos.getX(pos), ChunkPos.getZ(pos)));
 		}
 	}
 }

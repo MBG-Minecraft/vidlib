@@ -37,7 +37,7 @@ public record ParticleMovementData(
 		ByteBufCodecs.VAR_INT, ParticleMovementData::count,
 		ByteBufCodecs.FLOAT, ParticleMovementData::radius,
 		ByteBufCodecs.FLOAT, ParticleMovementData::deviate,
-		KLibStreamCodecs.optional(Rotation.STREAM_CODEC_NO_ROLL, Rotation.NONE), ParticleMovementData::rotation,
+		KLibStreamCodecs.optional(Rotation.STREAM_CODEC, Rotation.NONE), ParticleMovementData::rotation,
 		ParticleMovementData::new
 	);
 

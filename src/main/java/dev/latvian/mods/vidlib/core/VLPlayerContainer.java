@@ -1,9 +1,11 @@
 package dev.latvian.mods.vidlib.core;
 
 import com.mojang.datafixers.util.Pair;
+import dev.latvian.mods.klib.block.PositionedBlock;
+import dev.latvian.mods.klib.knumber.KNumberVariables;
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.util.MessageConsumer;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
-import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.bulk.RedrawChunkSectionsPayload;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeAtPositionPayload;
@@ -45,8 +47,6 @@ import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundPayload;
 import dev.latvian.mods.vidlib.feature.vote.StartNumberVotingPayload;
 import dev.latvian.mods.vidlib.feature.vote.StartYesNoVotingPayload;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.core.BlockPos;
@@ -55,7 +55,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -88,7 +88,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 			getEnvironment().tell(message);
 		} else {
 			for (var player : vl$getS2CPlayers()) {
-				player.displayClientMessage(message, false);
+				player.sendSystemMessage(message);
 			}
 		}
 	}
@@ -99,7 +99,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 			getEnvironment().status(message);
 		} else {
 			for (var player : vl$getS2CPlayers()) {
-				player.displayClientMessage(message, true);
+				player.sendOverlayMessage(message);
 			}
 		}
 	}
@@ -164,7 +164,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 		}
 	}
 
-	default void setPostEffect(ResourceLocation id) {
+	default void setPostEffect(Identifier id) {
 		if (isClient()) {
 			getEnvironment().setPostEffect(id);
 		} else {
@@ -221,7 +221,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void playGlobalSound(Vec3 pos, SoundData sound) {
-		playGlobalSound(new PositionedSoundData(sound, KVector.of(pos), false, false), KNumberVariables.EMPTY);
+		playGlobalSound(new PositionedSoundData(sound, KVector.of(pos).ref(), false, false), KNumberVariables.EMPTY);
 	}
 
 	default void playGlobalSound(SoundData sound) {
@@ -252,16 +252,16 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 		}
 	}
 
-	default void physicsParticles(ResourceLocation id, long seed, List<PositionedBlock> blocks) {
+	default void physicsParticles(Identifier id, long seed, List<PositionedBlock> blocks) {
 		physicsParticles(new PhysicsParticlesIdData(id, seed, blocks), vl$level().getGameTime());
 	}
 
 	default void physicsParticles(PhysicsParticleData data, List<PositionedBlock> blocks) {
-		physicsParticles(data, vl$level().getGameTime(), vl$level().vl$level().random.nextLong(), blocks);
+		physicsParticles(data, vl$level().getGameTime(), vl$level().vl$level().getRandom().nextLong(), blocks);
 	}
 
-	default void physicsParticles(ResourceLocation id, List<PositionedBlock> blocks) {
-		physicsParticles(id, vl$level().vl$level().random.nextLong(), blocks);
+	default void physicsParticles(Identifier id, List<PositionedBlock> blocks) {
+		physicsParticles(id, vl$level().vl$level().getRandom().nextLong(), blocks);
 	}
 
 	default void cubeParticles(Map<ShapeParticleOptions, List<BlockPos>> map) {

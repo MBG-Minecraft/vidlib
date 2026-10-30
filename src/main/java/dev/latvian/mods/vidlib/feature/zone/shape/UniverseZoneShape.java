@@ -1,10 +1,11 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
-import dev.latvian.mods.klib.math.KMath;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.klib.math.AABBs;
+import dev.latvian.mods.klib.registry.UnitType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -14,20 +15,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class UniverseZoneShape implements ZoneShape {
-	public static final SimpleRegistryType<UniverseZoneShape> TYPE = SimpleRegistryType.unit("universe", new UniverseZoneShape());
-
-	private UniverseZoneShape() {
-	}
+public enum UniverseZoneShape implements ZoneShape {
+	INSTANCE;
 
 	@Override
-	public SimpleRegistryType<?> type() {
-		return TYPE;
+	public UnitType<RegistryFriendlyByteBuf, ZoneShape> type() {
+		return UNIVERSE;
 	}
 
 	@Override
 	public AABB toAABB() {
-		return KMath.infiniteAABB();
+		return AABBs.INFINITE;
 	}
 
 	@Override

@@ -3,24 +3,18 @@ package dev.latvian.mods.vidlib.feature.platform;
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.KLib;
 import dev.latvian.mods.klib.platform.PlatformType;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
-import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.feature.entity.number.EntityNumber;
-import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import dev.latvian.mods.vidlib.math.knumber.KNumber;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
@@ -45,47 +39,19 @@ public class VLPlatformHelper {
 	public void packetCaptureMetadata(PacketCapture packetCapture, JsonObject metadata) {
 	}
 
-	public void collectDynamicResources(PackType type, Consumer<ResourceLocation> callback) {
+	public void collectDynamicResources(PackType type, Consumer<Identifier> callback) {
 	}
 
-	public void collectKNumbers(SimpleRegistryCollector<KNumber> registry) {
-		KNumber.builtinTypes(registry);
+	public void collectZoneShapeTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ZoneShape> registry) {
+		ZoneShape.builtInTypes(registry);
 	}
 
-	public void collectKVectors(SimpleRegistryCollector<KVector> registry) {
-		KVector.builtinTypes(registry);
+	public void collectScreenShakeTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenShakeType> registry) {
+		ScreenShakeType.builtInTypes(registry);
 	}
 
-	public void collectEntityFilters(SimpleRegistryCollector<EntityFilter> registry) {
-		EntityFilter.builtinTypes(registry);
-	}
-
-	public void collectBlockFilters(SimpleRegistryCollector<BlockFilter> registry) {
-		BlockFilter.builtinTypes(registry);
-	}
-
-	public void collectZoneShapes(SimpleRegistryCollector<ZoneShape> registry) {
-		ZoneShape.builtinTypes(registry);
-	}
-
-	public void collectIcons(SimpleRegistryCollector<Icon> registry) {
-		Icon.builtinTypes(registry);
-	}
-
-	public void collectScreenShakeTypes(SimpleRegistryCollector<ScreenShakeType> registry) {
-		ScreenShakeType.builtinTypes(registry);
-	}
-
-	public void collectBulkLevelModifications(SimpleRegistryCollector<BulkLevelModification> registry) {
-		BulkLevelModification.builtinTypes(registry);
-	}
-
-	public void collectScreenEffects(SimpleRegistryCollector<ScreenEffect> registry) {
-		ScreenEffect.builtinTypes(registry);
-	}
-
-	public void collectEntityNumbers(SimpleRegistryCollector<EntityNumber> registry) {
-		EntityNumber.builtinTypes(registry);
+	public void collectScreenEffectTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenEffect> registry) {
+		ScreenEffect.builtInTypes(registry);
 	}
 
 	public boolean isStaff(Entity entity) {
@@ -95,7 +61,7 @@ public class VLPlatformHelper {
 			gameMode = player.gameMode();
 		}
 
-		return CommonGameEngine.INSTANCE.isPlayerStaff(entity.getTags(), gameMode);
+		return CommonGameEngine.INSTANCE.isPlayerStaff(entity.entityTags(), gameMode);
 	}
 
 	public boolean isStaffOrTalent(Entity entity) {
@@ -105,7 +71,7 @@ public class VLPlatformHelper {
 			gameMode = player.gameMode();
 		}
 
-		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(entity.getTags(), gameMode);
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(entity.entityTags(), gameMode);
 	}
 
 	public Path getPlayerDataDirectory(MinecraftServer server) {

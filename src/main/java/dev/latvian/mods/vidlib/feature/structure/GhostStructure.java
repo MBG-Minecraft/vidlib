@@ -3,20 +3,19 @@ package dev.latvian.mods.vidlib.feature.structure;
 import com.mojang.math.Axis;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.apps.tinyhttp.ws.FrameInfo;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.entity.filter.EntityFilter;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.klib.math.Vec3f;
-import dev.latvian.mods.klib.render.BufferSupplier;
-import dev.latvian.mods.klib.render.CuboidRenderer;
-import dev.latvian.mods.vidlib.feature.entity.filter.EntityFilter;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.JsonCodecReloadListener;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
-import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import imgui.type.ImBoolean;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
@@ -32,10 +31,10 @@ public record GhostStructure(
 	List<GhostStructurePart> structures,
 	Optional<StructureRendererData> data,
 	double animationTicks,
-	EntityFilter visibleTo,
-	List<KVector> locations,
-	KVector scale,
-	KVector rotation,
+	Ref<EntityFilter> visibleTo,
+	List<Ref<KVector>> locations,
+	Ref<KVector> scale,
+	Ref<KVector> rotation,
 	boolean preload,
 	boolean preloadRenderer
 ) {
@@ -46,7 +45,7 @@ public record GhostStructure(
 		GhostStructurePart.CODEC.listOf().fieldOf("structures").forGetter(GhostStructure::structures),
 		StructureRendererData.CODEC.optionalFieldOf("data").forGetter(GhostStructure::data),
 		Codec.DOUBLE.optionalFieldOf("animation_ticks", 1D).forGetter(GhostStructure::animationTicks),
-		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY.instance()).forGetter(GhostStructure::visibleTo),
+		EntityFilter.CODEC.optionalFieldOf("visible_to", EntityFilter.ANY).forGetter(GhostStructure::visibleTo),
 		KVector.CODEC.listOf().fieldOf("locations").forGetter(GhostStructure::locations),
 		KVector.CODEC.optionalFieldOf("scale", KVector.ONE).forGetter(GhostStructure::scale),
 		KVector.CODEC.optionalFieldOf("rotation", KVector.ZERO).forGetter(GhostStructure::rotation),
@@ -92,7 +91,7 @@ public record GhostStructure(
 		}
 
 		@Override
-		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, GhostStructure> from) {
+		protected void apply(ResourceManager resourceManager, Map<Identifier, GhostStructure> from) {
 			StructureRenderer.redrawAll();
 			LIST = List.copyOf(from.values());
 		}
@@ -110,17 +109,17 @@ public record GhostStructure(
 			}
 
 			for (var loc : gs.locations) {
-				var pos = loc.get(ctx);
+				var pos = loc.value().get(ctx);
 
 				if (pos == null) {
 					continue;
 				}
 
-				if (!gs.visibleTo().test(mc.player)) {
+				if (!gs.visibleTo().value().test(mc.player)) {
 					continue;
 				}
 
-				var scale = gs.scale.get(ctx);
+				var scale = gs.scale.value().get(ctx);
 
 				if (scale == null) {
 					continue;
@@ -132,7 +131,7 @@ public record GhostStructure(
 					continue;
 				}
 
-				var rotation = gs.rotation.get(ctx);
+				var rotation = gs.rotation.value().get(ctx);
 
 				var rotation3f = rotation == null ? Vec3f.ZERO : Vec3f.of(rotation);
 
@@ -199,7 +198,7 @@ public record GhostStructure(
 			ms.pushPose();
 			frame.translate(str.pos);
 
-			if (str.slice != null && mc.getEntityRenderDispatcher().shouldRenderHitBoxes() && frame.layer() == TerrainRenderLayer.TRANSLUCENT) {
+			if (str.slice != null && mc.debugEntries.isCurrentlyEnabled(net.minecraft.client.gui.components.debug.DebugScreenEntries.ENTITY_HITBOXES) && frame.layer() == TerrainRenderLayer.TRANSLUCENT) {
 				var b = str.slice;
 				CuboidRenderer.lines(ms, b.minX(), b.minY(), b.minZ(), b.maxX() + 1F, b.maxY() + 1F, b.maxZ() + 1F, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Color.RED);
 			}
@@ -214,9 +213,9 @@ public record GhostStructure(
 			}
 
 			if (str.rotation != Vec3f.ZERO) {
-				ms.mulPose(Axis.YP.rotation(str.rotation.y()));
-				ms.mulPose(Axis.XP.rotation(str.rotation.x()));
-				ms.mulPose(Axis.ZP.rotation(str.rotation.z()));
+				ms.rotate(Axis.YP.rotation(str.rotation.y()));
+				ms.rotate(Axis.XP.rotation(str.rotation.x()));
+				ms.rotate(Axis.ZP.rotation(str.rotation.z()));
 			}
 
 			s.render(ms, frame.layer(), str.structure.data.orElse(str.structure.ghostChunks ? StructureRendererData.DEFAULT_GHOST_CHUNKS : StructureRendererData.DEFAULT));

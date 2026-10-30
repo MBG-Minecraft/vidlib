@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.mojang.serialization.DataResult;
-import dev.latvian.mods.vidlib.feature.codec.DataResultError;
+import dev.latvian.mods.klib.codec.DataResultError;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;

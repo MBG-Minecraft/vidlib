@@ -1,10 +1,7 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.chromaticaberration;
 
-import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
+import dev.latvian.mods.klib.kvector.KVector;
+import dev.latvian.mods.klib.registry.Ref;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
@@ -13,10 +10,11 @@ public class ChromaticAberration {
 	public static float strength = 0F;
 	public static boolean isAngled = false;
 	public static float angle = 0F;
-	public static KVector focus = null;
+	public static Ref<KVector> focus = null;
 	public static Vec2 screenFocus = Vec2.ZERO;
 	private static Vec2 uFocusPos = Vec2.ZERO;
 
+	/*
 	@ClientAutoRegister
 	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("chromatic_aberration"), builder -> {
 		builder.setTickCallback(ChromaticAberration::tick);
@@ -25,6 +23,7 @@ public class ChromaticAberration {
 		builder.addUniform(CanvasUniform.float1("Angle", () -> isAngled ? (float) Math.toRadians(angle) : -1F));
 		builder.addUniform(CanvasUniform.vec2("FocusPos", u -> u.set(uFocusPos)));
 	});
+	 */
 
 	public static Vec2 prevFocusPos = null;
 	public static Vec2 focusPos = null;
@@ -53,7 +52,7 @@ public class ChromaticAberration {
 
 		float delta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
-		CANVAS.markActive();
+		// FIXME CANVAS.markActive();
 		uFocusPos = new Vec2(Mth.lerp(delta, prevFocusPos.x, focusPos.x), -Mth.lerp(delta, prevFocusPos.y, focusPos.y));
 	}
 }

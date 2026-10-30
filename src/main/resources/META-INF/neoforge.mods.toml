@@ -7,20 +7,12 @@ modId = "vidlib"
 version = "${version}"
 displayName = "VidLib"
 authors = "latvian.dev"
-logoFile = "vidlib_logo.png"
-logoBlur = false
+iconFile = "vidlib_logo.png"
 
 [[dependencies.vidlib]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.5.95,)"
-ordering = "AFTER"
-side = "BOTH"
-
-[[dependencies.vidlib]]
-modId = "klib"
-type = "required"
-versionRange = "*"
+versionRange = "[26.3,)"
 ordering = "AFTER"
 side = "BOTH"
 
@@ -37,6 +29,10 @@ type = "optional"
 versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
+
+# NOTE: KLib is jarJar'd into the mod (see build.gradle) and ships its own mixin config,
+# access transformer entries and MC-interface injections through the artifact metadata.
+# The `[[mixins]]` block for it is therefore not declared here.
 
 [[mixins]]
 config = "vidlib.mixins.json"

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.npc;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.authlib.GameProfile;
+import dev.latvian.mods.klib.icon.Icon;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresets;
@@ -8,32 +9,34 @@ import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
-import dev.latvian.mods.vidlib.feature.icon.EmptyIcon;
 import dev.latvian.mods.vidlib.feature.icon.PlumbobRenderer;
 import dev.latvian.mods.vidlib.feature.particle.CustomParticle;
+import dev.latvian.mods.vidlib.feature.particle.ParticleGeometryBuffers;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
-import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class NPCParticle extends CustomParticle {
 	private final NPCRecording recording;
 	private final PlayerProfile profile;
 	private final Vec3 positionOffset;
-	private final PlayerRenderer playerRenderer;
+	private final AvatarRenderer<?> playerRenderer;
 	private final RemotePlayer fakePlayer;
-	private final PlayerRenderState playerRenderState;
+	private final AvatarRenderState playerRenderState;
 
 	public NPCParticle(NPCParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
 		super(level, x, y, z);
@@ -41,10 +44,10 @@ public class NPCParticle extends CustomParticle {
 		var recordingMap = NPCRecording.getReplay(level.registryAccess());
 		var recordingLazy = recordingMap.isEmpty() ? null : recordingMap.get(options.npc());
 		this.recording = recordingLazy == null ? null : recordingLazy.get();
-		this.profile = recording == null ? PlayerProfile.ERROR : PlayerProfiles.get(options.profile().orElse(recording.profile).getId());
+		this.profile = recording == null ? PlayerProfile.ERROR : PlayerProfiles.get(options.profile().orElse(recording.profile).id());
 		var modelType = PlayerSkins.getModelType(profile);
-		this.playerRenderer = (PlayerRenderer) mc.getEntityRenderDispatcher().getSkinMap().get(modelType);
-		this.fakePlayer = recording == null ? null : new RemotePlayer(level, profile.profile());
+		this.playerRenderer = vl$avatarRenderer(mc, modelType);
+		this.fakePlayer = recording == null ? null : new RemotePlayer(level, new GameProfile(profile.profile().id(), profile.profile().name()));
 		this.playerRenderState = playerRenderer.createRenderState();
 
 		if (recording != null && fakePlayer != null) {
@@ -63,8 +66,18 @@ public class NPCParticle extends CustomParticle {
 		}
 	}
 
+	/**
+	 * 1.21.5 looked the renderer up in {@code EntityRenderDispatcher#getSkinMap()}; 26.3 keys the
+	 * avatar renderers off the model type inside {@link AvatarRenderState}.
+	 */
+	private static AvatarRenderer<?> vl$avatarRenderer(Minecraft mc, net.minecraft.world.entity.player.PlayerModelType modelType) {
+		var probe = new AvatarRenderState();
+		probe.skin = new PlayerSkin(DefaultPlayerSkin.getDefaultSkin().body(), null, null, modelType, true);
+		return mc.getEntityRenderDispatcher().getRenderer(probe);
+	}
+
 	@Override
-	public void renderCustom(PoseStack ms, MultiBufferSource buffers, Camera camera, float delta) {
+	public void renderCustom(com.mojang.blaze3d.vertex.PoseStack ms, ParticleGeometryBuffers buffers, Camera camera, float delta) {
 		if (recording == null || fakePlayer == null || age <= 1) {
 			return;
 		}
@@ -89,14 +102,16 @@ public class NPCParticle extends CustomParticle {
 		fakePlayer.yHeadRotO = fakePlayer.yHeadRot;
 		fakePlayer.setDeltaMovement(recording.get(NPCDataType.VELOCITY, offset));
 
-		playerRenderer.extractRenderState(fakePlayer, playerRenderState, delta);
+		@SuppressWarnings("unchecked")
+		AvatarRenderer<RemotePlayer> renderer = (AvatarRenderer<RemotePlayer>) (AvatarRenderer<?>) playerRenderer;
+		renderer.extractRenderState(fakePlayer, playerRenderState, delta);
 
 		var mc = Minecraft.getInstance();
 		var eyePos = new Vec3(playerRenderState.x, playerRenderState.y + fakePlayer.getEyeHeight(), playerRenderState.z);
 		var blockpos = BlockPos.containing(eyePos);
-		int light = LightTexture.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
+		int light = LightCoordsUtil.pack(mc.level.getBrightness(LightLayer.BLOCK, blockpos), mc.level.getBrightness(LightLayer.SKY, blockpos));
 
-		var skin = mc.getSkinManager().getInsecureSkin(profile.profile());
+		var skin = mc.getSkinManager().createLookup(new GameProfile(profile.profile().id(), profile.profile().name()), false).get();
 		var clothing = recording.get(NPCDataType.CLOTHING, offset);
 
 		if (ClothingPresets.ready && clothing != PlayerClothing.NONE) {
@@ -104,10 +119,9 @@ public class NPCParticle extends CustomParticle {
 
 			if (replacement != null) {
 				skin = new PlayerSkin(
-					replacement,
-					null,
-					skin.capeTexture(),
-					skin.elytraTexture(),
+					new net.minecraft.core.ClientAsset.ResourceTexture(replacement, replacement),
+					skin.cape(),
+					skin.elytra(),
 					skin.model(),
 					true
 				);
@@ -116,10 +130,9 @@ public class NPCParticle extends CustomParticle {
 
 		playerRenderState.skin = skin;
 		playerRenderState.swimAmount = recording.get(NPCDataType.SWIM_AMOUNT, offset);
-		playerRenderState.attackTime = recording.get(NPCDataType.ATTACK_TIME, offset);
 		playerRenderState.isPassenger = recording.get(NPCDataType.PASSENGER, offset);
 		playerRenderState.isUsingItem = recording.get(NPCDataType.USING_ITEM, offset);
-		playerRenderState.appearsGlowing = recording.get(NPCDataType.GLOWING, offset);
+		playerRenderState.outlineColor = recording.get(NPCDataType.GLOWING, offset) ? ARGB.opaque(0xFFFFFF) : 0;
 		playerRenderState.hasRedOverlay = recording.get(NPCDataType.RED_OVERLAY, offset);
 		playerRenderState.deathTime = recording.get(NPCDataType.DEATH_TIME, offset);
 
@@ -142,18 +155,18 @@ public class NPCParticle extends CustomParticle {
 		playerRenderState.showRightSleeve = true;
 		playerRenderState.showCape = true;
 
-		var cameraPos = camera.getPosition();
+		var cameraPos = camera.position();
 		var rx = (float) (playerRenderState.x - cameraPos.x);
 		var ry = (float) (playerRenderState.y - cameraPos.y);
 		var rz = (float) (playerRenderState.z - cameraPos.z);
 
 		ms.pushPose();
 		ms.translate(rx, ry, rz);
-		playerRenderer.render(playerRenderState, ms, buffers, light);
+		renderer.submit(playerRenderState, ms, buffers.collector(), cameraRenderState == null ? new CameraRenderState() : cameraRenderState);
 
 		var plumbob = recording.get(NPCDataType.PLUMBOB, offset);
 
-		if (plumbob != null && plumbob != EmptyIcon.INSTANCE) {
+		if (plumbob != null && plumbob != Icon.EMPTY) {
 			PlumbobRenderer.render(mc, plumbob, eyePos, ms, delta, buffers, light, playerRenderState.isCrouching, playerRenderState.scoreText != null);
 		}
 
@@ -172,7 +185,10 @@ public class NPCParticle extends CustomParticle {
 			fakePlayer.setItemSlot(EquipmentSlot.OFFHAND, recording.get(NPCDataType.OFF_HAND, offset));
 			fakePlayer.setHealth(recording.get(NPCDataType.HEALTH, offset));
 			fakePlayer.getAttribute(Attributes.MAX_HEALTH).setBaseValue(recording.get(NPCDataType.MAX_HEALTH, offset));
-			fakePlayer.swinging = recording.get(NPCDataType.SWINGING, offset);
+
+			if (recording.get(NPCDataType.SWINGING, offset)) {
+				fakePlayer.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+			}
 
 			try {
 				fakePlayer.tick();
@@ -180,10 +196,5 @@ public class NPCParticle extends CustomParticle {
 				ex.printStackTrace();
 			}
 		}
-	}
-
-	@Override
-	public AABB getRenderBoundingBox(float partialTicks) {
-		return AABB.INFINITE;
 	}
 }

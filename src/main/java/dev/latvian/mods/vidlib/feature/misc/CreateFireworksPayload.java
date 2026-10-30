@@ -31,6 +31,6 @@ public record CreateFireworksPayload(double x, double y, double z, double vx, do
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().createFireworks(x, y, z, vx, vy, vz, explosions);
+		ctx.level().createFireworks(x, y, z, vx, vy, vz, explosions, true);
 	}
 }

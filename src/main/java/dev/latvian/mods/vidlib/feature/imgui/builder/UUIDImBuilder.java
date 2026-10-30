@@ -6,7 +6,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.ImGui;
 import imgui.type.ImString;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.util.UUID;
 

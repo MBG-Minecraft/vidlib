@@ -1,12 +1,15 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
+import dev.latvian.mods.klib.block.filter.BlockFilter;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.client.UnconfigurableValueSet;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
+import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
 
@@ -15,24 +18,24 @@ public interface VidLibClientOptions {
 	OptionInstance<Boolean> SHOW_ZONES = OptionInstance.createBoolean("options.vidlib.show_zones", false);
 	OptionInstance<Boolean> SHOW_ZONE_OUTER_BOUNDS = OptionInstance.createBoolean("options.vidlib.show_zone_outer_bounds", true);
 	OptionInstance<Boolean> SHOW_COORDINATES = OptionInstance.createBoolean("options.vidlib.show_coordinates", false);
-	OptionInstance<Boolean> LOCK_GUI_SCALE = OptionInstance.createBoolean("options.vidlib.lock_gui_scale", true, v -> Minecraft.getInstance().resizeDisplay());
+	OptionInstance<Boolean> LOCK_GUI_SCALE = OptionInstance.createBoolean("options.vidlib.lock_gui_scale", true, v -> Minecraft.getInstance().resizeGui());
 	OptionInstance<Boolean> LOCK_IMGUI_SCROLL = OptionInstance.createBoolean("options.vidlib.lock_imgui_scroll", false);
 
 	OptionInstance<ZoneRenderType> ZONE_RENDER_TYPE = new OptionInstance<>(
 		"options.vidlib.zone_render_type",
 		OptionInstance.noTooltip(),
-		OptionInstance.forOptionEnum(),
+		(prefix, value) -> Options.genericValueLabel(prefix, Component.translatable(value.getKey())),
 		new OptionInstance.Enum<>(Arrays.asList(ZoneRenderType.values()), ZoneRenderType.DATA_TYPE.codec()),
 		ZoneRenderType.NORMAL,
 		callback -> {
 		}
 	);
 
-	OptionInstance<BlockFilter> ZONE_BLOCK_FILTER = UnconfigurableValueSet.create(
+	OptionInstance<Ref<BlockFilter>> ZONE_BLOCK_FILTER = UnconfigurableValueSet.create(
 		"options.vidlib.zone_block_filter",
 		BlockFilter.DATA_TYPE.codec(),
 		OptionInstance.noTooltip(),
-		BlockFilter.ANY.instance(),
+		BlockFilter.ANY,
 		callback -> {
 			var mc = Minecraft.getInstance();
 
@@ -62,7 +65,7 @@ public interface VidLibClientOptions {
 		"options.vidlib.test_screen_shake.max_distance",
 		OptionInstance.noTooltip(),
 		(l, v) -> Options.genericValueLabel(l, v.intValue()),
-		new OptionInstance.IntRange(0, 1000).xmap(i -> (double) i, Double::intValue),
+		new OptionInstance.IntRange(0, 1000).xmap(i -> (double) i, Double::intValue, true),
 		Codec.doubleRange(0.0, 1000.0),
 		30.0,
 		callback -> {
@@ -99,7 +102,7 @@ public interface VidLibClientOptions {
 		return ZONE_RENDER_TYPE.get();
 	}
 
-	static BlockFilter getZoneBlockFilter() {
+	static Ref<BlockFilter> getZoneBlockFilter() {
 		return ZONE_BLOCK_FILTER.get();
 	}
 

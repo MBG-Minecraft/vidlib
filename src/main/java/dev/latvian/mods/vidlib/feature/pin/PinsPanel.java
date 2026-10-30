@@ -98,7 +98,7 @@ public class PinsPanel extends Panel {
 		if (level != null) {
 			var player = level.getPlayerByUUID(uuid);
 			if (player != null) {
-				return player.getGameProfile().getName();
+				return player.getGameProfile().name();
 			}
 
 			var entity = level.getEntity(uuid);

@@ -1,16 +1,16 @@
 package dev.mrbeastgaming.mods.hub.client;
 
+import com.mojang.blaze3d.Blaze3D;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.Component;
 
 public class LinkHubUserScreen extends ConfirmScreen {
 	public static void open(Minecraft mc) {
-		if (!(mc.screen instanceof LinkHubUserScreen)) {
-			mc.pushGuiLayer(new LinkHubUserScreen());
+		if (!(mc.gui.screen() instanceof LinkHubUserScreen)) {
+			mc.gui.setScreen(new LinkHubUserScreen());
 		}
 	}
 
@@ -18,14 +18,13 @@ public class LinkHubUserScreen extends ConfirmScreen {
 		var mc = Minecraft.getInstance();
 
 		if (confirm) {
-			mc.popGuiLayer();
-			mc.pushGuiLayer(new LinkHubUserWaitingScreen());
+			mc.gui.setScreen(new LinkHubUserWaitingScreen());
 			var port = HubLocalServer.getWebServer();
-			Util.getPlatform().openUri(HubAPI.URI_BASE.resolve("/minecraft/link/" + port));
+			Blaze3D.openUri(HubAPI.URI_BASE.resolve("/minecraft/link/" + port));
 		} else if (HubUserCapabilities.get().resolveRequireLink()) {
 			mc.stop();
 		} else {
-			mc.popGuiLayer();
+			mc.gui.setScreen(null);
 		}
 	}
 

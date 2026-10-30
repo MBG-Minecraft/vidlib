@@ -22,7 +22,8 @@ public record ClientCommandHolder(String name, Callback callback) {
 	public static Predicate<CommandSourceStack> isClientSingleplayer() {
 		return source -> {
 			var level = PlatformHelper.CURRENT.getLevel(source);
-			return level.isClientSide() && PlatformHelper.CURRENT.isLocalServer(level);
+			var server = level.getServer();
+			return level.isClientSide() && server != null && server.isSingleplayer();
 		};
 	}
 }

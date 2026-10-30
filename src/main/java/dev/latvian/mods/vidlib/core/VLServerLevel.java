@@ -1,17 +1,18 @@
 package dev.latvian.mods.vidlib.core;
 
+import dev.latvian.mods.klib.bulk.BlockModificationBuilder;
+import dev.latvian.mods.klib.bulk.BulkLevelModification;
+import dev.latvian.mods.klib.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.klib.core.NoMixinException;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModification;
-import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationBundle;
-import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.Util;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.TicketStorage;
@@ -45,18 +46,18 @@ public interface VLServerLevel extends VLLevel {
 	}
 
 	@Override
-	default int bulkModify(boolean undoable, BulkLevelModification modification) {
-		var optimized = modification.optimize();
+	default int bulkModify(boolean undoable, Ref<BulkLevelModification> modification) {
+		var optimized = modification.optimizedRef();
 
 		if (modification == BulkLevelModification.NONE) {
 			return 0;
 		}
 
-		if (optimized instanceof BulkLevelModificationBundle(List<BulkLevelModification> list)) {
-			var builder = new OptimizedModificationBuilder();
+		if (optimized.value() instanceof BulkLevelModificationBundle b) {
+			var builder = new BlockModificationBuilder();
 
-			for (var m : list) {
-				m.apply(builder);
+			for (var m : b.list()) {
+				m.value().apply(builder);
 			}
 
 			optimized = builder.build();

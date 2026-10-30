@@ -9,7 +9,6 @@ import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
 public class DecalProp extends Prop {
@@ -40,7 +39,7 @@ public class DecalProp extends Prop {
 	}
 
 	@Override
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
+	public boolean isVisibleInFrustum(double x, double y, double z, FrustumCheck frustum) {
 		return true;
 	}
 }

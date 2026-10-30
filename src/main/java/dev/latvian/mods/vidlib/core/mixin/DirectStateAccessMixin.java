@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import com.mojang.blaze3d.opengl.DirectStateAccess;
+import com.mojang.renderpearl.backend.opengl.DirectStateAccess;
 import dev.latvian.mods.vidlib.core.VLDirectStateAccess;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;

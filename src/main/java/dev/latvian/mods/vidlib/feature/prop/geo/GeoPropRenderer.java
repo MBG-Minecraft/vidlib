@@ -1,34 +1,38 @@
 package dev.latvian.mods.vidlib.feature.prop.geo;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.geckolib.constant.DataTickets;
+import com.geckolib.model.GeoModel;
+import com.geckolib.renderer.GeoObjectRenderer;
+import com.geckolib.renderer.base.GeoRenderState;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
-import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
+import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
 import dev.latvian.mods.vidlib.integration.VidLibGeoDataTickets;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.constant.DataTickets;
-import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.GeoObjectRenderer;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
+import net.minecraft.resources.Identifier;
 
-public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer<P> implements PropRenderer<P> {
+public class GeoPropRenderer<P extends Prop & GeoProp, O> extends GeoObjectRenderer<P, O, GeoRenderState> implements PropRenderer<P> {
 	public GeoPropRenderer(GeoModel<P> model) {
 		super(model);
 	}
 
-	public GeoPropRenderer(ResourceLocation id) {
+	public GeoPropRenderer(Identifier id) {
 		super(new DefaultedPropGeoModel<>(id));
 	}
 
 	@Override
-	public void render(PropRenderContext<P> ctx) {
-		int light = getPackedLight(ctx);
-		render(ctx.poseStack(), ctx.prop(), ctx.frame().buffers(), null, null, light, ctx.delta());
+	public void render(PropSubmitContext<P> ctx) {
+		var mc = Minecraft.getInstance();
+		var state = createRenderState(ctx.prop(), null);
+		extractRenderState(mc, ctx.prop(), state, ctx.delta());
+
+		var cameraState = new CameraRenderState();
+		cameraState.pos = mc.gameRenderer.mainCamera().position();
+		cameraState.initialized = true;
+
+		performRenderPass(ctx.prop(), null, ctx.poseStack(), ctx.collector(), cameraState, getPackedLight(ctx), ctx.delta());
 	}
 
 	public static float getDelta(GeoRenderState state) {
@@ -37,9 +41,18 @@ public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer
 	}
 
 	@Override
-	public final void addRenderData(P prop, Void relatedObject, GeoRenderState state) {
-		float delta = getDelta(state);
+	public GeoRenderState createRenderState(P prop, O relatedObject) {
+		return new GeoRenderState() {
+		};
+	}
+
+	@Override
+	public void addRenderData(P prop, O relatedObject, GeoRenderState state, float delta) {
 		extractRenderState(Minecraft.getInstance(), prop, state, delta);
+	}
+
+	@Override
+	public void setMolangQueryValues(P prop, O relatedObject, GeoRenderState state, float delta) {
 	}
 
 	public void extractRenderState(Minecraft mc, P prop, GeoRenderState state, float delta) {
@@ -47,36 +60,11 @@ public class GeoPropRenderer<P extends Prop & GeoProp> extends GeoObjectRenderer
 		state.addGeckolibData(DataTickets.ENTITY_PITCH, prop.getPitch(delta));
 		state.addGeckolibData(DataTickets.ENTITY_YAW, prop.getYaw(delta));
 		state.addGeckolibData(VidLibGeoDataTickets.ENTITY_ROLL, prop.getRoll(delta));
-		// state.addGeckolibData(DataTickets.VELOCITY, new Vec3(prop.velocity.x, prop.velocity.y, prop.velocity.z));
-		state.addGeckolibData(DataTickets.VELOCITY, Vec3.ZERO);
 		var pos = prop.getPos(delta);
 		state.addGeckolibData(DataTickets.BLOCKPOS, BlockPos.containing(pos));
 		state.addGeckolibData(DataTickets.POSITION, pos);
 		state.addGeckolibData(VidLibGeoDataTickets.WIDTH, (float) prop.width);
 		state.addGeckolibData(VidLibGeoDataTickets.HEIGHT, (float) prop.height);
-		state.addGeckolibData(VidLibGeoDataTickets.CAMERA_DISTANCE, pos.distanceTo(mc.gameRenderer.getMainCamera().getPosition()));
-	}
-
-	@Override
-	public void adjustPositionForRender(GeoRenderState state, PoseStack ms, BakedGeoModel model, boolean isReRender) {
-		if (!isReRender) {
-			var roll = state.getGeckolibData(VidLibGeoDataTickets.ENTITY_ROLL);
-
-			if (roll != null) {
-				ms.mulPose(Axis.ZP.rotationDegrees(roll));
-			}
-
-			var yaw = state.getGeckolibData(DataTickets.ENTITY_YAW);
-
-			if (yaw != null) {
-				ms.mulPose(Axis.YP.rotationDegrees(yaw));
-			}
-
-			var pitch = state.getGeckolibData(DataTickets.ENTITY_PITCH);
-
-			if (pitch != null) {
-				ms.mulPose(Axis.XP.rotationDegrees(pitch));
-			}
-		}
+		state.addGeckolibData(VidLibGeoDataTickets.CAMERA_DISTANCE, pos.distanceTo(mc.gameRenderer.mainCamera().position()));
 	}
 }

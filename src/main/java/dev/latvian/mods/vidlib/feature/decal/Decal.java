@@ -7,7 +7,7 @@ import dev.latvian.mods.klib.codec.JOMLCodecs;
 import dev.latvian.mods.klib.codec.JOMLStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.feature.client.ColorBlendMode;
+import dev.latvian.mods.klib.util.ColorBlendMode;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
@@ -81,7 +81,7 @@ public class Decal {
 		Decal::new
 	);
 
-	public static final DataType<Decal> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Decal.class);
+	public static final DataType<Decal> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public Decal parent;
 	public DecalType type;

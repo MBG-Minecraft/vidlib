@@ -3,73 +3,33 @@ package dev.latvian.mods.vidlib.math.kvector;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderHolder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWithHolder;
+import dev.latvian.mods.klib.entity.PositionType;
+import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.kvector.KVector;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
-import dev.latvian.mods.vidlib.feature.prop.PropIdImBuilder;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record FollowingPropKVector(int prop, PositionType positionType) implements KVector, ImBuilderWithHolder.Factory {
-	public static final SimpleRegistryType<FollowingPropKVector> TYPE = SimpleRegistryType.dynamic("following_prop", RecordCodecBuilder.mapCodec(instance -> instance.group(
-		Codec.INT.fieldOf("prop").forGetter(FollowingPropKVector::prop),
-		PositionType.CODEC.optionalFieldOf("position_type", PositionType.CENTER).forGetter(FollowingPropKVector::positionType)
-	).apply(instance, FollowingPropKVector::new)), CompositeStreamCodec.of(
-		ByteBufCodecs.VAR_INT, FollowingPropKVector::prop,
-		PositionType.STREAM_CODEC, FollowingPropKVector::positionType,
-		FollowingPropKVector::new
-	));
-
-	public static class Builder implements KVectorImBuilder {
-		public static final ImBuilderHolder<KVector> TYPE = ImBuilderHolder.of("Following Prop", Builder::new);
-
-		public final PropIdImBuilder prop = new PropIdImBuilder();
-		public final ImBuilder<PositionType> positionType = PositionType.BUILDER_TYPE.get();
-
-		public Builder() {
-			this.positionType.set(PositionType.CENTER);
-		}
-
-		@Override
-		public ImBuilderHolder<?> holder() {
-			return TYPE;
-		}
-
-		@Override
-		public void set(KVector value) {
-			if (value instanceof FollowingPropKVector v) {
-				prop.set(v.prop);
-				positionType.set(v.positionType);
-			}
-		}
-
-		@Override
-		public ImUpdate imgui(ImGraphics graphics) {
-			var update = ImUpdate.NONE;
-			update = update.or(prop.imguiKey(graphics, "Prop", "prop"));
-			update = update.or(positionType.imguiKey(graphics, "Position Type", "position-type"));
-			return update;
-		}
-
-		@Override
-		public boolean isValid() {
-			return prop.isValid() && positionType.isValid();
-		}
-
-		@Override
-		public KVector build() {
-			return new FollowingPropKVector(prop.build(), positionType.build());
-		}
-	}
+public record FollowingPropKVector(int prop, PositionType positionType) implements KVector {
+	public static final DynamicType<RegistryFriendlyByteBuf, KVector> TYPE = DynamicType.create(
+		"following_prop",
+		RecordCodecBuilder.mapCodec(instance -> instance.group(
+			Codec.INT.fieldOf("prop").forGetter(FollowingPropKVector::prop),
+			PositionType.CODEC.optionalFieldOf("position_type", PositionType.CENTER).forGetter(FollowingPropKVector::positionType)
+		).apply(instance, FollowingPropKVector::new)),
+		CompositeStreamCodec.of(
+			ByteBufCodecs.VAR_INT, FollowingPropKVector::prop,
+			PositionType.STREAM_CODEC, FollowingPropKVector::positionType,
+			FollowingPropKVector::new
+		)
+	);
 
 	@Override
-	public SimpleRegistryType<?> type() {
+	public CustomRegistryType<RegistryFriendlyByteBuf, KVector> type() {
 		return TYPE;
 	}
 
@@ -79,10 +39,5 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 		var props = VLPlatformHelper.CURRENT.getProps(ctx.level);
 		var p = props.levelProps.get(prop);
 		return p == null ? null : p.getPos(positionType);
-	}
-
-	@Override
-	public ImBuilderWithHolder<?> createImBuilder() {
-		return new Builder();
 	}
 }

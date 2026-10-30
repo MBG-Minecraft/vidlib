@@ -17,10 +17,10 @@ import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
-import net.minecraft.Util;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,7 +36,7 @@ import java.util.function.Predicate;
 
 @AutoInit
 public record PropType<P extends Prop>(
-	ResourceLocation id,
+	Identifier id,
 	Factory<? extends P> factory,
 	List<PropData<?, ?>> unsortedData,
 	List<PropDataEntry> data,
@@ -51,7 +51,7 @@ public record PropType<P extends Prop>(
 		P create(PropContext<?> ctx);
 	}
 
-	public static final Lazy<Map<ResourceLocation, PropType<?>>> ALL = Lazy.map(map -> {
+	public static final Lazy<Map<Identifier, PropType<?>>> ALL = Lazy.map(map -> {
 		for (var s : AutoRegister.SCANNED.get()) {
 			if (s.value() instanceof PropType<?> propType) {
 				map.put(propType.id, propType);
@@ -60,10 +60,10 @@ public record PropType<P extends Prop>(
 	});
 
 	public static final Lazy<List<PropType<?>>> SORTED = ALL.map(map -> {
-		return List.copyOf(map.values().stream().sorted((a, b) -> a.id.compareNamespaced(b.id)).toList());
+		return List.copyOf(map.values().stream().sorted((a, b) -> a.id.compareTo(b.id)).toList());
 	});
 
-	public static <P extends Prop> PropType<P> create(ResourceLocation id, Factory<? extends P> factory, PropTypeInfo... info) {
+	public static <P extends Prop> PropType<P> create(Identifier id, Factory<? extends P> factory, PropTypeInfo... info) {
 		var dataMap = new Object2ObjectLinkedOpenHashMap<String, PropData<?, ?>>();
 		var packetSet = new ObjectLinkedOpenHashSet<PropPacketType<?, ?>>();
 
@@ -111,7 +111,7 @@ public record PropType<P extends Prop>(
 
 	public static final Codec<PropType<?>> CODEC = KLibCodecs.map(ALL, ID.CODEC, PropType::id);
 	public static final StreamCodec<ByteBuf, PropType<?>> STREAM_CODEC = KLibStreamCodecs.map(ALL, ID.STREAM_CODEC, PropType::id);
-	public static final DataType<PropType<?>> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Cast.to(PropType.class));
+	public static final DataType<PropType<?>> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	@Override
 	public boolean test(Prop prop) {

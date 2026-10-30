@@ -6,7 +6,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -15,11 +15,11 @@ import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 
 public class LazyStructures implements WithCache, Supplier<List<StructureHolder>> {
-	public final ResourceLocation id;
+	public final Identifier id;
 	public final Resource resource;
 	private List<StructureHolder> structures;
 
-	public LazyStructures(ResourceLocation id, Resource resource) {
+	public LazyStructures(Identifier id, Resource resource) {
 		this.id = id;
 		this.resource = resource;
 	}

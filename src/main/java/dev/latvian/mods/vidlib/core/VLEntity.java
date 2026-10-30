@@ -2,6 +2,8 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.entity.PlayerInput;
+import dev.latvian.mods.klib.entity.PositionType;
+import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
@@ -9,13 +11,10 @@ import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.location.Location;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
-import dev.latvian.mods.vidlib.math.knumber.KNumberVariables;
-import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -81,12 +80,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		teleport(new Vec3(pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D));
 	}
 
-	default void teleport(Location location) {
-		var entity = vl$self();
-		var ctx = entity.level().getGlobalContext();
-		teleport(entity.getServer().getLevel(location.dimension()), location.random(entity.getRandom()).get(ctx));
-	}
-
 	default void forceSetVelocity(Vec3 velocity) {
 		var e = vl$self();
 		e.setDeltaMovement(velocity);
@@ -148,7 +141,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 			case CENTER -> new Vec3(e.getX(), e.getY() + e.getBbHeight() / 2D, e.getZ());
 			case TOP -> new Vec3(e.getX(), e.getY() + e.getBbHeight(), e.getZ());
 			case EYES -> e.getEyePosition();
-			case LEASH -> e.position().add(e.getLeashOffset(1F));
+			case LEASH -> e.position().add(e instanceof net.minecraft.world.entity.Leashable l ? l.getLeashOffset(1F) : Vec3.ZERO);
 			case SOUND_SOURCE -> getSoundSource(1F);
 			case LOOK_TARGET -> getLookTarget(1F);
 			default -> e.position();
@@ -162,7 +155,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 			case CENTER -> e.getPosition(delta).add(0D, e.getBbHeight() / 2D, 0D);
 			case TOP -> e.getPosition(delta).add(0D, e.getBbHeight(), 0D);
 			case EYES -> e.getEyePosition(delta);
-			case LEASH -> e.getPosition(delta).add(e.getLeashOffset(delta));
+			case LEASH -> e.getPosition(delta).add(e instanceof net.minecraft.world.entity.Leashable l ? l.getLeashOffset(delta) : Vec3.ZERO);
 			case SOUND_SOURCE -> getSoundSource(delta);
 			case LOOK_TARGET -> getLookTarget(delta);
 			default -> delta == 1F ? e.position() : e.getPosition(delta);
@@ -243,23 +236,23 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default boolean addTags(Collection<String> tags) {
-		return vl$self().tags.addAll(tags);
+		return vl$self().entityTags().addAll(tags);
 	}
 
 	default boolean removeTags(Collection<String> tags) {
-		return vl$self().tags.removeAll(tags);
+		return vl$self().entityTags().removeAll(tags);
 	}
 
 	default void setTags(Collection<String> tags) {
-		vl$self().tags.clear();
-		vl$self().tags.addAll(tags);
+		vl$self().entityTags().clear();
+		vl$self().entityTags().addAll(tags);
 	}
 
 	default boolean isStaff() {
-		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().getTags(), EntityUtils.getGameMode(vl$self()));
+		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().entityTags(), EntityUtils.getGameMode(vl$self()));
 	}
 
 	default boolean isStaffOrTalent() {
-		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().getTags(), EntityUtils.getGameMode(vl$self()));
+		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().entityTags(), EntityUtils.getGameMode(vl$self()));
 	}
 }

@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import com.mojang.datafixers.util.Either;
+import dev.latvian.mods.klib.block.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
-import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
@@ -11,7 +11,7 @@ import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.SpawnClientParticlePayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -40,8 +40,8 @@ public enum PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public ResourceLocation getModel() {
-		return ResourceLocation.withDefaultNamespace("blaze_rod");
+	public Identifier getModel() {
+		return Identifier.withDefaultNamespace("blaze_rod");
 	}
 
 	@Override

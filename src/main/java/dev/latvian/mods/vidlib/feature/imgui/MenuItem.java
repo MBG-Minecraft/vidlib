@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.FloatSupplier;
-import dev.latvian.mods.vidlib.feature.imgui.config.VideoConfigPanel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.util.ColoredText;
@@ -80,16 +79,6 @@ public record MenuItem(
 	}
 
 	public static MenuItem item(ImIcon icon, String label, Panel panel) {
-		return item(icon, label, panel.isOpen(), g -> {
-			if (panel.isOpen()) {
-				panel.close();
-			} else {
-				panel.open();
-			}
-		});
-	}
-
-	public static MenuItem config(ImIcon icon, String label, VideoConfigPanel panel) {
 		return item(icon, label, panel.isOpen(), g -> {
 			if (panel.isOpen()) {
 				panel.close();

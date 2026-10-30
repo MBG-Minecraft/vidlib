@@ -194,7 +194,7 @@ public class Panel {
 				ImGui.endTabItem();
 			}
 		} else {
-			windowType = ImWindowType.get(graphics.mc.getWindow().getWindow());
+			windowType = ImWindowType.get(graphics.mc.getWindow().handle());
 			ImGui.end();
 		}
 

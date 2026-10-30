@@ -2,16 +2,15 @@ package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.platform.PlatformModInfo;
+import dev.latvian.mods.klib.util.RuntimeDebugger;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
-import dev.latvian.mods.vidlib.feature.location.WarpLocation;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
-import dev.latvian.mods.vidlib.util.RuntimeDebugger;
 import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
@@ -31,6 +30,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -40,12 +40,11 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -53,6 +52,7 @@ import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CommandBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelResource;
@@ -61,7 +61,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.neoforge.network.bundle.PacketAndPayloadAcceptor;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -87,34 +86,41 @@ public class CommonGameEngine {
 	}
 
 	public void setupServer(MinecraftServer server) {
-		server.overworld().setDayTime(6000L);
-		server.overworld().setWeatherParameters(20000000, 20000000, false, false);
-		server.setFlightAllowed(true);
+		var overworldClock = server.overworld().dimensionTypeRegistration().value().defaultClock();
+		if (overworldClock.isPresent()) {
+			server.clockManager().setTotalTicks(overworldClock.get(), 6000);
+		}
+
+		server.setWeatherParameters(20000000, 20000000, false, false);
+		// 26.3 removed MinecraftServer#setFlightAllowed: flight is now a per-player ability
+		// (see the mayFly hook in core/mixin/neo/IPlayerExtensionMixin.java).
 
 		if (server.isSingleplayer()) {
-			server.getPlayerList().setAllowCommandsForAllPlayers(true);
+			// 26.3 removed PlayerList#setAllowCommandsForAllPlayers: command permission is now
+			// derived from MinecraftServer#getProfilePermissions, which already grants the
+			// default permission level to every player.
 		}
 
 		setupGameRules(server.getGameRules(), server);
 	}
 
 	public void setupGameRules(GameRules rules, MinecraftServer server) {
-		rules.getRule(GameRules.RULE_DOFIRETICK).set(false, server);
-		// rules.getRule(GameRules.RULE_DOBLOCKDROPS).set(false, server);
-		rules.getRule(GameRules.RULE_COMMANDBLOCKOUTPUT).set(false, server);
-		rules.getRule(GameRules.RULE_SPAWN_RADIUS).set(0, server);
-		rules.getRule(GameRules.RULE_DISABLE_PLAYER_MOVEMENT_CHECK).set(true, server);
-		rules.getRule(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK).set(true, server);
-		rules.getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(false, server);
-		rules.getRule(GameRules.RULE_DISABLE_RAIDS).set(true, server);
-		rules.getRule(GameRules.RULE_DOINSOMNIA).set(false, server);
-		rules.getRule(GameRules.RULE_DO_PATROL_SPAWNING).set(false, server);
-		rules.getRule(GameRules.RULE_DO_TRADER_SPAWNING).set(false, server);
-		rules.getRule(GameRules.RULE_DO_WARDEN_SPAWNING).set(false, server);
-		rules.getRule(GameRules.RULE_GLOBAL_SOUND_EVENTS).set(false, server);
+		rules.set(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0, server);
+		// rules.set(GameRules.BLOCK_DROPS, false, server);
+		rules.set(GameRules.COMMAND_BLOCK_OUTPUT, false, server);
+		rules.set(GameRules.RESPAWN_RADIUS, 0, server);
+		rules.set(GameRules.PLAYER_MOVEMENT_CHECK, false, server);
+		rules.set(GameRules.ELYTRA_MOVEMENT_CHECK, false, server);
+		rules.set(GameRules.SHOW_ADVANCEMENT_MESSAGES, false, server);
+		rules.set(GameRules.RAIDS, false, server);
+		rules.set(GameRules.PLAYERS_SLEEPING_PERCENTAGE, 0, server);
+		rules.set(GameRules.SPAWN_PATROLS, false, server);
+		rules.set(GameRules.SPAWN_WANDERING_TRADERS, false, server);
+		rules.set(GameRules.SPAWN_WARDENS, false, server);
+		rules.set(GameRules.GLOBAL_SOUND_EVENTS, false, server);
 
 		if (privacyMode()) {
-			rules.getRule(GameRules.RULE_SHOWDEATHMESSAGES).set(false, server);
+			rules.set(GameRules.SHOW_DEATH_MESSAGES, false, server);
 		}
 	}
 
@@ -132,14 +138,14 @@ public class CommonGameEngine {
 
 	@Nullable
 	public UUID createOfflinePlayerUUID(String name) {
-		if (!FMLLoader.isProduction() && !name.startsWith("Player") && !name.startsWith("Dev")) {
+		if (!FMLLoader.getCurrent().isProduction() && !name.startsWith("Player") && !name.startsWith("Dev")) {
 			try {
 				VidLib.LOGGER.info("Fetching offline UUID for " + name + "...");
 				var profile = PlayerProfiles.get(name);
 
 				if (!profile.isError()) {
-					VidLib.LOGGER.info("UUID for " + name + " found: " + profile.profile().getId());
-					return profile.profile().getId();
+					VidLib.LOGGER.info("UUID for " + name + " found: " + profile.profile().id());
+					return profile.profile().id();
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -244,7 +250,7 @@ public class CommonGameEngine {
 
 	@Nullable
 	public Packet<ClientGamePacketListener> overrideEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
-		if (!entity.getType().builtInRegistryHolder().getKey().location().getNamespace().equals("minecraft")) {
+		if (!entity.getType().builtInRegistryHolder().key().identifier().getNamespace().equals("minecraft")) {
 			return (Packet) new ExactEntitySpawnPayload(entity, serverEntity, 0).toS2CPacket(entity.level().getGameTime());
 		}
 
@@ -284,7 +290,7 @@ public class CommonGameEngine {
 	}
 
 	public float getAmbientLight(float fallback) {
-		if (FMLLoader.getDist().isClient()) {
+		if (FMLLoader.getCurrent().getDist().isClient()) {
 			LocalPlayer player = Minecraft.getInstance().player;
 			if (player != null) {
 				Float value = player.get(InternalPlayerData.BRIGHTNESS_OVERRIDE);
@@ -351,7 +357,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean canVoicechatBroadcast(Player player) {
-		return player.isStaff() || player.hasPermissions(2);
+		return player.isStaff() || player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
 
 	public boolean isInvulnerable(Entity entity) {
@@ -415,19 +421,19 @@ public class CommonGameEngine {
 	}
 
 	public boolean allowEmoteCommand(CommandSourceStack source) {
-		return source.hasPermission(2);
+		return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
 
 	public boolean allowPlayerListCommand(CommandSourceStack source) {
-		return !privacyMode() || source.hasPermission(2);
+		return !privacyMode() || source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
 
 	public boolean allowMsgCommand(CommandSourceStack source) {
-		return !privacyMode() || source.hasPermission(2);
+		return !privacyMode() || source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
 
 	public boolean allowTeamMsgCommand(CommandSourceStack source) {
-		return !privacyMode() || source.hasPermission(2);
+		return !privacyMode() || source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
 
 	public void modifyDroppedItem(LivingEntity entity, ItemEntity item) {
@@ -482,17 +488,13 @@ public class CommonGameEngine {
 		return name;
 	}
 
-	public List<WarpLocation> getWarpLocations() {
-		return List.of();
-	}
-
-	public void initialPlayerSync(ServerPlayer player, PacketAndPayloadAcceptor<ClientGamePacketListener> callback) {
-		// callback.accept(new SyncPlayerTagsPayload(player.getUUID(), List.copyOf(player.getTags())).toS2C(player.level().getGameTime()));
+	public void initialPlayerSync(ServerPlayer player, java.util.function.Consumer<Packet<ClientGamePacketListener>> callback) {
+		// callback.accept(new SyncPlayerTagsPayload(player.getUUID(), List.copyOf(player.entityTags())).toS2C(player.level().getGameTime()));
 	}
 
 	public void tickPlayerSync(ServerPlayer player) {
 		/*
-		var tags = player.getTags();
+		var tags = player.entityTags();
 
 		if (vl$prevTags == null || !vl$prevTags.equals(tags)) {
 			vl$prevTags = Set.copyOf(tags);

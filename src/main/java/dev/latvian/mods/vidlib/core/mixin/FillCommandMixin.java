@@ -25,7 +25,7 @@ public class FillCommandMixin {
 		return BlockPosArgument.getBlockPos(context, name);
 	}
 
-	@ModifyExpressionValue(method = "fillBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules;getInt(Lnet/minecraft/world/level/GameRules$Key;)I"))
+	@ModifyExpressionValue(method = "fillBlocks", at = @At(value = "INVOKE", target = "Ljava/lang/Integer;intValue()I"))
 	private static int vl$expand(int original) {
 		return Integer.MAX_VALUE;
 	}

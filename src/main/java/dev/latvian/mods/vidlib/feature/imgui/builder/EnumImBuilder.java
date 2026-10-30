@@ -1,8 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import com.mojang.serialization.DynamicOps;
-import dev.latvian.mods.klib.codec.KLibCodecs;
-import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.klib.util.NameProvider;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
@@ -16,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Function;
 
 public class EnumImBuilder<E> implements ImBuilder<E> {
 	public static final ImBuilderType<Mirror> MIRROR_TYPE = () -> new EnumImBuilder<>(Mirror.values(), Mirror.NONE);
@@ -24,9 +22,9 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 	public static final ImBuilderType<LiquidSettings> LIQUID_SETTINGS_TYPE = () -> new EnumImBuilder<>(LiquidSettings.values(), LiquidSettings.IGNORE_WATERLOGGING);
 	public static final ImBuilderType<InteractionHand> HAND_TYPE = () -> new EnumImBuilder<>(InteractionHand.values(), InteractionHand.MAIN_HAND);
 
-	public static <T> EnumImBuilder<T> ofRegistry(Registry<T> registry, @Nullable T defaultValue, Function<T, String> nameGetter) {
+	public static <T> EnumImBuilder<T> ofRegistry(Registry<T> registry, @Nullable T defaultValue, NameProvider<T> nameProvider) {
 		var builder = new EnumImBuilder<>(registry.stream().toList(), defaultValue);
-		builder.nameGetter = nameGetter;
+		builder.nameProvider = nameProvider;
 		return builder;
 	}
 
@@ -35,13 +33,13 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 	public final Collection<E> options;
 	public final Object[] value;
 	public boolean allowNull;
-	public Function<E, String> nameGetter;
+	public NameProvider<E> nameProvider;
 
 	public EnumImBuilder(Collection<E> options, @Nullable E defaultValue) {
 		this.options = options;
 		this.value = new Object[]{defaultValue};
 		this.allowNull = defaultValue == null;
-		this.nameGetter = null;
+		this.nameProvider = NameProvider.resolve(null);
 	}
 
 	public EnumImBuilder(E[] options, E defaultValue) {
@@ -56,9 +54,9 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 		this(Arrays.asList(options));
 	}
 
-	public EnumImBuilder<E> withNameGetter(Function<E, String> nameGetter) {
+	public EnumImBuilder<E> withNameGetter(NameProvider<E> nameProvider) {
 		var b = new EnumImBuilder<>(options, build());
-		b.nameGetter = nameGetter;
+		b.nameProvider = NameProvider.resolve(nameProvider);
 		return b;
 	}
 
@@ -69,7 +67,7 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		return graphics.combo("###enum", value, allowNull ? "Not Set" : "", options, nameGetter, SEARCH);
+		return graphics.combo("###enum", value, allowNull ? "Not Set" : "", options, nameProvider, SEARCH);
 	}
 
 	@Override
@@ -84,6 +82,6 @@ public class EnumImBuilder<E> implements ImBuilder<E> {
 
 	@Override
 	public <O> String toString(DynamicOps<O> ops, E value) {
-		return KLibCodecs.DEFAULT_NAME_GETTER.apply(Cast.to(value));
+		return nameProvider.provideName(value);
 	}
 }

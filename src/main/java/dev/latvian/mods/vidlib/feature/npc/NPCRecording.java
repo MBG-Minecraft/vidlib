@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.npc;
 
-import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectSortedMap;
@@ -13,6 +13,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.VarInt;
 import net.minecraft.network.VarLong;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
 
 import java.io.BufferedInputStream;
@@ -21,6 +23,11 @@ import java.util.Map;
 
 public class NPCRecording {
 	public static Object2ObjectSortedMap<String, Lazy<NPCRecording>> REPLAY = null;
+
+	private static final StreamCodec<ByteBuf, NameAndId> PROFILE_STREAM_CODEC = ByteBufCodecs.GAME_PROFILE.map(
+		NameAndId::new,
+		profile -> new com.mojang.authlib.GameProfile(profile.id(), profile.name())
+	);
 
 	public static Object2ObjectSortedMap<String, Lazy<NPCRecording>> getReplay(RegistryAccess registryAccess) {
 		if (REPLAY == null) {
@@ -64,11 +71,11 @@ public class NPCRecording {
 	}
 
 	public final long start;
-	public final GameProfile profile;
+	public final NameAndId profile;
 	public final Map<NPCDataType<?>, NPCTypeRecording<?>> actions;
 	public long length;
 
-	public NPCRecording(GameProfile profile) {
+	public NPCRecording(NameAndId profile) {
 		this.start = System.currentTimeMillis();
 		this.profile = profile;
 		this.actions = new Reference2ObjectLinkedOpenHashMap<>(NPCDataType.MAP.size());
@@ -79,7 +86,7 @@ public class NPCRecording {
 	}
 
 	public NPCRecording(RegistryFriendlyByteBuf buf) {
-		this(ByteBufCodecs.GAME_PROFILE.decode(buf));
+		this(PROFILE_STREAM_CODEC.decode(buf));
 		this.length = VarLong.read(buf);
 		int size = VarInt.read(buf);
 
@@ -98,7 +105,7 @@ public class NPCRecording {
 	}
 
 	public void write(RegistryFriendlyByteBuf buf) {
-		ByteBufCodecs.GAME_PROFILE.encode(buf, profile);
+		PROFILE_STREAM_CODEC.encode(buf, profile);
 		VarLong.write(buf, length);
 		VarInt.write(buf, actions.size());
 

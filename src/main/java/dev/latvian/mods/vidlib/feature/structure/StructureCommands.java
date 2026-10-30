@@ -2,19 +2,20 @@ package dev.latvian.mods.vidlib.feature.structure;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.latvian.mods.klib.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.Locale;
 
 public interface StructureCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("structure", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.literal("add-blocks")
 			.then(Commands.argument("start", BlockPosArgument.blockPos())
 				.then(Commands.argument("end", BlockPosArgument.blockPos())
@@ -35,9 +36,9 @@ public interface StructureCommands {
 			})
 		)
 		.then(Commands.literal("set-ignore-filter")
-			.then(Commands.argument("filter", BlockFilter.COMMAND.argument(buildContext))
+			.then(Commands.argument("filter", BlockFilter.DATA_TYPE.argument(buildContext))
 				.executes(ctx -> {
-					StructureCapture.IGNORE_FILTER.setValue(BlockFilter.COMMAND.get(ctx, "filter"));
+					StructureCapture.IGNORE_FILTER.setValue(BlockFilter.DATA_TYPE.get(ctx, "filter"));
 					return 1;
 				})
 			)

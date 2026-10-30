@@ -34,7 +34,7 @@ public record TestScreenShakePayload(ScreenShake shake, Optional<Vec3> position,
 		if (ctx.isAdmin()) {
 			if (position.isPresent()) {
 				ctx.level().screenShake(shake, position.get(), maxDistance);
-				ctx.level().cubeParticles(new ShapeParticleOptions(ScreenShake.DEFAULT.duration(), Color.CYAN, Color.WHITE), List.of(BlockPos.containing(position.get())));
+				ctx.level().cubeParticles(new ShapeParticleOptions(ScreenShake.DEFAULT.duration(), Color.CYAN.toGradient().ref(), Color.WHITE.toGradient().ref()), List.of(BlockPos.containing(position.get())));
 			} else {
 				ctx.level().screenShake(shake);
 			}

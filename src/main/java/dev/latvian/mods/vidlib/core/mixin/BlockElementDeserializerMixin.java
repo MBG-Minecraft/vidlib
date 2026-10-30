@@ -1,19 +1,15 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import com.google.gson.JsonObject;
-import net.minecraft.client.renderer.block.model.BlockElement;
-import net.minecraft.util.GsonHelper;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(BlockElement.Deserializer.class)
+/**
+ * 26.3 removed {@code net.minecraft.client.renderer.block.model.BlockElement} and its
+ * {@code Deserializer.getAngle(JsonObject)} helper. Element geometry is now parsed by
+ * {@code net.minecraft.client.resources.model.cuboid.CuboidModelElement.Deserializer}, which reads the
+ * rotation angle directly via {@code GsonHelper.getAsFloat(rotationObject, "angle")} - the exact
+ * behaviour VidLib's old {@code getAngle} override produced. Kept registered for compatibility;
+ * there is no longer a separate {@code getAngle} method to overwrite.
+ */
+@Mixin(targets = "net.minecraft.client.resources.model.cuboid.CuboidModelElement$Deserializer")
 public class BlockElementDeserializerMixin {
-	/**
-	 * @author Lat
-	 * @reason MBG
-	 */
-	@Overwrite
-	private float getAngle(JsonObject json) {
-		return GsonHelper.getAsFloat(json, "angle");
-	}
 }

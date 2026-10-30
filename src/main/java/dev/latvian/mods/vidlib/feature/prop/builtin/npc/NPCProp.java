@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.npc;
 
-import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
@@ -24,6 +23,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
@@ -42,6 +42,9 @@ import java.util.Set;
 public class NPCProp extends BaseGeoProp {
 	public static final Pose[] POSES = Pose.values();
 	public static final Pose[] VALID_POSES = {Pose.STANDING, Pose.CROUCHING, Pose.SLEEPING, Pose.SWIMMING, Pose.SITTING};
+
+	// Named instead of an inline DataType.of(POSES) so the command argument type has a stable registration id.
+	public static final DataType<Pose> POSE_TYPE = DataType.of(POSES);
 
 	public static class NPCInstance {
 		public int index;
@@ -67,7 +70,7 @@ public class NPCProp extends BaseGeoProp {
 		ROLL,
 		PropData.create(NPCProp.class, "name", DataTypes.TEXT_COMPONENT, p -> p.name, (p, v) -> p.name = v, TextComponentImBuilder.TYPE),
 		PropData.createBoolean(NPCProp.class, "stone", p -> p.stone, (p, v) -> p.stone = v),
-		PropData.create(NPCProp.class, "profile", DataTypes.GAME_PROFILE, p -> p.profile, (p, v) -> p.profile = v, GameProfileImBuilder.TYPE),
+		PropData.create(NPCProp.class, "profile", DataTypes.NAME_AND_ID, p -> p.profile, (p, v) -> p.profile = v, GameProfileImBuilder.TYPE),
 		PropData.createInt(NPCProp.class, "count", p -> p.count, (p, v) -> {
 			p.count = v;
 			p.instances = null;
@@ -94,7 +97,7 @@ public class NPCProp extends BaseGeoProp {
 		PropData.create(NPCProp.class, "chest_item", DataTypes.ITEM_STACK, p -> p.chestItem, (p, v) -> p.chestItem = v, ItemStackImBuilder.CHEST_EQUIPMENT_TYPE),
 		PropData.create(NPCProp.class, "legs_item", DataTypes.ITEM_STACK, p -> p.legsItem, (p, v) -> p.legsItem = v, ItemStackImBuilder.LEGS_EQUIPMENT_TYPE),
 		PropData.create(NPCProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v, ItemStackImBuilder.FEET_EQUIPMENT_TYPE),
-		PropData.create(NPCProp.class, "pose", DataType.of(POSES), p -> p.pose, (p, v) -> p.pose = v, () -> new EnumImBuilder<>(VALID_POSES)),
+		PropData.create(NPCProp.class, "pose", POSE_TYPE, p -> p.pose, (p, v) -> p.pose = v, () -> new EnumImBuilder<>(VALID_POSES)),
 		PropData.createBoolean(NPCProp.class, "breathing", p -> p.breathing, (p, v) -> p.breathing = v),
 		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F),
 		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
@@ -110,7 +113,7 @@ public class NPCProp extends BaseGeoProp {
 
 	public Component name;
 	public boolean stone;
-	public GameProfile profile;
+	public NameAndId profile;
 	public float bodyPitch;
 	public int count;
 	public SpreadType spread;
@@ -144,7 +147,7 @@ public class NPCProp extends BaseGeoProp {
 		this.height = 1.92F;
 		this.name = Empty.COMPONENT;
 		this.stone = false;
-		this.profile = PlayerProfile.EMPTY_GAME_PROFILE;
+		this.profile = PlayerProfile.EMPTY_NAME_AND_ID;
 		this.bodyPitch = 0F;
 		this.count = 1;
 		this.spread = SpreadType.FILLED_SQUARE;
@@ -171,7 +174,7 @@ public class NPCProp extends BaseGeoProp {
 	public void cloneFrom(Player player) {
 		setPos(player.position());
 		name = player.getDisplayName();
-		profile = player.getGameProfile();
+		profile = new net.minecraft.server.players.NameAndId(player.getUUID(), player.getGameProfile().name());
 		clothing = player.get(InternalPlayerData.CLOTHING);
 		mainHandItem = player.getMainHandItem();
 		offHandItem = player.getOffhandItem();
@@ -193,7 +196,7 @@ public class NPCProp extends BaseGeoProp {
 	}
 
 	@Override
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
+	public boolean isVisibleInFrustum(double x, double y, double z, FrustumCheck frustum) {
 		if (count > 1) {
 			return true;
 		}
@@ -238,11 +241,11 @@ public class NPCProp extends BaseGeoProp {
 					npc.prevPunching = 0;
 				}
 
-				if (jumping > 0 && npc.y <= 0F && level.random.nextInt(jumping) == 0) {
+				if (jumping > 0 && npc.y <= 0F && level.getRandom().nextInt(jumping) == 0) {
 					npc.jump = 0.42F;
 				}
 
-				if (punching > 0 && (npc.punching == 0 || npc.punching >= 4) && level.random.nextInt(punching) == 0) {
+				if (punching > 0 && (npc.punching == 0 || npc.punching >= 4) && level.getRandom().nextInt(punching) == 0) {
 					npc.punching = 1;
 				}
 			}

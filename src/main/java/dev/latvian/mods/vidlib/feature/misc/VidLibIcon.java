@@ -3,10 +3,11 @@ package dev.latvian.mods.vidlib.feature.misc;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.util.ID;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.Style;
 
 public interface VidLibIcon {
-	Style STYLE_RGB = Style.EMPTY.withFont(ID.vidlib("icons"));
+	Style STYLE_RGB = Style.EMPTY.withFont(new FontDescription.Resource(ID.vidlib("icons")));
 	Style STYLE = STYLE_RGB.withColor(Color.WHITE);
 
 	private static Component icon(char c, boolean rgb) {

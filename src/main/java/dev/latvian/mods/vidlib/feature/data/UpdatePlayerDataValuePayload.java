@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
 import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +28,7 @@ public record UpdatePlayerDataValuePayload(UUID uuid, List<DataMapValue> update)
 	@Override
 	public void handle(Context ctx) {
 		for (var u : update) {
-			if (u.key() != null && (u.key().allowClientUpdates() && ctx.player().getUUID().equals(uuid) || ctx.player().hasPermissions(2))) {
+			if (u.key() != null && (u.key().allowClientUpdates() && ctx.player().getUUID().equals(uuid) || ctx.player().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))) {
 				var session = ctx.level().getServer().vl$getOrLoadServerSession(uuid);
 				session.dataMap.set(u.key(), Cast.to(u.value()));
 			}

@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.client;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.client.VidLibWorldRenderState;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -12,6 +13,7 @@ import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.BeeRenderState;
 import net.minecraft.client.renderer.entity.state.CatRenderState;
 import net.minecraft.client.renderer.entity.state.ChickenRenderState;
@@ -27,7 +29,6 @@ import net.minecraft.client.renderer.entity.state.ItemFrameRenderState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.entity.state.LlamaRenderState;
 import net.minecraft.client.renderer.entity.state.PigRenderState;
-import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.client.renderer.entity.state.SkeletonRenderState;
 import net.minecraft.client.renderer.entity.state.VillagerRenderState;
 import net.minecraft.client.renderer.entity.state.WitchRenderState;
@@ -35,12 +36,13 @@ import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.horse.Markings;
+import net.minecraft.world.entity.animal.equine.Markings;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 public interface VidLibEntityRenderStates {
+	ContextKey<VidLibWorldRenderState> WORLD_KEY = new ContextKey<>(ID.vidlib("world"));
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(ID.vidlib("creative"));
 	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(ID.vidlib("sprite_key"));
 	ContextKey<UV> UV = new ContextKey<>(ID.vidlib("uv"));
@@ -50,7 +52,7 @@ public interface VidLibEntityRenderStates {
 
 	static void extract(Entity entity, EntityRenderState state, float delta) {
 		var mc = Minecraft.getInstance();
-		var camPos = mc.gameRenderer.getMainCamera().getPosition();
+		var camPos = mc.gameRenderer.mainCamera().position();
 		var vehicle = entity.getVehicle();
 
 		if (vehicle != null) {
@@ -67,7 +69,7 @@ public interface VidLibEntityRenderStates {
 			extractLiving(mc, camPos, e, s);
 		}
 
-		if (entity instanceof AbstractClientPlayer e && state instanceof PlayerRenderState s) {
+		if (entity instanceof AbstractClientPlayer e && state instanceof AvatarRenderState s) {
 			extractPlayer(mc, camPos, e, s);
 		}
 
@@ -77,7 +79,7 @@ public interface VidLibEntityRenderStates {
 	static void lod(Minecraft mc, EntityRenderState state, Vec3 camPos) {
 		var replay = mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level);
 		boolean hideDetails = !(replay || LevelOfDetailValue.ENTITY_DETAILS.isVisible(camPos, state.x, state.y, state.z));
-		boolean hideArmor = !(replay || (state instanceof PlayerRenderState ? LevelOfDetailValue.PLAYER_ARMOR : LevelOfDetailValue.ENTITY_ARMOR).isVisible(camPos, state.x, state.y, state.z));
+		boolean hideArmor = !(replay || (state instanceof AvatarRenderState ? LevelOfDetailValue.PLAYER_ARMOR : LevelOfDetailValue.ENTITY_ARMOR).isVisible(camPos, state.x, state.y, state.z));
 		boolean hideHandItems = !(replay || LevelOfDetailValue.HELD_ITEM.isVisible(camPos, state.x, state.y, state.z));
 		boolean hideClothing = !(replay || LevelOfDetailValue.CLOTHING.isVisible(camPos, state.x, state.y, state.z));
 		lod(state, hideDetails, hideArmor, hideHandItems, hideClothing);
@@ -85,8 +87,10 @@ public interface VidLibEntityRenderStates {
 
 	private static void lod(EntityRenderState state, boolean hideDetails, boolean hideArmor, boolean hideHandItems, boolean hideClothing) {
 		if (state instanceof ArmedEntityRenderState s && hideHandItems) {
-			s.leftHandItem.clear();
-			s.rightHandItem.clear();
+			s.leftHandItemState.clear();
+			s.rightHandItemState.clear();
+			s.leftHandItemStack = ItemStack.EMPTY;
+			s.rightHandItemStack = ItemStack.EMPTY;
 		}
 
 		if (state instanceof HumanoidRenderState s && hideArmor) {
@@ -95,7 +99,7 @@ public interface VidLibEntityRenderStates {
 			s.legsEquipment = ItemStack.EMPTY;
 			s.feetEquipment = ItemStack.EMPTY;
 			s.headItem.clear();
-		} else if (state instanceof PlayerRenderState s && !MiscClientUtils.PLAYER_HEADWEAR.get()) {
+		} else if (state instanceof AvatarRenderState s && !MiscClientUtils.PLAYER_HEADWEAR.get()) {
 			s.headEquipment = ItemStack.EMPTY;
 			s.headItem.clear();
 		}
@@ -132,7 +136,7 @@ public interface VidLibEntityRenderStates {
 
 		if (state instanceof EndermanRenderState s) {
 			if (hideHandItems) {
-				s.carriedBlock = null;
+				s.carriedBlock.clear();
 			}
 		}
 
@@ -183,7 +187,7 @@ public interface VidLibEntityRenderStates {
 			}
 		}
 
-		if (state instanceof PlayerRenderState s) {
+		if (state instanceof AvatarRenderState s) {
 			if (hideDetails) {
 				s.arrowCount = 0;
 				s.stingerCount = 0;
@@ -232,11 +236,10 @@ public interface VidLibEntityRenderStates {
 	static void extractLiving(Minecraft mc, Vec3 camPos, LivingEntity entity, LivingEntityRenderState state) {
 		if (ClientGameEngine.INSTANCE.hideRenderedName(entity)) {
 			state.nameTag = null;
-			state.customName = null;
 		}
 	}
 
-	static void extractPlayer(Minecraft mc, Vec3 camPos, AbstractClientPlayer player, PlayerRenderState state) {
+	static void extractPlayer(Minecraft mc, Vec3 camPos, AbstractClientPlayer player, AvatarRenderState state) {
 		state.setRenderData(CREATIVE, player.isCreative() ? Boolean.TRUE : null);
 		state.setRenderData(TRANSLUCENT, player.get(InternalPlayerData.TRANSLUCENT) ? Boolean.TRUE : null);
 
@@ -251,7 +254,7 @@ public interface VidLibEntityRenderStates {
 		}
 	}
 
-	static boolean isCreative(PlayerRenderState state) {
+	static boolean isCreative(LivingEntityRenderState state) {
 		var v = state.getRenderData(CREATIVE);
 		return v != null && v;
 	}

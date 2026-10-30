@@ -13,8 +13,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
 import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.resources.Identifier;
 
 public class GeoDisplayProp extends BaseGeoProp {
 	@AutoRegister
@@ -28,9 +27,9 @@ public class GeoDisplayProp extends BaseGeoProp {
 		PropData.create(GeoDisplayProp.class, "animations", ID.DATA_TYPE, p -> p.animations, (p, v) -> p.animations = v, GeoAnimationsImBuilder.TYPE)
 	);
 
-	public ResourceLocation model = ID.vidlib("prop/player");
-	public ClientAsset texture = SkinTexture.WIDE_STEVE.asset();
-	public ResourceLocation animations = ID.EMPTY;
+	public Identifier model = ID.vidlib("prop/player");
+	public ClientAsset.ResourceTexture texture = SkinTexture.WIDE_STEVE.asset();
+	public Identifier animations = Identifier.withDefaultNamespace("empty");
 
 	public GeoDisplayProp(PropContext<?> ctx) {
 		super(ctx);
@@ -44,7 +43,7 @@ public class GeoDisplayProp extends BaseGeoProp {
 	}
 
 	@Override
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
+	public boolean isVisibleInFrustum(double x, double y, double z, FrustumCheck frustum) {
 		return true;
 	}
 }

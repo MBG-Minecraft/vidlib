@@ -1,11 +1,20 @@
 [
 	{
-		"vidlib:smoking/top": "{namespace}:{path}"
+		"vidlib:smoking/top": {
+			"type": "client",
+			"gradient": "{namespace}:{path}"
+		}
 	},
 	{
-		"vidlib:smoking/pants": "{namespace}:{path}"
+		"vidlib:smoking/pants": {
+			"type": "client",
+			"gradient": "{namespace}:{path}"
+		}
 	},
 	{
-		"vidlib:shoes": "vidlib:black"
+		"vidlib:shoes": {
+			"type": "client",
+			"gradient": "vidlib:black"
+		}
 	}
 ]

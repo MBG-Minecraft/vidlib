@@ -4,10 +4,10 @@ import java.net.http.HttpResponse
 
 plugins {
 	id 'base'
-	id 'java'
-	id 'idea'
+	id 'java-library'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version "2.0.137"
+	id 'net.neoforged.moddev' version '2.0.148'
+	id 'idea'
 }
 
 var ENV = System.getenv() + (file('.env').exists() ? file('.env').readLines().findAll { it && !it.startsWith('#') }.collectEntries {
@@ -18,11 +18,13 @@ var CI = ENV.CI == "true"
 
 var localBuildFile = new File(project.rootDir, "build.txt")
 var localBuildNumber = localBuildFile.getText("UTF-8").toInteger() + 1
-var webHookId = ""
 
 version = "$mod_version-build.$localBuildNumber"
 group = project.maven_group
-base.archivesName = project.archives_base_name
+
+base {
+	archivesName = project.archives_base_name
+}
 
 println("Building version: $version")
 
@@ -81,7 +83,7 @@ neoForge {
 		}
 
 		mods {
-			vidlib {
+			mod {
 				sourceSet sourceSets.main
 			}
 		}
@@ -90,18 +92,26 @@ neoForge {
 
 compileJava {
 	options.encoding = "UTF-8"
-	options.release.set(21)
+	options.release.set(25)
 	options.compilerArgs << '-parameters' << '-Xmaxerrs' << '1000'
 }
 
 java {
-	sourceCompatibility = targetCompatibility = '21'
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
+
+	sourceCompatibility = targetCompatibility = '25'
 	withSourcesJar()
-	// withJavadocJar()
+	withJavadocJar()
 }
 
 configurations {
 	runtimeClasspath.extendsFrom localRuntime
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
 }
 
 tasks.withType(Javadoc) {
@@ -116,17 +126,11 @@ repositories {
 		url "https://maven.neoforged.net/releases"
 	}
 
-	maven {
-		url = 'https://maven.parchmentmc.org'
-		content {
-			includeGroup "org.parchmentmc.data"
-		}
-	}
-
 	if (findProperty('mrbeastURL') ?: ENV.MBG_MAVEN_URL) {
 		maven {
 			url = findProperty('mrbeastURL') ?: ENV.MBG_MAVEN_URL
 			content {
+				includeGroup "com.geckolib"
 				includeGroup "software.bernie.geckolib"
 				includeGroup "dev.latvian.mods"
 				includeGroup "dev.latvian.apps"
@@ -162,13 +166,7 @@ repositories {
 		url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
 		content {
 			includeGroup "software.bernie.geckolib"
-		}
-	}
-
-	maven {
-		url = 'https://cursemaven.com'
-		content {
-			includeGroup "curse.maven"
+			includeGroup "com.geckolib"
 		}
 	}
 }
@@ -181,30 +179,37 @@ dependencies {
 		}
 	}
 
-	additionalRuntimeClasspath(jarJar(implementation('dev.latvian.apps:tiny-http'))) {
+	jarJar(implementation('dev.latvian.mods:better-advanced-tooltips')) {
+		version {
+			strictly "[$bat_version,)"
+			prefer "$bat_version"
+		}
+	}
+
+	jarJar(implementation('dev.latvian.apps:tiny-http')) {
 		version {
 			strictly "[$tiny_http_version,)"
 			prefer "$tiny_http_version"
 		}
 	}
 
-	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
 	accessTransformers("dev.latvian.mods:klib:$klib_version")
+	interfaceInjectionData("dev.latvian.mods:klib:$klib_version")
 
-	compileOnly("dev.latvian.mods:better-advanced-tooltips:$bat_version")
-	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
+	compileOnly("maven.modrinth:G922NeHS:fB0LmHnR") // watermedia:2.1.37
+	// compileOnly("maven.modrinth:G922NeHS:FdCZ5Rxq") // watermedia:3.0.0.23 // Fixes linux and mac but conflicts with flashback
+
 	compileOnly('com.github.luben:zstd-jni:1.5.7-7')
-
-	compileOnly("maven.modrinth:simple-voice-chat:neoforge-1.21.5-2.6.12")
-	compileOnly("maven.modrinth:iris:1.8.11+1.21.5-neoforge")
-	compileOnly("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}")
-	compileOnly("curse.maven:watermedia-869524:7281929") // 2.1.37
-	// compileOnly("curse.maven:watermedia-869524:8519098") // 3.0.0.23 // Fixes linux and mac but conflicts with flashback
+	compileOnly("dev.latvian.mods:imgui-resources:$imgui_resources_version")
+	compileOnly("maven.modrinth:simple-voice-chat:$simple_voice_chat_version")
+	compileOnly("maven.modrinth:iris:$iris_version")
+	compileOnly("com.geckolib:geckolib-neoforge-$minecraft_version:$geckolib_version")
 }
 
 processResources {
 	def toReplace = [
-			"version": project.version
+			"version"         : project.version,
+			"geckolib_version": project.geckolib_version
 	]
 
 	println("[Process Resources] Replacing properties in resources: " + toReplace)
@@ -299,7 +304,7 @@ idea {
 			downloadJavadoc = true
 			excludeDirs.add(file(".editorconfig"))
 
-			["client", "server"].each {
+			["client", "client2", "server", "server2"].each {
 				[
 						".architectury-transformer",
 						".fobby",

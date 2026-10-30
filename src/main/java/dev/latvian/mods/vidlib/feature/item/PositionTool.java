@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.item;
 
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Line;
 import dev.latvian.mods.klib.shape.ColoredShape;
@@ -17,7 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -76,8 +77,8 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 	}
 
 	@Override
-	public ResourceLocation getModel() {
-		return ResourceLocation.withDefaultNamespace("breeze_rod");
+	public Identifier getModel() {
+		return Identifier.withDefaultNamespace("breeze_rod");
 	}
 
 	@Override
@@ -121,7 +122,7 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 				)
 			);
 
-			player.level().addParticle(new ShapeParticleOptions(60, Color.CYAN, Color.WHITE), clientPos.x, clientPos.y, clientPos.z, 0D, 0D, 0D);
+			player.level().addParticle(new ShapeParticleOptions(60, Color.CYAN.toGradient().ref(), Color.WHITE.toGradient().ref()), clientPos.x, clientPos.y, clientPos.z, 0D, 0D, 0D);
 		}
 
 		return true;
@@ -139,15 +140,17 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 
 	@Override
 	public void renderSetup(Player player, ItemStack item, @Nullable HitResult hit, float delta) {
-		var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
+		var tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
 		clientMode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
-		var chit = player.klib$ray(500D, delta).hitBlock(player, ClipContext.Fluid.SOURCE_ONLY);
+		var start = player.getEyePosition(delta);
+		var end = start.add(player.getViewVector(delta).scale(500D));
+		var chit = player.level().clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.SOURCE_ONLY, player));
 		clientPos = chit instanceof BlockHitResult blockHit ? clientMode.position(player, blockHit) : clientMode.position(player, null);
 	}
 
 	@Override
 	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
-		var tag = item.get(DataComponents.CUSTOM_DATA).getUnsafe();
+		var tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
 		var mode = Type.VALUES[tag.getByteOr("position_tool_mode", (byte) 0)];
 		screenText.topRight.add("Mode: " + mode.name);
 
@@ -172,10 +175,10 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x + 0.5D, clientPos.y, clientPos.z)), Color.WHITE, Color.WHITE.withAlpha(0));
 				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x, clientPos.y + 0.5D, clientPos.z)), Color.WHITE, Color.WHITE.withAlpha(0));
 				visuals.addLine(new Line(clientPos, new Vec3(clientPos.x, clientPos.y, clientPos.z + 0.5D)), Color.WHITE, Color.WHITE.withAlpha(0));
-				visuals.add(new ColoredShape(SphereShape.UNIT, Color.CYAN, Color.TRANSPARENT).at(clientPos));
-				visuals.addOutline(new ColoredShape(SphereShape.UNIT, Color.WHITE, Color.TRANSPARENT).at(clientPos));
+				visuals.add(new ColoredShape(SphereShape.UNIT_SPHERE, Gradient.EMPTY, Color.CYAN.toGradient().ref()).at(clientPos));
+				visuals.addOutline(new ColoredShape(SphereShape.UNIT_SPHERE, Gradient.EMPTY, Color.WHITE.toGradient().ref()).at(clientPos));
 			} else {
-				visuals.add(new ColoredShape(CubeShape.UNIT, Color.CYAN, Color.WHITE).at(clientPos));
+				visuals.add(new ColoredShape(CubeShape.UNIT_CUBE, Gradient.EMPTY, Color.CYAN.toGradient().ref()).at(clientPos));
 			}
 		}
 	}

@@ -4,10 +4,9 @@ import dev.latvian.mods.klib.math.DistanceComparator;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.klib.util.PathIDGenerator;
+import dev.latvian.mods.klib.util.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import dev.latvian.mods.vidlib.feature.gallery.Gallery;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryFileUploader;
 import dev.latvian.mods.vidlib.feature.gallery.GalleryImageImBuilder;
@@ -24,7 +23,8 @@ import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.util.TriState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -51,7 +51,7 @@ public interface Pins {
 
 	MenuItem MENU_ITEM = MenuItem.item(ImIcons.LOCATION, "Pins", PinsPanel.INSTANCE);
 
-	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
+	static void draw(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		if (!ENABLED.get() || PINS.isEmpty()) {
 			return;
 		}
@@ -105,7 +105,7 @@ public interface Pins {
 		if (list.isEmpty()) {
 			return;
 		} else if (list.size() >= 2) {
-			list.sort(new DistanceComparator<>(mc.gameRenderer.getMainCamera().getPosition(), ScreenPin::pos));
+			list.sort(new DistanceComparator<>(mc.gameRenderer.mainCamera().position(), ScreenPin::pos));
 		}
 
 		for (var screenPin : list) {
@@ -116,10 +116,10 @@ public interface Pins {
 				int pinAlpha = pin.alpha << 24;
 				int pinSize = (int) (pin.size * mc.getEffectScale());
 
-				graphics.pose().pushPose();
-				graphics.pose().translate(wpos.x(), wpos.y() - 2F, 0F);
-				graphics.pose().translate(-pinSize / 2F, -pinSize * (1F + pin.offset), 0F);
-				graphics.pose().scale(pinSize / 512F, pinSize / 512F, 1F);
+				;
+				graphics.pose().translate(wpos.x(), wpos.y() - 2F);
+				graphics.pose().translate(-pinSize / 2F, -pinSize * (1F + pin.offset));
+				graphics.pose().scale(pinSize / 512F, pinSize / 512F);
 
 				var shape = pin.shapeOverride == null ? pin.shape : pin.shapeOverride;
 				int size = shape.size;
@@ -128,20 +128,20 @@ public interface Pins {
 				screenPin.image().load(mc, true);
 
 				if (!shape.transparentBackground) {
-					graphics.blit(VidLibRenderTypes.GUI, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, color);
+					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, color);
 				}
 
 				if (!pin.background.isTransparent()) {
-					graphics.blit(VidLibRenderTypes.GUI, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, pin.background.withAlpha(pin.background.alphaf() * (pin.alpha / 255F)).argb());
+					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, pin.background.withAlpha(pin.background.alphaf() * (pin.alpha / 255F)).argb());
 				}
 
 				graphics.blit(shape.maskedRenderType, screenPin.image().textureId(), shape.x, shape.y, 1F, 1F, size - 2, size - 2, size, size, pinAlpha | 0xFFFFFF);
 
 				if (shape.overlayTexture != null) {
-					graphics.blit(VidLibRenderTypes.GUI, shape.overlayTexture, 0, 0, 0F, 0F, 512, 512, 512, 512, color);
+					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.overlayTexture, 0, 0, 0F, 0F, 512, 512, 512, 512, color);
 				}
 
-				graphics.pose().popPose();
+				;
 			}
 		}
 	}

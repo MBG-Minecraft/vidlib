@@ -1,17 +1,20 @@
 package dev.latvian.mods.vidlib.feature.clothing;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import dev.latvian.mods.klib.color.Gradient;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.klib.util.SkinTexture;
+import dev.latvian.mods.klib.util.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.PersistentPixelTexture;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
-import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.PlayerModelType;
+import net.minecraft.world.entity.player.PlayerSkin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -22,7 +25,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
-	public record ClothedPlayerSkinCache(NativeImage setImage, Map<ResourceLocation, ClothedPlayerSkinTexture> cache) {
+	public record ClothedPlayerSkinCache(NativeImage setImage, Map<Identifier, ClothedPlayerSkinTexture> cache) {
 	}
 
 	public static final Lazy<NativeImage> MISSING = Lazy.of(() -> {
@@ -41,9 +44,9 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 		return img;
 	});
 
-	public static final EnumMap<PlayerSkin.Model, Map<ResourceLocation, Optional<ClothingPartImage>>> PART_CACHE = new EnumMap<>(PlayerSkin.Model.class);
-	public static final EnumMap<PlayerSkin.Model, Map<ResourceLocation, NativeImage>> SET_CACHE = new EnumMap<>(PlayerSkin.Model.class);
-	public static final EnumMap<PlayerSkin.Model, Map<ResourceLocation, ClothedPlayerSkinCache>> CLOTHED_PLAYER_SKIN_CACHE = new EnumMap<>(PlayerSkin.Model.class);
+	public static final EnumMap<PlayerModelType, Map<Identifier, Optional<ClothingPartImage>>> PART_CACHE = new EnumMap<>(PlayerModelType.class);
+	public static final EnumMap<PlayerModelType, Map<Identifier, NativeImage>> SET_CACHE = new EnumMap<>(PlayerModelType.class);
+	public static final EnumMap<PlayerModelType, Map<Identifier, ClothedPlayerSkinCache>> CLOTHED_PLAYER_SKIN_CACHE = new EnumMap<>(PlayerModelType.class);
 
 	@AutoInit(AutoInit.Type.TEXTURES_RELOADED)
 	public static void reload() {
@@ -63,11 +66,11 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 		MiscClientUtils.BUILTIN_SKIN_IMAGE_MAP.clear();
 
 		Stream.concat(Stream.of(SkinTexture.DEFAULT_WIDE), Stream.of(SkinTexture.DEFAULT_SLIM)).forEach(skin -> {
-			try (var in = Minecraft.getInstance().getResourceManager().getResourceOrThrow(skin.asset().texturePath()).open()) {
+			try (var in = Minecraft.getInstance().getResourceManager().getResourceOrThrow(skin.asset().id()).open()) {
 				var img = NativeImage.read(in);
 
 				if (img.getWidth() == img.getHeight() && img.getWidth() >= 4) {
-					MiscClientUtils.BUILTIN_SKIN_IMAGE_MAP.put(skin.asset().texturePath(), img);
+					MiscClientUtils.BUILTIN_SKIN_IMAGE_MAP.put(skin.asset().id(), img);
 				}
 			} catch (Exception ignore) {
 			}
@@ -80,7 +83,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 	}
 
 	@Nullable
-	public static synchronized NativeImage computePart(Minecraft mc, PlayerSkin.Model model, ResourceLocation asset, Gradient gradient) {
+	public static synchronized NativeImage computePart(Minecraft mc, PlayerModelType model, Identifier asset, Ref<Gradient> gradient) {
 		var map = PART_CACHE.computeIfAbsent(model, m -> new Object2ObjectOpenHashMap<>());
 		var tex = map.get(asset);
 
@@ -102,7 +105,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 		return null;
 	}
 
-	public static synchronized NativeImage computeSet(Minecraft mc, PlayerSkin.Model model, ClothingSet set) {
+	public static synchronized NativeImage computeSet(Minecraft mc, PlayerModelType model, ClothingSet set) {
 		var map = SET_CACHE.computeIfAbsent(model, m -> new Object2ObjectOpenHashMap<>());
 		var uniqueId = set.getUniqueId();
 		var img = map.get(uniqueId);
@@ -120,14 +123,14 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 				}
 			}
 
-			img = MiscClientUtils.layeredImage(layers, true);
+			img = ImagePreProcessor.layeredImage(layers, true);
 			map.put(uniqueId, img);
 		}
 
 		return img;
 	}
 
-	public static synchronized ResourceLocation computeClothedPlayerSkin(Minecraft mc, ResourceLocation skinId, NativeImage skinImage, PlayerSkin.Model model, ClothingSet clothing) {
+	public static synchronized Identifier computeClothedPlayerSkin(Minecraft mc, Identifier skinId, NativeImage skinImage, PlayerModelType model, ClothingSet clothing) {
 		var map = CLOTHED_PLAYER_SKIN_CACHE.computeIfAbsent(model, m -> new Object2ObjectOpenHashMap<>());
 		var uniqueId = clothing.getUniqueId();
 		var cache = map.get(uniqueId);
@@ -140,8 +143,8 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 		var tex = cache.cache.get(skinId);
 
 		if (tex == null) {
-			var pixels = MiscClientUtils.layeredImage(List.of(skinImage, cache.setImage), false);
-			var genTex = new ClothedPlayerSkinTexture(uniqueId.withPath("textures/vidlib/generated/clothed_player/" + skinId.getPath() + "/" + uniqueId.getPath() + "/" + model.id() + ".png"), pixels);
+			var pixels = ImagePreProcessor.layeredImage(List.of(skinImage, cache.setImage), false);
+			var genTex = new ClothedPlayerSkinTexture(uniqueId.withPath("textures/vidlib/generated/clothed_player/" + skinId.getPath() + "/" + uniqueId.getPath() + "/" + model.getSerializedName() + ".png"), pixels);
 			mc.execute(() -> mc.getTextureManager().registerAndLoad(genTex.resourceId(), genTex));
 			tex = genTex;
 			cache.cache.put(skinId, tex);
@@ -151,7 +154,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 	}
 
 	@Nullable
-	public static ResourceLocation replace(Minecraft mc, ResourceLocation skinTexture, PlayerSkin.Model model, PlayerClothing playerClothing) {
+	public static Identifier replace(Minecraft mc, Identifier skinTexture, PlayerModelType model, PlayerClothing playerClothing) {
 		if (ClothingPresets.ready && playerClothing != PlayerClothing.NONE) {
 			var skinImage = MiscClientUtils.SKIN_IMAGE_MAP.get(skinTexture);
 
@@ -172,11 +175,11 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 	}
 
 	@Nullable
-	public static ResourceLocation replace(Minecraft mc, PlayerSkin playerSkin, PlayerClothing playerClothing) {
-		return replace(mc, playerSkin.texture(), playerSkin.model(), playerClothing);
+	public static Identifier replace(Minecraft mc, PlayerSkin playerSkin, PlayerClothing playerClothing) {
+		return replace(mc, playerSkin.body().texturePath(), playerSkin.model(), playerClothing);
 	}
 
-	public ClothedPlayerSkinTexture(ResourceLocation location, NativeImage pixels) {
+	public ClothedPlayerSkinTexture(Identifier location, NativeImage pixels) {
 		super(location);
 		this.pixels = pixels;
 	}

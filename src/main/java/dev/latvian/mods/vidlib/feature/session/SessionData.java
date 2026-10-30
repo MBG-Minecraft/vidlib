@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.entity.PlayerInput;
+import dev.latvian.mods.klib.registry.CustomRegistry;
 import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
-import dev.latvian.mods.vidlib.feature.clock.ClockValue;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
@@ -17,14 +17,10 @@ import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
-import dev.latvian.mods.vidlib.feature.registry.SyncRegistryPayload;
-import dev.latvian.mods.vidlib.feature.registry.SyncedRegistry;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -32,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -70,13 +65,7 @@ public class SessionData implements Comparable<SessionData> {
 		suspended = player.get(InternalPlayerData.SUSPENDED);
 	}
 
-	public <V> void syncRegistry(Player player, SyncedRegistry<V> registry, Map<ResourceLocation, V> map) {
-	}
-
 	public void updateZones(Level level) {
-	}
-
-	public void updateClocks(Map<ResourceLocation, ClockValue> map) {
 	}
 
 	public void updateServerData(long gameTime, Player self, List<DataMapValue> update) {
@@ -110,13 +99,14 @@ public class SessionData implements Comparable<SessionData> {
 	public void sync(VLS2CPacketConsumer packets, Player player, int syncType) {
 		var level = player.level();
 		var environment = level.getEnvironment();
-		var time = level.getGameTime();
 
-		packets.s2c(new ClientboundSetTimePacket(time, level.getDayTime(), level.klib$getTickDayTime()));
+		if (level.getServer() != null) {
+			packets.s2c(level.getServer().clockManager().createFullSyncPacket());
+		}
 		// packets.s2c(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()));
 
-		for (var reg : SyncedRegistry.ALL.values()) {
-			packets.s2c(new SyncRegistryPayload(reg, Map.copyOf(reg.registry().getMap())));
+		if (player instanceof ServerPlayer serverPlayer) {
+			CustomRegistry.syncAll(serverPlayer, packets::s2c);
 		}
 
 		packets.s2c(new SyncGlobalNumberVariablesPayload(environment.globalVariables()));

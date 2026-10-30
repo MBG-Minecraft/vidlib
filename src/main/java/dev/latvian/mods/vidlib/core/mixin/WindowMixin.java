@@ -114,10 +114,6 @@ public class WindowMixin implements VLWindow {
 
 	@Override
 	public void vl$setViewportArea(double xOffset, double yOffset, double xScale, double yScale) {
-		if (xScale <= 0D || yScale <= 0D) {
-			return;
-		}
-
 		vl$xOffset = xOffset;
 		vl$yOffset = yOffset;
 		vl$xScale = xScale;
@@ -188,8 +184,8 @@ public class WindowMixin implements VLWindow {
 		}
 	}
 
-	@Inject(method = "lambda$setWindowCloseCallback$0", at = @At("HEAD"), cancellable = true)
-	private static void vl$windowCloseCallback(Runnable callback, long id, CallbackInfo ci) {
+	@Inject(method = "requestClose", at = @At("HEAD"), cancellable = true)
+	private void vl$windowCloseCallback(CallbackInfo ci) {
 		if (BlockExitScreen.cancelExit(Minecraft.getInstance())) {
 			ci.cancel();
 		}

@@ -4,8 +4,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
-import dev.latvian.mods.vidlib.math.kvector.PositionType;
 import imgui.ImGui;
 
 public class DepthOfFieldPanel extends Panel {
@@ -13,11 +11,8 @@ public class DepthOfFieldPanel extends Panel {
 
 	public static final MenuItem MENU_ITEM = MenuItem.item(ImIcons.BLUR, "Depth of Field", INSTANCE);
 
-	public final DepthOfFieldDataImBuilder builder;
-
 	private DepthOfFieldPanel() {
 		super("depth-of-field", "Depth of Field");
-		this.builder = new DepthOfFieldDataImBuilder();
 	}
 
 	@Override
@@ -27,17 +22,20 @@ public class DepthOfFieldPanel extends Panel {
 
 		if (ImGui.checkbox("Override", DepthOfField.OVERRIDE_ENABLED) && DepthOfField.OVERRIDE_ENABLED.get()) {
 			if (graphics.player != null) {
+				/*
 				var pos = KVector.following(graphics.player, PositionType.EYES);
-				builder.set(DepthOfField.OVERRIDE.withFocus(pos));
+				builder.set(DepthOfField.OVERRIDE.withFocus(pos.ref()));
 				builder.focus.set(pos);
 				update = true;
+				 */
 			}
 		}
 
 		if (DepthOfField.OVERRIDE_ENABLED.get()) {
-			if ((builder.imgui(graphics).isAny() || update) && builder.isValid()) {
+			/*if ((builder.imgui(graphics).isAny() || update) && builder.isValid()) {
 				DepthOfField.OVERRIDE = builder.build();
 			}
+			 */
 		}
 
 		ImGui.checkbox("Debug", DepthOfField.DEBUG_ENABLED);

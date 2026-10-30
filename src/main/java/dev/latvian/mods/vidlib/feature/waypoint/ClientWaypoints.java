@@ -13,7 +13,7 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Mth;
 import org.joml.Vector2d;
 
@@ -39,12 +39,12 @@ public interface ClientWaypoints {
 		ImGui.sliderInt("Alpha###alpha", ALPHA.getData(), 1, 255);
 	}
 
-	static void draw(GuiGraphics graphics, DeltaTracker deltaTracker) {
-		if (!VISIBLE.get() || graphics.vl$mc().options.hideGui) {
+	static void draw(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+		var mc = Minecraft.getInstance();
+
+		if (!VISIBLE.get() || mc.gui.hud.isHidden()) {
 			return;
 		}
-
-		var mc = Minecraft.getInstance();
 		var level = mc.level;
 
 		if (level == null || mc.player == null) {
@@ -67,11 +67,11 @@ public interface ClientWaypoints {
 
 		int wpSize = (int) (SIZE.get() * mc.getEffectScale());
 		var list = new ArrayList<ScreenWaypoint>(waypoints.size());
-		var cam = mc.gameRenderer.getMainCamera().getPosition();
+		var cam = mc.gameRenderer.mainCamera().position();
 
 		for (var waypoint : waypoints) {
-			if (waypoint.dimension() == level.dimension() && (BYPASS_FILTERS.get() || waypoint.visible().test(mc.player))) {
-				var pos = waypoint.position().get(ctx);
+			if (waypoint.dimension() == level.dimension() && (BYPASS_FILTERS.get() || waypoint.visible().value().test(mc.player))) {
+				var pos = waypoint.position().value().get(ctx);
 
 				if (pos != null) {
 					double distance = waypoint.ignoreHeight() ? Vector2d.distance(pos.x, pos.z, cam.x, cam.z) : pos.distanceTo(cam);
@@ -114,12 +114,11 @@ public interface ClientWaypoints {
 				wpos.x = Math.clamp(wpos.x, 16F, projectedCoordinates.width() - 16F);
 				wpos.y = Math.clamp(wpos.y, 16F, projectedCoordinates.height() - 16F);
 
-				graphics.pose().pushPose();
-				graphics.pose().translate(wpos.x(), wpos.y(), 0F);
-				graphics.pose().scale(wpSize / 16F, wpSize / 16F, 1F);
+				graphics.pose().translate(wpos.x(), wpos.y());
+				graphics.pose().scale(wpSize / 16F, wpSize / 16F);
 
 				if (wp.waypoint().centered()) {
-					graphics.pose().translate(0F, 8F, 0F);
+					graphics.pose().translate(0F, 8F);
 				}
 
 				var textColor = Color.WHITE.withAlpha(alpha).argb();
@@ -129,18 +128,17 @@ public interface ClientWaypoints {
 
 					for (int i = 0; i < lines.size(); i++) {
 						var line = lines.get(i);
-						graphics.drawString(mc.font, line, -mc.font.width(line) / 2F, -18 - (lines.size() * 9) + i * 9, textColor, true);
+						graphics.text(mc.font, line, -mc.font.width(line) / 2, -18 - (lines.size() * 9) + i * 9, textColor, true);
 					}
 				}
 
 				if (wp.waypoint().showDistance()) {
 					var dist = "%,d m".formatted(Mth.floor(cam.distanceTo(wp.pos())));
-					graphics.drawString(mc.font, dist, -mc.font.width(dist) / 2F, 2, textColor, true);
+					graphics.text(mc.font, dist, -mc.font.width(dist) / 2, 2, textColor, true);
 				}
 
-				graphics.pose().translate(0F, -8F, 0F);
+				graphics.pose().translate(0F, -8F);
 				IconRenderer.draw(wp.waypoint().icon(), mc, graphics, (int) (alpha * 255));
-				graphics.pose().popPose();
 			}
 		}
 

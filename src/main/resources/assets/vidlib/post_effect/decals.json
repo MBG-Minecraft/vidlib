@@ -36,27 +36,39 @@
 				}
 			],
 			"output": "swap",
-			"uniforms": [
-				{
-					"name": "Count",
-					"type": "int"
-				},
-				{
-					"name": "InverseViewProjectionMat",
-					"type": "matrix4x4"
-				},
-				{
-					"name": "GameTime",
-					"type": "float"
-				},
-				{
-					"name": "NoSceneSample",
-					"type": "int"
-				}
-			]
+			"uniforms": {
+				"Count": [
+					{
+						"name": "Count",
+						"type": "int",
+						"value": 0
+					}
+				],
+				"InverseViewProjectionMat": [
+					{
+						"name": "InverseViewProjectionMat",
+						"type": "matrix4x4",
+						"value": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+					}
+				],
+				"GameTime": [
+					{
+						"name": "GameTime",
+						"type": "float",
+						"value": 0.0
+					}
+				],
+				"NoSceneSample": [
+					{
+						"name": "NoSceneSample",
+						"type": "int",
+						"value": 0
+					}
+				]
+			}
 		},
 		{
-			"vertex_shader": "minecraft:post/blit",
+			"vertex_shader": "minecraft:core/screenquad",
 			"fragment_shader": "minecraft:post/blit",
 			"inputs": [
 				{
@@ -65,13 +77,15 @@
 				}
 			],
 			"output": "vidlib:decals",
-			"uniforms": [
-				{
-					"name": "ColorModulate",
-					"type": "vec4",
-					"values": [1.0, 1.0, 1.0, 1.0]
-				}
-			]
+			"uniforms": {
+				"BlitConfig": [
+					{
+						"name": "ColorModulate",
+						"type": "vec4",
+						"value": [1.0, 1.0, 1.0, 1.0]
+					}
+				]
+			}
 		}
 	]
 }

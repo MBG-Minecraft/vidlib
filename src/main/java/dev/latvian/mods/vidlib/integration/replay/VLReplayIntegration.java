@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.integration.replay;
 
-import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.replay.api.ReplayMarkerGroup;
 import dev.latvian.mods.replay.api.ReplayMarkerType;
@@ -22,9 +21,7 @@ import dev.latvian.mods.replay.api.event.ReplayVisualsMenuEvent;
 import dev.latvian.mods.replay.api.event.ReplayWindowsMenuBarEvent;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
-import dev.latvian.mods.vidlib.feature.bloom.Bloom;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
-import dev.latvian.mods.vidlib.feature.clock.ClockRenderer;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
@@ -65,7 +62,8 @@ import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -87,8 +85,8 @@ public class VLReplayIntegration {
 		var dataMapOverrideBuilder = new DataMapOverrides.Builder();
 		var replayProps = new ArrayList<ReplayProp>();
 		var currentReplayProps = new Int2ObjectLinkedOpenHashMap<ReplayProp>();
-		var uuidToPlayerInfo = new Object2ObjectOpenHashMap<UUID, GameProfile>();
-		var idToPlayerMap = new Int2ObjectLinkedOpenHashMap<GameProfile>();
+		var uuidToPlayerInfo = new Object2ObjectOpenHashMap<UUID, NameAndId>();
+		var idToPlayerMap = new Int2ObjectLinkedOpenHashMap<NameAndId>();
 		var notes = new Object2ObjectLinkedOpenHashMap<UUID, Note>();
 
 		long startTick = event.getSession().getFileInfo().getStartGameTick();
@@ -177,11 +175,11 @@ public class VLReplayIntegration {
 			} else if (entry.packet() instanceof ClientboundPlayerInfoUpdatePacket p) {
 				for (var e : p.entries()) {
 					if (e.profile() != null) {
-						uuidToPlayerInfo.put(e.profileId(), e.profile());
+						uuidToPlayerInfo.put(e.profileId(), new NameAndId(e.profile()));
 					}
 				}
 			} else if (entry.packet() instanceof ClientboundAddEntityPacket p) {
-				if (p.getType() == EntityType.PLAYER) {
+				if (p.getType() == EntityTypes.PLAYER) {
 					var profile = uuidToPlayerInfo.get(p.getUUID());
 
 					if (profile != null) {
@@ -191,20 +189,20 @@ public class VLReplayIntegration {
 							.group(ReplayMarkerGroup.PLAYER_ADDED)
 							.dimension(entry.dimension())
 							.position(new Vec3(p.getX(), p.getY(), p.getZ()))
-							.description(profile.getName())
+							.description(profile.name())
 							.build()
 						);
 					}
 				}
 			} else if (entry.packet() instanceof ClientboundRemoveEntitiesPacket p) {
-				for (var id : p.getEntityIds()) {
+				for (var id : p.entityIds()) {
 					var profile = idToPlayerMap.remove(id.intValue());
 
 					if (profile != null) {
 						event.addMarker(entry.replayTime(), ReplayMarkerData.builder()
 							.group(ReplayMarkerGroup.PLAYER_REMOVED)
 							.dimension(entry.dimension())
-							.description(profile.getName())
+							.description(profile.name())
 							.build()
 						);
 					}
@@ -295,8 +293,6 @@ public class VLReplayIntegration {
 				ImGui.checkbox("Show Status Bar###show-bottom-info-bar", BuiltInImGui.SHOW_BOTTOM_INFO_BAR);
 				ImGui.checkbox("Props###props", ClientProps.VISIBLE);
 				ImGui.checkbox("Physics Particles###physics-particles", PhysicsParticleManager.VISIBLE);
-				ImGui.checkbox("Clocks###clocks", ClockRenderer.VISIBLE);
-				ImGui.checkbox("Bloom###bloom", Bloom.VISIBLE);
 				ImGui.checkbox("Ghost Structures###ghost-structures", GhostStructure.VISIBLE_CONFIG);
 				ImGui.sliderFloat("Name Scale###name-scale", VidLibHUD.NAME_SCALE.getData(), 0F, 4F);
 				event.endSection();

@@ -3,11 +3,22 @@
 uniform sampler2D InSampler;
 uniform sampler2D InDepthSampler;
 uniform sampler2D DataSampler;
-uniform int Count;
-uniform mat4 InverseViewProjectionMat;
 
-in vec2 texCoord;
-in vec2 oneTexel;
+layout(std140) uniform SamplerInfo {
+	vec2 OutSize;
+	vec2 InSize;
+};
+
+layout(std140) uniform Count {
+	int count;
+};
+
+layout(std140) uniform InverseViewProjectionMat {
+	mat4 inverseViewProjectionMat;
+};
+
+layout (location = 0) in vec2 texCoord;
+layout (location = 1) in vec2 oneTexel;
 
 layout (location = 0) out vec4 fragColor;
 
@@ -38,22 +49,22 @@ vec3 clip(float depth) {
 	clipPos.xy = texCoord * 2.0 - 1.0;
 	clipPos.z = depth * 2.0 - 1.0;
 	clipPos.w = 1.0;
-	vec4 homogenousPos = InverseViewProjectionMat * clipPos;
+	vec4 homogenousPos = inverseViewProjectionMat * clipPos;
 	return homogenousPos.xyz / homogenousPos.w;
 }
 
 void main() {
-	if (Count == 0) {
+	if (count == 0) {
 		discard;
 	}
 
 	float depth = texture(InDepthSampler, texCoord).r;
 	vec3 worldPos = clip(depth);
 
-	if (Count == 999) {
+	if (count == 999) {
 		fragColor = vec4(mod(length(worldPos), 1.0), 0.0, 0.0, 1.0);
 		return;
-	} else if (Count == 998) {
+	} else if (count == 998) {
 		fragColor = vec4(1.0, 0.0, 0.0, 1.0);
 		return;
 	}
@@ -61,7 +72,7 @@ void main() {
 	vec3 color = texture(InSampler, texCoord).rgb;
 
 	for (int y = 0; y < 8; y++) {
-		if (y >= Count) {
+		if (y >= count) {
 			break;
 		}
 

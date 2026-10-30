@@ -7,19 +7,17 @@ import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
 
 public class WindParticle extends InterpolatedParticle {
-	public static final SingleQuadParticle.FacingCameraMode GROUND = (quaternion, camera, delta) -> {
-		quaternion.rotateX(-(float) (Math.PI / 2D));
-	};
+	public static final SingleQuadParticle.FacingCameraMode GROUND = (quaternion, camera, delta) -> quaternion.rotateX(-(float) (Math.PI / 2D));
 
 	public static ParticleProvider<WindParticleOptions> create(SpriteSet spriteSet) {
-		return (options, level, x, y, z, xd, yd, zd) -> new WindParticle(options, level, x, y, z, xd, yd, zd, spriteSet);
+		return (options, level, x, y, z, xd, yd, zd, random) -> new WindParticle(options, level, x, y, z, xd, yd, zd, spriteSet);
 	}
 
 	public final WindParticleOptions options;
 	public final SpriteSet spriteSet;
 
 	public WindParticle(WindParticleOptions options, ClientLevel level, double x, double y, double z, double xd, double yd, double zd, SpriteSet spriteSet) {
-		super(level, x, y, z, xd, yd, zd, options.interpolation());
+		super(level, x, y, z, xd, yd, zd, options.ease());
 		this.hasPhysics = false;
 		this.options = options;
 		this.spriteSet = spriteSet;
@@ -30,12 +28,12 @@ public class WindParticle extends InterpolatedParticle {
 	}
 
 	@Override
-	public FacingCameraMode getFacingCameraMode() {
+	public SingleQuadParticle.FacingCameraMode getFacingCameraMode() {
 		return options.ground() ? GROUND : SingleQuadParticle.FacingCameraMode.LOOKAT_XYZ;
 	}
 
 	@Override
-	protected int getLightColor(float tint) {
+	protected int getLightCoords(float partialTick) {
 		return 15728880;
 	}
 
@@ -43,6 +41,6 @@ public class WindParticle extends InterpolatedParticle {
 	public void tick() {
 		super.tick();
 		setSpriteFromAge(spriteSet);
-		quadSizeMod = KMath.lerp(interpolation.interpolate(age / (float) lifetime), 0.25F, 1F) * options.scale();
+		quadSizeMod = KMath.lerp(ease.apply(age / (float) lifetime), 0.25F, 1F) * options.scale();
 	}
 }

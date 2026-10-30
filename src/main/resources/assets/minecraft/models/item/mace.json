@@ -3,7 +3,7 @@
 	"textures": {
 		"particle": "item/mace",
 		"handle": "item/mace",
-		"head": "block/heavy_core"
+		"head": "item/mace_head"
 	},
 	"elements": [
 		{

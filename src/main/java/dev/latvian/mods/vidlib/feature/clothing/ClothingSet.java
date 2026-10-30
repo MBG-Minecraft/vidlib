@@ -5,13 +5,12 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
-import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -21,7 +20,7 @@ import java.util.List;
 
 public class ClothingSet {
 	public static final ClothingSet EMPTY = new ClothingSet(List.of());
-	private static final ResourceLocation EMPTY_TEXTURE_ASSET = ID.vidlib("empty");
+	private static final Identifier EMPTY_TEXTURE_ASSET = ID.vidlib("empty");
 
 	public static ClothingSet of(List<ClothingPart> list) {
 		return list.isEmpty() ? EMPTY : new ClothingSet(list);
@@ -30,8 +29,7 @@ public class ClothingSet {
 	public static final Codec<ClothingSet> CODEC = ClothingPart.CODEC.listOf().xmap(ClothingSet::of, ClothingSet::parts);
 
 	public static final StreamCodec<ByteBuf, ClothingSet> STREAM_CODEC = KLibStreamCodecs.listOf(ClothingPart.STREAM_CODEC).map(ClothingSet::of, ClothingSet::parts);
-	public static final DataType<ClothingSet> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, ClothingSet.class);
-	public static final CommandDataType<ClothingSet> COMMAND = CommandDataType.of(DATA_TYPE);
+	public static final DataType<ClothingSet> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public static ClothingSet join(ClothingSet a, ClothingSet b) {
 		if (a.parts.isEmpty()) {
@@ -47,7 +45,7 @@ public class ClothingSet {
 	}
 
 	public final List<ClothingPart> parts;
-	private ResourceLocation uniqueId;
+	private Identifier uniqueId;
 
 	private ClothingSet(List<ClothingPart> parts) {
 		this.parts = List.copyOf(parts);
@@ -65,13 +63,13 @@ public class ClothingSet {
 		return o == this || o instanceof ClothingSet set && parts.equals(set.parts);
 	}
 
-	public ResourceLocation getUniqueId() {
+	public Identifier getUniqueId() {
 		if (uniqueId == null) {
 			if (!parts.isEmpty()) {
 				var id = ClothingPresets.INSTANCE.reverseMap.get(this);
 
 				if (id != null) {
-					uniqueId = id.location().withPath("preset/" + id.location().getPath());
+					uniqueId = id.identifier().withPath("preset/" + id.identifier().getPath());
 				} else {
 					try (var out = new ByteArrayOutputStream(); var dataOut = new DataOutputStream(out)) {
 						var tag = CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow();

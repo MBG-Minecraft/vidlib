@@ -1,13 +1,22 @@
 [
 	"vidlib:shirt",
 	{
-		"vidlib:tie": "vidlib:shiny_red"
+		"vidlib:tie": {
+			"type": "client",
+			"gradient": "vidlib:shiny_red"
+		}
 	},
 	{
-		"vidlib:pants": "vidlib:olive"
+		"vidlib:pants": {
+			"type": "client",
+			"gradient": "vidlib:olive"
+		}
 	},
 	"vidlib:shoes",
 	{
-		"vidlib:jacket": "vidlib:black"
+		"vidlib:jacket": {
+			"type": "client",
+			"gradient": "vidlib:black"
+		}
 	}
 ]

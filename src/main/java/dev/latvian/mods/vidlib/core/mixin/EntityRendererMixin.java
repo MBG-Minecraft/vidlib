@@ -23,7 +23,15 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 		var mc = Minecraft.getInstance();
 
 		if (mc.player != null) {
-			var override = mc.player.vl$sessionData().entityBrightnessOverrides.get(entity.getId());
+			int id;
+
+			try {
+				id = entity.getId();
+			} catch (IllegalStateException e) {
+				return; // not assigned to a level yet - can't have a brightness override
+			}
+
+			var override = mc.player.vl$sessionData().entityBrightnessOverrides.get(id);
 
 			if (override != -1) {
 				cir.setReturnValue(override);
@@ -36,7 +44,7 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 		cir.setReturnValue(true);
 	}
 
-	@ModifyExpressionValue(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderer;shouldShowName(Lnet/minecraft/world/entity/Entity;D)Z"))
+	@ModifyExpressionValue(method = "extractNameTags(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/entity/state/EntityRenderState;FDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderer;shouldShowName(Lnet/minecraft/world/entity/Entity;D)Z"))
 	private boolean vl$shouldShowName(boolean original, @Local(argsOnly = true) Entity entity) {
 		return ClientGameEngine.INSTANCE.shouldShowName(entity, original);
 	}
@@ -48,5 +56,5 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 
 	@Override
 	@Invoker("getBoundingBoxForCulling")
-	public abstract AABB vl$getBoundingBoxForCulling(T entity);
+	public abstract AABB vl$getBoundingBoxForCulling(T entity, float partialTicks);
 }

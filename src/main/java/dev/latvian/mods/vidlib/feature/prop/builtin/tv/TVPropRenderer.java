@@ -4,9 +4,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
-import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import net.minecraft.client.renderer.LightTexture;
+import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.util.ARGB;
@@ -15,14 +14,14 @@ import org.joml.Vector3f;
 
 public class TVPropRenderer implements PropRenderer<TVProp> {
 	@ClientAutoRegister
-	public static final Holder HOLDER = PropRenderer.holder(TVProp.TYPE, new TVPropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(TVProp.TYPE, TVPropRenderer::new);
 
-	public static final ClientAsset TEXTURE_BG = new ClientAsset(ID.vidlib("prop/tv/bg"));
-	public static final ClientAsset TEXTURE_FG = new ClientAsset(ID.vidlib("prop/tv/fg"));
-	public static final ClientAsset TEXTURE_NO_VIDEO = new ClientAsset(ID.vidlib("prop/tv/no_video"));
+	public static final ClientAsset TEXTURE_BG = new ClientAsset.ResourceTexture(ID.vidlib("prop/tv/bg"));
+	public static final ClientAsset TEXTURE_FG = new ClientAsset.ResourceTexture(ID.vidlib("prop/tv/fg"));
+	public static final ClientAsset TEXTURE_NO_VIDEO = new ClientAsset.ResourceTexture(ID.vidlib("prop/tv/no_video"));
 
 	@Override
-	public void render(PropRenderContext<TVProp> ctx) {
+	public void render(PropSubmitContext<TVProp> ctx) {
 		var prop = ctx.prop();
 		float delta = ctx.delta();
 
@@ -41,28 +40,28 @@ public class TVPropRenderer implements PropRenderer<TVProp> {
 			bbMat.translate(0F, h / 2F, 0F);
 		}
 
-		var m = ctx.frame().poseStack().last().pose();
-		m.mul(bbMat);
+		var m = ctx.frame().poseStack().last();
+		m.pose().mul(bbMat);
 
 		var n = new Vector3f(0F, 1F, 0F);
 
 		int tint = 0xFFFFFFFF;
 		int light = prop.getPackedLight();
 
-		var bg = ctx.frame().buffers().getBuffer(EntityRenderTypes.texture(TEXTURE_BG, false));
-		cq(bg, m, 0F, -(h - px) / 2F, 0F, w, px, n, tint, light);
-		cq(bg, m, 0F, (h - px) / 2F, 0F, w, px, n, tint, light);
+		var bg = ctx.frame().buffers().getVertexConsumer(EntityRenderTypes.texture(TEXTURE_BG, false));
+		cq(bg, m.pose(), 0F, -(h - px) / 2F, 0F, w, px, n, tint, light);
+		cq(bg, m.pose(), 0F, (h - px) / 2F, 0F, w, px, n, tint, light);
 
-		cq(bg, m, -(w - px) / 2F, 0F, 0F, px, h - px, n, tint, light);
-		cq(bg, m, (w - px) / 2F, 0F, 0F, px, h - px, n, tint, light);
+		cq(bg, m.pose(), -(w - px) / 2F, 0F, 0F, px, h - px, n, tint, light);
+		cq(bg, m.pose(), (w - px) / 2F, 0F, 0F, px, h - px, n, tint, light);
 
 		float videoW = (float) prop.videoWidth;
 		float videoH = (float) prop.videoHeight;
 		float videoS = Math.min(w / videoW, h / videoH);
 
-		var fg = ctx.frame().buffers().getBuffer(EntityRenderTypes.texture(TEXTURE_FG, false));
-		cq(fg, m, 0F, 0F, 0F, w - px * 2F, h - px * 2F, n, tint, light);
-		renderTVImage(ctx, m, videoW, videoH, videoS, px, n, tint, prop.fullBright ? LightTexture.FULL_BRIGHT : light);
+		var fg = ctx.frame().buffers().getVertexConsumer(EntityRenderTypes.texture(TEXTURE_FG, false));
+		cq(fg, m.pose(), 0F, 0F, 0F, w - px * 2F, h - px * 2F, n, tint, light);
+		renderTVImage(ctx, m.pose(), videoW, videoH, videoS, px, n, tint, prop.fullBright ? net.minecraft.util.LightCoordsUtil.FULL_BRIGHT : light);
 
 		prop.rotatedQuadData.update(bbMat, w, h);
 	}
@@ -78,14 +77,14 @@ public class TVPropRenderer implements PropRenderer<TVProp> {
 		consumer.addVertex(m, x + w / 2F, y + h / 2F, z).setColor(color).setUv(1F, 0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(n.x, n.y, n.z);
 	}
 
-	private static void renderTVImage(PropRenderContext<TVProp> ctx, Matrix4f m, float videoW, float videoH, float videoS, float px, Vector3f n, int tint, int light) {
+	private static void renderTVImage(PropSubmitContext<TVProp> ctx, Matrix4f m, float videoW, float videoH, float videoS, float px, Vector3f n, int tint, int light) {
 		float offset = Math.clamp((float) ((ctx.distanceToCamera() - 1000D) / 1000D), 0.01F, 0.5F);
 
 		if (TVPlayer.hasVideo()) {
-			var video = ctx.frame().buffers().getBuffer(EntityRenderTypes.texture(TVPlayer.TEXTURE, false));
+			var video = ctx.frame().buffers().getVertexConsumer(EntityRenderTypes.texture(TVPlayer.TEXTURE, false));
 			cq(video, m, 0F, 0F, offset, videoW * videoS - px * 2F, videoH * videoS - px * 2F, n, tint, light);
 		} else {
-			var video = ctx.frame().buffers().getBuffer(EntityRenderTypes.texture(TEXTURE_NO_VIDEO, false));
+			var video = ctx.frame().buffers().getVertexConsumer(EntityRenderTypes.texture(TEXTURE_NO_VIDEO, false));
 			float s = Math.min(videoW * videoS - px * 2F, videoH * videoS - px * 2F);
 			cq(video, m, 0F, 0F, offset, s, s, n, tint, light);
 		}

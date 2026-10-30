@@ -9,10 +9,10 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.type.ImString;
-import net.minecraft.Util;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +24,12 @@ public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
 		list.add(SpriteKey.PARTICLES);
 		list.add(SpriteKey.GUI);
 		list.add(MiscUtils.assetFromPNG(Sheets.BANNER_SHEET));
-		list.add(MiscUtils.assetFromPNG(Sheets.BED_SHEET));
+		list.add(MiscUtils.assetFromPNG(Identifier.withDefaultNamespace("textures/atlas/beds.png")));
 		list.add(MiscUtils.assetFromPNG(Sheets.CHEST_SHEET));
 		list.add(MiscUtils.assetFromPNG(Sheets.SHIELD_SHEET));
-		list.add(MiscUtils.assetFromPNG(Sheets.SIGN_SHEET));
+		list.add(MiscUtils.assetFromPNG(Identifier.withDefaultNamespace("textures/atlas/signs.png")));
 		list.add(MiscUtils.assetFromPNG(Sheets.SHULKER_SHEET));
-		list.add(MiscUtils.assetFromPNG(Sheets.ARMOR_TRIMS_SHEET));
+		list.add(MiscUtils.assetFromPNG(Identifier.withDefaultNamespace("textures/atlas/armor_trims.png")));
 		list.add(MiscUtils.assetFromPNG(Sheets.DECORATED_POT_SHEET));
 		return list;
 	});
@@ -69,8 +69,8 @@ public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
 			update = update.or(TextureSet.ALL.imgui(graphics, sprite, SEARCH));
 		} else {
 			try {
-				var list = new ArrayList<>(graphics.mc.getAtlasFromTexture(atlas[0].texturePath()).getTextures().keySet());
-				list.sort(ResourceLocation::compareNamespaced);
+				var list = new ArrayList<>(graphics.mc.getAtlasFromTexture(atlas[0].id()).getTextures().keySet());
+				list.sort(Identifier::compareNamespaced);
 				update = update.or(graphics.combo("###sprite", sprite, "", list, ID::idToString, SEARCH));
 			} catch (Throwable ex) {
 				graphics.stackTrace(ex);

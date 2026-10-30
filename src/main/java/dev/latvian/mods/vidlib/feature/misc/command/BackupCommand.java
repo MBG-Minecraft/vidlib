@@ -15,6 +15,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Files;
@@ -26,7 +27,7 @@ import java.util.concurrent.CompletableFuture;
 public interface BackupCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("backup", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.literal("test-compression")
 			.executes(ctx -> testCompression(ctx.getSource()))
 		)

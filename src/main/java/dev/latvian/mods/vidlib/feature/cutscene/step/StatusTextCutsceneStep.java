@@ -2,17 +2,13 @@ package dev.latvian.mods.vidlib.feature.cutscene.step;
 
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
-import dev.latvian.mods.vidlib.math.knumber.KNumberContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
-import org.jetbrains.annotations.Nullable;
 
 public class StatusTextCutsceneStep extends CutsceneStep {
 	public static final Codec<StatusTextCutsceneStep> CODEC = ComponentSerialization.CODEC.xmap(StatusTextCutsceneStep::new, s -> s.text);
@@ -21,32 +17,6 @@ public class StatusTextCutsceneStep extends CutsceneStep {
 		ComponentSerialization.TRUSTED_STREAM_CODEC, o -> o.text,
 		StatusTextCutsceneStep::new
 	);
-
-	public static class Builder extends CutsceneStepImBuilder {
-		public final TextComponentImBuilder text = new TextComponentImBuilder(true);
-
-		@Override
-		public void set(@Nullable CutsceneStep value) {
-			if (value instanceof StatusTextCutsceneStep s) {
-				text.set(s.text);
-			}
-		}
-
-		@Override
-		public ImUpdate imgui(ImGraphics graphics) {
-			return text.imgui(graphics);
-		}
-
-		@Override
-		public boolean isValid() {
-			return text.isValid();
-		}
-
-		@Override
-		public CutsceneStep build() {
-			return new StatusTextCutsceneStep(text.build());
-		}
-	}
 
 	public final Component text;
 
@@ -81,10 +51,5 @@ public class StatusTextCutsceneStep extends CutsceneStep {
 				mc.player.status(Component.empty());
 			}
 		}
-	}
-
-	@Override
-	public CutsceneStepImBuilder createBuilder() {
-		return new Builder();
 	}
 }

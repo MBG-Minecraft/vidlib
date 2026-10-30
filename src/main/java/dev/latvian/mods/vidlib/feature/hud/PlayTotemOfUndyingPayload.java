@@ -32,6 +32,6 @@ public record PlayTotemOfUndyingPayload(boolean particles, ItemStack itemStack) 
 			mc.particleEngine.createTrackingEmitter(player, ParticleTypes.TOTEM_OF_UNDYING, 30);
 		}
 
-		mc.gameRenderer.displayItemActivation(itemStack);
+		mc.player.displayItemActivation(itemStack);
 	}
 }

@@ -2,14 +2,14 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.google.gson.JsonElement;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.renderpearl.api.textures.GpuTexture;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.klib.util.NameProvider;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
@@ -31,16 +31,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLScancode;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImNodesStyleVarConsumer, ImNodesStyleColorConsumer {
@@ -83,11 +83,11 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		this.isExportingReplay = ReplayAPI.getActive().isExporting();
 		this.serverFeatures = inGame ? mc.level.getServerFeatures() : FeatureSet.EMPTY;
 		this.adminPanel = isReplay || ClientGameEngine.INSTANCE.allowAdminPanel(mc.player);
-		this.isAdmin = inGame && (isSinglePlayer || mc.player.hasPermissions(2));
+		this.isAdmin = inGame && (isSinglePlayer || mc.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
 		this.jsonOps = inGame ? mc.level.jsonOps() : JsonOps.INSTANCE;
 		this.nbtOps = inGame ? mc.level.nbtOps() : NbtOps.INSTANCE;
 		this.scroll = VidLibClientOptions.LOCK_IMGUI_SCROLL.get() ? Math.clamp(ImGui.getIO().getMouseWheel(), -1F, 1F) : ImGui.getIO().getMouseWheel();
-		this.escapePressed = ImGui.isKeyReleased(GLFW.GLFW_KEY_ESCAPE);
+		this.escapePressed = ImGui.isKeyReleased(SDLScancode.SDL_SCANCODE_ESCAPE);
 	}
 
 	public void pushStack() {
@@ -372,19 +372,19 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		popStack();
 	}
 
-	public static int getTextureId(ResourceLocation identifier) {
+	public static int getTextureId(Identifier identifier) {
 		return Minecraft.getInstance().getTextureManager().getTexture(identifier).getTexture().vl$getHandle();
 	}
 
-	public static void texture(ResourceLocation id, float width, float height) {
+	public static void texture(Identifier id, float width, float height) {
 		ImGui.image(getTextureId(id), width, height);
 	}
 
-	public static void texture(ResourceLocation id, float width, float height, float u0, float v0) {
+	public static void texture(Identifier id, float width, float height, float u0, float v0) {
 		ImGui.image(getTextureId(id), width, height, u0, v0);
 	}
 
-	public static void texture(ResourceLocation id, float width, float height, float u0, float v0, float u1, float v1) {
+	public static void texture(Identifier id, float width, float height, float u0, float v0, float u1, float v1) {
 		ImGui.image(getTextureId(id), width, height, u0, v0, u1, v1);
 	}
 
@@ -406,15 +406,12 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		ImGui.setNextWindowSize(viewport.getWorkSizeX(), viewport.getWorkSizeY());
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, Iterable<? extends E> options, @Nullable Function<E, String> nameFunction, @Nullable ImString search) {
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, Iterable<? extends E> options, @Nullable NameProvider<E> nameFunction, @Nullable ImString search) {
 		var result = ImUpdate.NONE;
 		var searchText = search != null ? search.get().toLowerCase(Locale.ROOT) : "";
+		nameFunction = NameProvider.resolve(nameFunction);
 
-		if (nameFunction == null) {
-			nameFunction = (Function<E, String>) KLibCodecs.DEFAULT_NAME_GETTER;
-		}
-
-		if (ImGui.beginCombo(label, selected[0] == null ? noneLabel.isEmpty() ? "None" : noneLabel : nameFunction.apply((E) selected[0]), ImGuiInputTextFlags.None)) {
+		if (ImGui.beginCombo(label, selected[0] == null ? noneLabel.isEmpty() ? "None" : noneLabel : nameFunction.provideName((E) selected[0]), ImGuiInputTextFlags.None)) {
 			float y = ImGui.getCursorPos().y;
 
 			if (search != null) {
@@ -442,7 +439,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 
 			for (var option : options) {
 				boolean isSelected = selected[0] == option;
-				var itemLabel = nameFunction.apply(option);
+				var itemLabel = nameFunction.provideName(option);
 
 				if ((isSelected || searchText.isEmpty() || itemLabel.toLowerCase(Locale.ROOT).contains(searchText)) && ImGui.selectable(itemLabel + "###" + i, isSelected)) {
 					selected[0] = option;
@@ -462,7 +459,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		return result;
 	}
 
-	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options, @Nullable Function<E, String> nameFunction) {
+	public <E> ImUpdate combo(String label, Object[] selected, String noneLabel, E[] options, @Nullable NameProvider<E> nameFunction) {
 		return combo(label, selected, noneLabel, Arrays.asList(options), nameFunction, null);
 	}
 
@@ -594,7 +591,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		return imageButton(texture, w, h, uv, padding, variant, Color.TRANSPARENT, Color.WHITE);
 	}
 
-	public boolean imageButton(@Nullable ResourceLocation texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
+	public boolean imageButton(@Nullable Identifier texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
 		return imageButton(texture == null ? null : mc.getTextureManager().getTexture(texture).getTexture(), w, h, uv, padding, variant);
 	}
 

@@ -10,8 +10,8 @@ import dev.mrbeastgaming.mods.hub.api.data.HubKeys;
 import dev.mrbeastgaming.mods.hub.api.data.HubProject;
 import dev.mrbeastgaming.mods.hub.api.data.HubResponseContext;
 import dev.mrbeastgaming.mods.hub.api.data.HubUser;
-import net.minecraft.Util;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Util;
 
 import java.util.Optional;
 import java.util.UUID;

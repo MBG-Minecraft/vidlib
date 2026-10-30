@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.feature.codec.VLCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
@@ -45,7 +44,7 @@ public record PlayerClothing(Type type, @Nullable ClothingSet custom, @Nullable 
 		return preset == null || preset == Clothing.NONE ? NONE : new PlayerClothing(Type.PRESET, null, preset);
 	}
 
-	public static final Codec<PlayerClothing> NONE_CODEC = VLCodecs.unit("", NONE, playerClothing -> playerClothing.custom == null && playerClothing.preset == null);
+	public static final Codec<PlayerClothing> NONE_CODEC = KLibCodecs.unit("", NONE, playerClothing -> playerClothing.custom == null && playerClothing.preset == null);
 
 	public static final Codec<PlayerClothing> CUSTOM_CODEC = ClothingSet.CODEC.flatComapMap(PlayerClothing::custom, playerClothing -> {
 		if (playerClothing.custom != null) {
@@ -89,7 +88,7 @@ public record PlayerClothing(Type type, @Nullable ClothingSet custom, @Nullable 
 		}
 	};
 
-	public static final DataType<PlayerClothing> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PlayerClothing.class);
+	public static final DataType<PlayerClothing> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public PlayerClothing(Type type, @Nullable ClothingSet custom, @Nullable ResourceKey<ClothingSet> preset) {
 		this.type = type;

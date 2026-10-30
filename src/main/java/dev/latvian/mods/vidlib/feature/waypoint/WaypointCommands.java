@@ -3,12 +3,12 @@ package dev.latvian.mods.vidlib.feature.waypoint;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.math.kvector.KVector;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.Set;
 public class WaypointCommands {
 	@AutoRegister
 	public static final ServerCommandHolder COMMAND = new ServerCommandHolder("waypoint", (command, buildContext) -> command
-		.requires(source -> source.hasPermission(2))
+		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.literal("add")
 			.then(Commands.argument("id", StringArgumentType.word())
 				.then(Commands.argument("position", Vec3Argument.vec3())
@@ -42,7 +42,7 @@ public class WaypointCommands {
 	private static int add(CommandSourceStack source, String id, Vec3 position, Component label) {
 		source.getServer().addWaypoints(List.of(new Waypoint.Builder()
 			.id(id)
-			.position(KVector.of(position))
+			.position(position)
 			.label(label)
 			.distance(6D, 20D, 0D)
 			.build()

@@ -24,6 +24,9 @@ public class VidLibNetworkEventHandler {
 		}
 	};
 
+	public static final IPayloadHandler<VidLibPacketPayloadContainer> NOOP_HANDLER = (payload, payloadContext) -> {
+	};
+
 	@SubscribeEvent
 	public static void registerConfigurationTasks(RegisterConfigurationTasksEvent event) {
 		var listener = event.getListener();
@@ -41,10 +44,14 @@ public class VidLibNetworkEventHandler {
 		for (var s : AutoPacket.SCANNED.get()) {
 			VidLib.LOGGER.info("Registered " + s.stage().string + " " + s.to().string + " @AutoPacket '" + s.type().type().id() + "' @ " + s.className());
 
+			var clientbound = s.to() == AutoPacket.To.CLIENT;
+			var serverbound = s.to() == AutoPacket.To.SERVER;
+
 			NetworkRegistry.register(
 				s.type().type(),
 				s.type().streamCodec(),
-				ASYNC_HANDLER,
+				serverbound ? ASYNC_HANDLER : NOOP_HANDLER,
+				clientbound ? ASYNC_HANDLER : NOOP_HANDLER,
 				s.stage().protocols,
 				s.to().flow,
 				"1",

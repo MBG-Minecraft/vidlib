@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.npc;
 
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
+import dev.latvian.mods.klib.icon.Icon;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.SimilarityCheck;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
-import dev.latvian.mods.vidlib.feature.icon.EmptyIcon;
-import dev.latvian.mods.vidlib.feature.icon.Icon;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -67,9 +67,9 @@ public record NPCDataType<T>(String name, StreamCodec<?, T> streamCodec, T defau
 	public static final NPCDataType<Float> HEALTH = addFloat("health", 20F, (p, d) -> p.getHealth());
 	public static final NPCDataType<Float> MAX_HEALTH = addFloat("max_health", 20F, (p, d) -> p.getMaxHealth());
 	public static final NPCDataType<Pose> POSE = add("pose", Pose.STREAM_CODEC, Pose.STANDING, SimilarityCheck.getDefault(), (p, d) -> p.getPose());
-	public static final NPCDataType<Boolean> SWINGING = addBoolean("swinging", false, p -> p.swinging);
+	public static final NPCDataType<Boolean> SWINGING = addBoolean("swinging", false, LivingEntity::isSwinging);
 	public static final NPCDataType<Float> SWIM_AMOUNT = addFloat("swim_amount", 0F, LivingEntity::getSwimAmount);
-	public static final NPCDataType<Float> ATTACK_TIME = addFloat("attack_time", 0F, LivingEntity::getAttackAnim);
+	public static final NPCDataType<Float> ATTACK_TIME = addFloat("attack_time", 0F, (p, d) -> p.getSwingAnimation(d));
 	public static final NPCDataType<Boolean> PASSENGER = addBoolean("passenger", false, p -> p.isPassenger() && (p.getVehicle() != null && p.getVehicle().shouldRiderSit()));
 	public static final NPCDataType<Boolean> USING_ITEM = addBoolean("using_item", false, LivingEntity::isUsingItem);
 	public static final NPCDataType<Boolean> GLOWING = addBoolean("glowing", false, Entity::isCurrentlyGlowing);
@@ -78,7 +78,7 @@ public record NPCDataType<T>(String name, StreamCodec<?, T> streamCodec, T defau
 	public static final NPCDataType<Float> WALK_ANIMATION_POS = addFloat("walk_animation_pos", 0F, (p, d) -> p.walkAnimation.position(d));
 	public static final NPCDataType<Float> WALK_ANIMATION_SPEED = addFloat("walk_animation_speed", 0F, (p, d) -> p.walkAnimation.speed(d));
 	public static final NPCDataType<PlayerClothing> CLOTHING = add("clothing", PlayerClothing.DATA_TYPE.streamCodec(), PlayerClothing.NONE, SimilarityCheck.getDefault(), (p, d) -> p instanceof AbstractClientPlayer player ? ClientGameEngine.INSTANCE.getClothing(player) : PlayerClothing.NONE);
-	public static final NPCDataType<Icon> PLUMBOB = add("plumbob", Icon.STREAM_CODEC, EmptyIcon.INSTANCE, SimilarityCheck.getDefault(), (p, d) -> ClientGameEngine.INSTANCE.getPlumbob(p));
+	public static final NPCDataType<Ref<Icon>> PLUMBOB = add("plumbob", Icon.STREAM_CODEC, Icon.EMPTY, SimilarityCheck.getDefault(), (p, d) -> ClientGameEngine.INSTANCE.getPlumbob(p));
 
 	@Override
 	public String getSerializedName() {

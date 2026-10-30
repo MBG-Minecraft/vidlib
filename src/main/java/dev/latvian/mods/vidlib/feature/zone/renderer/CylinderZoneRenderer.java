@@ -1,10 +1,12 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.render.BufferSupplier;
-import dev.latvian.mods.klib.render.CuboidRenderer;
 import dev.latvian.mods.klib.render.DebugRenderTypes;
 import dev.latvian.mods.vidlib.feature.zone.shape.CylinderZoneShape;
+import dev.latvian.mods.vidlib.klib.render.BufferSupplier;
+import dev.latvian.mods.vidlib.klib.render.CuboidRenderer;
+import dev.latvian.mods.vidlib.klib.shape.Shapes;
+import dev.latvian.mods.vidlib.klib.vertex.PoseTransforms;
 
 public class CylinderZoneRenderer implements ZoneRenderer<CylinderZoneShape> {
 	@Override
@@ -24,8 +26,8 @@ public class CylinderZoneRenderer implements ZoneRenderer<CylinderZoneShape> {
 
 		ms.pushPose();
 		ctx.frame().translate(shape.pos());
-		shape.shape().buildLines(0F, 0F, 0F, ms.last().transform(ctx.buffers().getBuffer(DebugRenderTypes.LINES)).withColor(ctx.outlineColor()));
-		shape.shape().buildQuads(0F, 0F, 0F, ms.last().transform(ctx.buffers().getBuffer(DebugRenderTypes.QUADS_NO_CULL_NO_DEPTH)).withColor(ctx.color()));
+		Shapes.buildLines(shape.shape(), 0F, 0F, 0F, PoseTransforms.transform(ms.last(), ctx.buffers().getBuffer(DebugRenderTypes.LINES)).withColor(ctx.outlineColor()));
+		Shapes.buildQuads(shape.shape(), 0F, 0F, 0F, PoseTransforms.transform(ms.last(), ctx.buffers().getBuffer(DebugRenderTypes.QUADS_NO_CULL_NO_DEPTH)).withColor(ctx.color()));
 		ms.popPose();
 	}
 }

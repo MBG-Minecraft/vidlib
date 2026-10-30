@@ -5,17 +5,13 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLMinecraftClient;
-import dev.latvian.mods.vidlib.feature.client.SleepScreen;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
-import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.progressqueue.BlockExitScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.InBedChatScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
@@ -25,7 +21,6 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -66,10 +61,6 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		}
 	}
 
-	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", ordinal = 0))
-	private void vl$openSocialInteractionsScreen(Minecraft instance, Screen old) {
-	}
-
 	@Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)
 	private void vl$startAttack(CallbackInfoReturnable<Boolean> cir) {
 		if (PlayerActionHandler.handle(player, PlayerActionType.ATTACK, true)) {
@@ -96,11 +87,6 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		return original || PlayerActionHandler.handle(player, PlayerActionType.INTERACT, false);
 	}
 
-	@ModifyExpressionValue(method = "renderNames", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Options;hideGui:Z"))
-	private static boolean vl$hideGui(boolean original) {
-		return ClientGameEngine.INSTANCE.hideGui(Minecraft.getInstance());
-	}
-
 	@Override
 	public TextureAtlas getBlockAtlas() {
 		if (vl$blockTextureAtlas == null) {
@@ -110,27 +96,30 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		return vl$blockTextureAtlas;
 	}
 
-	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;initRenderer(JIZLjava/util/function/BiFunction;Z)V", shift = At.Shift.AFTER))
+	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;initRenderer(Lcom/mojang/renderpearl/api/device/GpuDevice;)V", shift = At.Shift.AFTER))
 	public void vl$initRenderer(GameConfig gameConfig, CallbackInfo ci) {
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void vl$onFinishInit(CallbackInfo ci) {
-		TTFFile.find(resourceManager);
 		ImGuiHooks.init(vl$self(), resourceManager);
 	}
 
-	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderFog(Lnet/minecraft/client/renderer/FogParameters;)V"))
+	@Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;getNanos()J", ordinal = 0))
 	public void vl$onStartFrame(boolean tick, CallbackInfo ci) {
 		ImGuiHooks.startFrame(vl$self());
 	}
 
-	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;isMinimized()Z"))
+	// 26.3 moved GpuSurface#present() ahead of the last Util#getNanos() call site, so the UI has to
+	// be built right after the game image is blitted onto the window surface...
+	@Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/api/device/GpuSurface;blitFromTexture(Lcom/mojang/renderpearl/api/commands/CommandEncoder;Lcom/mojang/renderpearl/api/textures/GpuTextureView;)V", shift = At.Shift.AFTER))
 	public void vl$beforeEndFrame(boolean tick, CallbackInfo ci) {
 		ImGuiHooks.beforeEndFrame(vl$self());
 	}
 
-	@Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;getNanos()J", ordinal = 1))
+	// ...and drawn right before it is presented, otherwise the whole ImGui overlay is composited
+	// after the swap and never reaches the screen.
+	@Inject(method = "renderFrame", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/api/device/GpuSurface;present()V", shift = At.Shift.BEFORE))
 	public void vl$onEndFrame(boolean tick, CallbackInfo ci) {
 		ImGuiHooks.endFrame(vl$self());
 	}
@@ -152,11 +141,6 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		}
 	}
 
-	@WrapOperation(method = "tick", at = @At(value = "NEW", target = "()Lnet/minecraft/client/gui/screens/InBedChatScreen;"))
-	private InBedChatScreen vl$sleepScreen(Operation<InBedChatScreen> original) {
-		return ClientGameEngine.INSTANCE.removeChatFromSleepScreen() ? new SleepScreen() : original.call();
-	}
-
 	@Override
 	public int vl$reloadCount() {
 		return vl$reloadCount;
@@ -173,9 +157,10 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	}
 
 	@WrapOperation(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;stop()V"))
-	private void vl$stop(Minecraft mc, Operation<Void> original, @Local(argsOnly = true) boolean renderLevel) {
-		if (BlockExitScreen.preventExit(mc, renderLevel)) {
-			GLFW.glfwSetWindowShouldClose(mc.getWindow().getWindow(), false);
+	private void vl$stop(Minecraft mc, Operation<Void> original, @Local(argsOnly = true) boolean advanceGameTime) {
+		if (BlockExitScreen.preventExit(mc, advanceGameTime)) {
+			// 26.3 removed the SDL window-close helper; Window#shouldClose is a latched flag, so
+			// simply not stopping here keeps the close request alive until we can actually exit.
 		} else {
 			original.call(mc);
 		}

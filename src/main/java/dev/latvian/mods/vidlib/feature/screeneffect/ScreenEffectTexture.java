@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.screeneffect;
 
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.klib.util.client.DataTexture;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.DynamicTextureHolder;
-import dev.latvian.mods.vidlib.util.client.DataTexture;
 
 import java.util.List;
 

@@ -87,32 +87,32 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 		}
 	}
 
-	@Override
-	public Set<String> getTags() {
+	public Set<String> vl$getTagSet() {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
 			return get(InternalPlayerData.PLAYER_TAGS);
 		} else {
-			return super.getTags();
+			return vl$self().entityTags();
 		}
 	}
 
-	@Override
 	public void setTags(Collection<String> tags) {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
 			var newSet = Set.copyOf(tags);
 
-			if (!newSet.equals(getTags())) {
+			if (!newSet.equals(vl$getTagSet())) {
 				set(InternalPlayerData.PLAYER_TAGS, newSet);
 			}
 		} else {
-			super.setTags(tags);
+			var self = vl$self();
+			self.entityTags().clear();
+			self.entityTags().addAll(tags);
 		}
 	}
 
 	@Override
 	public boolean addTag(String tag) {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(getTags());
+			var tags = new HashSet<>(vl$getTagSet());
 
 			if (tags.add(tag)) {
 				setTags(tags);
@@ -128,7 +128,7 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 	@Override
 	public boolean removeTag(String tag) {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(getTags());
+			var tags = new HashSet<>(vl$getTagSet());
 
 			if (tags.remove(tag)) {
 				setTags(tags);
@@ -141,10 +141,9 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 		}
 	}
 
-	@Override
 	public boolean addTags(Collection<String> t) {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(getTags());
+			var tags = new HashSet<>(vl$getTagSet());
 
 			if (tags.addAll(t)) {
 				setTags(tags);
@@ -153,14 +152,14 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 				return false;
 			}
 		} else {
-			return super.addTags(tags);
+			var tags = vl$self().entityTags();
+			return tags.addAll(t);
 		}
 	}
 
-	@Override
 	public boolean removeTags(Collection<String> t) {
 		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(getTags());
+			var tags = new HashSet<>(vl$getTagSet());
 
 			if (tags.removeAll(t)) {
 				setTags(tags);
@@ -169,7 +168,8 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 				return false;
 			}
 		} else {
-			return super.removeTags(tags);
+			var tags = vl$self().entityTags();
+			return tags.removeAll(t);
 		}
 	}
 }

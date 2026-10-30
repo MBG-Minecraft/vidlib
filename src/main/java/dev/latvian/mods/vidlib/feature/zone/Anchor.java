@@ -50,7 +50,7 @@ public record Anchor(List<Area> areas, Map<ResourceKey<Level>, List<AAIBB>> shap
 		list -> list.isEmpty() ? NONE : create(list)
 	);
 
-	public static final DataType<Anchor> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, Anchor.class);
+	public static final DataType<Anchor> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 	public static final TicketController TICKET_CONTROLLER = new TicketController(ID.vidlib("anchor"), (serverLevel, ticketHelper) -> {
 		// Bukkit
 		if (serverLevel instanceof VLServerLevel vlServerLevel) {
@@ -61,7 +61,7 @@ public record Anchor(List<Area> areas, Map<ResourceKey<Level>, List<AAIBB>> shap
 	public static final TicketController BLOCK_TICKET_CONTROLLER = new TicketController(ID.vidlib("anchor_blocks"), (level, ticketHelper) -> {
 		for (var pos : ticketHelper.getBlockTickets().keySet()) {
 			if (!CommonGameEngine.INSTANCE.isBlockAnchor(level, pos, level.getBlockState(pos))) {
-				ticketHelper.removeTicket(pos, ChunkPos.asLong(pos), false);
+				ticketHelper.removeTicket(pos, ChunkPos.pack(pos), false);
 			}
 		}
 	});

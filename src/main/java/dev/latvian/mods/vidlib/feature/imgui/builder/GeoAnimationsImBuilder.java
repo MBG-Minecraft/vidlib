@@ -5,21 +5,21 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.type.ImString;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GeoAnimationsImBuilder implements ImBuilder<ResourceLocation> {
-	public static final ImBuilderType<ResourceLocation> TYPE = GeoAnimationsImBuilder::new;
+public class GeoAnimationsImBuilder implements ImBuilder<Identifier> {
+	public static final ImBuilderType<Identifier> TYPE = GeoAnimationsImBuilder::new;
 
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
-	public final ResourceLocation[] value = {ID.vidlib("prop/skeleton")};
-	private List<ResourceLocation> list;
+	public final Identifier[] value = {ID.vidlib("prop/skeleton")};
+	private List<Identifier> list;
 
 	@Override
-	public void set(ResourceLocation value) {
+	public void set(Identifier value) {
 		this.value[0] = value;
 	}
 
@@ -38,16 +38,16 @@ public class GeoAnimationsImBuilder implements ImBuilder<ResourceLocation> {
 				list.add(id.withPath(id.getPath().substring(20)));
 			}
 
-			list.sort(ResourceLocation::compareNamespaced);
-			list.addFirst(ID.EMPTY);
+			list.sort(Identifier::compareNamespaced);
+			list.addFirst(Identifier.withDefaultNamespace("empty"));
 			list = List.copyOf(list);
 		}
 
-		return graphics.combo("###animation", value, "", list, ResourceLocation::toString, SEARCH);
+		return graphics.combo("###animation", value, "", list, Identifier::toString, SEARCH);
 	}
 
 	@Override
-	public ResourceLocation build() {
+	public Identifier build() {
 		return value[0];
 	}
 }

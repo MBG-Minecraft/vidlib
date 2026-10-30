@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.npc;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -10,6 +9,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Collection;
@@ -57,14 +57,14 @@ public interface NPCServerCommands {
 		return 1;
 	}
 
-	private static int summonAs(CommandSourceStack source, String npc, boolean relativePosition, Vec3 pos, Collection<GameProfile> profiles) {
+	private static int summonAs(CommandSourceStack source, String npc, boolean relativePosition, Vec3 pos, Collection<NameAndId> profiles) {
 		var profile = profiles.stream().findFirst().orElse(null);
 
 		if (profile == null) {
 			return 0;
 		}
 
-		profile = source.getServer().getSessionService().fetchProfile(profile.getId(), true).profile();
+		profile = new NameAndId(source.getServer().services().sessionService().fetchProfile(profile.id(), true).profile());
 		source.getLevel().s2c(new SummonNPCPayload(new NPCParticleOptions(npc, relativePosition, 0, Optional.of(profile)), pos));
 		return 1;
 	}

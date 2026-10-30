@@ -1,11 +1,12 @@
 package dev.latvian.mods.vidlib.core;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.latvian.mods.klib.math.KMath;
-import net.minecraft.client.renderer.MultiBufferSource;
+import dev.latvian.mods.klib.math.AABBs;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 
@@ -14,14 +15,17 @@ public interface VLEntityRenderer<T extends Entity, S extends EntityRenderState>
 		return (EntityRenderer<T, S>) this;
 	}
 
-	default void renderModel(T entity, PoseStack ms, MultiBufferSource buffers, double xOffset, double yOffset, double zOffset, float delta, int light) {
+	/**
+	 * 26.3 split entity rendering into extraction ({@code extractRenderState}) and submission
+	 * ({@code submit}), so the old {@code render(S, PoseStack, MultiBufferSource, int)} entry
+	 * point no longer exists. Geometry is submitted through a {@link SubmitNodeCollector} and the
+	 * camera state comes from the live frame's render state.
+	 */
+	default void renderModel(T entity, PoseStack ms, SubmitNodeCollector buffers, double xOffset, double yOffset, double zOffset, float delta, int light) {
 		var state = vl$self().createRenderState(entity, delta);
 		state.nameTag = null;
 		state.nameTagAttachment = null;
-
-		if (state instanceof LivingEntityRenderState s) {
-			s.customName = null;
-		}
+		state.scoreText = null;
 
 		var renderOffset = vl$self().getRenderOffset(state);
 		var x = xOffset + renderOffset.x();
@@ -33,11 +37,16 @@ public interface VLEntityRenderer<T extends Entity, S extends EntityRenderState>
 		ms.popPose();
 	}
 
-	default void renderModel(S state, PoseStack ms, MultiBufferSource buffers, int light) {
-		vl$self().render(state, ms, buffers, light);
+	default CameraRenderState vl$cameraRenderState() {
+		var mc = Minecraft.getInstance();
+		return mc.gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
 	}
 
-	default AABB vl$getBoundingBoxForCulling(T entity) {
-		return KMath.infiniteAABB();
+	default void renderModel(S state, PoseStack ms, SubmitNodeCollector buffers, int light) {
+		vl$self().submit(state, ms, buffers, vl$cameraRenderState());
+	}
+
+	default AABB vl$getBoundingBoxForCulling(T entity, float partialTicks) {
+		return AABBs.INFINITE;
 	}
 }

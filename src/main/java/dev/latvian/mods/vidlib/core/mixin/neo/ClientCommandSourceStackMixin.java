@@ -3,14 +3,13 @@ package dev.latvian.mods.vidlib.core.mixin.neo;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.ClientCommandSourceStack;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,8 +19,8 @@ import java.util.Collection;
 
 @Mixin(ClientCommandSourceStack.class)
 public abstract class ClientCommandSourceStackMixin extends CommandSourceStack {
-	public ClientCommandSourceStackMixin(CommandSource source, Vec3 worldPosition, Vec2 rotation, ServerLevel level, int permissionLevel, String textName, Component displayName, MinecraftServer server, @Nullable Entity entity) {
-		super(source, worldPosition, rotation, level, permissionLevel, textName, displayName, server, entity);
+	public ClientCommandSourceStackMixin(CommandSource source, Vec3 worldPosition, Vec2 rotation, PermissionSet permissions, Entity entity) {
+		super(source, worldPosition, rotation, (ServerLevel) null, permissions, ServerLifecycleHooks.getCurrentServer(), entity);
 	}
 
 	@Inject(method = "getOnlinePlayerNames", at = @At("HEAD"), cancellable = true)

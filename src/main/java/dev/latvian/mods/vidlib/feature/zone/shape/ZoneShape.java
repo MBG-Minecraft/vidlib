@@ -1,14 +1,16 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import dev.latvian.mods.klib.codec.KLibCodecErrors;
+import dev.latvian.mods.klib.codec.KLibCodecs;
+import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryCollector;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryEntry;
-import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.registry.CustomRegistryValue;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.registry.UnitType;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
@@ -17,7 +19,6 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneLike;
 import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -25,16 +26,27 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Function;
 
-public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
-	SimpleRegistry<ZoneShape> REGISTRY = SimpleRegistry.create(ID.vidlib("zone_shape"), c -> VLPlatformHelper.CURRENT.collectZoneShapes(c));
+public interface ZoneShape extends CustomRegistryValue<RegistryFriendlyByteBuf, ZoneShape>, ZoneLike {
+	DataResult<AAIBB> NOT_A_BOX = KLibCodecErrors.error("Not a BlockZoneShape");
+	UnitType<RegistryFriendlyByteBuf, ZoneShape> UNIVERSE = UnitType.create("universe", UniverseZoneShape.INSTANCE);
 
-	Codec<ZoneShape> CODEC = Codec.either(AAIBB.CODEC, REGISTRY.codec()).xmap(either -> either.map(box -> BlockZoneShape.of(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.intBox()) : Either.right(shape));
-	StreamCodec<RegistryFriendlyByteBuf, ZoneShape> STREAM_CODEC = ByteBufCodecs.either(AAIBB.STREAM_CODEC, REGISTRY.streamCodec()).map(either -> either.map(box -> BlockZoneShape.of(box.min(), box.max()), Function.identity()), shape -> shape instanceof BlockZoneShape b ? Either.left(b.intBox()) : Either.right(shape));
+	CustomRegistry<RegistryFriendlyByteBuf, ZoneShape> REGISTRY = CustomRegistry.<RegistryFriendlyByteBuf, ZoneShape>builder("zone_shape")
+		.customCodec(directCodec -> KLibCodecs.or(AAIBB.CODEC.<ZoneShape>flatComapMap(box -> BlockZoneShape.of(box.min(), box.max()), shape -> {
+			if (shape instanceof BlockZoneShape z) {
+				return DataResult.success(z.intBox());
+			} else {
+				return NOT_A_BOX;
+			}
+		}), directCodec))
+		.build();
 
-	static void builtinTypes(SimpleRegistryCollector<ZoneShape> registry) {
-		registry.register(UniverseZoneShape.TYPE);
+	Codec<Ref<ZoneShape>> CODEC = REGISTRY.codec();
+	StreamCodec<RegistryFriendlyByteBuf, Ref<ZoneShape>> STREAM_CODEC = REGISTRY.streamCodec();
+	DataType<Ref<ZoneShape>> DATA_TYPE = REGISTRY.dataType();
+
+	static void builtInTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ZoneShape> registry) {
+		registry.register(UNIVERSE);
 		registry.register(ZoneShapeGroup.TYPE);
 		registry.register(BlockZoneShape.TYPE);
 		registry.register(BoxZoneShape.TYPE);
@@ -44,8 +56,8 @@ public interface ZoneShape extends ZoneLike, SimpleRegistryEntry {
 	}
 
 	@Override
-	default SimpleRegistryType<?> type() {
-		return REGISTRY.getType(this);
+	default CustomRegistry<RegistryFriendlyByteBuf, ZoneShape> getRegistry() {
+		return REGISTRY;
 	}
 
 	default Zone createInstance(ZoneContainer container, ZoneVolume zoneVolume) {

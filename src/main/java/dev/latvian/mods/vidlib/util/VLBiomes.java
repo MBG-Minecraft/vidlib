@@ -1,5 +1,8 @@
 package dev.latvian.mods.vidlib.util;
 
+import net.minecraft.util.ARGB;
+import net.minecraft.world.attribute.BackgroundMusic;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -10,15 +13,16 @@ public interface VLBiomes {
 		.hasPrecipitation(false)
 		.temperature(0.5F)
 		.downfall(0.5F)
+		.setAttribute(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(12638463))
+		.setAttribute(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(7907327))
+		.setAttribute(EnvironmentAttributes.WATER_FOG_COLOR, ARGB.vector3fFromRGB24(329011))
+		.setAttribute(EnvironmentAttributes.BACKGROUND_MUSIC, BackgroundMusic.EMPTY)
+		.setAttribute(EnvironmentAttributes.CREATURE_WORLD_GEN_SPAWN_PROBABILITY, 0F)
+		.mobSpawnSettings(new MobSpawnSettings.Builder().build())
 		.specialEffects(new BiomeSpecialEffects.Builder()
-			.fogColor(12638463)
-			.skyColor(7907327)
 			.waterColor(4159204)
-			.waterFogColor(329011)
-			.silenceAllBackgroundMusic()
 			.build()
 		)
-		.mobSpawnSettings(new MobSpawnSettings.Builder().creatureGenerationProbability(0F).build())
 		.generationSettings(new BiomeGenerationSettings.Builder(null, null).build())
 		.build();
 }

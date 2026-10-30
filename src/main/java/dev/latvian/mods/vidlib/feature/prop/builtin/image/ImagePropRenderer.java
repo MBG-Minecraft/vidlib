@@ -2,18 +2,17 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.image;
 
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
-import dev.latvian.mods.vidlib.feature.prop.PropRenderContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import net.minecraft.client.renderer.LightTexture;
+import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import org.joml.Matrix4f;
 
 public class ImagePropRenderer implements PropRenderer<ImageProp> {
 	@ClientAutoRegister
-	public static final Holder HOLDER = PropRenderer.holder(ImageProp.TYPE, new ImagePropRenderer());
+	public static final Holder HOLDER = PropRenderer.holder(ImageProp.TYPE, ImagePropRenderer::new);
 
 	@Override
-	public void render(PropRenderContext<ImageProp> ctx) {
+	public void render(PropSubmitContext<ImageProp> ctx) {
 		var prop = ctx.prop();
 		float delta = ctx.delta();
 
@@ -30,16 +29,16 @@ public class ImagePropRenderer implements PropRenderer<ImageProp> {
 			bbMat.translate(0F, height / 2F, 0F);
 		}
 
-		var matrix4f = ctx.frame().poseStack().last().pose();
-		matrix4f.mul(bbMat);
+		var matrix4f = ctx.frame().poseStack().last();
+		matrix4f.pose().mul(bbMat);
 
-		int light = prop.fullBright ? LightTexture.FULL_BRIGHT : prop.getPackedLight();
+		int light = prop.fullBright ? net.minecraft.util.LightCoordsUtil.FULL_BRIGHT : prop.getPackedLight();
 		float w2 = width / 2F;
 
 		int tint = prop.tint.argb();
 
 		// var buffer = ctx.frame().buffers().getBuffer(prop.seeThrough ? RenderType.textBackgroundSeeThrough() : RenderType.textBackground());
-		var buffer = ctx.frame().buffers().getBuffer(EntityRenderTypes.texture(prop.texture, prop.translucent));
+		var buffer = ctx.frame().buffers().getVertexConsumer(EntityRenderTypes.texture(prop.texture, prop.translucent));
 		buffer.addVertex(matrix4f, -w2, y, 0F).setUv(1F, 1F).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
 		buffer.addVertex(matrix4f, -w2, 0F, 0F).setUv(1F, 0F).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
 		buffer.addVertex(matrix4f, w2, 0F, 0F).setUv(0F, 0F).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);

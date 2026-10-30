@@ -2,18 +2,18 @@ package dev.latvian.mods.vidlib.feature.imgui.icon;
 
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import imgui.ImGui;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public record ImageImIcon(ResourceLocation texture, float sizeX, float sizeY, float u0, float v0, float u1, float v1) implements ImIcon {
-	public ImageImIcon(ResourceLocation texture, float sizeX, float sizeY) {
+public record ImageImIcon(Identifier texture, float sizeX, float sizeY, float u0, float v0, float u1, float v1) implements ImIcon {
+	public ImageImIcon(Identifier texture, float sizeX, float sizeY) {
 		this(texture, sizeX, sizeY, 0F, 0F, 1F, 1F);
 	}
 
-	public ImageImIcon(ResourceLocation texture, float u0, float v0, float u1, float v1) {
+	public ImageImIcon(Identifier texture, float u0, float v0, float u1, float v1) {
 		this(texture, 18F, 18F, u0, v0, u1, v1);
 	}
 
-	public ImageImIcon(ResourceLocation texture) {
+	public ImageImIcon(Identifier texture) {
 		this(texture, 18F, 18F);
 	}
 

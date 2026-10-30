@@ -6,19 +6,14 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.Range;
-import dev.latvian.mods.vidlib.feature.config.BooleanConfigValue;
-import dev.latvian.mods.vidlib.feature.config.ConfigValue;
-import dev.latvian.mods.vidlib.feature.config.FloatConfigValue;
-import dev.latvian.mods.vidlib.feature.config.RangeConfigValue;
+import dev.latvian.mods.klib.util.JsonCodecReloadListener;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
-import dev.latvian.mods.vidlib.util.JsonCodecReloadListener;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
-import java.util.List;
 import java.util.Map;
 
 public class PhysicsParticleData {
@@ -71,22 +66,7 @@ public class PhysicsParticleData {
 		PhysicsParticleData::new
 	) : ByteBufCodecs.fromCodecTrusted(CODEC);
 
-	public static final DataType<PhysicsParticleData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC, PhysicsParticleData.class);
-
-	public static final List<ConfigValue<PhysicsParticleData, ?>> CONFIG = List.of(
-		new FloatConfigValue<>("Density", Range.of(0F, 1000F), false, data -> data.density, (data, v) -> data.density = v),
-		new RangeConfigValue<>("Lifespan", Range.of(1F, 300F), true, data -> data.lifespan, (data, v) -> data.lifespan = v),
-		new RangeConfigValue<>("Scale", Range.of(0F, 10F), true, data -> data.scale, (data, v) -> data.scale = v),
-		new RangeConfigValue<>("Power", null, false, data -> data.power, (data, v) -> data.power = v),
-		new RangeConfigValue<>("Spread", Range.FULL, true, data -> data.spread, (data, v) -> data.spread = v),
-		new FloatConfigValue<>("Inertia", Range.FULL, true, data -> data.inertia, (data, v) -> data.inertia = v),
-		new FloatConfigValue<>("Gravity", null, false, data -> data.gravity, (data, v) -> data.gravity = v),
-		new RangeConfigValue<>("Speed", Range.of(0.1F, 10F), true, data -> data.speed, (data, v) -> data.speed = v),
-		new FloatConfigValue<>("Direction", Range.of(0F, 360F), true, data -> data.direction, (data, v) -> data.direction = v),
-		new FloatConfigValue<>("Tilt", Range.of(0F, 180F), true, data -> data.tilt, (data, v) -> data.tilt = v),
-		new RangeConfigValue<>("Section", Range.of(-360F, 360F), false, data -> data.section, (data, v) -> data.section = v),
-		new BooleanConfigValue<>("Ignore Block Density", data -> data.ignoreBlockDensity, (data, v) -> data.ignoreBlockDensity = v)
-	);
+	public static final DataType<PhysicsParticleData> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public static final VLRegistry<PhysicsParticleData> REGISTRY = VLRegistry.createClient("physics_particle_data", PhysicsParticleData.class);
 
@@ -96,7 +76,7 @@ public class PhysicsParticleData {
 		}
 
 		@Override
-		protected void apply(ResourceManager resourceManager, Map<ResourceLocation, PhysicsParticleData> map) {
+		protected void apply(ResourceManager resourceManager, Map<Identifier, PhysicsParticleData> map) {
 			REGISTRY.update(Map.copyOf(map));
 		}
 	}

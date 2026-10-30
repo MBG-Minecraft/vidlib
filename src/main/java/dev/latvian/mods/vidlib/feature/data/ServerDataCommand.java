@@ -7,11 +7,12 @@ import net.minecraft.commands.Commands;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 
 public interface ServerDataCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("server-data", (command, buildContext) -> {
-		command.requires(source -> source.hasPermission(2));
+		command.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
 		var nbtOps = buildContext.createSerializationContext(NbtOps.INSTANCE);
 
 		for (var key : DataKey.SERVER.all.values()) {
@@ -29,9 +30,9 @@ public interface ServerDataCommand {
 			);
 
 			cmd.then(Commands.literal("set")
-				.then(Commands.argument("value", key.command().argument(buildContext))
+				.then(Commands.argument("value", key.type().argument(buildContext))
 					.executes(ctx -> {
-						var value = key.command().get(ctx, "value");
+						var value = key.type().get(ctx, "value");
 						ctx.getSource().getServer().set(key, Cast.to(value));
 						return 1;
 					})

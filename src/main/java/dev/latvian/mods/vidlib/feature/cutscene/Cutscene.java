@@ -5,10 +5,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import dev.latvian.mods.vidlib.feature.codec.CommandDataType;
 import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStep;
 import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
-import dev.latvian.mods.vidlib.util.JsonRegistryReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -42,7 +42,7 @@ public class Cutscene {
 		}
 	);
 
-	public static final DataType<Cutscene> DIRECT_DATA_TYPE = DataType.of(DIRECT_CODEC, DIRECT_STREAM_CODEC, Cutscene.class);
+	public static final DataType<Cutscene> DIRECT_DATA_TYPE = DataType.of(DIRECT_CODEC, DIRECT_STREAM_CODEC);
 	public static final VLRegistry<Cutscene> REGISTRY = VLRegistry.createServer("cutscene", Cutscene.class);
 
 	public static final DataType<Cutscene> DATA_TYPE = REGISTRY.orDirect(DIRECT_DATA_TYPE);

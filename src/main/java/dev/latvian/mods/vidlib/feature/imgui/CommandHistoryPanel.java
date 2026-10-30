@@ -23,7 +23,7 @@ public class CommandHistoryPanel extends Panel {
 
 	@Override
 	public void content(ImGraphics graphics) {
-		var list = new ArrayList<>(graphics.mc.commandHistory().history());
+		var list = new ArrayList<>(graphics.mc.gui.hud.getChat().getRecentChat());
 
 		if (graphics.inGame && commandSuggestions == null) {
 			var mc = Minecraft.getInstance();
@@ -33,7 +33,7 @@ public class CommandHistoryPanel extends Panel {
 
 			this.commandSuggestions = new CommandSuggestions(
 				mc,
-				new ChatScreen(""),
+				new ChatScreen("", false),
 				input,
 				mc.font,
 				false,

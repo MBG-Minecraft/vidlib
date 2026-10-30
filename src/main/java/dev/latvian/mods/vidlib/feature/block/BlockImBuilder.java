@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.block;
 
-import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.renderpearl.api.textures.GpuTexture;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Lazy;
@@ -94,7 +94,7 @@ public class BlockImBuilder implements ImBuilder<Block> {
 
 					for (var b : BLOCKS.get()) {
 						var stack = new ItemStack(b.asItem());
-						var key = new ItemKey(stack.getItemHolder(), stack.getComponentsPatch());
+						var key = new ItemKey(stack.typeHolder(), stack.getComponentsPatch());
 						var cached = CachedItemData.create(graphics.mc, stack, key, ctx);
 
 						if (cached.search().contains(searchText)) {

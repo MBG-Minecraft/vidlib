@@ -1,61 +1,121 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.klib.math.DistanceComparator;
+import com.mojang.renderpearl.api.pipeline.BlendFunction;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.CompareOp;
+import com.mojang.renderpearl.api.pipeline.DepthStencilState;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
-import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesRenderTypes;
 import net.minecraft.client.Camera;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.LayeringTransform;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.util.TriState;
-import org.spongepowered.asm.mixin.Unique;
+import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
+/**
+ * 26.3 port of VidLib's custom particle render types.
+ * <p>
+ * Minecraft 26.3 replaced the old {@code ParticleRenderType(String, RenderType, boolean)} constructor
+ * with a simple {@code (name, shorthand)} record, and moved the actual pipeline/render-type selection
+ * into {@link SingleQuadParticle.Layer}. So the group tags (used to sort particles into
+ * {@link net.minecraft.client.particle.ParticleGroup}s) and the layers (used to batch them into draws)
+ * are now separate things.
+ */
 public class VidLibParticleRenderTypes {
-	public static final ParticleRenderType TRUE_TRANSLUCENT = new ParticleRenderType("vidlib:true_translucent", RenderType.translucentParticle(TextureAtlas.LOCATION_PARTICLES), true);
+	public static final ParticleRenderType TRUE_TRANSLUCENT = new ParticleRenderType("vidlib:true_translucent", "TT");
+	public static final ParticleRenderType ADDITIVE = new ParticleRenderType("vidlib:additive", "AD");
+	public static final ParticleRenderType ADDITIVE_ONLY_DEPTH = new ParticleRenderType("vidlib:additive_only_depth", "AOD");
+	public static final ParticleRenderType CUSTOM = new ParticleRenderType("vidlib:custom", "VC");
 
-	public static final ParticleRenderType ADDITIVE = new ParticleRenderType("vidlib:additive", RenderType.create(
-		ID.vidlib("particle/additive").toString(),
-		1536,
-		false,
-		false,
-		VidLibRenderPipelines.ADDITIVE_PARTICLE,
-		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(SpriteKey.PARTICLES.texturePath(), TriState.FALSE, false))
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOutputState(RenderStateShard.PARTICLES_TARGET)
-			.createCompositeState(false)
-	), true);
+	private static final List<ParticleRenderType> EXTRA_TYPES = List.of(TRUE_TRANSLUCENT, ADDITIVE, ADDITIVE_ONLY_DEPTH, CUSTOM);
 
-	public static final ParticleRenderType ADDITIVE_ONLY_DEPTH = new ParticleRenderType("vidlib:additive_only_depth", RenderType.create(
-		ID.vidlib("particle/additive_only_depth").toString(),
-		1536,
-		false,
-		false,
-		VidLibRenderPipelines.ADDITIVE_PARTICLE_ONLY_DEPTH,
-		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(SpriteKey.PARTICLES.texturePath(), TriState.FALSE, false))
-			.setLightmapState(RenderStateShard.LIGHTMAP)
-			.setOutputState(RenderStateShard.PARTICLES_TARGET)
-			.createCompositeState(false)
-	), true);
+	private static final List<ParticleRenderType> EXTENDED_RENDER_ORDER = java.util.stream.Stream.concat(
+		List.of(ParticleRenderType.SINGLE_QUADS, ParticleRenderType.ITEM_PICKUP, ParticleRenderType.ELDER_GUARDIANS).stream(),
+		EXTRA_TYPES.stream()
+	).toList();
 
-	private static final Map<ParticleRenderType, List<Particle>> SORTED = new IdentityHashMap<>();
+	/**
+	 * The render types that are not part of vanilla's {@code ParticleEngine.RENDER_ORDER}.
+	 */
+	public static List<ParticleRenderType> all() {
+		return EXTRA_TYPES;
+	}
+
+	/**
+	 * Vanilla's render order plus VidLib's, for {@code ParticleEngine.extract}.
+	 */
+	public static List<ParticleRenderType> renderOrder() {
+		return EXTENDED_RENDER_ORDER;
+	}
+
+	/**
+	 * True when the given render type is handled by vanilla's own {@code ParticleGroup}s.
+	 */
+	public static boolean isVanillaType(ParticleRenderType type) {
+		return type != TRUE_TRANSLUCENT && type != ADDITIVE && type != ADDITIVE_ONLY_DEPTH && type != CUSTOM;
+	}
+
+	// --- Render types / layers ---------------------------------------------------------------
+
+	static RenderPipeline additivePipeline(String path, boolean depthWrite) {
+		return RenderPipeline.builder(RenderPipelines.PARTICLE_SNIPPET)
+			.withLocation(ID.vidlib("pipeline/" + path))
+			.withColorTargetState(new ColorTargetState(BlendFunction.ADDITIVE))
+			.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, depthWrite))
+			.build();
+	}
+
+	public static final SingleQuadParticle.Layer TRUE_TRANSLUCENT_LAYER = new SingleQuadParticle.Layer(
+		true,
+		TextureAtlas.LOCATION_PARTICLES,
+		RenderPipelines.TRANSLUCENT_PARTICLE,
+		RenderPipelines.OIT_PARTICLE
+	);
+
+	public static final SingleQuadParticle.Layer ADDITIVE_LAYER = new SingleQuadParticle.Layer(
+		true,
+		TextureAtlas.LOCATION_PARTICLES,
+		additivePipeline("particle/additive", true),
+		RenderPipelines.OIT_PARTICLE
+	);
+
+	public static final SingleQuadParticle.Layer ADDITIVE_ONLY_DEPTH_LAYER = new SingleQuadParticle.Layer(
+		true,
+		TextureAtlas.LOCATION_PARTICLES,
+		additivePipeline("particle/additive_only_depth", true),
+		RenderPipelines.OIT_PARTICLE
+	);
+
+	// --- Sorting -----------------------------------------------------------------------------
+
+	private static final Map<ParticleRenderType, Boolean> SORTED = new IdentityHashMap<>();
 
 	public static void enableSorting(ParticleRenderType type) {
-		SORTED.put(type, new ArrayList<>());
+		SORTED.put(type, Boolean.TRUE);
+	}
+
+	public static boolean isSorted(ParticleRenderType type) {
+		return type != null && SORTED.containsKey(type);
+	}
+
+	/**
+	 * ADDITIVE particles are drawn twice - once with the additive layer, once with the
+	 * additive-only-depth layer (this mirrors 1.21.5, where the whole sorted particle list was
+	 * re-rendered into a second render pass).
+	 */
+	public static boolean hasDepthPass(ParticleRenderType type) {
+		return type == ADDITIVE;
 	}
 
 	static {
@@ -64,64 +124,48 @@ public class VidLibParticleRenderTypes {
 		enableSorting(ADDITIVE_ONLY_DEPTH);
 	}
 
-	@Unique
-	private static List<Particle> vl$sortedParticleList = null;
-
-	public static void vl$renderParticleTypePre(ParticleRenderType particleType) {
-		vl$sortedParticleList = VidLibParticleRenderTypes.SORTED.get(particleType);
-
-		if (vl$sortedParticleList != null) {
-			vl$sortedParticleList.clear();
-		}
+	/**
+	 * Far-to-near ordering, matching {@code DistanceComparator}'s 1.21.5 behaviour.
+	 * <p>
+	 * {@code Particle}'s position fields are protected, so the bounding box centre - which differs
+	 * only by the constant half-height - is used instead.
+	 */
+	public static Comparator<SingleQuadParticle> distanceComparator(Camera camera) {
+		Vec3 origin = camera.position();
+		return (a, b) -> Double.compare(
+			origin.distanceToSqr(b.getBoundingBox().getCenter()),
+			origin.distanceToSqr(a.getBoundingBox().getCenter())
+		);
 	}
 
-	public static boolean addDefaultParticle(Particle particle) {
-		if (vl$sortedParticleList != null) {
-			vl$sortedParticleList.add(particle);
-			return false;
-		}
+	/**
+	 * Render types used by {@link PhysicsParticleManager} when Iris is not running.
+	 */
+	public interface Physics {
+		RenderType SOLID = RenderType.create("physics_particle_solid", RenderSetup.builder(PhysicsParticlesRenderTypes.SOLID_PIPELINE)
+			.withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS)
+			.useLightmap()
+			.createRenderSetup());
 
-		return true;
-	}
+		RenderType CUTOUT = RenderType.create("physics_particle_cutout", RenderSetup.builder(PhysicsParticlesRenderTypes.CUTOUT_PIPELINE)
+			.withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS)
+			.useLightmap()
+			.createRenderSetup());
 
-	public static void vl$renderParticleTypePost(Camera camera, float partialTick, MultiBufferSource.BufferSource bufferSource, ParticleRenderType particleType) {
-		if (vl$sortedParticleList != null && !vl$sortedParticleList.isEmpty()) {
-			if (vl$sortedParticleList.size() >= 2) {
-				vl$sortedParticleList.sort(new DistanceComparator<>(camera.getPosition(), Particle::getPos));
-			}
+		RenderType CUTOUT_MIPPED = RenderType.create("physics_particle_cutout_mipped", RenderSetup.builder(PhysicsParticlesRenderTypes.CUTOUT_MIPPED_PIPELINE)
+			.withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS)
+			.useLightmap()
+			.createRenderSetup());
 
-			var buffer = bufferSource.getBuffer(Objects.requireNonNull(particleType.renderType()));
+		RenderType TRANSLUCENT = RenderType.create("physics_particle_translucent", RenderSetup.builder(PhysicsParticlesRenderTypes.TRANSLUCENT_PIPELINE)
+			.withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS)
+			.useLightmap()
+			.setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+			.createRenderSetup());
 
-			for (var particle : vl$sortedParticleList) {
-				try {
-					particle.render(buffer, camera, partialTick);
-				} catch (Throwable throwable) {
-					var crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
-					CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
-					crashreportcategory.setDetail("Particle", particle::toString);
-					crashreportcategory.setDetail("Particle Type", particleType::toString);
-					throw new ReportedException(crashreport);
-				}
-			}
-
-			if (particleType.renderType() == ADDITIVE.renderType()) {
-				var buffer2 = bufferSource.getBuffer(Objects.requireNonNull(ADDITIVE_ONLY_DEPTH.renderType()));
-
-				for (var particle : vl$sortedParticleList) {
-					try {
-						particle.render(buffer2, camera, partialTick);
-					} catch (Throwable throwable) {
-						var crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
-						CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
-						crashreportcategory.setDetail("Particle", particle::toString);
-						crashreportcategory.setDetail("Particle Type", particleType::toString);
-						throw new ReportedException(crashreport);
-					}
-				}
-			}
-
-			vl$sortedParticleList.clear();
-			vl$sortedParticleList = null;
-		}
+		RenderType TRIPWIRE = RenderType.create("physics_particle_tripwire", RenderSetup.builder(PhysicsParticlesRenderTypes.SOLID_PIPELINE)
+			.withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS)
+			.useLightmap()
+			.createRenderSetup());
 	}
 }

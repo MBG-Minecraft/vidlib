@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.net;
 
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface NetworkChannelInfo {
-	boolean hasChannel(ResourceLocation payloadId);
+	boolean hasChannel(Identifier payloadId);
 
 	default boolean hasChannel(CustomPacketPayload.Type<?> type) {
 		return hasChannel(type.id());

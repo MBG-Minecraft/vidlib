@@ -1,16 +1,17 @@
-#version 150
+#version 330
+#extension GL_ARB_separate_shader_objects : require
+
+#include < minecraft:fog.glsl >
+#include < minecraft:dynamictransforms.glsl >
 
 uniform sampler2D Sampler0;
 
-uniform vec4 ColorModulator;
+layout(location = 2) in vec4 vertexColor;
+layout(location = 4) in vec4 lightMapColor;
+layout(location = 5) in vec4 overlayColor;
+layout(location = 6) in vec2 texCoord0;
 
-in float vertexDistance;
-in vec4 vertexColor;
-in vec4 lightMapColor;
-in vec4 overlayColor;
-in vec2 texCoord0;
-
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 
 float hash(float n) { return fract(sin(n) * 1e4); }
 float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }

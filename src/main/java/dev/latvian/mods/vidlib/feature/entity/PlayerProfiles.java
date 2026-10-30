@@ -9,18 +9,17 @@ import com.mojang.authlib.SignatureState;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTextures;
 import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.yggdrasil.TextureUrlChecker;
-import com.mojang.authlib.yggdrasil.response.MinecraftTexturesPayload;
+import com.mojang.authlib.services.response.MinecraftTexturesPayload;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.util.UUIDTypeAdapter;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.CommonPaths;
 import dev.latvian.mods.klib.util.JsonUtils;
+import dev.latvian.mods.klib.util.net.NetUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.util.ExtraCodecs;
 
@@ -56,8 +55,8 @@ public class PlayerProfiles {
 		BY_UUID.clear();
 		BY_NAME.clear();
 
-		BY_UUID.put(PlayerProfile.STEVE.profile().getId(), PlayerProfile.STEVE);
-		BY_UUID.put(PlayerProfile.ALEX.profile().getId(), PlayerProfile.ALEX);
+		BY_UUID.put(PlayerProfile.STEVE.profile().id(), PlayerProfile.STEVE);
+		BY_UUID.put(PlayerProfile.ALEX.profile().id(), PlayerProfile.ALEX);
 
 		try {
 			var path = VidLibPaths.USER.get().resolve("cached-profiles.json");
@@ -67,8 +66,8 @@ public class PlayerProfiles {
 				var list = PlayerProfile.LIST_CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 
 				for (var entry : list) {
-					BY_UUID.put(entry.profile().getId(), entry);
-					BY_NAME.put(entry.profile().getName().toLowerCase(Locale.ROOT), entry);
+					BY_UUID.put(entry.profile().id(), entry);
+					BY_NAME.put(entry.profile().name().toLowerCase(Locale.ROOT), entry);
 				}
 			}
 		} catch (Exception ex) {
@@ -103,20 +102,20 @@ public class PlayerProfiles {
 
 			for (var value : BY_UUID.values()) {
 				if (!value.isError()) {
-					map.put(value.profile().getId(), value);
+					map.put(value.profile().id(), value);
 				}
 			}
 
 			for (var value : BY_NAME.values()) {
 				if (!value.isError()) {
-					map.put(value.profile().getId(), value);
+					map.put(value.profile().id(), value);
 				}
 			}
 
 			var list = new ArrayList<>(map.values());
 			list.add(PlayerProfile.STEVE);
 			list.add(PlayerProfile.ALEX);
-			list.sort((o1, o2) -> o1.profile().getName().compareToIgnoreCase(o2.profile().getName()));
+			list.sort((o1, o2) -> o1.profile().name().compareToIgnoreCase(o2.profile().name()));
 			allKnown = list;
 			return list;
 		}
@@ -137,13 +136,13 @@ public class PlayerProfiles {
 		}
 
 		try {
-			return MiscUtils.fetch(BASE_PROFILE_RESOLVE_URI.resolve(input)).flatMap(bytes -> {
+			return NetUtils.fetch(BASE_PROFILE_RESOLVE_URI.resolve(input)).flatMap(bytes -> {
 				JsonObject json = null;
 
 				try (var stream = new ByteArrayInputStream(bytes)) {
 					json = JsonUtils.read(stream).getAsJsonObject();
-					var profile = ExtraCodecs.GAME_PROFILE.parse(JsonOps.INSTANCE, json);
-					return profile.flatMap(p -> DataResult.success(p.getId()));
+					var profile = ExtraCodecs.AUTHLIB_GAME_PROFILE.parse(JsonOps.INSTANCE, json);
+					return profile.flatMap(p -> DataResult.success(p.id()));
 				} catch (Exception e) {
 					var j = json;
 					return DataResult.error(() -> "Failed to parse profile json " + j + ": " + e.getMessage());
@@ -155,12 +154,12 @@ public class PlayerProfiles {
 	}
 
 	public static DataResult<PlayerProfile> fetch(UUID uuid) {
-		return MiscUtils.fetch(BASE_PROFILE_INFO_URI.resolve(UndashedUuid.toString(uuid))).flatMap(bytes -> {
+		return NetUtils.fetch(BASE_PROFILE_INFO_URI.resolve(UndashedUuid.toString(uuid))).flatMap(bytes -> {
 			JsonObject json = null;
 
 			try {
 				json = JsonUtils.GSON.fromJson(new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8), JsonObject.class);
-				var profile = ExtraCodecs.GAME_PROFILE.parse(JsonOps.INSTANCE, json);
+				var profile = ExtraCodecs.AUTHLIB_GAME_PROFILE.parse(JsonOps.INSTANCE, json);
 				return profile.flatMap(p -> DataResult.success(wrap(p)));
 			} catch (Exception e) {
 				var j = json;
@@ -172,7 +171,7 @@ public class PlayerProfiles {
 	public static PlayerProfile get(UUID uuid) {
 		return BY_UUID.computeIfAbsent(uuid, id -> {
 			for (var p : BY_NAME.values()) {
-				if (!p.isError() && p.profile().getId().equals(id)) {
+				if (!p.isError() && p.profile().id().equals(id)) {
 					return p;
 				}
 			}
@@ -187,7 +186,7 @@ public class PlayerProfiles {
 	public static PlayerProfile get(String name) {
 		return BY_NAME.computeIfAbsent(name.toLowerCase(Locale.ROOT), n -> {
 			for (var p : BY_UUID.values()) {
-				if (!p.isError() && p.profile().getName().equalsIgnoreCase(n)) {
+				if (!p.isError() && p.profile().name().equalsIgnoreCase(n)) {
 					return p;
 				}
 			}
@@ -210,7 +209,7 @@ public class PlayerProfiles {
 
 	public static String getName(UUID uuid) {
 		var p = get(uuid);
-		return p.isError() ? uuid.equals(PlayerProfile.STEVE.profile().getId()) ? "Steve" : uuid.equals(PlayerProfile.ALEX.profile().getId()) ? "Alex" : UndashedUuid.toString(uuid) : p.profile().getName();
+		return p.isError() ? uuid.equals(PlayerProfile.STEVE.profile().id()) ? "Steve" : uuid.equals(PlayerProfile.ALEX.profile().id()) ? "Alex" : UndashedUuid.toString(uuid) : p.profile().name();
 	}
 
 	public static MinecraftProfileTextures unpackTextures(Property packedTextures) {
@@ -234,7 +233,7 @@ public class PlayerProfiles {
 		for (var entry : textures.entrySet()) {
 			var url = entry.getValue().getUrl();
 
-			if (url == null || !TextureUrlChecker.isAllowedTextureDomain(url)) {
+			if (!isAllowedTextureUrl(url)) {
 				VidLib.LOGGER.error("Textures payload url is invalid: {}", url);
 				return MinecraftProfileTextures.EMPTY;
 			}
@@ -248,8 +247,32 @@ public class PlayerProfiles {
 		);
 	}
 
+	/**
+	 * Replacement for the removed {@code com.mojang.authlib.yggdrasil.TextureUrlChecker}: only
+	 * Mojang's own texture host is allowed, and it must be https with a normal host name.
+	 */
+	private static boolean isAllowedTextureUrl(String url) {
+		if (url == null || url.isEmpty()) {
+			return false;
+		}
+
+		try {
+			var uri = URI.create(url);
+			var scheme = uri.getScheme();
+			var host = uri.getHost();
+
+			if (!"https".equalsIgnoreCase(scheme) || host == null) {
+				return false;
+			}
+
+			return host.equalsIgnoreCase("textures.minecraft.net");
+		} catch (Exception ex) {
+			return false;
+		}
+	}
+
 	public static GameProfile withTextures(GameProfile profile) {
-		return profile.getProperties().containsKey("textures") ? profile : get(profile.getId()).profile();
+		return profile.properties().containsKey("textures") ? profile : get(profile.id()).profile();
 	}
 
 	private static PlayerProfile wrap(GameProfile profile) {
@@ -257,7 +280,7 @@ public class PlayerProfiles {
 		boolean slimModel = false;
 
 		try {
-			for (var property : profile.getProperties().get("textures")) {
+			for (var property : profile.properties().get("textures")) {
 				if (property != null && !property.value().isEmpty()) {
 					var textures = unpackTextures(property);
 
@@ -279,12 +302,12 @@ public class PlayerProfiles {
 			return;
 		}
 
-		var id = profile.getId();
-		var name = profile.getName().toLowerCase(Locale.ROOT);
+		var id = profile.id();
+		var name = profile.name().toLowerCase(Locale.ROOT);
 
-		if (!id.equals(PlayerProfile.EMPTY_GAME_PROFILE.getId()) && !name.isEmpty()) {
+		if (!id.equals(PlayerProfile.EMPTY_GAME_PROFILE.id()) && !name.isEmpty()) {
 			if (!BY_UUID.containsKey(id) || !BY_NAME.containsKey(name)) {
-				if (profile.getProperties().containsKey("textures")) {
+				if (profile.properties().containsKey("textures")) {
 					var p = wrap(profile);
 					BY_UUID.put(id, p);
 					BY_NAME.put(name, p);

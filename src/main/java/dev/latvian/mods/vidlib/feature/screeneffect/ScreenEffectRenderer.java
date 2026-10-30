@@ -1,15 +1,11 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
-import dev.latvian.mods.klib.math.ClientMatrices;
-import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.feature.canvas.Canvas;
-import dev.latvian.mods.vidlib.feature.canvas.CanvasUniform;
 import net.minecraft.client.Minecraft;
 
 public class ScreenEffectRenderer {
 	private static int uCount = 0;
 
+	/*
 	@ClientAutoRegister
 	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("screen_effects"), builder -> {
 		builder.setTickCallback(ScreenEffectRenderer::tick);
@@ -17,6 +13,7 @@ public class ScreenEffectRenderer {
 		builder.addUniform(CanvasUniform.int1("Count", () -> uCount));
 		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));
 	});
+	 */
 
 	private static void tick(Minecraft mc) {
 		if (!mc.getPauseType().tick()) {
@@ -50,7 +47,7 @@ public class ScreenEffectRenderer {
 		if (!effects.isEmpty()) {
 			var texture = ScreenEffectTexture.HOLDER.texture().get();
 			uCount = texture.update(effects, delta);
-			CANVAS.markActive();
+			// FIXME CANVAS.markActive();
 		} else {
 			uCount = 0;
 		}

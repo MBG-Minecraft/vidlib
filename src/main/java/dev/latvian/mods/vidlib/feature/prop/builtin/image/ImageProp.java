@@ -4,7 +4,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.math.VoxelShapeBox;
+import dev.latvian.mods.klib.shape.VoxelShapeBox;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
@@ -38,7 +38,7 @@ public class ImageProp extends Prop {
 		PropData.createBoolean(ImageProp.class, "translucent", p -> p.translucent, (p, v) -> p.translucent = v)
 	);
 
-	public ClientAsset texture;
+	public ClientAsset.ResourceTexture texture;
 	public Color tint;
 	public boolean seeThrough;
 	public boolean fullBright;
@@ -78,7 +78,7 @@ public class ImageProp extends Prop {
 	}
 
 	@Override
-	public boolean isVisible(double x, double y, double z, FrustumCheck frustum, Vec3 camera, double squaredCenterDistanceToCamera) {
+	public boolean isVisibleInFrustum(double x, double y, double z, FrustumCheck frustum) {
 		return frustum.isVisible(x, y, z, rotatedQuadData.getClipBox());
 	}
 
@@ -93,7 +93,7 @@ public class ImageProp extends Prop {
 
 	private void clientTick() {
 		if (autoRotateYaw || autoRotatePitch) {
-			var r = Rotation.compute(getPos(1F), Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
+			var r = Rotation.compute(getPos(1F), Minecraft.getInstance().gameRenderer.mainCamera().position());
 
 			if (autoRotateYaw) {
 				rotation.y = r.yawDeg();

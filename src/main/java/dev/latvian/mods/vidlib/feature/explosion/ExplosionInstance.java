@@ -1,11 +1,12 @@
 package dev.latvian.mods.vidlib.feature.explosion;
 
+import dev.latvian.mods.klib.block.PositionedBlock;
+import dev.latvian.mods.klib.bulk.BlockModificationBuilder;
+import dev.latvian.mods.klib.bulk.BlockModificationConsumer;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.DebugColorBlocks;
-import dev.latvian.mods.vidlib.feature.bulk.BlockModificationConsumer;
-import dev.latvian.mods.vidlib.feature.bulk.OptimizedModificationBuilder;
-import dev.latvian.mods.vidlib.feature.bulk.PositionedBlock;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.TextParticleOptions;
 import net.minecraft.core.BlockPos;
@@ -43,7 +44,7 @@ public class ExplosionInstance {
 		this.level = level;
 		this.at = at;
 		this.data = data;
-		this.random = level.random;
+		this.random = level.getRandom();
 		this.blocks = List.of();
 		this.entities = List.of();
 		this.debug = DebugColorBlocks.NONE;
@@ -199,7 +200,7 @@ public class ExplosionInstance {
 	}
 
 	public int create() {
-		var m = new OptimizedModificationBuilder();
+		var m = new BlockModificationBuilder();
 		create(m);
 		return level.bulkModify(undoable, m.build());
 	}
@@ -253,12 +254,12 @@ public class ExplosionInstance {
 			var list = blocks.get(i);
 
 			if (!list.isEmpty()) {
-				map.put(new ShapeParticleOptions(-duration, Color.hsb(KMath.lerp(i / (float) maxBlocks, 0F, 0.3F), 1F, 1F, 255), Color.TRANSPARENT), list);
+				map.put(new ShapeParticleOptions(-duration, Color.hsb(KMath.lerp(i / (float) maxBlocks, 0F, 0.3F), 1F, 1F, 255).toGradient().ref(), Gradient.EMPTY), list);
 			}
 		}
 
 		if (!instantDeathBlocks.isEmpty()) {
-			map.put(new ShapeParticleOptions(-duration, Color.MAGENTA, Color.TRANSPARENT), instantDeathBlocks);
+			map.put(new ShapeParticleOptions(-duration, Color.MAGENTA.toGradient().ref(), Gradient.EMPTY), instantDeathBlocks);
 		}
 
 		for (var entry : damageText.entrySet()) {

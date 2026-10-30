@@ -1,6 +1,10 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.textures.AddressMode;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import com.mojang.renderpearl.api.textures.GpuSampler;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.util.UndashedUuid;
@@ -8,17 +12,17 @@ import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.klib.util.StringUtils;
+import dev.latvian.mods.klib.util.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
-import dev.latvian.mods.vidlib.feature.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.feature.client.URITextures;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.TriState;
 import org.jetbrains.annotations.Nullable;
 
@@ -91,7 +95,7 @@ public class Gallery<K> {
 		return this;
 	}
 
-	public ResourceLocation getTexturePath(K imageId) {
+	public Identifier getTexturePath(K imageId) {
 		return ID.vidlib("textures/vidlib/generated/gallery/" + id + "/" + keyToString.apply(imageId) + ".png");
 	}
 
@@ -181,6 +185,24 @@ public class Gallery<K> {
 		);
 	}
 
+	/**
+	 * 26.3 replacement for {@code DynamicTexture#setClamp} / {@code DynamicTexture#setFilter}:
+	 * {@code AbstractTexture} now exposes a single (protected) {@code sampler}, so the requested
+	 * address/filter mode has to be baked into an overriding {@link #getSampler()}.
+	 */
+	public static DynamicTexture samplerTexture(Supplier<String> label, NativeImage image, boolean blur) {
+		FilterMode filter = blur ? FilterMode.LINEAR : FilterMode.NEAREST;
+		GpuSampler sampler = RenderSystem.getSamplerCache()
+			.getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, filter, filter, false);
+
+		return new DynamicTexture(label, image) {
+			@Override
+			public GpuSampler getSampler() {
+				return sampler;
+			}
+		};
+	}
+
 	public GalleryImage<K> upload(Minecraft mc, K key, Callable<NativeImage> input, String displayName, Supplier<String> fullPath, ImagePreProcessor preProcessor) throws Exception {
 		var originalImg = input.call();
 		var img = preProcessor.apply(originalImg);
@@ -192,9 +214,7 @@ public class Gallery<K> {
 			img.writeToFile(dst);
 		}
 
-		var texture = new DynamicTexture(textureId::toString, img);
-		texture.setClamp(true);
-		texture.setFilter(blur, false);
+		var texture = Gallery.samplerTexture(textureId::toString, img, blur == net.minecraft.util.TriState.TRUE);
 		mc.getTextureManager().register(textureId, texture);
 
 		var galleryImage = new GalleryImage<>(new GalleryImageKey<>(this, key), displayName, dst, textureId);
@@ -220,6 +240,7 @@ public class Gallery<K> {
 		var url = urlGetter.apply(key, name);
 
 		if (url == null || url.isEmpty()) {
+			VidLib.LOGGER.info("[skindbg] gallery '{}' key {} has no url", id, key);
 			return img;
 		}
 
@@ -233,10 +254,10 @@ public class Gallery<K> {
 				preProcessor
 			);
 		} catch (Exception ex) {
-			VidLib.LOGGER.warn("Failed to download " + id + "/" + key, ex);
+			VidLib.LOGGER.warn("[skindbg] gallery '" + id + "' key " + key + " failed to download " + url, ex);
 			// Do a default
 			try {
-				var defaultTex = mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_BODY.texturePath());
+				var defaultTex = mc.getTextureManager().getTexture(((net.minecraft.core.ClientAsset.Texture) VidLibTextures.DEFAULT_PLAYER_BODY).texturePath());
 				mc.getTextureManager().byPath.put(img.textureId(), defaultTex);
 			} catch (Throwable ignored) {
 			}

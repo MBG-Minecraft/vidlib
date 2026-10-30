@@ -25,10 +25,10 @@ public class PoiSectionMixin {
 		}
 	}
 
-	@Inject(method = "add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Holder;)V", at = @At("HEAD"), cancellable = true)
-	private void vl$add(BlockPos pos, Holder<PoiType> type, CallbackInfo ci) {
+	@Inject(method = "add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Holder;)Lnet/minecraft/world/entity/ai/village/poi/PoiRecord;", at = @At("HEAD"), cancellable = true)
+	private void vl$add(BlockPos pos, Holder<PoiType> type, CallbackInfoReturnable<PoiRecord> cir) {
 		if (CommonGameEngine.INSTANCE.disablePOI()) {
-			ci.cancel();
+			cir.setReturnValue(null);
 		}
 	}
 

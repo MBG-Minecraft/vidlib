@@ -21,6 +21,6 @@ public record PlayReloadChunksPayload() implements SimplePacketPayload {
 
 	@Override
 	public void handle(Context ctx) {
-		Minecraft.getInstance().levelRenderer.allChanged();
+		Minecraft.getInstance().levelExtractor.allChanged();
 	}
 }

@@ -1,16 +1,13 @@
 package dev.latvian.mods.vidlib.feature.zone.renderer;
 
+import dev.latvian.mods.klib.block.filter.BlockFilter;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.core.KLibBlockInWorld;
-import dev.latvian.mods.klib.math.VoxelShapeBox;
-import dev.latvian.mods.klib.render.BufferSupplier;
-import dev.latvian.mods.klib.render.CuboidRenderer;
-import dev.latvian.mods.klib.render.SphereRenderer;
 import dev.latvian.mods.klib.shape.SpherePoints;
+import dev.latvian.mods.klib.shape.VoxelShapeBox;
 import dev.latvian.mods.klib.texture.LightUV;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.block.filter.BlockFilter;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.registry.SimpleRegistryType;
 import dev.latvian.mods.vidlib.feature.visual.TexturedCubeRenderer;
@@ -21,8 +18,11 @@ import dev.latvian.mods.vidlib.feature.zone.shape.SphereZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.UniverseZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeGroup;
+import dev.latvian.mods.vidlib.klib.render.BufferSupplier;
+import dev.latvian.mods.vidlib.klib.render.CuboidRenderer;
+import dev.latvian.mods.vidlib.klib.render.MultiBufferSource;
+import dev.latvian.mods.vidlib.klib.render.SphereRenders;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;
 
 import java.util.IdentityHashMap;
@@ -59,7 +59,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 	static void renderAll(FrameInfo frame) {
 		var mc = frame.mc();
 		var ms = frame.poseStack();
-		var cameraPos = frame.camera().getPosition();
+		var cameraPos = frame.camera().position();
 		var renderType = VidLibClientOptions.getZoneRenderType();
 		var buffers = frame.buffers();
 		var session = frame.session();
@@ -68,7 +68,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 		if (clip != null && clip.pos() != null) {
 			ms.pushPose();
 			frame.translate(clip.pos());
-			SphereRenderer.lines(ms, 0F, 0F, 0F, 0.25F, SpherePoints.L, buffers, BufferSupplier.DEBUG_NO_DEPTH, Color.BLACK);
+			SphereRenders.lines(ms, 0F, 0F, 0F, 0.25F, SpherePoints.L, buffers, BufferSupplier.DEBUG_NO_DEPTH, Color.BLACK);
 			ms.popPose();
 		}
 
@@ -108,7 +108,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 									session.cachedZoneShapes.put(instance.volume.shape(), voxelShape);
 
 									Thread.startVirtualThread(() -> {
-										var filter = VidLibClientOptions.getZoneBlockFilter();
+										var filter = VidLibClientOptions.getZoneBlockFilter().value();
 
 										session.cachedZoneShapes.put(instance.volume.shape(), VoxelShapeBox.of(instance.volume.shape().createBlockRenderingShape(pos -> {
 											var state = mc.level.getBlockState(pos);
@@ -134,7 +134,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 	static void renderVisible(FrameInfo frame) {
 		for (var sz : frame.session().filteredZones.getVisible()) {
 			var zone = sz.instance().volume;
-			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
+			double dist = zone.shape().closestDistanceTo(frame.camera().position());
 
 			if (dist > 2048D || !frame.isVisible(zone.shape().toAABB())) {
 				continue;
@@ -149,7 +149,7 @@ public interface ZoneRenderer<T extends ZoneShape> {
 	static void renderSolid(FrameInfo frame) {
 		for (var sz : frame.session().filteredZones.getSolidZones()) {
 			var zone = sz.instance().volume;
-			double dist = zone.shape().closestDistanceTo(frame.camera().getPosition());
+			double dist = zone.shape().closestDistanceTo(frame.camera().position());
 
 			if (dist <= 10D && zone.color().alpha() > 0 && frame.isVisible(zone.shape().toAABB()) && zone.solid().test(frame.mc().player)) {
 				var renderer = ZoneRenderer.get(zone.shape().type());
