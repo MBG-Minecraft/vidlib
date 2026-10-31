@@ -4,14 +4,14 @@ import com.mojang.datafixers.util.Either;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.net.URI;
 
-public record TVPlayPayload(Either<String, String> path, int flags) implements SimplePacketPayload {
+public record TVPlayPayload(Either<String, String> path, int flags) implements SimplePayload {
 	public static final int START_PAUSED = 1;
 	public static final int LOOPING = 2;
 	public static final int MUTED = 4;
@@ -25,14 +25,14 @@ public record TVPlayPayload(Either<String, String> path, int flags) implements S
 	}
 
 	@AutoPacket
-	public static final VidLibPacketType<TVPlayPayload> TYPE = VidLibPacketType.internal("tv/play", CompositeStreamCodec.of(
+	public static final SimplePayloadType<TVPlayPayload> TYPE = SimplePayloadType.vidlib("tv/play", CompositeStreamCodec.of(
 		ByteBufCodecs.either(ByteBufCodecs.STRING_UTF8, ByteBufCodecs.STRING_UTF8), TVPlayPayload::path,
 		ByteBufCodecs.VAR_INT, TVPlayPayload::flags,
 		TVPlayPayload::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

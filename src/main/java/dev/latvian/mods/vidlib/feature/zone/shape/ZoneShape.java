@@ -2,52 +2,49 @@ package dev.latvian.mods.vidlib.feature.zone.shape;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import dev.latvian.mods.klib.codec.KLibCodecErrors;
-import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.klib.registry.CustomRegistry;
 import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.klib.registry.UnitType;
+import dev.latvian.mods.klib.vertex.LineVertexCallback;
+import dev.latvian.mods.klib.vertex.QuadVertexCallback;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLike;
 import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface ZoneShape extends CustomRegistryValue<RegistryFriendlyByteBuf, ZoneShape>, ZoneLike {
-	DataResult<AAIBB> NOT_A_BOX = KLibCodecErrors.error("Not a BlockZoneShape");
-	UnitType<RegistryFriendlyByteBuf, ZoneShape> UNIVERSE = UnitType.create("universe", UniverseZoneShape.INSTANCE);
-
-	CustomRegistry<RegistryFriendlyByteBuf, ZoneShape> REGISTRY = CustomRegistry.<RegistryFriendlyByteBuf, ZoneShape>builder("zone_shape")
-		.customCodec(directCodec -> KLibCodecs.or(AAIBB.CODEC.<ZoneShape>flatComapMap(box -> BlockZoneShape.of(box.min(), box.max()), shape -> {
-			if (shape instanceof BlockZoneShape z) {
-				return DataResult.success(z.intBox());
+public interface ZoneShape extends ZoneLike, CustomRegistryValue<ByteBuf, ZoneShape> {
+	CustomRegistry<ByteBuf, ZoneShape> REGISTRY = CustomRegistry.<ByteBuf, ZoneShape>builder("zone_shape")
+		.customCodec(AAIBB.CODEC.flatComapMap(BlockZoneShape::of, shape -> {
+			if (shape instanceof BlockZoneShape b) {
+				return DataResult.success(b.intBox());
 			} else {
-				return NOT_A_BOX;
+				return DataResult.error(() -> "Not an AAIBB");
 			}
-		}), directCodec))
+		}))
 		.build();
 
 	Codec<Ref<ZoneShape>> CODEC = REGISTRY.codec();
-	StreamCodec<RegistryFriendlyByteBuf, Ref<ZoneShape>> STREAM_CODEC = REGISTRY.streamCodec();
+	StreamCodec<ByteBuf, Ref<ZoneShape>> STREAM_CODEC = REGISTRY.streamCodec();
 	DataType<Ref<ZoneShape>> DATA_TYPE = REGISTRY.dataType();
 
-	static void builtInTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ZoneShape> registry) {
-		registry.register(UNIVERSE);
-		registry.register(ZoneShapeGroup.TYPE);
+	static void builtInTypes(CustomRegistryTypeCollector<ByteBuf, ZoneShape> registry) {
+		registry.register(UniverseZoneShape.TYPE);
+		registry.register(JoinedZoneShape.TYPE);
 		registry.register(BlockZoneShape.TYPE);
 		registry.register(BoxZoneShape.TYPE);
 		registry.register(SphereZoneShape.TYPE);
@@ -56,12 +53,12 @@ public interface ZoneShape extends CustomRegistryValue<RegistryFriendlyByteBuf, 
 	}
 
 	@Override
-	default CustomRegistry<RegistryFriendlyByteBuf, ZoneShape> getRegistry() {
+	default CustomRegistry<ByteBuf, ZoneShape> getRegistry() {
 		return REGISTRY;
 	}
 
-	default Zone createInstance(ZoneContainer container, ZoneVolume zoneVolume) {
-		return new Zone(container, zoneVolume);
+	default Zone createInstance(ZoneContainer container, ZoneVolume zone) {
+		return new Zone(container, zone);
 	}
 
 	@Override
@@ -94,5 +91,34 @@ public interface ZoneShape extends CustomRegistryValue<RegistryFriendlyByteBuf, 
 		var sy = box.getYsize() * y / 2D;
 		var sz = box.getZsize() * z / 2D;
 		return new BoxZoneShape(new AABB(c.x - sx, c.y - sy, c.z - sz, c.x + sx, c.y + sy, c.z + sz));
+	}
+
+	default void buildLines(LineVertexCallback callback, Vec3 offset) {
+		var box = toAABB();
+
+		callback.cuboidLines(
+			(float) (box.minX + offset.x),
+			(float) (box.minY + offset.y),
+			(float) (box.minZ + offset.z),
+			(float) (box.maxX + offset.x),
+			(float) (box.maxY + offset.y),
+			(float) (box.maxZ + offset.z)
+		);
+	}
+
+	default void buildOuterLines(LineVertexCallback callback, Vec3 offset) {
+	}
+
+	default void buildQuads(QuadVertexCallback callback, Vec3 offset) {
+		var box = toAABB();
+
+		callback.cuboidQuads(
+			(float) (box.minX + offset.x),
+			(float) (box.minY + offset.y),
+			(float) (box.minZ + offset.z),
+			(float) (box.maxX + offset.x),
+			(float) (box.maxY + offset.y),
+			(float) (box.maxZ + offset.z)
+		);
 	}
 }

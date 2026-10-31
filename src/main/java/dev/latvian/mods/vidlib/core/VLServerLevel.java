@@ -80,7 +80,7 @@ public interface VLServerLevel extends VLLevel {
 			for (var container : activeZones) {
 				for (var zone : container.zones) {
 					if (zone.volume.forceLoaded()) {
-						zone.volume.shape().collectChunkPositions(toLoad);
+						zone.volume.shape().value().collectChunkPositions(toLoad);
 					}
 				}
 			}

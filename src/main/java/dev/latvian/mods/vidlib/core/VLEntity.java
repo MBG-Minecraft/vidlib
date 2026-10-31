@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.entity.PositionType;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.entity.EntityData;
 import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
@@ -207,7 +208,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return this instanceof ItemEntity;
 	}
 
-	default void replaySnapshot(VLS2CPacketConsumer packets) {
+	default void replaySnapshot(S2CPacketConsumer packets) {
 	}
 
 	default void imgui(ImGraphics graphics, float delta) {

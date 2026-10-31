@@ -112,14 +112,14 @@ public class ProgressQueueImGui {
 					graphics.setErrorText();
 
 					for (var error : queue.errors) {
-						error.push(graphics);
+						graphics.pushColor(error);
 
 						if (queue.errors.size() > 1) {
 							ImGui.bullet();
 						}
 
 						ImGui.textWrapped(error.text());
-						error.pop(graphics);
+						graphics.popColor(error);
 					}
 
 					graphics.popStack();

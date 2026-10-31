@@ -4,20 +4,20 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.world.phys.Vec3;
 
-public record SummonNPCPayload(NPCParticleOptions options, Vec3 pos) implements SimplePacketPayload {
+public record SummonNPCPayload(NPCParticleOptions options, Vec3 pos) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<SummonNPCPayload> TYPE = VidLibPacketType.internal("summon_npc", CompositeStreamCodec.of(
+	public static final SimplePayloadType<SummonNPCPayload> TYPE = SimplePayloadType.vidlib("summon_npc", CompositeStreamCodec.of(
 		NPCParticleOptions.STREAM_CODEC, SummonNPCPayload::options,
 		MCStreamCodecs.VEC3, SummonNPCPayload::pos,
 		SummonNPCPayload::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

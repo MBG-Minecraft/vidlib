@@ -2,15 +2,15 @@ package dev.latvian.mods.vidlib.feature.note;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
-public record CreateNotePayload(Note note) implements SimplePacketPayload {
+public record CreateNotePayload(Note note) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<CreateNotePayload> TYPE = VidLibPacketType.internal("create_note", Note.STREAM_CODEC.map(CreateNotePayload::new, CreateNotePayload::note));
+	public static final SimplePayloadType<CreateNotePayload> TYPE = SimplePayloadType.vidlib("create_note", Note.STREAM_CODEC.map(CreateNotePayload::new, CreateNotePayload::note));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

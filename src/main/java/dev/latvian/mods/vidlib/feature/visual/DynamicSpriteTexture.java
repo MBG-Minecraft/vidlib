@@ -8,13 +8,11 @@ import com.mojang.renderpearl.api.textures.FilterMode;
 import dev.latvian.mods.vidlib.core.VLSpriteContents;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.Dumpable;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.Identifier;
 
 import java.nio.file.Path;
@@ -22,7 +20,7 @@ import java.util.function.IntUnaryOperator;
 
 public class DynamicSpriteTexture extends AbstractTexture implements Dumpable, EphemeralTexture {
 	public static Identifier get(Minecraft mc, SpriteKey key) {
-		if (key.atlas() == SpriteKey.SPECIAL) {
+		if (key.atlas() == SpriteKey.SPECIAL_ATLAS) {
 			return key.sprite().id();
 		}
 
@@ -48,7 +46,7 @@ public class DynamicSpriteTexture extends AbstractTexture implements Dumpable, E
 
 	public DynamicSpriteTexture(TextureAtlasSprite sprite) {
 		this.sprite = sprite;
-		this.key = SpriteKey.of(MiscUtils.assetFromPNG(sprite.atlasLocation()), new ClientAsset.ResourceTexture(sprite.contents().name()));
+		this.key = SpriteKey.of(sprite.atlasLocation(), sprite.contents().name());
 		this.path = key.dynamic();
 	}
 

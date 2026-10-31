@@ -1,18 +1,12 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.klib.core.NoMixinException;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public interface VLParticleEngine {
-	default TextureAtlas getTextureAtlas() {
-		throw new NoMixinException(this);
-	}
-
 	@Nullable
-	default SpriteSet getSpriteSet(Identifier id) {
+	default SpriteSet vl$getSpriteSet(Identifier id) {
 		return null;
 	}
 }

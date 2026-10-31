@@ -2,15 +2,15 @@ package dev.latvian.mods.vidlib.feature.camera;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
-public record ScreenShakePayload(ScreenShake shake) implements SimplePacketPayload {
+public record ScreenShakePayload(ScreenShake shake) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<ScreenShakePayload> TYPE = VidLibPacketType.internal("screen_shake", ScreenShake.STREAM_CODEC.map(ScreenShakePayload::new, ScreenShakePayload::shake));
+	public static final SimplePayloadType<ScreenShakePayload> TYPE = SimplePayloadType.vidlib("screen_shake", ScreenShake.STREAM_CODEC.map(ScreenShakePayload::new, ScreenShakePayload::shake));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

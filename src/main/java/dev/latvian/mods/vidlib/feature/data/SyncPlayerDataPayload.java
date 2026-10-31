@@ -4,22 +4,22 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
 import java.util.List;
 import java.util.UUID;
 
-public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) implements SimplePacketPayload {
+public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<SyncPlayerDataPayload> TYPE = VidLibPacketType.internal("sync_player_data", CompositeStreamCodec.of(
+	public static final SimplePayloadType<SyncPlayerDataPayload> TYPE = SimplePayloadType.vidlib("sync_player_data", CompositeStreamCodec.of(
 		KLibStreamCodecs.UUID, SyncPlayerDataPayload::player,
 		DataKey.PLAYER.valueListStreamCodec, SyncPlayerDataPayload::update,
 		SyncPlayerDataPayload::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

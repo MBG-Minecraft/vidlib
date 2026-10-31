@@ -1,71 +1,79 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.klib.render.DebugRenderTypes;
 import dev.latvian.mods.klib.shape.Shape;
-import dev.latvian.mods.vidlib.feature.bloom.BloomRenderTypes;
-import dev.latvian.mods.vidlib.feature.client.RenderLightLayer;
-import dev.latvian.mods.vidlib.klib.shape.Shapes;
-import dev.latvian.mods.vidlib.klib.vertex.PoseTransforms;
+import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 public class ShapeParticle extends CustomParticle {
+	public record State(
+		float x,
+		float y,
+		float z,
+		float scale,
+		Shape shape,
+		Color color,
+		Color outlineColor
+	) implements CustomParticleState {
+		@Override
+		public void submit(SubmitNodeCollector collector, CameraRenderState cameraRenderState) {
+			var ms = new PoseStack();
+			ms.translate(x, y, z);
+			ms.scale(scale, scale, scale);
+			collector.submitCustomGeometry(ms, RenderTypes.debugFilledBox(), (pose, buffer) -> shape.buildQuads(pose.transform(buffer).withColor(color)));
+			collector.submitCustomGeometry(ms, RenderTypes.lines(), (pose, buffer) -> shape.buildLines(pose.transform(buffer).withColor(outlineColor)));
+		}
+	}
+
 	private final ShapeParticleOptions options;
 	private final Ref<Shape> shape;
 	private final Ref<Gradient> color;
 	private final Ref<Gradient> outlineColor;
+	public int prevAge;
 
-	protected ShapeParticle(ShapeParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
+	protected ShapeParticle(ShapeParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz, RandomSource random) {
 		super(level, x, y, z);
 		this.options = options;
 		this.shape = options.shape();
 		this.color = options.color();
 		this.outlineColor = options.outlineColor();
-		setLifetime(Math.abs(options.lifespan()));
+		setLifetime(Math.max(1, Math.abs(options.lifespan())));
 	}
 
 	@Override
-	public void submit(SubmitNodeCollector collector, CameraRenderState cameraRenderState) {
+	public void tick() {
+		prevAge = age;
+		super.tick();
+	}
+
+	@Override
+	@Nullable
+	public State extract(Frustum frustum, Camera camera, Vec3 cameraPos, float delta) {
+		if (!shape.value().isVisible(x, y, z, frustum)) {
+			return null;
+		}
+
 		float time = KMath.lerp(delta, prevAge, age);
-		var cameraPos = camera.position();
 
-		ms.pushPose();
-		ms.translate(
-			KMath.lerp(time, xo, x) - cameraPos.x,
-			KMath.lerp(time, yo, y) - cameraPos.y,
-			KMath.lerp(time, zo, z) - cameraPos.z
+		return new State(
+			(float) (KMath.lerp(delta, xo, x) - cameraPos.x),
+			(float) (KMath.lerp(delta, yo, y) - cameraPos.y),
+			(float) (KMath.lerp(delta, zo, z) - cameraPos.z),
+			options.lifespan() < 0 ? 0.5F : 1F,
+			options.shape().value(),
+			color.value().get(time / (float) lifetime).withAlpha(50).fadeOut(time, lifetime, 20F),
+			outlineColor.value().get(time / (float) lifetime).fadeOut(time, lifetime, 20F)
 		);
-
-		if (options.lifespan() < 0) {
-			ms.scale(0.5F, 0.5F, 0.5F);
-		}
-
-		var lc = outlineColor.value().get(time / (float) lifetime);
-
-		if (lc.alpha() > 0) {
-			if (options.lightLayer() == RenderLightLayer.BRIGHT) {
-				// Bloom.markActive();
-				shape.value().buildQuads(shape.value(), 0F, 0F, 0F, PoseTransforms.transform(ms.last(), BloomRenderTypes.POS_COL_BUFFER_SUPPLIER.quadsCull(BloomRenderTypes.overridePosCol(buffers))).withColor(lc.fadeOut(time, lifetime, 20F)));
-			} else {
-				shape.value().buildLines(ms.last().transform(buffers.getBuffer(DebugRenderTypes.LINES)).withColor(lc.fadeOut(time, lifetime, 20F)));
-			}
-		}
-
-		var c = color.value().get(time / (float) lifetime);
-
-		if (c.alpha() > 0) {
-			if (options.lightLayer() == RenderLightLayer.BRIGHT) {
-				// Bloom.markActive();
-				Shapes.buildQuads(shape.value(), 0F, 0F, 0F, PoseTransforms.transform(ms.last(), buffers.getBuffer(DebugRenderTypes.QUADS)).withColor(c.fadeOut(time, lifetime, 20F)));
-			} else {
-				Shapes.buildQuads(shape.value(), 0F, 0F, 0F, PoseTransforms.transform(ms.last(), buffers.getBuffer(DebugRenderTypes.QUADS_NO_DEPTH)).withColor(c.withAlpha(50).fadeOut(time, lifetime, 20F)));
-			}
-		}
-
-		ms.popPose();
 	}
 }

@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.NeoForgeCommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.platform.neoforge.VLNeoPlatformHelper;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -19,6 +20,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforgespi.language.IModInfo;
+
+import java.util.HashMap;
 
 @Mod(VidLib.ID)
 @EventBusSubscriber(modid = VidLib.ID)
@@ -56,13 +59,16 @@ public class VidLibMod {
 			}
 		}
 
-		var particleRegistry = DeferredRegister.create(Registries.PARTICLE_TYPE, VidLib.ID);
+		var particleRegistries = new HashMap<String, DeferredRegister<ParticleType<?>>>();
 
 		for (var particle : VidLibParticles.PARTICLES) {
-			particleRegistry.register(particle.left(), particle.right());
+			var particleRegistry = particleRegistries.computeIfAbsent(particle.left().getNamespace(), namespace -> DeferredRegister.create(Registries.PARTICLE_TYPE, namespace));
+			particleRegistry.register(particle.left().getPath(), particle.right());
 		}
 
-		particleRegistry.register(bus);
+		for (var particleRegistry : particleRegistries.values()) {
+			particleRegistry.register(bus);
+		}
 	}
 
 	@SubscribeEvent

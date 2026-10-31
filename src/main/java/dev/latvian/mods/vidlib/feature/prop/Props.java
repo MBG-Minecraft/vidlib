@@ -2,8 +2,8 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +35,7 @@ public abstract class Props<L extends Level> {
 		}
 	}
 
-	public void tickBukkit(@Nullable VLS2CPacketConsumer updates, boolean tick) {
+	public void tickBukkit(@Nullable S2CPacketConsumer updates, boolean tick) {
 		for (var list : propLists.values()) {
 			list.tickBukkit(null, tick);
 		}
@@ -58,7 +58,7 @@ public abstract class Props<L extends Level> {
 			if (list.queueNewProps || level.isClientSide()) {
 				list.add(prop, null);
 			} else {
-				var builder = new S2CPacketBundleBuilder(level);
+				var builder = new S2CPacketBundleBuilder();
 				list.add(prop, builder);
 				builder.send(level);
 			}

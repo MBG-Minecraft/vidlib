@@ -2,18 +2,18 @@ package dev.latvian.mods.vidlib.feature.particle;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.network.codec.StreamCodec;
 
-public enum RemoveAllParticlesPayload implements SimplePacketPayload {
+public enum RemoveAllParticlesPayload implements SimplePayload {
 	INSTANCE;
 
 	@AutoPacket
-	public static final VidLibPacketType<RemoveAllParticlesPayload> TYPE = VidLibPacketType.internal("remove_all_particles", StreamCodec.unit(INSTANCE));
+	public static final SimplePayloadType<RemoveAllParticlesPayload> TYPE = SimplePayloadType.vidlib("remove_all_particles", StreamCodec.unit(INSTANCE));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

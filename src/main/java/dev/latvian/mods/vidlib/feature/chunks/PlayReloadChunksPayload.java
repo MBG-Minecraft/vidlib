@@ -2,20 +2,20 @@ package dev.latvian.mods.vidlib.feature.chunks;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.codec.StreamCodec;
 
-public record PlayReloadChunksPayload() implements SimplePacketPayload {
+public record PlayReloadChunksPayload() implements SimplePayload {
 
 	public static final PlayReloadChunksPayload INSTANCE = new PlayReloadChunksPayload();
 
 	@AutoPacket
-	public static final VidLibPacketType<PlayReloadChunksPayload> TYPE = VidLibPacketType.internal("reload_chunks", StreamCodec.unit(INSTANCE));
+	public static final SimplePayloadType<PlayReloadChunksPayload> TYPE = SimplePayloadType.vidlib("reload_chunks", StreamCodec.unit(INSTANCE));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

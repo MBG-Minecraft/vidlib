@@ -8,12 +8,14 @@ import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
-import dev.latvian.mods.klib.shape.VoxelShapeBox;
-import dev.latvian.mods.klib.util.Side;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
+import dev.latvian.mods.vidlib.feature.atmosphere.ClientAtmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
@@ -40,23 +42,17 @@ import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
-import dev.latvian.mods.vidlib.feature.skybox.ClientSkybox;
-import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
-import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
-import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
+import dev.latvian.mods.vidlib.feature.zone.ZoneCache;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
-import dev.latvian.mods.vidlib.feature.zone.ZoneEvent;
-import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
-import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
@@ -69,7 +65,6 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
@@ -95,17 +90,14 @@ public class LocalClientSessionData extends ClientSessionData {
 	private final Map<UUID, RemoteClientSessionData> remoteSessionData;
 	private List<ClientSessionData> allClientSessionData;
 	private ScheduledTask.Handler scheduledTaskHandler;
-	public final ActiveZones serverZones;
-	public final ActiveZones filteredZones;
 	public ZoneClipResult zoneClip;
 	public final List<ScreenShakeInstance> screenShakeInstances;
 	public Vector2dc prevCameraShake;
 	public Vector2dc cameraShake;
-	public Map<Identifier, ClientSkybox> skyboxes;
+	public Map<String, ClientAtmosphere> atmosphereCache;
 	public final DataMap serverDataMap;
 	public final KNumberVariables globalVariables;
-	public ClientSkybox skybox;
-	public Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
+	public ClientAtmosphere atmosphere;
 	public CameraOverride cameraOverride;
 	public ClientCutscene currentCutscene;
 	public ScreenFadeInstance screenFade;
@@ -132,12 +124,10 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.mc = mc;
 		this.remoteSessionData = new Object2ObjectOpenHashMap<>();
 
-		this.serverZones = new ActiveZones();
-		this.filteredZones = new ActiveZones();
 		this.zoneClip = null;
 		this.screenShakeInstances = new ArrayList<>();
 		this.prevCameraShake = this.cameraShake = Identity.DVEC_2;
-		this.skyboxes = new Object2ObjectOpenHashMap<>();
+		this.atmosphereCache = new Reference2ObjectOpenHashMap<>();
 		this.serverDataMap = new DataMap(uuid, DataKey.SERVER, mc);
 		this.globalVariables = new KNumberVariables();
 		this.debugDecals = new ArrayList<>();
@@ -193,30 +183,24 @@ public class LocalClientSessionData extends ClientSessionData {
 	@Override
 	public void updateOverrides(Player player) {
 		super.updateOverrides(player);
-		var skyboxId = ClientGameEngine.INSTANCE.getSkybox(mc);
+		var atmosphereId = ClientGameEngine.INSTANCE.getAtmosphere(mc);
 
-		if (skyboxId.equals(Skyboxes.VANILLA)) {
-			skybox = null;
+		if (atmosphereId == null) {
+			atmosphere = null;
 		} else {
-			skybox = getSkybox(skyboxId);
+			atmosphere = getAtmosphere(atmosphereId);
 		}
 	}
 
-	public ClientSkybox getSkybox(Identifier id) {
-		var skybox = skyboxes.get(id);
+	public ClientAtmosphere getAtmosphere(Ref<Atmosphere> ref) {
+		var atmosphere = atmosphereCache.get(ref.key());
 
-		if (skybox == null) {
-			var skyboxData = SkyboxData.REGISTRY.get(id);
-
-			if (skyboxData == null) {
-				skyboxData = new SkyboxData(id, Optional.empty(), 0F, 0F, Color.WHITE, false, true, true, Optional.empty(), Optional.empty());
-			}
-
-			skybox = new ClientSkybox(skyboxData);
-			skyboxes.put(id, skybox);
+		if (atmosphere == null) {
+			atmosphere = new ClientAtmosphere(ref);
+			atmosphereCache.put(ref.key(), atmosphere);
 		}
 
-		return skybox;
+		return atmosphere;
 	}
 
 	@Override
@@ -235,7 +219,15 @@ public class LocalClientSessionData extends ClientSessionData {
 		}
 
 		level.vl$preTick(paused);
-		filteredZones.tick(level);
+
+		for (var ref : ZoneContainer.REGISTRY) {
+			var zoneContainer = ref.value();
+
+			if (zoneContainer.dimension == level.dimension()) {
+				zoneContainer.tick(ZoneCache.of(zoneContainer.dimension, true), level);
+			}
+		}
+
 		updateOverrides(player);
 
 		input = KLibLocalPlayer.fromInput(mc, player/*, mc.gui.screen() == null && mc.isWindowActive()*/);
@@ -329,15 +321,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	public void refreshZones(ResourceKey<Level> dimension) {
-		filteredZones.filter(dimension, serverZones, ZoneLoader.CLIENT_BY_DIMENSION.get(dimension));
-		cachedZoneShapes = null;
-		NeoForge.EVENT_BUS.post(new ZoneEvent.Updated(dimension, filteredZones, Side.CLIENT));
-	}
-
-	@Override
-	public void updateZones(Level level) {
-		serverZones.update(ZoneContainer.REGISTRY.getMap().values());
-		refreshZones(level.dimension());
+		ZoneCache.clearAll();
 	}
 
 	@Override
@@ -366,7 +350,6 @@ public class LocalClientSessionData extends ClientSessionData {
 
 	@Override
 	public void refreshBlockZones() {
-		cachedZoneShapes = null;
 	}
 
 	@Override
@@ -384,8 +367,8 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	@Override
-	public void updateSkyboxes() {
-		skyboxes.clear();
+	public void updateAtmospheres() {
+		atmosphereCache.clear();
 	}
 
 	@Override

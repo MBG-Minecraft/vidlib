@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.capture.task;
 
-import dev.latvian.mods.vidlib.util.MiscUtils;
+import dev.latvian.mods.klib.util.CollectionUtils;
 
 public enum CaptureTaskType {
 	SESSION_INFO(0, SessionInfoTask::new),
@@ -16,7 +16,7 @@ public enum CaptureTaskType {
 	;
 
 	public static final CaptureTaskType[] VALUES = values();
-	public static final CaptureTaskType[] LOOKUP = MiscUtils.fastIndexedLookup(VALUES, t -> t.id, CaptureTaskType[]::new);
+	public static final CaptureTaskType[] LOOKUP = CollectionUtils.fastIndexedLookup(VALUES, t -> t.id, CaptureTaskType[]::new);
 
 	public final int id;
 	public final CaptureTaskFactory factory;

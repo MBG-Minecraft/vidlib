@@ -2,15 +2,15 @@ package dev.latvian.mods.vidlib.feature.screeneffect.fade;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
-public record ScreenFadePayload(Fade fade) implements SimplePacketPayload {
+public record ScreenFadePayload(Fade fade) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<ScreenFadePayload> TYPE = VidLibPacketType.internal("screen_fade", Fade.STREAM_CODEC.map(ScreenFadePayload::new, ScreenFadePayload::fade));
+	public static final SimplePayloadType<ScreenFadePayload> TYPE = SimplePayloadType.vidlib("screen_fade", Fade.STREAM_CODEC.map(ScreenFadePayload::new, ScreenFadePayload::fade));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

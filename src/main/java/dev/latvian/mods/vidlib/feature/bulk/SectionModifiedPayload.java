@@ -6,14 +6,14 @@ import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record SectionModifiedPayload(boolean undoable, SectionPos section, Ref<BulkLevelModification> modification) implements SimplePacketPayload {
+public record SectionModifiedPayload(boolean undoable, SectionPos section, Ref<BulkLevelModification> modification) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<SectionModifiedPayload> TYPE = VidLibPacketType.internal("section_modified", CompositeStreamCodec.of(
+	public static final SimplePayloadType<SectionModifiedPayload> TYPE = SimplePayloadType.vidlib("section_modified", CompositeStreamCodec.of(
 		ByteBufCodecs.BOOL, SectionModifiedPayload::undoable,
 		MCStreamCodecs.SECTION_POS, SectionModifiedPayload::section,
 		BulkLevelModification.REGISTRY.streamCodec(), SectionModifiedPayload::modification,
@@ -21,7 +21,7 @@ public record SectionModifiedPayload(boolean undoable, SectionPos section, Ref<B
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

@@ -6,14 +6,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.permissions.Permissions;
 
 import java.util.ArrayList;
 
 public interface AnchorCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("anchor", (command, buildContext) -> command
-		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
+		.requires(source -> Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("set")
 			.then(Commands.argument("start", BlockPosArgument.blockPos())
 				.then(Commands.argument("end", BlockPosArgument.blockPos())

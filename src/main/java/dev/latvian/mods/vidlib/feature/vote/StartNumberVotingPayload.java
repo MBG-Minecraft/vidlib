@@ -5,17 +5,17 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record StartNumberVotingPayload(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable, boolean closeOnVote) implements SimplePacketPayload {
+public record StartNumberVotingPayload(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable, boolean closeOnVote) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<StartNumberVotingPayload> TYPE = VidLibPacketType.internal("start_number_vote", CompositeStreamCodec.of(
+	public static final SimplePayloadType<StartNumberVotingPayload> TYPE = SimplePayloadType.vidlib("start_number_vote", CompositeStreamCodec.of(
 		MCStreamCodecs.COMPOUND_TAG, StartNumberVotingPayload::extraData,
 		ComponentSerialization.TRUSTED_STREAM_CODEC, StartNumberVotingPayload::title,
 		ComponentSerialization.TRUSTED_STREAM_CODEC, StartNumberVotingPayload::subtitle,
@@ -26,7 +26,7 @@ public record StartNumberVotingPayload(CompoundTag extraData, Component title, C
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

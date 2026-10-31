@@ -5,23 +5,23 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.server.permissions.Permissions;
 
 import java.util.List;
 import java.util.UUID;
 
-public record UpdatePlayerDataValuePayload(UUID uuid, List<DataMapValue> update) implements SimplePacketPayload {
+public record UpdatePlayerDataValuePayload(UUID uuid, List<DataMapValue> update) implements SimplePayload {
 	@AutoPacket(to = AutoPacket.To.SERVER)
-	public static final VidLibPacketType<UpdatePlayerDataValuePayload> TYPE = VidLibPacketType.internal("update_player_data_value", CompositeStreamCodec.of(
+	public static final SimplePayloadType<UpdatePlayerDataValuePayload> TYPE = SimplePayloadType.vidlib("update_player_data_value", CompositeStreamCodec.of(
 		KLibStreamCodecs.UUID, UpdatePlayerDataValuePayload::uuid,
 		DataKey.PLAYER.valueListStreamCodec, UpdatePlayerDataValuePayload::update,
 		UpdatePlayerDataValuePayload::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

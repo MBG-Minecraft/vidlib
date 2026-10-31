@@ -4,21 +4,21 @@ import dev.latvian.mods.klib.codec.CollectionStreamCodecs;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record RedrawChunkSectionsPayload(LongList sections, boolean mainThread) implements SimplePacketPayload {
+public record RedrawChunkSectionsPayload(LongList sections, boolean mainThread) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<RedrawChunkSectionsPayload> TYPE = VidLibPacketType.internal("redraw_chunk_sections", CompositeStreamCodec.of(
+	public static final SimplePayloadType<RedrawChunkSectionsPayload> TYPE = SimplePayloadType.vidlib("redraw_chunk_sections", CompositeStreamCodec.of(
 		CollectionStreamCodecs.LONG_LIST, RedrawChunkSectionsPayload::sections,
 		ByteBufCodecs.BOOL, RedrawChunkSectionsPayload::mainThread,
 		RedrawChunkSectionsPayload::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

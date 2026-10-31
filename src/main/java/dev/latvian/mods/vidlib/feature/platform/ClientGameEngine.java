@@ -14,6 +14,7 @@ import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
@@ -29,7 +30,6 @@ import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
@@ -262,8 +262,9 @@ public class ClientGameEngine {
 		}
 	}
 
-	public Identifier getSkybox(Minecraft mc) {
-		return mc.getSkybox();
+	@Nullable
+	public Ref<Atmosphere> getAtmosphere(Minecraft mc) {
+		return mc.getAtmosphere();
 	}
 
 	public boolean disableFog() {
@@ -665,14 +666,14 @@ public class ClientGameEngine {
 	}
 
 	public boolean handleClientPacket(Context ctx) {
-		if (ctx.payload() instanceof VidLibPacketPayloadContainer container) {
-			if (isPacketLoggingEnabled() && container.wrapped().allowDebugLogging()) {
-				VidLib.LOGGER.info("S2C Packet '%s' #%,d @ %,d: %s".formatted(ctx.payload().type().id(), ctx.uid(), ctx.remoteGameTime(), ctx.payload()));
-			}
+		if (isPacketLoggingEnabled() && ctx.payload().allowDebugLogging()) {
+			VidLib.LOGGER.info("S2C Packet '%s' @ %s".formatted(ctx.payload().type().id(), ctx.payload()));
+		}
 
-			if (PacketDebuggerPanel.INSTANCE.isOpen()) {
-				Minecraft.getInstance().execute(() -> PacketDebuggerPanel.INSTANCE.debugPackets.add(new PacketDebuggerPanel.LoggedPacket(ctx.uid(), ctx.remoteGameTime(), container.wrapped())));
-			}
+		if (PacketDebuggerPanel.INSTANCE.isOpen()) {
+			var timestamp = Instant.now();
+			var gameTime = ctx.level().getGameTime();
+			Minecraft.getInstance().execute(() -> PacketDebuggerPanel.INSTANCE.debugPackets.add(new PacketDebuggerPanel.LoggedPacket(timestamp, gameTime, ctx.payload())));
 		}
 
 		return true;

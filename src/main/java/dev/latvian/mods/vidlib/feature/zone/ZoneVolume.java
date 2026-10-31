@@ -50,7 +50,7 @@ public record ZoneVolume(
 		Color.STREAM_CODEC, ZoneVolume::color,
 		EntityFilter.STREAM_CODEC, ZoneVolume::entityFilter,
 		MCStreamCodecs.COMPOUND_TAG, ZoneVolume::data,
-		EntityFilter.STREAM_CODEC, ZoneVolume::solid,
+		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.NONE), ZoneVolume::solid,
 		KLibStreamCodecs.linkedSetOf(ByteBufCodecs.STRING_UTF8), ZoneVolume::tags,
 		ByteBufCodecs.BOOL, ZoneVolume::forceLoaded,
 		ByteBufCodecs.optional(ZoneFluid.STREAM_CODEC), ZoneVolume::fluid,

@@ -41,8 +41,10 @@ public class Zone {
 		entities.clear();
 
 		if (level != null) {
-			for (var entity : volume.shape().collectEntities(level, volume.entityFilter().value())) {
-				if (entity.isAlive() && volume.shape().intersects(entity.getBoundingBox())) {
+			var shape = volume.shape().value();
+
+			for (var entity : shape.collectEntities(level, volume.entityFilter().value())) {
+				if (entity.isAlive() && shape.intersects(entity.getBoundingBox())) {
 					entities.put(entity.getId(), entity);
 
 					var list = container.entityZones.get(entity.getId());

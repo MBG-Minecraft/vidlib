@@ -5,21 +5,21 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
 import java.util.UUID;
 
-public record SyncPlayerInputToClient(UUID player, PlayerInput input) implements SimplePacketPayload {
+public record SyncPlayerInputToClient(UUID player, PlayerInput input) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<SyncPlayerInputToClient> TYPE = VidLibPacketType.internal("sync_input_to_client", CompositeStreamCodec.of(
+	public static final SimplePayloadType<SyncPlayerInputToClient> TYPE = SimplePayloadType.vidlib("sync_input_to_client", CompositeStreamCodec.of(
 		KLibStreamCodecs.UUID, SyncPlayerInputToClient::player,
 		PlayerInput.STREAM_CODEC, SyncPlayerInputToClient::input,
 		SyncPlayerInputToClient::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

@@ -6,18 +6,18 @@ import dev.latvian.mods.klib.registry.CustomRegistry;
 import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.Ref;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import org.joml.Vector2dc;
 
-public interface ScreenShakeType extends CustomRegistryValue<RegistryFriendlyByteBuf, ScreenShakeType> {
-	CustomRegistry<RegistryFriendlyByteBuf, ScreenShakeType> REGISTRY = CustomRegistry.create("screen_shake_type");
+public interface ScreenShakeType extends CustomRegistryValue<ByteBuf, ScreenShakeType> {
+	CustomRegistry<ByteBuf, ScreenShakeType> REGISTRY = CustomRegistry.create("screen_shake_type");
 
 	Codec<Ref<ScreenShakeType>> CODEC = REGISTRY.codec();
-	StreamCodec<RegistryFriendlyByteBuf, Ref<ScreenShakeType>> STREAM_CODEC = REGISTRY.streamCodec();
+	StreamCodec<ByteBuf, Ref<ScreenShakeType>> STREAM_CODEC = REGISTRY.streamCodec();
 	DataType<Ref<ScreenShakeType>> DATA_TYPE = REGISTRY.dataType();
 
-	static void builtInTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenShakeType> registry) {
+	static void builtInTypes(CustomRegistryTypeCollector<ByteBuf, ScreenShakeType> registry) {
 		registry.register(LemniscateScreenShakeType.DEFAULT);
 		registry.register(LemniscateScreenShakeType.HORIZONTAL);
 		registry.register(LemniscateScreenShakeType.VERTICAL);
@@ -25,7 +25,7 @@ public interface ScreenShakeType extends CustomRegistryValue<RegistryFriendlyByt
 	}
 
 	@Override
-	default CustomRegistry<RegistryFriendlyByteBuf, ScreenShakeType> getRegistry() {
+	default CustomRegistry<ByteBuf, ScreenShakeType> getRegistry() {
 		return REGISTRY;
 	}
 

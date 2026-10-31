@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ListButtonImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ListItemAction;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextureImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import imgui.ImGui;
 import net.minecraft.core.ClientAsset;
 import org.jetbrains.annotations.Nullable;
@@ -81,7 +82,7 @@ public class SkinTextureImBuilder extends CompoundImBuilder<SkinTexture> impleme
 		var tex = texture.build();
 
 		if (tex != null) {
-			return new SkinTexture(dev.latvian.mods.vidlib.feature.visual.SpriteKey.narrow(tex), slim.build());
+			return new SkinTexture(SpriteKey.narrow(tex), slim.build());
 		} else {
 			return null;
 		}

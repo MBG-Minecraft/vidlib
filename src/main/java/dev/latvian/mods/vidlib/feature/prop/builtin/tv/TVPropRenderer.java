@@ -2,9 +2,8 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.tv;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.util.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
-import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.ClientAsset;

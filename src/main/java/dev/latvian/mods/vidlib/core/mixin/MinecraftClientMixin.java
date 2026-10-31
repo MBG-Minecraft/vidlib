@@ -15,7 +15,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.Entity;
@@ -44,15 +43,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	private ReloadableResourceManager resourceManager;
 
 	@Unique
-	private TextureAtlas vl$blockTextureAtlas = null;
-
-	@Unique
 	private int vl$reloadCount = 0;
-
-	@Override
-	public void vl$clearProfileCache() {
-		vl$blockTextureAtlas = null;
-	}
 
 	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"))
 	private void vl$swap(ClientPacketListener instance, Packet packet) {
@@ -85,15 +76,6 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@ModifyExpressionValue(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isUsingItem()Z", ordinal = 1))
 	private boolean vl$handleKeybindsUsingItem(boolean original) {
 		return original || PlayerActionHandler.handle(player, PlayerActionType.INTERACT, false);
-	}
-
-	@Override
-	public TextureAtlas getBlockAtlas() {
-		if (vl$blockTextureAtlas == null) {
-			vl$blockTextureAtlas = VLMinecraftClient.super.getBlockAtlas();
-		}
-
-		return vl$blockTextureAtlas;
 	}
 
 	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;initRenderer(Lcom/mojang/renderpearl/api/device/GpuDevice;)V", shift = At.Shift.AFTER))

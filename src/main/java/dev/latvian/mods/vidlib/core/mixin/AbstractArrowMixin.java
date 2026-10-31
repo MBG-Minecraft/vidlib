@@ -1,11 +1,8 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.vidlib.feature.gradient.ClientGradients;
-import dev.latvian.mods.vidlib.feature.particle.LineParticleOptions;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -49,6 +46,7 @@ public abstract class AbstractArrowMixin {
 				var delta = vl$prevTrailPos.subtract(pos);
 
 				if (delta.lengthSqr() > 0.0001D) {
+					/* FIXME
 					((ServerLevel) arrow.level()).sendParticles(
 						new LineParticleOptions(20, ClientGradients.TRAIL, ClientGradients.TRAIL, 1),
 						true,
@@ -62,6 +60,7 @@ public abstract class AbstractArrowMixin {
 						delta.z,
 						1D
 					);
+					 */
 				}
 			}
 

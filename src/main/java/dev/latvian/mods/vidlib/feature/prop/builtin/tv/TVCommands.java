@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.permissions.Permissions;
@@ -67,7 +67,7 @@ public interface TVCommands {
 		)
 	);
 
-	private static void broadcast(CommandContext<CommandSourceStack> ctx, SimplePacketPayload packet) {
+	private static void broadcast(CommandContext<CommandSourceStack> ctx, SimplePayload packet) {
 		ctx.getSource().getServer().s2c(packet);
 	}
 }

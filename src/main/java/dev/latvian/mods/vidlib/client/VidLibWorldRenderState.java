@@ -103,7 +103,7 @@ public class VidLibWorldRenderState {
 
 		if (anchorAreas != null && !anchorAreas.isEmpty()) {
 			collector.submitCustomGeometry(poseStack, RenderTypes.debugFilledBox(), (pose, buffer) -> {
-				var callback = pose.transform(buffer).withColor(Color.YELLOW.withAlpha(80)).withLineWidth(lineWidth);
+				var callback = pose.transform(buffer).withColor(Color.YELLOW.withAlpha(80));
 
 				for (var a : anchorAreas) {
 					float minX = (float) (a.minX() + 0.5D - cam.x);

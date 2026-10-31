@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.util.MiscUtils;
 import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.klib.util.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.VidLibPaths;
@@ -12,7 +13,7 @@ import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.util.MiscUtils;
+import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -84,7 +85,7 @@ public interface PlayerSkins {
 	};
 
 	Codec<PlayerSkin> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		SkinTexture.CODEC.fieldOf("skin").forGetter(s -> new SkinTexture(dev.latvian.mods.vidlib.feature.visual.SpriteKey.narrow(MiscUtils.assetFromPNG(s.body().texturePath())), s.model() == PlayerModelType.SLIM)),
+		SkinTexture.CODEC.fieldOf("skin").forGetter(s -> new SkinTexture(SpriteKey.narrow(MiscUtils.assetFromPNG(s.body().texturePath())), s.model() == PlayerModelType.SLIM)),
 		Codec.STRING.optionalFieldOf("textureUrl", "").forGetter(PlayerSkins::textureUrl),
 		ClientAsset.ResourceTexture.CODEC.optionalFieldOf("capeTexture").forGetter(s -> resourceTexture(s.cape())),
 		ClientAsset.ResourceTexture.CODEC.optionalFieldOf("elytraTexture").forGetter(s -> resourceTexture(s.elytra()))
@@ -97,7 +98,7 @@ public interface PlayerSkins {
 	)));
 
 	StreamCodec<ByteBuf, PlayerSkin> STREAM_CODEC = CompositeStreamCodec.of(
-		SkinTexture.STREAM_CODEC, s -> new SkinTexture(dev.latvian.mods.vidlib.feature.visual.SpriteKey.narrow(MiscUtils.assetFromPNG(s.body().texturePath())), s.model() == PlayerModelType.SLIM),
+		SkinTexture.STREAM_CODEC, s -> new SkinTexture(SpriteKey.narrow(MiscUtils.assetFromPNG(s.body().texturePath())), s.model() == PlayerModelType.SLIM),
 		ByteBufCodecs.STRING_UTF8, PlayerSkins::textureUrl,
 		KLibStreamCodecs.optional(ClientAsset.ResourceTexture.STREAM_CODEC, null), s -> resourceTexture(s.cape()).orElse(null),
 		KLibStreamCodecs.optional(ClientAsset.ResourceTexture.STREAM_CODEC, null), s -> resourceTexture(s.elytra()).orElse(null),

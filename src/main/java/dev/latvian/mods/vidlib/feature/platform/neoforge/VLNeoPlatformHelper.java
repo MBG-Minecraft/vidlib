@@ -8,7 +8,11 @@ import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeTypeRegistryEvent;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.capture.PacketCaptureEvent;
+import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepTypeRegistryEvent;
+import dev.latvian.mods.vidlib.feature.cutscene.step.NewCutsceneStepType;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
+import dev.latvian.mods.vidlib.feature.font.TTFFile;
+import dev.latvian.mods.vidlib.feature.font.TTFFileRegistryEvent;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
@@ -18,6 +22,7 @@ import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeRegistryEvent;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGatewayEventRegistryEvent;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -72,13 +77,13 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	}
 
 	@Override
-	public void collectZoneShapeTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ZoneShape> registry) {
+	public void collectZoneShapeTypes(CustomRegistryTypeCollector<ByteBuf, ZoneShape> registry) {
 		super.collectZoneShapeTypes(registry);
 		ModLoader.postEvent(new ZoneShapeRegistryEvent(registry));
 	}
 
 	@Override
-	public void collectScreenShakeTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenShakeType> registry) {
+	public void collectScreenShakeTypes(CustomRegistryTypeCollector<ByteBuf, ScreenShakeType> registry) {
 		super.collectScreenShakeTypes(registry);
 		ModLoader.postEvent(new ScreenShakeTypeRegistryEvent(registry));
 	}
@@ -87,6 +92,18 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	public void collectScreenEffectTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenEffect> registry) {
 		super.collectScreenEffectTypes(registry);
 		ModLoader.postEvent(new ScreenEffectRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectCutsceneStepTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, NewCutsceneStepType> registry) {
+		super.collectCutsceneStepTypes(registry);
+		ModLoader.postEvent(new CutsceneStepTypeRegistryEvent(registry));
+	}
+
+	@Override
+	public void collectTTFFiles(CustomRegistryTypeCollector<ByteBuf, TTFFile> registry) {
+		super.collectTTFFiles(registry);
+		ModLoader.postEvent(new TTFFileRegistryEvent(registry));
 	}
 
 	@Override

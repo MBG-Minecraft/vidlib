@@ -2,18 +2,18 @@ package dev.latvian.mods.vidlib.feature.misc;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.network.codec.StreamCodec;
 
-public enum CloseScreenPayload implements SimplePacketPayload {
+public enum CloseScreenPayload implements SimplePayload {
 	INSTANCE;
 
 	@AutoPacket
-	public static final VidLibPacketType<CloseScreenPayload> TYPE = VidLibPacketType.internal("close_screen", StreamCodec.unit(INSTANCE));
+	public static final SimplePayloadType<CloseScreenPayload> TYPE = SimplePayloadType.vidlib("close_screen", StreamCodec.unit(INSTANCE));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

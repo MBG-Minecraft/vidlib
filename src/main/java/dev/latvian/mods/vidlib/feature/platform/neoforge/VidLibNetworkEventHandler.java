@@ -1,10 +1,11 @@
 package dev.latvian.mods.vidlib.feature.platform.neoforge;
 
+import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.net.ConfigurationTaskHolder;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -15,16 +16,16 @@ import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
 @EventBusSubscriber(modid = VidLib.ID)
 public class VidLibNetworkEventHandler {
-	public static final IPayloadHandler<VidLibPacketPayloadContainer> ASYNC_HANDLER = (payload, payloadContext) -> {
+	public static final IPayloadHandler<SimplePayload> ASYNC_HANDLER = (payload, payloadContext) -> {
 		try {
 			var ctx = new NeoForgePacketContext(payload, payloadContext);
 			CommonGameEngine.INSTANCE.handlePacket(ctx);
 		} catch (Exception ex) {
-			VidLib.LOGGER.error("Failed to handle packet '%s' #%,d @ %,d, %s".formatted(payload.type().id(), payload.uid(), payload.remoteGameTime(), payload.wrapped()), ex);
+			VidLib.LOGGER.error("Failed to handle packet '%s' @ %s".formatted(payload.type().id(), payload), ex);
 		}
 	};
 
-	public static final IPayloadHandler<VidLibPacketPayloadContainer> NOOP_HANDLER = (payload, payloadContext) -> {
+	public static final IPayloadHandler<SimplePayload> NOOP_HANDLER = (_, _) -> {
 	};
 
 	@SubscribeEvent
@@ -42,21 +43,26 @@ public class VidLibNetworkEventHandler {
 	@SubscribeEvent
 	public static void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
 		for (var s : AutoPacket.SCANNED.get()) {
-			VidLib.LOGGER.info("Registered " + s.stage().string + " " + s.to().string + " @AutoPacket '" + s.type().type().id() + "' @ " + s.className());
-
-			var clientbound = s.to() == AutoPacket.To.CLIENT;
-			var serverbound = s.to() == AutoPacket.To.SERVER;
-
-			NetworkRegistry.register(
-				s.type().type(),
-				s.type().streamCodec(),
-				serverbound ? ASYNC_HANDLER : NOOP_HANDLER,
-				clientbound ? ASYNC_HANDLER : NOOP_HANDLER,
-				s.stage().protocols,
-				s.to().flow,
-				"1",
-				true
-			);
+			register(s);
 		}
+	}
+
+	private static <T extends SimplePayload> void register(AutoPacket.ScanData<T> scanData) {
+		var type = scanData.type();
+		var stage = scanData.stage();
+		var to = scanData.to();
+
+		VidLib.LOGGER.info("Registered " + stage.string + " " + to.string + " @AutoPacket '" + type.type().id() + "' @ " + scanData.className());
+
+		NetworkRegistry.register(
+			type.type(),
+			type.streamCodec(),
+			Cast.to(to == AutoPacket.To.SERVER ? ASYNC_HANDLER : NOOP_HANDLER),
+			Cast.to(to == AutoPacket.To.CLIENT ? ASYNC_HANDLER : NOOP_HANDLER),
+			stage.protocols,
+			to.flow,
+			"1",
+			true
+		);
 	}
 }

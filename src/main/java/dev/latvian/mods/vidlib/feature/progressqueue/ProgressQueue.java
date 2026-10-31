@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
+import dev.latvian.mods.klib.color.ColoredText;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
-import dev.latvian.mods.vidlib.util.ColoredText;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;

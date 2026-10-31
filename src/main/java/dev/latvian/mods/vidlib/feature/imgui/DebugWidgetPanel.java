@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.color.ColoredText;
 import dev.latvian.mods.klib.interpolation.BezierPreset;
 import dev.latvian.mods.klib.interpolation.Interpolation;
 import dev.latvian.mods.klib.io.CompressionMethod;
@@ -30,7 +31,6 @@ import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
-import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.HubProjectReplaysResponse;
 import dev.mrbeastgaming.mods.hub.api.data.HubCountry;
@@ -55,6 +55,7 @@ import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.data.AtlasIds;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.Slot;
@@ -362,9 +363,11 @@ public class DebugWidgetPanel extends Panel {
 
 		ImGui.separator();
 
+		var blockAtlas = mc.getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS);
+
 		ImGui.text("Image");
-		var sprite = mc.getBlockAtlas().getSprite(Identifier.withDefaultNamespace("block/campfire_fire"));
-		ImGui.image(mc.getBlockAtlas().getTexture().vl$getHandle(), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
+		var sprite = blockAtlas.getSprite(Identifier.withDefaultNamespace("block/campfire_fire"));
+		ImGui.image(blockAtlas.getTexture().vl$getHandle(), 128F, 128F, sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
 		ImGui.separator();
 		ImGui.image(ImGuiHooks.imGuiGl3.gFontTexture, 128F, 128F, 0F, 0F, 1F, 1F);
 

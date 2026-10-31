@@ -3,19 +3,19 @@ package dev.latvian.mods.vidlib.feature.particle;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.core.BlockPos;
 
 import java.util.List;
 import java.util.Map;
 
-public record SpawnCubeParticlesPayload(Map<ShapeParticleOptions, List<BlockPos>> map) implements SimplePacketPayload {
+public record SpawnCubeParticlesPayload(Map<ShapeParticleOptions, List<BlockPos>> map) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<SpawnCubeParticlesPayload> TYPE = VidLibPacketType.internal("spawn_cube_particles", KLibStreamCodecs.unboundedMap(ShapeParticleOptions.STREAM_CODEC, KLibStreamCodecs.listOf(BlockPos.STREAM_CODEC)).map(SpawnCubeParticlesPayload::new, SpawnCubeParticlesPayload::map));
+	public static final SimplePayloadType<SpawnCubeParticlesPayload> TYPE = SimplePayloadType.vidlib("spawn_cube_particles", KLibStreamCodecs.unboundedMap(ShapeParticleOptions.STREAM_CODEC, KLibStreamCodecs.listOf(BlockPos.STREAM_CODEC)).map(SpawnCubeParticlesPayload::new, SpawnCubeParticlesPayload::map));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

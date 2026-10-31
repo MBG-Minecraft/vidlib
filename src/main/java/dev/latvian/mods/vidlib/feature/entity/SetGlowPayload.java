@@ -5,21 +5,21 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
 import java.util.UUID;
 
-public record SetGlowPayload(UUID entity, Color color) implements SimplePacketPayload {
+public record SetGlowPayload(UUID entity, Color color) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<SetGlowPayload> TYPE = VidLibPacketType.internal("glow/set", CompositeStreamCodec.of(
+	public static final SimplePayloadType<SetGlowPayload> TYPE = SimplePayloadType.vidlib("glow/set", CompositeStreamCodec.of(
 		KLibStreamCodecs.UUID, SetGlowPayload::entity,
 		Color.STREAM_CODEC, SetGlowPayload::color,
 		SetGlowPayload::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

@@ -4,8 +4,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.klib.registry.DynamicType;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 
@@ -22,7 +22,11 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box, AAIBB intBo
 		return of(pos, pos);
 	}
 
-	public static final DynamicType<RegistryFriendlyByteBuf, ZoneShape> TYPE = DynamicType.create(
+	public static BlockZoneShape of(AAIBB intBox) {
+		return new BlockZoneShape(intBox.min(), intBox.max(), intBox.aabb(), intBox);
+	}
+
+	public static final DynamicType<ByteBuf, ZoneShape> TYPE = DynamicType.create(
 		"block",
 		RecordCodecBuilder.mapCodec(instance -> instance.group(
 			BlockPos.CODEC.fieldOf("start").forGetter(BlockZoneShape::start),
@@ -36,7 +40,7 @@ public record BlockZoneShape(BlockPos start, BlockPos end, AABB box, AAIBB intBo
 	);
 
 	@Override
-	public DynamicType<RegistryFriendlyByteBuf, ZoneShape> type() {
+	public DynamicType<ByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 

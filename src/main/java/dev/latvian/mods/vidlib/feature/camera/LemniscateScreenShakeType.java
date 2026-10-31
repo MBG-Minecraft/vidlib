@@ -6,18 +6,18 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.registry.CustomRegistryType;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.UnitType;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
 
-public record LemniscateScreenShakeType(@Nullable UnitType<RegistryFriendlyByteBuf, ScreenShakeType> typeOverride, float xScale, float yScale) implements ScreenShakeType {
-	public static final UnitType<RegistryFriendlyByteBuf, ScreenShakeType> DEFAULT = UnitType.create("default_lemniscate", type -> new LemniscateScreenShakeType(type, 0.6F, 1F));
-	public static final UnitType<RegistryFriendlyByteBuf, ScreenShakeType> HORIZONTAL = UnitType.create("horizontal", type -> new LemniscateScreenShakeType(type, 1F, 0F));
-	public static final UnitType<RegistryFriendlyByteBuf, ScreenShakeType> VERTICAL = UnitType.create("vertical", type -> new LemniscateScreenShakeType(type, 0F, 1F));
+public record LemniscateScreenShakeType(@Nullable UnitType<ByteBuf, ScreenShakeType> typeOverride, float xScale, float yScale) implements ScreenShakeType {
+	public static final UnitType<ByteBuf, ScreenShakeType> DEFAULT = UnitType.create("default_lemniscate", type -> new LemniscateScreenShakeType(type, 0.6F, 1F));
+	public static final UnitType<ByteBuf, ScreenShakeType> HORIZONTAL = UnitType.create("horizontal", type -> new LemniscateScreenShakeType(type, 1F, 0F));
+	public static final UnitType<ByteBuf, ScreenShakeType> VERTICAL = UnitType.create("vertical", type -> new LemniscateScreenShakeType(type, 0F, 1F));
 
-	public static final DynamicType<RegistryFriendlyByteBuf, ScreenShakeType> TYPE = DynamicType.create(
+	public static final DynamicType<ByteBuf, ScreenShakeType> TYPE = DynamicType.create(
 		"lemniscate",
 		RecordCodecBuilder.mapCodec(instance -> instance.group(
 			Codec.FLOAT.optionalFieldOf("x_scale", 1F).forGetter(LemniscateScreenShakeType::xScale),
@@ -35,7 +35,7 @@ public record LemniscateScreenShakeType(@Nullable UnitType<RegistryFriendlyByteB
 	}
 
 	@Override
-	public @Nullable CustomRegistryType<RegistryFriendlyByteBuf, ScreenShakeType> type() {
+	public @Nullable CustomRegistryType<ByteBuf, ScreenShakeType> type() {
 		return typeOverride == null ? TYPE : typeOverride;
 	}
 

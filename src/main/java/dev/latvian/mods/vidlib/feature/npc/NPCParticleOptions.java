@@ -17,7 +17,7 @@ import net.minecraft.server.players.NameAndId;
 import java.util.Optional;
 
 public record NPCParticleOptions(String npc, boolean relativePosition, int extraLifespan, Optional<NameAndId> profile) implements ParticleOptions {
-	public static final MapCodec<NPCParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final MapCodec<NPCParticleOptions> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		Codec.STRING.fieldOf("npc").forGetter(NPCParticleOptions::npc),
 		Codec.BOOL.optionalFieldOf("relative_position", false).forGetter(NPCParticleOptions::relativePosition),
 		KLibCodecs.TICKS.optionalFieldOf("extra_lifespan", 0).forGetter(NPCParticleOptions::extraLifespan),

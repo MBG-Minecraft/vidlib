@@ -7,8 +7,8 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.core.VLClientPlayPacketListener;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public record ExactEntitySpawnPayload(
-	EntityType<?> type,
+	EntityType<?> entityType,
 	UUID uuid,
 	int id,
 	Vec3 pos,
@@ -31,9 +31,9 @@ public record ExactEntitySpawnPayload(
 	float yRot,
 	float yHeadRot,
 	int data
-) implements SimplePacketPayload {
+) implements SimplePayload {
 	public static final StreamCodec<ByteBuf, ExactEntitySpawnPayload> STREAM_CODEC = CompositeStreamCodec.of(
-		ID.STREAM_CODEC.map(BuiltInRegistries.ENTITY_TYPE::getValue, t -> t.builtInRegistryHolder().key().identifier()), ExactEntitySpawnPayload::type,
+		ID.STREAM_CODEC.map(BuiltInRegistries.ENTITY_TYPE::getValue, t -> t.builtInRegistryHolder().key().identifier()), ExactEntitySpawnPayload::entityType,
 		KLibStreamCodecs.UUID, ExactEntitySpawnPayload::uuid,
 		ByteBufCodecs.VAR_INT, ExactEntitySpawnPayload::id,
 		MCStreamCodecs.VEC3, ExactEntitySpawnPayload::pos,
@@ -46,7 +46,7 @@ public record ExactEntitySpawnPayload(
 	);
 
 	@AutoPacket
-	public static final VidLibPacketType<ExactEntitySpawnPayload> TYPE = VidLibPacketType.internal("exact_entity_spawn", STREAM_CODEC);
+	public static final SimplePayloadType<ExactEntitySpawnPayload> TYPE = SimplePayloadType.vidlib("exact_entity_spawn", STREAM_CODEC);
 
 	public ExactEntitySpawnPayload(Entity entity, ServerEntity serverEntity, int data) {
 		this(
@@ -63,7 +63,7 @@ public record ExactEntitySpawnPayload(
 	}
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

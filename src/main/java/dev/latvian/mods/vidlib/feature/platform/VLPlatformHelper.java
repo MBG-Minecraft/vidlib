@@ -7,12 +7,15 @@ import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
+import dev.latvian.mods.vidlib.feature.cutscene.step.NewCutsceneStepType;
+import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -42,16 +45,24 @@ public class VLPlatformHelper {
 	public void collectDynamicResources(PackType type, Consumer<Identifier> callback) {
 	}
 
-	public void collectZoneShapeTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ZoneShape> registry) {
+	public void collectZoneShapeTypes(CustomRegistryTypeCollector<ByteBuf, ZoneShape> registry) {
 		ZoneShape.builtInTypes(registry);
 	}
 
-	public void collectScreenShakeTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenShakeType> registry) {
+	public void collectScreenShakeTypes(CustomRegistryTypeCollector<ByteBuf, ScreenShakeType> registry) {
 		ScreenShakeType.builtInTypes(registry);
 	}
 
 	public void collectScreenEffectTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenEffect> registry) {
 		ScreenEffect.builtInTypes(registry);
+	}
+
+	public void collectCutsceneStepTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, NewCutsceneStepType> registry) {
+		NewCutsceneStepType.builtInTypes(registry);
+	}
+
+	public void collectTTFFiles(CustomRegistryTypeCollector<ByteBuf, TTFFile> registry) {
+		TTFFile.builtInTypes(registry);
 	}
 
 	public boolean isStaff(Entity entity) {

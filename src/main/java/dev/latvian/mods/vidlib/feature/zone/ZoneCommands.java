@@ -8,14 +8,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface ZoneCommands {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("zones", (command, buildContext) -> command
-		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
+		.requires(source -> Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("count-blocks")
 			.then(Commands.argument("id", ZoneContainer.DATA_TYPE.argument(buildContext))
 				.executes(ctx -> countBlocks(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.NONE))
@@ -41,9 +40,9 @@ public interface ZoneCommands {
 		public long count = 0L;
 		public int minX, minY, minZ, maxX, maxY, maxZ;
 
-		public BlockProcessor(Level level, Ref<BlockFilter> filter, ZoneContainer zoneContainer) {
+		public BlockProcessor(Level level, BlockFilter filter, ZoneContainer zoneContainer) {
 			this.level = level;
-			this.filter = filter.value();
+			this.filter = filter;
 			this.zoneContainer = zoneContainer;
 		}
 
@@ -79,7 +78,7 @@ public interface ZoneCommands {
 	}
 
 	class SaveBlockProcessor extends BlockProcessor {
-		public SaveBlockProcessor(Level level, Ref<BlockFilter> filter, ZoneContainer zoneContainer) {
+		public SaveBlockProcessor(Level level, BlockFilter filter, ZoneContainer zoneContainer) {
 			super(level, filter, zoneContainer);
 		}
 
@@ -94,10 +93,10 @@ public interface ZoneCommands {
 		}
 	}
 
-	private static int countBlocks(CommandSourceStack source, ZoneContainer container, Ref<BlockFilter> filter) {
-		var processor = new BlockProcessor(source.getServer().getLevel(container.dimension), filter, container);
+	private static int countBlocks(CommandSourceStack source, Ref<ZoneContainer> container, Ref<BlockFilter> filter) {
+		var processor = new BlockProcessor(source.getServer().getLevel(container.value().dimension), filter.value(), container.value());
 
-		for (var zone : container.zones) {
+		for (var zone : container.value().zones) {
 			zone.volume.shape().value().getBlocks().forEach(processor::process);
 		}
 
@@ -105,10 +104,10 @@ public interface ZoneCommands {
 		return 1;
 	}
 
-	private static int saveStructure(CommandSourceStack source, ZoneContainer container, Ref<BlockFilter> filter) {
-		var processor = new SaveBlockProcessor(source.getServer().getLevel(container.dimension), filter, container);
+	private static int saveStructure(CommandSourceStack source, Ref<ZoneContainer> container, Ref<BlockFilter> filter) {
+		var processor = new SaveBlockProcessor(source.getServer().getLevel(container.value().dimension), filter.value(), container.value());
 
-		for (var zone : container.zones) {
+		for (var zone : container.value().zones) {
 			zone.volume.shape().value().getBlocks().forEach(processor::process);
 		}
 

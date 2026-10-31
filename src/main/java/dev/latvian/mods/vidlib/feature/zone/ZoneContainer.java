@@ -1,14 +1,24 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
+import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.vidlib.feature.registry.VLRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryType;
+import dev.latvian.mods.klib.registry.CustomRegistryValue;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.klib.registry.Ref;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -27,84 +37,32 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
-	private static final int FLAG_GENERATED = 1;
-	private static final int FLAG_NOT_OVERWORLD = 2;
-	private static final int FLAG_HAS_TAGS = 4;
+public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBuf, ZoneContainer>, ZoneLike, Comparable<ZoneContainer> {
+	public static final DynamicType<RegistryFriendlyByteBuf, ZoneContainer> TYPE = DynamicType.create("default",
+		RecordCodecBuilder.mapCodec(i -> i.group(
+			Ref.<ZoneContainer>contextRefCodec().forGetter(ZoneContainer::ref),
+			MapCodec.unit(false).forGetter(z -> z.generated),
+			MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(z -> z.dimension),
+			Codec.STRING.listOf().optionalFieldOf("tags", List.of()).forGetter(z -> List.copyOf(z.tags)),
+			ZoneVolume.CODEC.listOf().fieldOf("zones").forGetter(z -> z.zones.stream().map(zi -> zi.volume).toList())
+		).apply(i, ZoneContainer::new)),
+		CompositeStreamCodec.of(
+			Ref.contextRefStreamCodec(), ZoneContainer::ref,
+			ByteBufCodecs.BOOL, z -> z.generated,
+			KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), z -> z.dimension,
+			KLibStreamCodecs.listOf(ByteBufCodecs.STRING_UTF8), z -> List.copyOf(z.tags),
+			KLibStreamCodecs.listOf(ZoneVolume.STREAM_CODEC), z -> z.zones.stream().map(zi -> zi.volume).toList(),
+			ZoneContainer::new
+		)
+	);
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, ZoneContainer> DIRECT_STREAM_CODEC = new StreamCodec<>() {
-		@Override
-		public ZoneContainer decode(RegistryFriendlyByteBuf buf) {
-			var id = Identifier.STREAM_CODEC.decode(buf);
-			int flags = buf.readVarInt();
+	public static final CustomRegistry<RegistryFriendlyByteBuf, ZoneContainer> REGISTRY = CustomRegistry.create("zone_container", TYPE);
 
-			var dimension = ((flags & FLAG_NOT_OVERWORLD) != 0) ? MCStreamCodecs.DIMENSION.decode(buf) : Level.OVERWORLD;
-			var container = new ZoneContainer(id, dimension);
+	public static final Codec<Ref<ZoneContainer>> CODEC = REGISTRY.codec();
+	public static final StreamCodec<RegistryFriendlyByteBuf, Ref<ZoneContainer>> STREAM_CODEC = REGISTRY.streamCodec();
+	public static final DataType<Ref<ZoneContainer>> DATA_TYPE = REGISTRY.dataType();
 
-			container.generated = (flags & FLAG_GENERATED) != 0;
-
-			if ((flags & FLAG_HAS_TAGS) != 0) {
-				int tags = buf.readVarInt();
-
-				for (int i = 0; i < tags; i++) {
-					container.tags.add(buf.readUtf());
-				}
-			}
-
-			int count = buf.readVarInt();
-
-			for (int i = 0; i < count; i++) {
-				container.add(ZoneVolume.STREAM_CODEC.decode(buf));
-			}
-
-			return container;
-		}
-
-		@Override
-		public void encode(RegistryFriendlyByteBuf buf, ZoneContainer value) {
-			Identifier.STREAM_CODEC.encode(buf, value.id);
-
-			int flags = 0;
-
-			if (value.generated) {
-				flags |= FLAG_GENERATED;
-			}
-
-			if (value.dimension != Level.OVERWORLD) {
-				flags |= FLAG_NOT_OVERWORLD;
-			}
-
-			if (!value.tags.isEmpty()) {
-				flags |= FLAG_HAS_TAGS;
-			}
-
-			buf.writeVarInt(flags);
-
-			if (value.dimension != Level.OVERWORLD) {
-				MCStreamCodecs.DIMENSION.encode(buf, value.dimension);
-			}
-
-			if (!value.tags.isEmpty()) {
-				buf.writeVarInt(value.tags.size());
-
-				for (var tag : value.tags) {
-					buf.writeUtf(tag);
-				}
-			}
-
-			buf.writeVarInt(value.zones.size());
-
-			for (var zone : value.zones) {
-				ZoneVolume.STREAM_CODEC.encode(buf, zone.volume);
-			}
-		}
-	};
-
-	public static final VLRegistry<ZoneContainer> REGISTRY = VLRegistry.createServer("zone_container", ZoneContainer.class);
-	public static final DataType<ZoneContainer> DATA_TYPE = REGISTRY.dataType();
-
-	ActiveZones parent;
-	public final Identifier id;
+	public final Ref<ZoneContainer> ref;
 	public final ResourceKey<Level> dimension;
 	public final List<Zone> zones;
 	public final Set<String> tags;
@@ -114,8 +72,8 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	private AABB boundingBox;
 	private AAIBB intBoundingBox;
 
-	public ZoneContainer(Identifier id, ResourceKey<Level> dimension) {
-		this.id = id;
+	public ZoneContainer(Ref<ZoneContainer> ref, ResourceKey<Level> dimension) {
+		this.ref = ref;
 		this.dimension = dimension;
 		this.zones = new ArrayList<>();
 		this.tags = new LinkedHashSet<>();
@@ -126,26 +84,42 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		this.intBoundingBox = null;
 	}
 
-	public ZoneContainer add(ZoneVolume zoneVolume) {
-		var instance = zoneVolume.shape().value().createInstance(this, zoneVolume);
+	private ZoneContainer(Ref<ZoneContainer> ref, boolean generated, ResourceKey<Level> dimension, List<String> tags, List<ZoneVolume> zones) {
+		this(ref, dimension);
+		this.generated = generated;
+		this.tags.addAll(tags);
+
+		for (var zone : zones) {
+			add(zone);
+		}
+	}
+
+	@Override
+	public CustomRegistry<RegistryFriendlyByteBuf, ZoneContainer> getRegistry() {
+		return REGISTRY;
+	}
+
+	@Override
+	public CustomRegistryType<RegistryFriendlyByteBuf, ZoneContainer> type() {
+		return TYPE;
+	}
+
+	public ZoneContainer add(ZoneVolume zone) {
+		var instance = zone.shape().value().createInstance(this, zone);
 		instance.index = zones.size();
 
-		instance.tags.add(id.toString());
+		instance.tags.add(ref.key());
 		instance.tags.addAll(tags);
-		instance.tags.addAll(zoneVolume.tags());
+		instance.tags.addAll(zone.tags());
 
 		zones.add(instance);
-
-		if (parent != null) {
-			parent.solidZones = null;
-		}
 
 		boundingBox = null;
 		intBoundingBox = null;
 		return this;
 	}
 
-	public void tick(ActiveZones activeZones, @Nullable Level level) {
+	public void tick(ZoneCache zoneCache, @Nullable Level level) {
 		entityZones.clear();
 
 		for (var instance : zones) {
@@ -153,11 +127,11 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		}
 
 		for (var entry : entityZones.int2ObjectEntrySet()) {
-			var list = activeZones.entityZones.get(entry.getIntKey());
+			var list = zoneCache.entityZones.get(entry.getIntKey());
 
 			if (list == null) {
 				list = new ArrayList<>(entry.getValue().size());
-				activeZones.entityZones.put(entry.getIntKey(), list);
+				zoneCache.entityZones.put(entry.getIntKey(), list);
 			}
 
 			list.addAll(entry.getValue());
@@ -213,7 +187,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 	@Override
 	public int compareTo(@NotNull ZoneContainer container) {
 		int i = Integer.compare(container.priority, priority);
-		return i == 0 ? id.compareTo(container.id) : i;
+		return i == 0 ? ref.key().compareTo(container.ref.key()) : i;
 	}
 
 	@ApiStatus.Internal
@@ -233,7 +207,7 @@ public class ZoneContainer implements ZoneLike, Comparable<ZoneContainer> {
 		intBoundingBox = null;
 	}
 
-	public void update(int index, ZoneVolume zoneVolumeData) {
+	public void update(int index, ZoneVolume zoneVolume) {
 	}
 
 	public boolean isGenerated() {

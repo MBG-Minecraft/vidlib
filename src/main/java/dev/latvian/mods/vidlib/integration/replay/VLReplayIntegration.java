@@ -23,7 +23,6 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
@@ -33,8 +32,6 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
-import dev.latvian.mods.vidlib.feature.misc.SyncPlayerTagsPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
 import dev.latvian.mods.vidlib.feature.note.CreateNotePayload;
 import dev.latvian.mods.vidlib.feature.note.DeleteNotePayload;
 import dev.latvian.mods.vidlib.feature.note.Note;
@@ -73,7 +70,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.IdentityHashMap;
-import java.util.Set;
 import java.util.UUID;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
@@ -93,83 +89,79 @@ public class VLReplayIntegration {
 
 		for (var entry : event.getGamePackets()) {
 			if (entry.packet() instanceof ClientboundCustomPayloadPacket c) {
-				if (c.payload() instanceof VidLibPacketPayloadContainer w) {
-					long now = w.remoteGameTime();
+				long now = entry.gameTime();
 
-					switch (w.wrapped()) {
-						case SyncServerDataPayload p -> {
-							for (var u : p.update()) {
-								if (u.key() != null) {
-									dataMapOverrideBuilder.set(now, null, u.key(), u.value());
-								}
+				switch (c.payload()) {
+					case SyncServerDataPayload p -> {
+						for (var u : p.update()) {
+							if (u.key() != null) {
+								dataMapOverrideBuilder.set(now, null, u.key(), u.value());
 							}
 						}
-						case SyncPlayerDataPayload p -> {
-							for (var u : p.update()) {
-								if (u.key() != null) {
-									dataMapOverrideBuilder.set(now, p.player(), u.key(), u.value());
-								}
+					}
+					case SyncPlayerDataPayload p -> {
+						for (var u : p.update()) {
+							if (u.key() != null) {
+								dataMapOverrideBuilder.set(now, p.player(), u.key(), u.value());
 							}
 						}
-						// Legacy
-						//noinspection deprecation
-						case SyncPlayerTagsPayload p -> dataMapOverrideBuilder.set(now, p.player(), InternalPlayerData.PLAYER_TAGS, Set.copyOf(p.tags()));
-						case AddPropPayload p -> {
-							var map = new IdentityHashMap<PropData<?, ?>, Object>();
-							try {
-								p.type().readReplayUpdate(now, p.id(), registryAccess, p.update(), true, map::put);
-							} catch (Exception ex) {
-								ex.printStackTrace();
-							}
-
-							var old = currentReplayProps.get(p.id());
-
-							if (old != null) {
-								old.data.putAll(map);
-							} else {
-								var rp = new ReplayProp(p.id(), p.type());
-								rp.spawn = p.createdTime();
-								rp.data.putAll(map);
-								currentReplayProps.put(p.id(), rp);
-							}
-
+					}
+					// Legacy
+					case AddPropPayload p -> {
+						var map = new IdentityHashMap<PropData<?, ?>, Object>();
+						try {
+							p.propType().readReplayUpdate(now, p.id(), registryAccess, p.update(), true, map::put);
+						} catch (Exception ex) {
+							ex.printStackTrace();
 						}
-						case RemovePropsPayload p -> {
-							for (var id : p.ids()) {
-								var prop = currentReplayProps.remove(id.intValue());
 
-								if (prop != null) {
-									prop.remove = now;
-									replayProps.add(prop);
-								}
+						var old = currentReplayProps.get(p.id());
+
+						if (old != null) {
+							old.data.putAll(map);
+						} else {
+							var rp = new ReplayProp(p.id(), p.propType());
+							rp.spawn = p.createdTime();
+							rp.data.putAll(map);
+							currentReplayProps.put(p.id(), rp);
+						}
+
+					}
+					case RemovePropsPayload p -> {
+						for (var id : p.ids()) {
+							var prop = currentReplayProps.remove(id.intValue());
+
+							if (prop != null) {
+								prop.remove = now;
+								replayProps.add(prop);
 							}
 						}
-						// Legacy
-						//noinspection deprecation
-						case EventMarkerPayload p -> {
-							var builder = ReplayMarkerData.builder().description(p.event()).customData(p.tag().orElse(null));
+					}
+					// Legacy
+					//noinspection deprecation
+					case EventMarkerPayload p -> {
+						var builder = ReplayMarkerData.builder().description(p.event()).customData(p.tag().orElse(null));
 
-							if (p.event().equals("sync")) {
-								builder.group(ReplayMarkerGroup.DATA_SYNC);
-							}
-
-							var data = ClientGameEngine.INSTANCE.handleReplayMarker(builder.build());
-
-							if (data != null) {
-								event.addMarker((int) (now - startTick), ReplayMarkerType.SERVER_RECORDING, data);
-							}
+						if (p.event().equals("sync")) {
+							builder.group(ReplayMarkerGroup.DATA_SYNC);
 						}
-						case ReplayMarkerPayload p -> {
-							var data = ClientGameEngine.INSTANCE.handleReplayMarker(p.data());
 
-							if (data != null) {
-								event.addMarker((int) (now - startTick), ReplayMarkerType.SERVER_RECORDING, data);
-							}
+						var data = ClientGameEngine.INSTANCE.handleReplayMarker(builder.build());
+
+						if (data != null) {
+							event.addMarker((int) (now - startTick), ReplayMarkerType.SERVER_RECORDING, data);
 						}
-						case CreateNotePayload p -> notes.put(p.note().id(), p.note());
-						case DeleteNotePayload p -> notes.remove(p.id());
-						case null, default -> {
+					}
+					case ReplayMarkerPayload p -> {
+						var data = ClientGameEngine.INSTANCE.handleReplayMarker(p.data());
+
+						if (data != null) {
+							event.addMarker((int) (now - startTick), ReplayMarkerType.SERVER_RECORDING, data);
 						}
+					}
+					case CreateNotePayload p -> notes.put(p.note().id(), p.note());
+					case DeleteNotePayload p -> notes.remove(p.id());
+					case null, default -> {
 					}
 				}
 			} else if (entry.packet() instanceof ClientboundPlayerInfoUpdatePacket p) {

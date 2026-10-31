@@ -1,11 +1,12 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
-import dev.latvian.mods.klib.math.AABBs;
 import dev.latvian.mods.klib.registry.UnitType;
+import dev.latvian.mods.klib.vertex.LineVertexCallback;
+import dev.latvian.mods.klib.vertex.QuadVertexCallback;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -18,14 +19,16 @@ import java.util.stream.Stream;
 public enum UniverseZoneShape implements ZoneShape {
 	INSTANCE;
 
+	public static final UnitType<ByteBuf, ZoneShape> TYPE = UnitType.create("universe", INSTANCE);
+
 	@Override
-	public UnitType<RegistryFriendlyByteBuf, ZoneShape> type() {
-		return UNIVERSE;
+	public UnitType<ByteBuf, ZoneShape> type() {
+		return TYPE;
 	}
 
 	@Override
 	public AABB toAABB() {
-		return AABBs.INFINITE;
+		return AABB.INFINITE;
 	}
 
 	@Override
@@ -77,5 +80,13 @@ public enum UniverseZoneShape implements ZoneShape {
 	@Override
 	public ZoneShape scale(double x, double y, double z) {
 		return this;
+	}
+
+	@Override
+	public void buildLines(LineVertexCallback callback, Vec3 offset) {
+	}
+
+	@Override
+	public void buildQuads(QuadVertexCallback callback, Vec3 offset) {
 	}
 }

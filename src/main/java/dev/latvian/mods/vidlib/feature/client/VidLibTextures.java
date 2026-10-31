@@ -5,7 +5,7 @@ import net.minecraft.core.ClientAsset;
 
 public interface VidLibTextures {
 	ClientAsset.ResourceTexture LOGO = new ClientAsset.ResourceTexture(ID.vidlib("misc/logo"));
-	ClientAsset.ResourceTexture SQUARE = new ClientAsset.ResourceTexture(ID.mc("misc/white"));
+	ClientAsset.ResourceTexture WHITE = new ClientAsset.ResourceTexture(ID.mc("misc/white"));
 	ClientAsset.ResourceTexture CIRCLE = new ClientAsset.ResourceTexture(ID.vidlib("misc/circle"));
 	ClientAsset.ResourceTexture DEFAULT_MARKER = new ClientAsset.ResourceTexture(ID.vidlib("misc/default_marker"));
 	ClientAsset.ResourceTexture DEFAULT_PLAYER_BODY = new ClientAsset.ResourceTexture(ID.vidlib("misc/default_player_body"));

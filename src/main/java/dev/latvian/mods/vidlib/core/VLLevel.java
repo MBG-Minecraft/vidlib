@@ -9,6 +9,7 @@ import dev.latvian.mods.klib.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationHolder;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModification;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
@@ -16,8 +17,6 @@ import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.Props;
-import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
-import dev.latvian.mods.vidlib.util.PauseType;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
@@ -57,11 +56,6 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 	@Override
 	default FeatureSet getServerFeatures() {
 		return getEnvironment().getServerFeatures();
-	}
-
-	@Nullable
-	default ActiveZones vl$getActiveZones() {
-		throw new NoMixinException(this);
 	}
 
 	default List<UndoableModificationHolder> vl$getUndoableModifications() {

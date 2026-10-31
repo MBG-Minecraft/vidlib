@@ -2,18 +2,18 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.network.codec.StreamCodec;
 
-public enum StopCutscenePayload implements SimplePacketPayload {
+public enum StopCutscenePayload implements SimplePayload {
 	INSTANCE;
 
 	@AutoPacket
-	public static final VidLibPacketType<StopCutscenePayload> TYPE = VidLibPacketType.internal("cutscene/stop", StreamCodec.unit(INSTANCE));
+	public static final SimplePayloadType<StopCutscenePayload> TYPE = SimplePayloadType.vidlib("cutscene/stop", StreamCodec.unit(INSTANCE));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

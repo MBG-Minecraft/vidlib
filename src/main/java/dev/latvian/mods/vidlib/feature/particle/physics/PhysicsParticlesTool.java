@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import com.mojang.datafixers.util.Either;
 import dev.latvian.mods.klib.block.PositionedBlock;
+import dev.latvian.mods.klib.block.collection.PositionedBlockCollection;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
@@ -66,7 +67,11 @@ public enum PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 			}
 		}
 
-		player.c2s(new TestPhysicsParticlesPayload(VidLibClientOptions.TEST_PHYSICS_PARTICLE_DATA.get(), 0L, blocks));
+		player.c2s(new TestPhysicsParticlesPayload(new PhysicsParticlesDisplayData(
+			VidLibClientOptions.TEST_PHYSICS_PARTICLE_DATA.get(),
+			0L,
+			new PositionedBlockCollection(blocks).ref()
+		)));
 	}
 
 	@Override

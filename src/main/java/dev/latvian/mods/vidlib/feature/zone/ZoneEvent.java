@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
-import dev.latvian.mods.klib.util.Side;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.Event;
@@ -21,7 +19,7 @@ public class ZoneEvent extends Event {
 			this.entity = entity;
 		}
 
-		public Zone getZoneInstance() {
+		public Zone getZone() {
 			return zone;
 		}
 
@@ -54,7 +52,7 @@ public class ZoneEvent extends Event {
 		private final ZoneClipResult clip;
 
 		public ClickedOn(ZoneClipResult clip, Level level, Entity entity) {
-			super(clip.zone(), level, entity);
+			super(clip.instance(), level, entity);
 			this.clip = clip;
 		}
 
@@ -73,30 +71,6 @@ public class ZoneEvent extends Event {
 		public void add(ZoneContainer zoneContainer) {
 			zoneContainers.add(zoneContainer);
 			zoneContainer.generated = true;
-		}
-	}
-
-	public static class Updated extends ZoneEvent {
-		private final ResourceKey<Level> dimension;
-		private final ActiveZones zones;
-		private final Side side;
-
-		public Updated(ResourceKey<Level> dimension, ActiveZones zones, Side side) {
-			this.dimension = dimension;
-			this.zones = zones;
-			this.side = side;
-		}
-
-		public ResourceKey<Level> getDimension() {
-			return dimension;
-		}
-
-		public ActiveZones getZones() {
-			return zones;
-		}
-
-		public Side getSide() {
-			return side;
 		}
 	}
 }

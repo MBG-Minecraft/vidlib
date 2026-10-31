@@ -47,7 +47,7 @@ public interface VidLibClientOptions {
 
 	// OptionInstance<ExplosionData> TEST_EXPLOSION = DataKey.PLAYER.buildDefault("options.vidlib.test_explosion", ExplosionData.DATA_TYPE, ExplosionData.DEFAULT);
 
-	OptionInstance<PhysicsParticleData> TEST_PHYSICS_PARTICLE_DATA = UnconfigurableValueSet.create(
+	OptionInstance<Ref<PhysicsParticleData>> TEST_PHYSICS_PARTICLE_DATA = UnconfigurableValueSet.create(
 		"options.vidlib.test_physics_particles.data",
 		PhysicsParticleData.DATA_TYPE.codec(),
 		OptionInstance.noTooltip(),

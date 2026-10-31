@@ -67,8 +67,8 @@ public record GhostStructure(
 	) {
 	}
 
-	public static class Loader extends JsonCodecReloadListener<GhostStructure> {
-		public Loader() {
+	public static class ClientLoader extends JsonCodecReloadListener<GhostStructure> {
+		public ClientLoader() {
 			super("vidlib/ghost_structure", CODEC, true);
 		}
 

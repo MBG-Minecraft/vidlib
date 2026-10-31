@@ -2,7 +2,8 @@ package dev.latvian.mods.vidlib.feature.auto;
 
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.PacketFlow;
 import org.jetbrains.annotations.ApiStatus;
@@ -66,22 +67,22 @@ public @interface AutoPacket {
 
 	To to() default To.CLIENT;
 
-	record ScanData(String className, VidLibPacketType<?> type, Stage stage, To to) {
+	record ScanData<T extends SimplePayload>(String className, SimplePayloadType<T> type, Stage stage, To to) {
 	}
 
 	@ApiStatus.Internal
-	Lazy<List<ScanData>> SCANNED = Lazy.of(() -> {
-		var list = new ArrayList<ScanData>();
+	Lazy<List<ScanData<?>>> SCANNED = Lazy.of(() -> {
+		var list = new ArrayList<ScanData<?>>();
 		VidLib.LOGGER.info("Scanning @AutoPacket...");
 
 		AutoHelper.load(AutoPacket.class, EnumSet.of(ElementType.FIELD), (source, classLoader, ad) -> {
 			var clazz = AutoHelper.initClass(ad, classLoader);
 			var type = AutoHelper.getStaticFieldValue(clazz, ad);
 
-			if (type instanceof VidLibPacketType<?> t) {
+			if (type instanceof SimplePayloadType<?> t) {
 				var stage = AutoHelper.getEnumValue(ad, Stage.class, "stage", Stage.GAME);
 				var to = AutoHelper.getEnumValue(ad, To.class, "to", To.CLIENT);
-				list.add(new ScanData(clazz.getName(), t, stage, to));
+				list.add(new ScanData<>(clazz.getName(), t, stage, to));
 			}
 		});
 

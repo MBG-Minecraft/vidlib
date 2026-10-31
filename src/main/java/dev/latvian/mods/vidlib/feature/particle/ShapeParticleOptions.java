@@ -17,7 +17,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 public record ShapeParticleOptions(int lifespan, Ref<Shape> shape, Ref<Gradient> color, Ref<Gradient> outlineColor, RenderLightLayer lightLayer) implements ParticleOptions {
-	public static final MapCodec<ShapeParticleOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+	public static final MapCodec<ShapeParticleOptions> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		KLibCodecs.TICKS.optionalFieldOf("lifespan", 40).forGetter(ShapeParticleOptions::lifespan),
 		Shape.CODEC.optionalFieldOf("shape", CubeShape.UNIT_CUBE).forGetter(ShapeParticleOptions::shape),
 		Gradient.CODEC.optionalFieldOf("color", Color.CYAN.toGradient().ref()).forGetter(ShapeParticleOptions::color),

@@ -3,16 +3,16 @@ package dev.latvian.mods.vidlib.feature.prop;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.network.codec.ByteBufCodecs;
 import org.jetbrains.annotations.Nullable;
 
-public record UpdatePropPayload(PropListType type, int id, byte[] update) implements SimplePacketPayload {
+public record UpdatePropPayload(PropListType propListType, int id, byte[] update) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<UpdatePropPayload> TYPE = VidLibPacketType.internal("prop/update", CompositeStreamCodec.of(
-		PropListType.STREAM_CODEC, UpdatePropPayload::type,
+	public static final SimplePayloadType<UpdatePropPayload> TYPE = SimplePayloadType.vidlib("prop/update", CompositeStreamCodec.of(
+		PropListType.STREAM_CODEC, UpdatePropPayload::propListType,
 		ByteBufCodecs.VAR_INT, UpdatePropPayload::id,
 		ByteBufCodecs.BYTE_ARRAY, UpdatePropPayload::update,
 		UpdatePropPayload::new
@@ -30,14 +30,14 @@ public record UpdatePropPayload(PropListType type, int id, byte[] update) implem
 	}
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 
 	@Override
 	public void handle(Context ctx) {
 		var props = VLPlatformHelper.CURRENT.getProps(ctx.level());
-		var prop = props.propLists.get(type).get(id);
+		var prop = props.propLists.get(propListType).get(id);
 
 		if (prop != null) {
 			prop.update(ctx.level().registryAccess(), update, false);

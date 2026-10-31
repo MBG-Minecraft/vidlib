@@ -4,18 +4,18 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
-public record PropInteractionPayload(PropListType type, int id, int button, Vec3 pos, Direction side) implements SimplePacketPayload {
+public record PropInteractionPayload(PropListType propListType, int id, int button, Vec3 pos, Direction side) implements SimplePayload {
 	@AutoPacket(to = AutoPacket.To.SERVER)
-	public static final VidLibPacketType<PropInteractionPayload> TYPE = VidLibPacketType.internal("prop/interaction", CompositeStreamCodec.of(
-		PropListType.STREAM_CODEC, PropInteractionPayload::type,
+	public static final SimplePayloadType<PropInteractionPayload> TYPE = SimplePayloadType.vidlib("prop/interaction", CompositeStreamCodec.of(
+		PropListType.STREAM_CODEC, PropInteractionPayload::propListType,
 		ByteBufCodecs.VAR_INT, PropInteractionPayload::id,
 		ByteBufCodecs.VAR_INT, PropInteractionPayload::button,
 		MCStreamCodecs.VEC3, PropInteractionPayload::pos,
@@ -24,14 +24,14 @@ public record PropInteractionPayload(PropListType type, int id, int button, Vec3
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 
 	@Override
 	public void handle(Context ctx) {
 		var props = VLPlatformHelper.CURRENT.getProps(ctx.level());
-		var prop = props.propLists.get(type).get(id);
+		var prop = props.propLists.get(propListType).get(id);
 
 		if (prop != null) {
 			prop.onServerInteraction((ServerPlayer) ctx.player(), button, pos, side);

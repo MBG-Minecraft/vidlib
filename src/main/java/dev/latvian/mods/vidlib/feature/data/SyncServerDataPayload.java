@@ -2,17 +2,17 @@ package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
 import java.util.List;
 
-public record SyncServerDataPayload(List<DataMapValue> update) implements SimplePacketPayload {
+public record SyncServerDataPayload(List<DataMapValue> update) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<SyncServerDataPayload> TYPE = VidLibPacketType.internal("sync_server_data", DataKey.SERVER.valueListStreamCodec.map(SyncServerDataPayload::new, SyncServerDataPayload::update));
+	public static final SimplePayloadType<SyncServerDataPayload> TYPE = SimplePayloadType.vidlib("sync_server_data", DataKey.SERVER.valueListStreamCodec.map(SyncServerDataPayload::new, SyncServerDataPayload::update));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

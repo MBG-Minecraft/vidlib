@@ -6,32 +6,32 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.net.ConfigurationTaskHolder;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import dev.latvian.mods.vidlib.feature.net.VLConfigurationTask;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
 import net.minecraft.network.codec.StreamCodec;
 
-public enum ModListRequestPayload implements SimplePacketPayload {
+public enum ModListRequestPayload implements SimplePayload {
 	INSTANCE;
 
 	@AutoPacket(stage = AutoPacket.Stage.CONFIG)
-	public static final VidLibPacketType<ModListRequestPayload> TYPE = VidLibPacketType.internal("client_mod_list_request", StreamCodec.unit(INSTANCE));
+	public static final SimplePayloadType<ModListRequestPayload> TYPE = SimplePayloadType.vidlib("client_mod_list_request", StreamCodec.unit(INSTANCE));
 
 	@AutoRegister
 	public static final ConfigurationTaskHolder CONFIG_TASK = new ConfigurationTaskHolder(ID.vidlib("mod_list"), (channelInfo, registry) -> registry.register(ModListRequestPayload::config));
 
 	private static void config(VLConfigurationTask.Context ctx) {
-		ctx.send(ModListRequestPayload.INSTANCE.toS2CPacket(0L));
+		ctx.send(ModListRequestPayload.INSTANCE.toS2CPacket());
 	}
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 
 	@Override
 	public void handle(Context ctx) {
 		ctx.sessionData().setClientModListSentDuringConfig();
-		ctx.send(new ClientModListPayload(PlatformHelper.CURRENT.getModList()).toC2SPacket(0L));
+		ctx.send(new ClientModListPayload(PlatformHelper.CURRENT.getModList()).toC2SPacket());
 	}
 }

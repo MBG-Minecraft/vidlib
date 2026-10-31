@@ -6,6 +6,7 @@ import com.mojang.renderpearl.api.textures.GpuTexture;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.color.ColoredText;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
@@ -626,6 +627,32 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 	public void hoveredTooltip(Supplier<String> tooltip) {
 		if (ImGui.isItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) {
 			tooltip(tooltip.get());
+		}
+	}
+
+	public void pushColor(ColoredText coloredText) {
+		var color = coloredText.color();
+
+		if (color != null) {
+			pushStack();
+
+			if (color == ColoredText.WARNING) {
+				setWarningText();
+			} else if (color == ColoredText.ERROR) {
+				setErrorText();
+			} else if (color == ColoredText.SUCCESS) {
+				setSuccessText();
+			} else if (color == ColoredText.INFO) {
+				setInfoText();
+			} else if (color != null) {
+				setStyleCol(ImGuiCol.Text, color);
+			}
+		}
+	}
+
+	public void popColor(ColoredText coloredText) {
+		if (coloredText.color() != null) {
+			popStack();
 		}
 	}
 }

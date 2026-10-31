@@ -6,7 +6,6 @@ import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.client.RenderLightLayer;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingSet;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
-import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.EntitySnapshot;
 import dev.latvian.mods.vidlib.feature.environment.FogOverride;
@@ -36,8 +35,6 @@ public interface VidLibDataTypes {
 		registry.register("chanced_particle_list", ChancedParticle.LIST_DATA_TYPE);
 		registry.register("zone_render_type", ZoneRenderType.DATA_TYPE);
 		registry.register("anchor", Anchor.DATA_TYPE);
-		registry.register("direct_cutscene", Cutscene.DIRECT_DATA_TYPE);
-		registry.register("cutscene", Cutscene.DATA_TYPE);
 		registry.register("screen_shake", ScreenShake.DATA_TYPE);
 		registry.register("physics_particle_data", PhysicsParticleData.DATA_TYPE);
 		registry.register("prop_type", PropType.DATA_TYPE);

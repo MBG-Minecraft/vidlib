@@ -1,21 +1,24 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public interface ServerDataMapHolder extends DataMapHolder {
-	default Identifier getSkybox() {
-		return get(InternalServerData.SKYBOX);
+	@Nullable
+	default Ref<Atmosphere> getAtmosphere() {
+		return get(InternalServerData.ATMOSPHERE);
 	}
 
-	default void setSkybox(Identifier skybox) {
-		set(InternalServerData.SKYBOX, skybox);
+	default void setAtmosphere(@Nullable Ref<Atmosphere> atmosphere) {
+		set(InternalServerData.ATMOSPHERE, atmosphere);
 	}
 
 	default Anchor getAnchor() {

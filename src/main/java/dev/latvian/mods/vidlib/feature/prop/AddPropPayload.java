@@ -3,15 +3,15 @@ package dev.latvian.mods.vidlib.feature.prop;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, long createdTime, byte[] update) implements SimplePacketPayload {
+public record AddPropPayload(PropType<?> propType, PropSpawnType spawnType, int id, long createdTime, byte[] update) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<AddPropPayload> TYPE = VidLibPacketType.internal("prop/add", CompositeStreamCodec.of(
-		PropType.STREAM_CODEC, AddPropPayload::type,
+	public static final SimplePayloadType<AddPropPayload> TYPE = SimplePayloadType.vidlib("prop/add", CompositeStreamCodec.of(
+		PropType.STREAM_CODEC, AddPropPayload::propType,
 		PropSpawnType.STREAM_CODEC, AddPropPayload::spawnType,
 		ByteBufCodecs.VAR_INT, AddPropPayload::id,
 		ByteBufCodecs.VAR_LONG, AddPropPayload::createdTime,
@@ -24,7 +24,7 @@ public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, 
 	}
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 
@@ -42,7 +42,7 @@ public record AddPropPayload(PropType<?> type, PropSpawnType spawnType, int id, 
 		if (prop != null) {
 			prop.update(level.registryAccess(), update, true);
 		} else {
-			prop = type.factory().create(props.context(type, spawnType, createdTime));
+			prop = propType.factory().create(props.context(propType, spawnType, createdTime));
 			prop.id = id;
 			prop.update(level.registryAccess(), update, true);
 			prop.handleAddPacket(props);

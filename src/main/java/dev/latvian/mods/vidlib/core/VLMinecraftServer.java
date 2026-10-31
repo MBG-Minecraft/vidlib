@@ -2,6 +2,8 @@ package dev.latvian.mods.vidlib.core;
 
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.core.NoMixinException;
+import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
@@ -10,18 +12,11 @@ import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
-import dev.latvian.mods.vidlib.feature.zone.RemoveZonePayload;
-import dev.latvian.mods.vidlib.feature.zone.UpdateZonePayload;
-import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
-import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
-import dev.latvian.mods.vidlib.util.PauseType;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -120,7 +115,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 			return;
 		}
 
-		var packetsToEveryone = new S2CPacketBundleBuilder(vl$level());
+		var packetsToEveryone = new S2CPacketBundleBuilder();
 
 		if (!vl$isReplayServer()) {
 			getDataMap().sync(packetsToEveryone, (playerId, update) -> new SyncServerDataPayload(update));
@@ -151,36 +146,6 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 			} catch (Exception ignore) {
 			}
 		}
-	}
-
-	@Override
-	default void removeZone(Identifier zone, int index) {
-		var container = ZoneContainer.REGISTRY.get(zone);
-
-		if (container != null) {
-			container.remove(index);
-		}
-
-		for (var dim : ZoneLoader.SERVER_BY_DIMENSION.values()) {
-			dim.remove(zone, index);
-		}
-
-		s2c(new RemoveZonePayload(zone, index));
-	}
-
-	@Override
-	default void updateZone(Identifier zone, int index, ZoneVolume zoneVolumeData) {
-		var container = ZoneContainer.REGISTRY.get(zone);
-
-		if (container != null) {
-			container.update(index, zoneVolumeData);
-		}
-
-		for (var dim : ZoneLoader.SERVER_BY_DIMENSION.values()) {
-			dim.update(zone, index, zoneVolumeData);
-		}
-
-		s2c(new UpdateZonePayload(zone, index, zoneVolumeData));
 	}
 
 	@Override

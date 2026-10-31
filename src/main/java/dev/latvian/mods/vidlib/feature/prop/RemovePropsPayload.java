@@ -4,22 +4,22 @@ import dev.latvian.mods.klib.codec.CollectionStreamCodecs;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import it.unimi.dsi.fastutil.ints.IntList;
 
-public record RemovePropsPayload(PropListType type, IntList ids, PropRemoveType removeType) implements SimplePacketPayload {
+public record RemovePropsPayload(PropListType propListType, IntList ids, PropRemoveType removeType) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<RemovePropsPayload> TYPE = VidLibPacketType.internal("prop/remove", CompositeStreamCodec.of(
-		PropListType.STREAM_CODEC, RemovePropsPayload::type,
+	public static final SimplePayloadType<RemovePropsPayload> TYPE = SimplePayloadType.vidlib("prop/remove", CompositeStreamCodec.of(
+		PropListType.STREAM_CODEC, RemovePropsPayload::propListType,
 		CollectionStreamCodecs.VAR_INT_LIST, RemovePropsPayload::ids,
 		PropRemoveType.STREAM_CODEC, RemovePropsPayload::removeType,
 		RemovePropsPayload::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 
@@ -30,7 +30,7 @@ public record RemovePropsPayload(PropListType type, IntList ids, PropRemoveType 
 		}
 
 		var props = VLPlatformHelper.CURRENT.getProps(ctx.level());
-		var propList = props.propLists.get(type);
+		var propList = props.propLists.get(propListType);
 
 		for (var id : ids) {
 			var prop = propList.get(id);

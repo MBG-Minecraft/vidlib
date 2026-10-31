@@ -2,11 +2,11 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.tv;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record TVControlPayload(int control) implements SimplePacketPayload {
+public record TVControlPayload(int control) implements SimplePayload {
 	public static final int STOP = 0;
 	public static final int PLAY = 1;
 	public static final int PAUSE = 2;
@@ -15,10 +15,10 @@ public record TVControlPayload(int control) implements SimplePacketPayload {
 	public static final int UNMUTE = 5;
 
 	@AutoPacket
-	public static final VidLibPacketType<TVControlPayload> TYPE = VidLibPacketType.internal("tv/control", ByteBufCodecs.VAR_INT.map(TVControlPayload::new, TVControlPayload::control));
+	public static final SimplePayloadType<TVControlPayload> TYPE = SimplePayloadType.vidlib("tv/control", ByteBufCodecs.VAR_INT.map(TVControlPayload::new, TVControlPayload::control));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

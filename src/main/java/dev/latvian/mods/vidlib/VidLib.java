@@ -1,15 +1,22 @@
 package dev.latvian.mods.vidlib;
 
+import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.registry.CustomRegistryCollector;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.replay.api.ReplayMarkerGroup;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
+import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
+import dev.latvian.mods.vidlib.feature.cutscene.step.NewCutsceneStepType;
 import dev.latvian.mods.vidlib.feature.ffmpeg.FFMPEGBinaries;
+import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
@@ -33,6 +40,7 @@ public class VidLib {
 		}
 
 		HubConfig.load();
+		VidLibParticles.init();
 	}
 
 	public static void initClient() {
@@ -44,6 +52,12 @@ public class VidLib {
 		registry.register(ZoneShape.REGISTRY, platform::collectZoneShapeTypes);
 		registry.register(ScreenShakeType.REGISTRY, platform::collectScreenShakeTypes);
 		registry.register(ScreenEffect.REGISTRY, platform::collectScreenEffectTypes);
+		registry.register(Atmosphere.REGISTRY);
+		registry.register(PhysicsParticleData.REGISTRY);
+		registry.register(ZoneContainer.REGISTRY);
+		registry.register(NewCutsceneStepType.REGISTRY, platform::collectCutsceneStepTypes);
+		registry.register(Cutscene.REGISTRY);
+		registry.register(TTFFile.REGISTRY, platform::collectTTFFiles);
 	}
 
 	public static void sync(ServerPlayer player, int syncType) {
@@ -51,7 +65,7 @@ public class VidLib {
 			return;
 		}
 
-		var packets = new S2CPacketBundleBuilder(player.level());
+		var packets = new S2CPacketBundleBuilder();
 		packets.s2c(new ReplayMarkerPayload(ReplayMarkerData.builder().group(ReplayMarkerGroup.DATA_SYNC).build()));
 		player.vl$sessionData().sync(packets, player, syncType);
 		packets.send(player);

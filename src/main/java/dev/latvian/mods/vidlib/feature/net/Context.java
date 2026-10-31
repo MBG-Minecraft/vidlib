@@ -12,17 +12,15 @@ import net.minecraft.network.protocol.configuration.ClientConfigurationPacketLis
 import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.permissions.Permissions;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public interface Context {
-	VidLibPacketPayloadContainer payload();
+	SimplePayload payload();
 
 	PacketListener listener();
 
@@ -32,14 +30,6 @@ public interface Context {
 
 	default Level level() {
 		return player().level();
-	}
-
-	default long uid() {
-		return payload().uid();
-	}
-
-	default long remoteGameTime() {
-		return payload().remoteGameTime();
 	}
 
 	default SessionData sessionData() {
@@ -53,14 +43,6 @@ public interface Context {
 
 	default <T> CompletableFuture<T> enqueueWork(Supplier<T> task) {
 		return CompletableFuture.completedFuture(task.get());
-	}
-
-	default RandomSource createRandom() {
-		return new XoroshiroRandomSource(uid(), remoteGameTime());
-	}
-
-	default long getSeed() {
-		return Long.rotateLeft(uid() + remoteGameTime(), 17) + uid();
 	}
 
 	default boolean isAdmin() {

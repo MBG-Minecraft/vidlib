@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GeoAnimationsImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GeoModelImBuilder;
@@ -11,7 +12,6 @@ import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
-import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.Identifier;
 

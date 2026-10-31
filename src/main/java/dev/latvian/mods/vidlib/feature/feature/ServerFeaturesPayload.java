@@ -5,13 +5,13 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.net.ConfigurationTaskHolder;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.VLConfigurationTask;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
-public record ServerFeaturesPayload(FeatureSet featureSet) implements SimplePacketPayload {
+public record ServerFeaturesPayload(FeatureSet featureSet) implements SimplePayload {
 	@AutoPacket(stage = AutoPacket.Stage.CONFIG)
-	public static final VidLibPacketType<ServerFeaturesPayload> TYPE = VidLibPacketType.internal("server_features", FeatureSet.STREAM_CODEC.map(ServerFeaturesPayload::new, ServerFeaturesPayload::featureSet));
+	public static final SimplePayloadType<ServerFeaturesPayload> TYPE = SimplePayloadType.vidlib("server_features", FeatureSet.STREAM_CODEC.map(ServerFeaturesPayload::new, ServerFeaturesPayload::featureSet));
 
 	@AutoRegister
 	public static final ConfigurationTaskHolder CONFIG_TASK = new ConfigurationTaskHolder(ID.vidlib("features"), (channelInfo, registry) -> registry.register(ServerFeaturesPayload::config));
@@ -23,7 +23,7 @@ public record ServerFeaturesPayload(FeatureSet featureSet) implements SimplePack
 	}
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

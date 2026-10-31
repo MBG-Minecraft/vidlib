@@ -3,17 +3,17 @@ package dev.latvian.mods.vidlib.feature.session;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
 import java.util.UUID;
 
-public record RemovePlayerDataPayload(UUID player) implements SimplePacketPayload {
+public record RemovePlayerDataPayload(UUID player) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<RemovePlayerDataPayload> TYPE = VidLibPacketType.internal("remove_player_data", KLibStreamCodecs.UUID.map(RemovePlayerDataPayload::new, RemovePlayerDataPayload::player));
+	public static final SimplePayloadType<RemovePlayerDataPayload> TYPE = SimplePayloadType.vidlib("remove_player_data", KLibStreamCodecs.UUID.map(RemovePlayerDataPayload::new, RemovePlayerDataPayload::player));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

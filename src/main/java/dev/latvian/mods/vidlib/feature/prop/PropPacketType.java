@@ -4,7 +4,7 @@ import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -35,7 +35,7 @@ public record PropPacketType<P extends Prop, T>(Handler<P, T> handler, StreamCod
 	}
 
 	@Nullable
-	public SimplePacketPayload createPayload(Prop prop, T payload) {
+	public SimplePayload createPayload(Prop prop, T payload) {
 		int index = prop.type.getPacketIndex(this);
 
 		if (index == -1) {

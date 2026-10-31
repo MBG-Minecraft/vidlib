@@ -3,14 +3,14 @@ package dev.latvian.mods.vidlib.feature.prop;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record PropS2CPayload(int prop, int packet, byte[] data) implements SimplePacketPayload {
+public record PropS2CPayload(int prop, int packet, byte[] data) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<PropS2CPayload> TYPE = VidLibPacketType.internal("prop/s2c", CompositeStreamCodec.of(
+	public static final SimplePayloadType<PropS2CPayload> TYPE = SimplePayloadType.vidlib("prop/s2c", CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT, PropS2CPayload::prop,
 		ByteBufCodecs.VAR_INT, PropS2CPayload::packet,
 		ByteBufCodecs.BYTE_ARRAY, PropS2CPayload::data,
@@ -18,7 +18,7 @@ public record PropS2CPayload(int prop, int packet, byte[] data) implements Simpl
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

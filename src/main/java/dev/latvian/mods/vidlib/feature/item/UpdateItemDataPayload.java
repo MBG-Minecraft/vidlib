@@ -6,21 +6,21 @@ import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.vidlib.core.VLItem;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 
-public record UpdateItemDataPayload(InteractionHand hand, CompoundTag tag) implements SimplePacketPayload {
+public record UpdateItemDataPayload(InteractionHand hand, CompoundTag tag) implements SimplePayload {
 	@AutoPacket(to = AutoPacket.To.SERVER)
-	public static final VidLibPacketType<UpdateItemDataPayload> TYPE = VidLibPacketType.internal("update_item_data", CompositeStreamCodec.of(
+	public static final SimplePayloadType<UpdateItemDataPayload> TYPE = SimplePayloadType.vidlib("update_item_data", CompositeStreamCodec.of(
 		DataTypes.HAND.streamCodec(), UpdateItemDataPayload::hand,
 		MCStreamCodecs.COMPOUND_TAG, UpdateItemDataPayload::tag,
 		UpdateItemDataPayload::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

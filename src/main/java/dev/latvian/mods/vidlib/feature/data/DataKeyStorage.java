@@ -7,12 +7,6 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.codec.VLStreamCodecs;
-import dev.latvian.mods.vidlib.feature.imgui.builder.BooleanImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.DoubleImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.FloatImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
-import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -96,60 +90,48 @@ public class DataKeyStorage {
 		return new DataKey.Builder<>(this, id, type, defaultValue);
 	}
 
-	public <T> DataKey.Builder<T> buildDefault(String id, DataType<T> type, @Nullable T defaultValue, @Nullable ImBuilderType<T> imBuilder) {
-		return builder(id, type, defaultValue).imBuilder(imBuilder).save().sync();
+	public <T> DataKey.Builder<T> buildDefault(String id, DataType<T> type, @Nullable T defaultValue) {
+		return builder(id, type, defaultValue).save().sync();
 	}
 
-	public <T> DataKey<T> createDefault(String id, DataType<T> type, @Nullable T defaultValue, @Nullable ImBuilderType<T> imBuilder) {
-		return buildDefault(id, type, defaultValue, imBuilder).build();
+	public <T> DataKey<T> createDefault(String id, DataType<T> type, @Nullable T defaultValue) {
+		return buildDefault(id, type, defaultValue).build();
 	}
 
 	public DataKey<Boolean> createBoolean(String id, boolean defaultValue) {
-		return createDefault(id, DataTypes.BOOL, defaultValue, BooleanImBuilder.TYPE);
-	}
-
-	public DataKey<Integer> createInt(String id, int defaultValue) {
-		return createDefault(id, DataTypes.INT, defaultValue, IntImBuilder.TYPE_1M);
+		return createDefault(id, DataTypes.BOOL, defaultValue);
 	}
 
 	public DataKey<Integer> createInt(String id, int defaultValue, int min, int max) {
-		return createDefault(id, DataTypes.INT, defaultValue, () -> new IntImBuilder(min, max));
-	}
-
-	public DataKey<Integer> createVarInt(String id, int defaultValue) {
-		return createDefault(id, DataTypes.VAR_INT, defaultValue, IntImBuilder.TYPE_1M);
+		return createDefault(id, DataTypes.INT, defaultValue);
 	}
 
 	public DataKey<Integer> createVarInt(String id, int defaultValue, int min, int max) {
-		return createDefault(id, DataTypes.VAR_INT, defaultValue, () -> new IntImBuilder(min, max));
+		return createDefault(id, DataTypes.VAR_INT, defaultValue);
 	}
 
-	public DataKey<Integer> createTicks(String id, int defaultValue) {
-		return createDefault(id, DataTypes.TICKS, defaultValue, IntImBuilder.TYPE_1M);
+	public DataKey<Long> createLong(String id, long defaultValue, long min, long max) {
+		return createDefault(id, DataTypes.LONG, defaultValue);
+	}
+
+	public DataKey<Long> createVarLong(String id, long defaultValue, long min, long max) {
+		return createDefault(id, DataTypes.VAR_LONG, defaultValue);
 	}
 
 	public DataKey<Integer> createTicks(String id, int defaultValue, int min, int max) {
-		return createDefault(id, DataTypes.TICKS, defaultValue, () -> new IntImBuilder(min, max));
-	}
-
-	public DataKey<Float> createFloat(String id, float defaultValue) {
-		return createDefault(id, DataTypes.FLOAT, defaultValue, FloatImBuilder.TYPE);
+		return createDefault(id, DataTypes.TICKS, defaultValue);
 	}
 
 	public DataKey<Float> createFloat(String id, float defaultValue, float min, float max) {
-		return createDefault(id, DataTypes.FLOAT, defaultValue, FloatImBuilder.type(min, max));
-	}
-
-	public DataKey<Double> createDouble(String id, double defaultValue) {
-		return createDefault(id, DataTypes.DOUBLE, defaultValue, DoubleImBuilder.TYPE);
+		return createDefault(id, DataTypes.FLOAT, defaultValue);
 	}
 
 	public DataKey<Double> createDouble(String id, double defaultValue, double min, double max) {
-		return createDefault(id, DataTypes.DOUBLE, defaultValue, DoubleImBuilder.type(min, max));
+		return createDefault(id, DataTypes.DOUBLE, defaultValue);
 	}
 
 	public <E> DataKey<E> createEnum(String id, DataType<E> type, E defaultValue, E[] values) {
-		return createDefault(id, type, defaultValue, () -> new EnumImBuilder<>(values));
+		return createDefault(id, type, defaultValue);
 	}
 
 	@Override

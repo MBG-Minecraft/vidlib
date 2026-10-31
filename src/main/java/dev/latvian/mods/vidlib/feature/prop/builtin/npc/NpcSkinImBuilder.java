@@ -1,12 +1,12 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.npc;
 
+import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.vidlib.feature.client.TextureSet;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ListImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.SetImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.StringImBuilder;
-import dev.latvian.mods.vidlib.feature.skin.SkinTexture;
 import dev.latvian.mods.vidlib.feature.skin.SkinTextureImBuilder;
 import imgui.ImGui;
 import imgui.type.ImInt;

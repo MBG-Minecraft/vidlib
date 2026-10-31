@@ -2,15 +2,15 @@ package dev.latvian.mods.vidlib.feature.entity;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
-public record S2CEntityEventPayload(EntityData event) implements SimplePacketPayload {
+public record S2CEntityEventPayload(EntityData event) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<S2CEntityEventPayload> TYPE = VidLibPacketType.internal("s2c_ee", EntityData.STREAM_CODEC.map(S2CEntityEventPayload::new, S2CEntityEventPayload::event));
+	public static final SimplePayloadType<S2CEntityEventPayload> TYPE = SimplePayloadType.vidlib("s2c_ee", EntityData.STREAM_CODEC.map(S2CEntityEventPayload::new, S2CEntityEventPayload::event));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

@@ -12,7 +12,6 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
-import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.flag.ImGuiWindowFlags;
@@ -165,8 +164,6 @@ public class EntityExplorerPanel extends Panel {
 				} else {
 					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(entity, PositionType.EYES).ref());
 				}
-
-				DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
 			}
 
 			var team = entity.getTeam();

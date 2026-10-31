@@ -2,9 +2,9 @@ package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.entity.PlayerInput;
+import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.klib.registry.CustomRegistry;
 import dev.latvian.mods.klib.util.LevelGameTimeProvider;
-import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
@@ -65,9 +65,6 @@ public class SessionData implements Comparable<SessionData> {
 		suspended = player.get(InternalPlayerData.SUSPENDED);
 	}
 
-	public void updateZones(Level level) {
-	}
-
 	public void updateServerData(long gameTime, Player self, List<DataMapValue> update) {
 	}
 
@@ -85,7 +82,7 @@ public class SessionData implements Comparable<SessionData> {
 	public void updateInput(Level level, UUID player, PlayerInput input) {
 	}
 
-	public void updateSkyboxes() {
+	public void updateAtmospheres() {
 	}
 
 	public void setGlowColor(@Nullable UUID uuid, @Nullable Color color) {
@@ -96,7 +93,7 @@ public class SessionData implements Comparable<SessionData> {
 	 * syncType 1 = replay snapshot
 	 * syncType 2 = login
 	 */
-	public void sync(VLS2CPacketConsumer packets, Player player, int syncType) {
+	public void sync(S2CPacketConsumer packets, Player player, int syncType) {
 		var level = player.level();
 		var environment = level.getEnvironment();
 
@@ -105,9 +102,7 @@ public class SessionData implements Comparable<SessionData> {
 		}
 		// packets.s2c(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()));
 
-		if (player instanceof ServerPlayer serverPlayer) {
-			CustomRegistry.syncAll(serverPlayer, packets::s2c);
-		}
+		CustomRegistry.syncAll(player, packets);
 
 		packets.s2c(new SyncGlobalNumberVariablesPayload(environment.globalVariables()));
 

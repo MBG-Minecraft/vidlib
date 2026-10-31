@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
-import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
+import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -85,7 +85,7 @@ public class PropList implements Iterable<Prop> {
 		return false;
 	}
 
-	public void tick(@Nullable VLS2CPacketConsumer updates, boolean tick) {
+	public void tick(@Nullable S2CPacketConsumer updates, boolean tick) {
 		if (!tick) {
 			if (!map.isEmpty() && VLPlatformHelper.CURRENT.isReplayLevel(props.level)) {
 				var time = props.level.getGameTime();
@@ -140,7 +140,7 @@ public class PropList implements Iterable<Prop> {
 		}
 	}
 
-	public void tickBukkit(@Nullable VLS2CPacketConsumer updates, boolean tick) {
+	public void tickBukkit(@Nullable S2CPacketConsumer updates, boolean tick) {
 		if (!tick) {
 			return;
 		}
@@ -186,7 +186,7 @@ public class PropList implements Iterable<Prop> {
 		}
 	}
 
-	public void add(Prop prop, @Nullable VLS2CPacketConsumer packets) {
+	public void add(Prop prop, @Nullable S2CPacketConsumer packets) {
 		if (queueNewProps) {
 			propQueue.add(prop);
 			return;

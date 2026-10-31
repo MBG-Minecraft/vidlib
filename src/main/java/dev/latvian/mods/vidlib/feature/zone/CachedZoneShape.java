@@ -2,11 +2,11 @@ package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.shape.VoxelShapeBox;
-import dev.latvian.mods.klib.util.GeometryRenderLayer;
 import dev.latvian.mods.vidlib.feature.visual.FaceTexture;
 import dev.latvian.mods.vidlib.feature.visual.ResolvedCubeTextures;
 import dev.latvian.mods.vidlib.feature.visual.ResolvedTexturedCube;
 import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
+import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
@@ -23,7 +23,7 @@ public class CachedZoneShape {
 	private final Zone instance;
 	private final VoxelShape shape;
 	private VoxelShapeBox shapeBox;
-	private Map<GeometryRenderLayer, List<ResolvedTexturedCube>> cachedCubes;
+	private Map<TerrainRenderLayer, List<ResolvedTexturedCube>> cachedCubes;
 
 	public CachedZoneShape(Zone instance, VoxelShape shape) {
 		this.instance = instance;
@@ -31,7 +31,7 @@ public class CachedZoneShape {
 	}
 
 	public static void append(Collection<CachedZoneShape> list, Zone instance) {
-		var shape = instance.volume.shape().createVoxelShape().optimize();
+		var shape = instance.volume.shape().value().createVoxelShape().optimize();
 
 		if (!shape.isEmpty()) {
 			list.add(new CachedZoneShape(instance, shape));
@@ -62,7 +62,7 @@ public class CachedZoneShape {
 			"shapeBox=" + shapeBox + ']';
 	}
 
-	public Map<GeometryRenderLayer, List<ResolvedTexturedCube>> cachedCubes() {
+	public Map<TerrainRenderLayer, List<ResolvedTexturedCube>> cachedCubes() {
 		if (cachedCubes == null) {
 			cachedCubes = new Reference2ObjectOpenHashMap<>();
 
@@ -92,7 +92,7 @@ public class CachedZoneShape {
 				}
 
 				if (!textures.isEmpty()) {
-					for (var renderLayerFilter : GeometryRenderLayer.ALL) {
+					for (var renderLayerFilter : TerrainRenderLayer.ALL) {
 						var tex = textures.filter(renderLayerFilter, false);
 
 						if (!tex.isEmpty()) {
@@ -105,10 +105,10 @@ public class CachedZoneShape {
 
 				// directionless fog not supported yet
 				if (!fog.isNone() && fog.direction().isPresent()) {
-					var cubes = cachedCubes.computeIfAbsent(GeometryRenderLayer.TRANSLUCENT, k -> new ArrayList<>(1));
+					var cubes = cachedCubes.computeIfAbsent(TerrainRenderLayer.TRANSLUCENT, k -> new ArrayList<>(1));
 					var dir = fog.direction().get();
 
-					var tex = new ResolvedCubeTextures(GeometryRenderLayer.TRANSLUCENT, new ArrayList<>());
+					var tex = new ResolvedCubeTextures(TerrainRenderLayer.TRANSLUCENT, new ArrayList<>());
 					tex.faces().add(FaceTexture.EMPTY);
 					tex.faces().add(FaceTexture.EMPTY);
 					tex.faces().add(FaceTexture.EMPTY);
@@ -116,7 +116,7 @@ public class CachedZoneShape {
 					tex.faces().add(FaceTexture.EMPTY);
 					tex.faces().add(FaceTexture.EMPTY);
 
-					tex.faces().set(dir.get3DDataValue(), new FaceTexture(SpriteKey.WHITE, GeometryRenderLayer.TRANSLUCENT, false, fog.color(), 0F, 1D));
+					tex.faces().set(dir.get3DDataValue(), new FaceTexture(SpriteKey.WHITE, TerrainRenderLayer.TRANSLUCENT, false, fog.color(), 0F, 1D));
 
 					for (int i = 0; i <= fog.steps(); i++) {
 						double l = i / (double) fog.steps();

@@ -4,20 +4,20 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
 import java.util.UUID;
 
-public record RemoveGlowPayload(UUID entity) implements SimplePacketPayload {
+public record RemoveGlowPayload(UUID entity) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<RemoveGlowPayload> TYPE = VidLibPacketType.internal("glow/remove", CompositeStreamCodec.of(
+	public static final SimplePayloadType<RemoveGlowPayload> TYPE = SimplePayloadType.vidlib("glow/remove", CompositeStreamCodec.of(
 		KLibStreamCodecs.UUID, RemoveGlowPayload::entity,
 		RemoveGlowPayload::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

@@ -23,6 +23,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -38,7 +39,7 @@ public class NPCParticle extends CustomParticle {
 	private final RemotePlayer fakePlayer;
 	private final AvatarRenderState playerRenderState;
 
-	public NPCParticle(NPCParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
+	public NPCParticle(NPCParticleOptions options, ClientLevel level, double x, double y, double z, double vx, double vy, double vz, RandomSource random) {
 		super(level, x, y, z);
 		var mc = Minecraft.getInstance();
 		var recordingMap = NPCRecording.getReplay(level.registryAccess());

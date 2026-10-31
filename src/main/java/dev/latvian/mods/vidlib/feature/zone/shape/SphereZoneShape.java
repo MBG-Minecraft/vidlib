@@ -6,9 +6,12 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.klib.shape.SpherePoints;
+import dev.latvian.mods.klib.vertex.LineVertexCallback;
+import dev.latvian.mods.klib.vertex.QuadVertexCallback;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -16,7 +19,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements ZoneShape {
-	public static final DynamicType<RegistryFriendlyByteBuf, ZoneShape> TYPE = DynamicType.create(
+	public static final DynamicType<ByteBuf, ZoneShape> TYPE = DynamicType.create(
 		"sphere",
 		RecordCodecBuilder.mapCodec(instance -> instance.group(
 			MCCodecs.VEC3.fieldOf("pos").forGetter(SphereZoneShape::pos),
@@ -34,7 +37,7 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 	}
 
 	@Override
-	public DynamicType<RegistryFriendlyByteBuf, ZoneShape> type() {
+	public DynamicType<ByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 
@@ -135,5 +138,29 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 	@Override
 	public ZoneShape scale(double x, double y, double z) {
 		return new SphereZoneShape(pos, radius * x * y * z);
+	}
+
+	@Override
+	public void buildLines(LineVertexCallback callback, Vec3 offset) {
+		SpherePoints.M.buildLines((float) radius, callback);
+	}
+
+	@Override
+	public void buildOuterLines(LineVertexCallback callback, Vec3 offset) {
+		var box = toAABB();
+
+		callback.cuboidLines(
+			(float) (box.minX + offset.x),
+			(float) (box.minY + offset.y),
+			(float) (box.minZ + offset.z),
+			(float) (box.maxX + offset.x),
+			(float) (box.maxY + offset.y),
+			(float) (box.maxZ + offset.z)
+		);
+	}
+
+	@Override
+	public void buildQuads(QuadVertexCallback callback, Vec3 offset) {
+		SpherePoints.M.buildQuads((float) radius, callback);
 	}
 }

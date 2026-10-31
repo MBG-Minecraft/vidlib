@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.image;
 
+import dev.latvian.mods.klib.util.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.feature.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
 import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
 import net.minecraft.client.renderer.texture.OverlayTexture;

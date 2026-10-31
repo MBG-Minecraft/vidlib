@@ -61,7 +61,7 @@ public abstract class ClientPacketListenerMixin implements VLClientPlayPacketLis
 
 		Entity entity;
 
-		if (payload.type() == EntityTypes.PLAYER) {
+		if (payload.entityType() == EntityTypes.PLAYER) {
 			var playerinfo = getPlayerInfo(payload.uuid());
 
 			if (playerinfo == null) {
@@ -71,7 +71,7 @@ public abstract class ClientPacketListenerMixin implements VLClientPlayPacketLis
 				entity = new RemotePlayer(level, playerinfo.getProfile());
 			}
 		} else {
-			entity = payload.type().create(ctx.level(), EntitySpawnReason.LOAD);
+			entity = payload.entityType().create(ctx.level(), EntitySpawnReason.LOAD);
 		}
 
 		if (entity != null) {
@@ -79,7 +79,7 @@ public abstract class ClientPacketListenerMixin implements VLClientPlayPacketLis
 			level.addEntity(entity);
 			return entity;
 		} else {
-			VidLib.LOGGER.warn("Skipping Entity with id {}", payload.type());
+			VidLib.LOGGER.warn("Skipping Entity with id {}", payload.entityType());
 			return null;
 		}
 	}

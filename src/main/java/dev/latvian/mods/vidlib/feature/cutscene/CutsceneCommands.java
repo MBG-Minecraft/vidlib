@@ -13,9 +13,9 @@ public interface CutsceneCommands {
 		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.literal("play")
 			.then(Commands.argument("player", EntityArgument.players())
-				.then(Commands.argument("cutscene", Cutscene.COMMAND.argument(buildContext))
+				.then(Commands.argument("cutscene", Cutscene.DATA_TYPE.argument(buildContext))
 					.executes(ctx -> {
-						var cutscene = Cutscene.COMMAND.get(ctx, "cutscene");
+						var cutscene = Cutscene.DATA_TYPE.get(ctx, "cutscene");
 
 						for (var player : EntityArgument.getPlayers(ctx, "player")) {
 							player.playCutscene(cutscene, KNumberVariables.EMPTY);

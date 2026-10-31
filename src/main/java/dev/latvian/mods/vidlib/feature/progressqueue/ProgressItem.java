@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
-import dev.latvian.mods.vidlib.util.ColoredText;
+import dev.latvian.mods.klib.color.ColoredText;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;

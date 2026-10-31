@@ -2,13 +2,12 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
+import dev.latvian.mods.klib.net.S2CPacketConsumer;
+import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.session.SessionData;
-import dev.latvian.mods.vidlib.feature.zone.ZoneVolume;
-import dev.latvian.mods.vidlib.util.PauseType;
 import dev.latvian.mods.vidlib.util.RepeatingTask;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -64,17 +63,6 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 		vl$getScheduledTaskHandler().run(delay, task);
 	}
 
-	default void removeZone(Identifier zone, int index) {
-		throw new NoMixinException(this);
-	}
-
-	default void updateZone(Identifier zone, int index, ZoneVolume zoneVolumeData) {
-		throw new NoMixinException(this);
-	}
-
-	default void vl$clearProfileCache() {
-	}
-
 	default KNumberVariables globalVariables() {
 		return KNumberVariables.EMPTY;
 	}
@@ -87,7 +75,7 @@ public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEn
 	}
 
 	@ApiStatus.Internal
-	default void sync(VLS2CPacketConsumer packets) {
+	default void sync(S2CPacketConsumer packets) {
 		getDataMap().syncAll(packets, (uuid, updates) -> new SyncServerDataPayload(updates));
 	}
 

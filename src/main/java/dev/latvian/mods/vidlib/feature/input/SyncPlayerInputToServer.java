@@ -3,15 +3,15 @@ package dev.latvian.mods.vidlib.feature.input;
 import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
-public record SyncPlayerInputToServer(PlayerInput input) implements SimplePacketPayload {
+public record SyncPlayerInputToServer(PlayerInput input) implements SimplePayload {
 	@AutoPacket(to = AutoPacket.To.SERVER)
-	public static final VidLibPacketType<SyncPlayerInputToServer> TYPE = VidLibPacketType.internal("sync_input_to_server", PlayerInput.STREAM_CODEC.map(SyncPlayerInputToServer::new, SyncPlayerInputToServer::input));
+	public static final SimplePayloadType<SyncPlayerInputToServer> TYPE = SimplePayloadType.vidlib("sync_input_to_server", PlayerInput.STREAM_CODEC.map(SyncPlayerInputToServer::new, SyncPlayerInputToServer::input));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

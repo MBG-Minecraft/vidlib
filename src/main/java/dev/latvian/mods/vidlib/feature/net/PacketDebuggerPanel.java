@@ -5,11 +5,12 @@ import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PacketDebuggerPanel extends Panel {
-	public record LoggedPacket(long uid, long remoteGameTime, SimplePacketPayload payload) {
+	public record LoggedPacket(Instant timestamp, long gameTime, SimplePayload payload) {
 	}
 
 	public static final PacketDebuggerPanel INSTANCE = new PacketDebuggerPanel();

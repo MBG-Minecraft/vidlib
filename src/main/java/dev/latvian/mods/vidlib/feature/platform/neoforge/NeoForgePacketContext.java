@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.platform.neoforge;
 
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketPayloadContainer;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.extensions.ICommonPacketListener;
@@ -11,7 +11,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-public record NeoForgePacketContext(VidLibPacketPayloadContainer payload, IPayloadContext parent) implements Context {
+public record NeoForgePacketContext(SimplePayload payload, IPayloadContext parent) implements Context {
 	@Override
 	public ICommonPacketListener listener() {
 		return parent.listener();

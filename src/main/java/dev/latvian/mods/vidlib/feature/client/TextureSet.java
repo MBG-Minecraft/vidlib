@@ -1,14 +1,15 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.klib.util.MiscUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.ClientAsset;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class TextureSet {
@@ -51,7 +52,7 @@ public class TextureSet {
 				}
 			}
 
-			list.sort((a, b) -> a.id().compareTo(b.id()));
+			list.sort(Comparator.comparing(ClientAsset.ResourceTexture::id));
 			list = List.copyOf(list);
 		}
 

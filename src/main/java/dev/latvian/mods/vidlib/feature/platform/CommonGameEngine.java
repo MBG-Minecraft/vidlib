@@ -174,7 +174,7 @@ public class CommonGameEngine {
 			}
 		}
 
-		ctx.payload().wrapped().handleAsync(ctx);
+		ctx.payload().handleAsync(ctx);
 	}
 
 	private boolean forwardHandlePacketToClient(Context ctx) {
@@ -251,7 +251,7 @@ public class CommonGameEngine {
 	@Nullable
 	public Packet<ClientGamePacketListener> overrideEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
 		if (!entity.getType().builtInRegistryHolder().key().identifier().getNamespace().equals("minecraft")) {
-			return (Packet) new ExactEntitySpawnPayload(entity, serverEntity, 0).toS2CPacket(entity.level().getGameTime());
+			return (Packet) new ExactEntitySpawnPayload(entity, serverEntity, 0).toS2CPacket();
 		}
 
 		return null;
@@ -293,8 +293,9 @@ public class CommonGameEngine {
 		if (FMLLoader.getCurrent().getDist().isClient()) {
 			LocalPlayer player = Minecraft.getInstance().player;
 			if (player != null) {
-				Float value = player.get(InternalPlayerData.BRIGHTNESS_OVERRIDE);
-				if (value >= 0F) {
+				float value = player.get(InternalPlayerData.BRIGHTNESS_OVERRIDE);
+
+				if (value > 0F) {
 					return value;
 				}
 			}

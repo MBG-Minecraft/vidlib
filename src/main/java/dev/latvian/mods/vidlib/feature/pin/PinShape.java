@@ -15,10 +15,10 @@ import java.util.function.Function;
 public enum PinShape implements StringRepresentable {
 	PIN(ID.vidlib("pin"), "Pin", false, VidLibTextures.CIRCLE.id(), 103, 137, 308),
 	PIN_CROSS(ID.vidlib("pin_cross"), "Pin with Cross", false, VidLibTextures.CIRCLE.id(), 103, 137, 308),
-	SQUARE("square", "Full Square", true, null, VidLibTextures.SQUARE.id(), ID.vidlib("textures/misc/pin/icon/square.png"), 0, 0, 512),
+	SQUARE("square", "Full Square", true, null, VidLibTextures.WHITE.id(), ID.vidlib("textures/misc/pin/icon/square.png"), 0, 0, 512),
 	CIRCLE("circle", "Full Circle", true, null, VidLibTextures.CIRCLE.id(), ID.vidlib("textures/misc/pin/icon/circle.png"), 0, 0, 512),
-	ARROW(ID.vidlib("arrow"), "Arrow", true, VidLibTextures.SQUARE.id(), 0, 0, 512),
-	ARROW_OFFSET(ID.vidlib("arrow_offset"), "Arrow (Offset)", true, VidLibTextures.SQUARE.id(), 50, 0, 412),
+	ARROW(ID.vidlib("arrow"), "Arrow", true, VidLibTextures.WHITE.id(), 0, 0, 512),
+	ARROW_OFFSET(ID.vidlib("arrow_offset"), "Arrow (Offset)", true, VidLibTextures.WHITE.id(), 50, 0, 412),
 
 	;
 

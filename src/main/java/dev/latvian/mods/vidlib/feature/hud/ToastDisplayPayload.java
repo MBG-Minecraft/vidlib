@@ -3,15 +3,15 @@ package dev.latvian.mods.vidlib.feature.hud;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-public record ToastDisplayPayload(String uniqueId, long displayTime, Component title, Component description) implements SimplePacketPayload {
+public record ToastDisplayPayload(String uniqueId, long displayTime, Component title, Component description) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<ToastDisplayPayload> TYPE = VidLibPacketType.video("toast/display", CompositeStreamCodec.of(
+	public static final SimplePayloadType<ToastDisplayPayload> TYPE = SimplePayloadType.video("toast/display", CompositeStreamCodec.of(
 		ByteBufCodecs.STRING_UTF8, ToastDisplayPayload::uniqueId,
 		ByteBufCodecs.VAR_LONG, ToastDisplayPayload::displayTime,
 		ComponentSerialization.STREAM_CODEC, ToastDisplayPayload::title,
@@ -24,7 +24,7 @@ public record ToastDisplayPayload(String uniqueId, long displayTime, Component t
 	}
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

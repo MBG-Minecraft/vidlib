@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.renderpearl.api.pipeline.BlendEquation;
 import com.mojang.renderpearl.api.pipeline.BlendFunction;
 import com.mojang.renderpearl.api.pipeline.ColorTargetState;
@@ -19,6 +20,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Function;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
@@ -205,7 +207,7 @@ public interface VidLibRenderPipelines {
 		.withBindGroupLayout(BindGroupLayouts.FOG)
 		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
 		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
-		.withColorTargetState(new ColorTargetState(java.util.Optional.of(BlendFunction.ADDITIVE), com.mojang.renderpearl.api.GpuFormat.RGBA8_UNORM, ColorTargetState.WRITE_NONE))
+		.withColorTargetState(new ColorTargetState(Optional.of(BlendFunction.ADDITIVE), GpuFormat.RGBA8_UNORM, ColorTargetState.WRITE_NONE))
 		.withDepthStencilState(DepthStencilState.DEFAULT)
 		.withVertexShader("core/particle")
 		.withFragmentShader("core/particle")

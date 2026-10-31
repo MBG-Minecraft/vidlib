@@ -7,8 +7,8 @@ import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -27,9 +27,9 @@ public record SpawnClientParticlePayload(
 	Vec3 velocityMultiplierMin,
 	Vec3 velocityMultiplierMax,
 	int count
-) implements SimplePacketPayload {
+) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<SpawnClientParticlePayload> TYPE = VidLibPacketType.internal("spawn_client_particles", CompositeStreamCodec.of(
+	public static final SimplePayloadType<SpawnClientParticlePayload> TYPE = SimplePayloadType.vidlib("spawn_client_particles", CompositeStreamCodec.of(
 		KLibStreamCodecs.listOf(ByteBufCodecs.either(ParticleTypes.STREAM_CODEC, ByteBufCodecs.STRING_UTF8)), SpawnClientParticlePayload::particles,
 		MCStreamCodecs.VEC3, SpawnClientParticlePayload::pos,
 		MCStreamCodecs.VEC3S, SpawnClientParticlePayload::spread,
@@ -42,7 +42,7 @@ public record SpawnClientParticlePayload(
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

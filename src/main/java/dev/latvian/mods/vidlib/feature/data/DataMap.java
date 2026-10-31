@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.core.VLS2CPacketConsumer;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
@@ -230,7 +230,7 @@ public class DataMap implements DataMapHolder {
 		}
 	}
 
-	public void syncAll(VLS2CPacketConsumer target, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
+	public void syncAll(S2CPacketConsumer target, BiFunction<UUID, List<DataMapValue>, SimplePayload> factory) {
 		var list = new ArrayList<DataMapValue>();
 
 		for (var v : map) {
@@ -244,7 +244,7 @@ public class DataMap implements DataMapHolder {
 		}
 	}
 
-	public void sync(VLS2CPacketConsumer packetsToEveryone, BiFunction<UUID, List<DataMapValue>, SimplePacketPayload> factory) {
+	public void sync(S2CPacketConsumer packetsToEveryone, BiFunction<UUID, List<DataMapValue>, SimplePayload> factory) {
 		List<DataMapValue> syncAll = null;
 
 		for (var v : map) {

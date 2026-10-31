@@ -3,17 +3,17 @@ package dev.latvian.mods.vidlib.feature.note;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 
 import java.util.UUID;
 
-public record DeleteNotePayload(UUID id) implements SimplePacketPayload {
+public record DeleteNotePayload(UUID id) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<DeleteNotePayload> TYPE = VidLibPacketType.internal("delete_note", KLibStreamCodecs.UUID.map(DeleteNotePayload::new, DeleteNotePayload::id));
+	public static final SimplePayloadType<DeleteNotePayload> TYPE = SimplePayloadType.vidlib("delete_note", KLibStreamCodecs.UUID.map(DeleteNotePayload::new, DeleteNotePayload::id));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

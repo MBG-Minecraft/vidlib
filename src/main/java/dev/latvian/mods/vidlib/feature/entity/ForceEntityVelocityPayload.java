@@ -4,21 +4,21 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
 
-public record ForceEntityVelocityPayload(int entity, Vec3 velocity) implements SimplePacketPayload {
+public record ForceEntityVelocityPayload(int entity, Vec3 velocity) implements SimplePayload {
 	@AutoPacket
-	public static final VidLibPacketType<ForceEntityVelocityPayload> TYPE = VidLibPacketType.internal("force_entity_velocity", CompositeStreamCodec.of(
+	public static final SimplePayloadType<ForceEntityVelocityPayload> TYPE = SimplePayloadType.vidlib("force_entity_velocity", CompositeStreamCodec.of(
 		ByteBufCodecs.VAR_INT, ForceEntityVelocityPayload::entity,
 		MCStreamCodecs.VEC3, ForceEntityVelocityPayload::velocity,
 		ForceEntityVelocityPayload::new
 	));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

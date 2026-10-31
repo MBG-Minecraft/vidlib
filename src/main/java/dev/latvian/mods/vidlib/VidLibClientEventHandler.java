@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.client.VidLibWorldRenderState;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
@@ -35,7 +36,6 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
-import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
@@ -81,6 +81,7 @@ import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleGroupsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderNameTagEvent;
@@ -131,10 +132,10 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
 		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.CLIENT));
-		event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.Loader());
+		event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.ClientLoader());
 		event.addListener(ID.vidlib("clothing_preset"), new ClothingPresetLoader());
-		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader());
-		event.addListener(ID.vidlib("skybox"), new SkyboxData.Loader());
+		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.ClientLoader());
+		event.addListener(ID.vidlib("atmosphere"), new Atmosphere.ClientLoader());
 		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
 
 		event.addDependency(ID.vidlib("gradient"), ID.vidlib("clothing_preset"));
@@ -144,7 +145,12 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void registerParticleProviders(RegisterParticleProvidersEvent event) {
-		VidLibClientParticles.register(event);
+		VidLibClientParticles.registerParticleProviders(event);
+	}
+
+	@SubscribeEvent
+	public static void registerParticleGroups(RegisterParticleGroupsEvent event) {
+		VidLibClientParticles.registerParticleGroups(event);
 	}
 
 	@SubscribeEvent

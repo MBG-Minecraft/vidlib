@@ -14,7 +14,7 @@ public interface NetworkChannelInfo {
 		return hasChannel(payload.type());
 	}
 
-	default boolean hasChannel(VidLibPacketType<?> type) {
+	default boolean hasChannel(SimplePayloadType<?> type) {
 		return hasChannel(type.type());
 	}
 }

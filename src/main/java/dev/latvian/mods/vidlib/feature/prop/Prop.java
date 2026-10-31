@@ -27,7 +27,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.IntImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
@@ -389,7 +389,7 @@ public class Prop {
 		return "%08X".formatted(id);
 	}
 
-	public SimplePacketPayload createAddPacket() {
+	public SimplePayload createAddPacket() {
 		return new AddPropPayload(this);
 	}
 
@@ -398,7 +398,7 @@ public class Prop {
 	}
 
 	@Nullable
-	public SimplePacketPayload createUpdatePacket() {
+	public SimplePayload createUpdatePacket() {
 		return UpdatePropPayload.of(this);
 	}
 

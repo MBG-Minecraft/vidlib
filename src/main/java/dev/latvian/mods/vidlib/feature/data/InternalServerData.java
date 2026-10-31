@@ -1,22 +1,19 @@
 package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.klib.data.DataTypes;
-import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
-import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
-import dev.latvian.mods.vidlib.feature.skybox.Skyboxes;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
-import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
 public interface InternalServerData {
-	DataKey<Identifier> SKYBOX = DataKey.SERVER.createDefault("skybox", SkyboxData.ID_DATA_TYPE, Skyboxes.VANILLA, () -> new EnumImBuilder<>(SkyboxData.SKYBOX_IDS, Skyboxes.VANILLA).withNameGetter(ID::idToString));
-	DataKey<Anchor> ANCHOR = DataKey.SERVER.createDefault("anchor", Anchor.DATA_TYPE, Anchor.NONE, null);
+	DataKey<Ref<Atmosphere>> ATMOSPHERE = DataKey.SERVER.createDefault("atmosphere", Atmosphere.DATA_TYPE, null);
+	DataKey<Anchor> ANCHOR = DataKey.SERVER.createDefault("anchor", Anchor.DATA_TYPE, Anchor.NONE);
 	DataKey<Boolean> HIDE_PLUMBOBS = DataKey.SERVER.createBoolean("hide_plumbobs", false);
 	DataKey<NameDrawType> NAME_DRAW_TYPE = DataKey.SERVER.createEnum("name_draw_type", NameDrawType.DATA_TYPE, NameDrawType.VANILLA, NameDrawType.VALUES);
 	DataKey<Double> NAME_DRAW_MIN_DIST = DataKey.SERVER.createDouble("name_draw_min_dist", 20D, 0D, 500D);
@@ -24,12 +21,12 @@ public interface InternalServerData {
 	DataKey<Double> NAME_DRAW_MAX_DIST = DataKey.SERVER.createDouble("name_draw_max_dist", 230D, 0D, 500D);
 	DataKey<Float> NAME_DRAW_MIN_SIZE = DataKey.SERVER.createFloat("name_draw_min_size", 0.5F, 0F, 2F);
 	DataKey<Boolean> NAME_MUST_SEE = DataKey.SERVER.createBoolean("name_must_see", false);
-	DataKey<Long> GLOBAL_STOPWATCH = DataKey.SERVER.createDefault("global_stopwatch", DataTypes.VAR_LONG, 0L, null);
-	DataKey<Long> GLOBAL_STOPWATCH_START = DataKey.SERVER.createDefault("global_stopwatch_start", DataTypes.VAR_LONG, 0L, null);
+	DataKey<Long> GLOBAL_STOPWATCH = DataKey.SERVER.createDefault("global_stopwatch", DataTypes.VAR_LONG, 0L);
+	DataKey<Long> GLOBAL_STOPWATCH_START = DataKey.SERVER.createDefault("global_stopwatch_start", DataTypes.VAR_LONG, 0L);
 	DataKey<Boolean> ICE_MELTS = DataKey.SERVER.createBoolean("ice_melts", false);
 	DataKey<Boolean> BLOCK_GRAVITY = DataKey.SERVER.createBoolean("block_gravity", false);
-	DataKey<List<Waypoint>> WAYPOINTS = DataKey.SERVER.createDefault("waypoints", Waypoint.LIST_DATA_TYPE, List.of(), null);
-	DataKey<MapTextureOverrides> MAP_TEXTURE_OVERRIDES = DataKey.SERVER.createDefault("map_texture_overrides", MapTextureOverrides.DATA_TYPE, MapTextureOverrides.EMPTY, null);
+	DataKey<List<Waypoint>> WAYPOINTS = DataKey.SERVER.createDefault("waypoints", Waypoint.LIST_DATA_TYPE, List.of());
+	DataKey<MapTextureOverrides> MAP_TEXTURE_OVERRIDES = DataKey.SERVER.createDefault("map_texture_overrides", MapTextureOverrides.DATA_TYPE, MapTextureOverrides.EMPTY);
 	DataKey<Integer> MIN_FAKE_LAG = DataKey.SERVER.createVarInt("min_fake_lag", 0, 0, 1000);
 	DataKey<Integer> MAX_FAKE_LAG = DataKey.SERVER.createVarInt("max_fake_lag", 0, 0, 1000);
 

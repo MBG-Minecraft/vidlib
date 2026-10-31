@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import com.mojang.blaze3d.platform.TextureUtil;
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.color.ColoredText;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneBuilderPanel;
@@ -27,11 +28,9 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.chromaticaberration.ChromaticAberrationPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
-import dev.latvian.mods.vidlib.feature.skybox.ClientSkybox;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
-import dev.latvian.mods.vidlib.util.ColoredText;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
@@ -114,7 +113,7 @@ public class BuiltInImGui {
 			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(new NameAndId(graphics.player.getGameProfile()), graphics.player.vl$sessionData().dataMap).open()).enabled(graphics.isAdmin));
 		}
 
-		list.add(ClientSkybox.MENU_ITEM.enabled(graphics.isAdmin));
+		// list.add(ClientAtmosphere.MENU_ITEM.enabled(graphics.isAdmin));
 		list.add(DepthOfFieldPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(ChromaticAberrationPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(FluidPlanePanel.MENU_ITEM.enabled(graphics.isSinglePlayer));

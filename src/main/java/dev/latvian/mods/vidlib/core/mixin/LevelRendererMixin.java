@@ -21,7 +21,6 @@ import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.border.WorldBorder;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Final;
@@ -149,15 +148,5 @@ public abstract class LevelRendererMixin {
 	@Inject(method = "addMainPass", at = @At("RETURN"))
 	private void vl$copyOutlineDepth(FrameGraphBuilder frame, FeatureRenderDispatcher.PreparedFrame featureFrame, GpuBufferSlice terrainFog, ChunkSectionsToRender chunkSectionsToRender, boolean consistentDepthRequired, CallbackInfo ci) {
 		ClientGameEngine.INSTANCE.copyOutlineDepth(Minecraft.getInstance());
-	}
-
-	/**
-	 * Retained seam for {@link ClientGameEngine#getTeamColor}. 26.3 bakes the glow colour into
-	 * {@code EntityRenderState.outlineColor} inside {@code EntityRenderer.extractRenderState}, which
-	 * is no longer reachable from {@link LevelRenderer} — the override therefore has to be applied
-	 * from {@code EntityRendererMixin}.
-	 */
-	public dev.latvian.mods.klib.color.Color vl$getTeamColor(net.minecraft.client.Minecraft mc, Entity entity) {
-		return ClientGameEngine.INSTANCE.getTeamColor(mc, entity);
 	}
 }

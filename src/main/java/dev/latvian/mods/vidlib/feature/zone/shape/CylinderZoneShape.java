@@ -1,16 +1,19 @@
 package dev.latvian.mods.vidlib.feature.zone.shape;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.shape.CylinderShape;
+import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.klib.vertex.LineVertexCallback;
+import dev.latvian.mods.klib.vertex.QuadVertexCallback;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -18,27 +21,32 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 
 public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) implements ZoneShape {
-	public static final DynamicType<RegistryFriendlyByteBuf, ZoneShape> TYPE = DynamicType.create(
+	public static final DynamicType<ByteBuf, ZoneShape> TYPE = DynamicType.create(
 		"cylinder",
 		RecordCodecBuilder.mapCodec(instance -> instance.group(
 			MCCodecs.VEC3.fieldOf("pos").forGetter(CylinderZoneShape::pos),
-			Codec.FLOAT.optionalFieldOf("width", 1F).forGetter(s -> s.shape().width()),
-			Codec.FLOAT.optionalFieldOf("height", 1F).forGetter(s -> s.shape().height())
-		).apply(instance, (pos, width, height) -> new CylinderZoneShape(pos, new CylinderShape(width, height)))),
+			((MapCodec<CylinderShape>) Cast.to(CylinderShape.TYPE.mapCodec())).forGetter(CylinderZoneShape::shape)
+		).apply(instance, CylinderZoneShape::new)),
 		CompositeStreamCodec.of(
 			MCStreamCodecs.VEC3, CylinderZoneShape::pos,
-			ByteBufCodecs.FLOAT, s -> s.shape().width(),
-			ByteBufCodecs.FLOAT, s -> s.shape().height(),
-			(pos, width, height) -> new CylinderZoneShape(pos, new CylinderShape(width, height))
+			Cast.to(CylinderShape.TYPE.streamCodec()), CylinderZoneShape::shape,
+			CylinderZoneShape::new
 		)
 	);
 
 	public CylinderZoneShape(Vec3 pos, CylinderShape shape) {
-		this(pos, shape, new AABB(pos.x() - shape.width() / 2D, pos.y() - shape.height() / 2D, pos.z() - shape.width() / 2D, pos.x() + shape.width() / 2D, pos.y() + shape.height() / 2D, pos.z() + shape.width() / 2D));
+		this(pos, shape, new AABB(
+			pos.x() - shape.width() / 2D,
+			pos.y() - shape.height() / 2D,
+			pos.z() - shape.width() / 2D,
+			pos.x() + shape.width() / 2D,
+			pos.y() + shape.height() / 2D,
+			pos.z() + shape.width() / 2D
+		));
 	}
 
 	@Override
-	public DynamicType<RegistryFriendlyByteBuf, ZoneShape> type() {
+	public DynamicType<ByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 
@@ -60,7 +68,7 @@ public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) impleme
 
 	@Override
 	public boolean contains(double x, double y, double z) {
-		return Math.abs(pos.y - y) <= shape.height() / 2D && Vector2d.distanceSquared(pos.x, pos.z, x, z) <= (shape.width() / 2D) * (shape.width() / 2D);
+		return Math.abs(pos.y - y) <= shape.height() / 2D && Vector2d.distanceSquared(pos.x, pos.z, x, z) <= Mth.square(shape.width() / 2D);
 	}
 
 	@Override
@@ -68,7 +76,7 @@ public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) impleme
 		double dx = pos.x() - Math.clamp(pos.x, box.minX, box.maxX);
 		double dy = pos.y() - Math.clamp(pos.y, box.minY, box.maxY);
 		double dz = pos.z() - Math.clamp(pos.z, box.minZ, box.maxZ);
-		return dx * dx + dz * dz <= (shape.width() / 2D) * (shape.width() / 2D) && Math.abs(dy) <= shape.height() / 2D;
+		return dx * dx + dz * dz <= Mth.square(shape.width() / 2D) && Math.abs(dy) <= shape.height() / 2D;
 	}
 
 	@Override
@@ -88,6 +96,30 @@ public record CylinderZoneShape(Vec3 pos, CylinderShape shape, AABB box) impleme
 
 	@Override
 	public ZoneShape scale(double x, double y, double z) {
-		return new CylinderZoneShape(pos, new CylinderShape((float) (shape.width() * x * z), (float) (shape.height() * y)));
+		return new CylinderZoneShape(pos, new CylinderShape((float) (shape.width() / 2D * x * z), (float) (shape.height() * y)));
+	}
+
+	@Override
+	public void buildLines(LineVertexCallback callback, Vec3 offset) {
+		shape.buildLines(callback);
+	}
+
+	@Override
+	public void buildOuterLines(LineVertexCallback callback, Vec3 offset) {
+		var box = toAABB();
+
+		callback.cuboidLines(
+			(float) (box.minX + offset.x),
+			(float) (box.minY + offset.y),
+			(float) (box.minZ + offset.z),
+			(float) (box.maxX + offset.x),
+			(float) (box.maxY + offset.y),
+			(float) (box.maxZ + offset.z)
+		);
+	}
+
+	@Override
+	public void buildQuads(QuadVertexCallback callback, Vec3 offset) {
+		shape.buildQuads(callback);
 	}
 }

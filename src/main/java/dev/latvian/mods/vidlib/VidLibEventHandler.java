@@ -11,7 +11,7 @@ import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.entity.filter.VidLibEntityFilters;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
@@ -192,7 +192,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void serverStarting(ServerStartingEvent event) {
 		VidLib.LOGGER.info("Netty Threads: " + Math.max(1, SystemPropertyUtil.getInt("io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2)));
-		SimplePacketPayload.S2C.set(0L);
+		SimplePayload.S2C.set(0L);
 		gameLoaded();
 		HubServerSession.loadAsync(event.getServer());
 	}

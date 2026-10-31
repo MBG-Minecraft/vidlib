@@ -5,15 +5,15 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.registry.DynamicType;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.stream.Stream;
 
 public record BoxZoneShape(AABB box) implements ZoneShape {
-	public static final DynamicType<RegistryFriendlyByteBuf, ZoneShape> TYPE = DynamicType.create(
+	public static final DynamicType<ByteBuf, ZoneShape> TYPE = DynamicType.create(
 		"box",
 		RecordCodecBuilder.mapCodec(instance -> instance.group(
 			MCCodecs.VEC3.fieldOf("start").forGetter(z -> z.box.getMinPosition()),
@@ -30,7 +30,7 @@ public record BoxZoneShape(AABB box) implements ZoneShape {
 	}
 
 	@Override
-	public DynamicType<RegistryFriendlyByteBuf, ZoneShape> type() {
+	public DynamicType<ByteBuf, ZoneShape> type() {
 		return TYPE;
 	}
 

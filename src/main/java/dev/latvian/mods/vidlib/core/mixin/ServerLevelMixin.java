@@ -7,7 +7,6 @@ import dev.latvian.mods.vidlib.core.VLServerPacketListener;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
-import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -20,7 +19,6 @@ import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.WritableLevelData;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -46,27 +44,10 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	private MinecraftServer server;
 
 	@Unique
-	private ActiveZones vl$activeZones;
-
-	@Unique
 	private ServerProps vl$props;
 
 	protected ServerLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
 		super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
-	}
-
-	@Override
-	@Nullable
-	public ActiveZones vl$getActiveZones() {
-		return vl$activeZones;
-	}
-
-	@Override
-	public void vl$setActiveZones(ActiveZones zones) {
-		if (vl$activeZones != zones) {
-			vl$activeZones = zones;
-			vl$updateLoadedChunks();
-		}
 	}
 
 	@Override

@@ -2,16 +2,16 @@ package dev.latvian.mods.vidlib.feature.entity;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
-import dev.latvian.mods.vidlib.feature.net.SimplePacketPayload;
-import dev.latvian.mods.vidlib.feature.net.VidLibPacketType;
+import dev.latvian.mods.vidlib.feature.net.SimplePayload;
+import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import net.minecraft.server.level.ServerPlayer;
 
-public record C2SEntityEventPayload(EntityData event) implements SimplePacketPayload {
+public record C2SEntityEventPayload(EntityData event) implements SimplePayload {
 	@AutoPacket(to = AutoPacket.To.SERVER)
-	public static final VidLibPacketType<C2SEntityEventPayload> TYPE = VidLibPacketType.internal("c2s_ee", EntityData.STREAM_CODEC.map(C2SEntityEventPayload::new, C2SEntityEventPayload::event));
+	public static final SimplePayloadType<C2SEntityEventPayload> TYPE = SimplePayloadType.vidlib("c2s_ee", EntityData.STREAM_CODEC.map(C2SEntityEventPayload::new, C2SEntityEventPayload::event));
 
 	@Override
-	public VidLibPacketType<?> getType() {
+	public SimplePayloadType<?> getType() {
 		return TYPE;
 	}
 

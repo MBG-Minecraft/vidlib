@@ -8,9 +8,7 @@ import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.DebugColorBlocks;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
-import dev.latvian.mods.vidlib.feature.particle.TextParticleOptions;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -262,9 +260,11 @@ public class ExplosionInstance {
 			map.put(new ShapeParticleOptions(-duration, Color.MAGENTA.toGradient().ref(), Gradient.EMPTY), instantDeathBlocks);
 		}
 
+		/* FIXME
 		for (var entry : damageText.entrySet()) {
 			level.textParticles(new TextParticleOptions(duration, Component.literal(entry.getKey())), entry.getValue());
 		}
+		 */
 
 		level.cubeParticles(map);
 	}

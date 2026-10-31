@@ -38,13 +38,13 @@ public class ClientCutscene implements CameraOverride {
 		ctx.sourcePos = originPos;
 		ctx.originPos = originPos;
 
-		for (var c : cutscene.steps) {
+		for (var c : cutscene.steps()) {
 			this.totalLength = Math.max(totalLength, c.start + c.length);
 		}
 
 		ctx.maxTick = (double) totalLength;
 
-		for (var step : cutscene.steps) {
+		for (var step : cutscene.steps()) {
 			if (step.start == 0) {
 				ctx.progress = 0D;
 				ctx.tick = 0D;
@@ -76,7 +76,7 @@ public class ClientCutscene implements CameraOverride {
 		ctx.originPos = originPos;
 		ctx.targetPos = state.target;
 
-		for (var step : cutscene.steps) {
+		for (var step : cutscene.steps()) {
 			if (totalTick == step.start + step.length) {
 				ctx.progress = 1D;
 				ctx.tick = (double) step.length;
@@ -86,7 +86,7 @@ public class ClientCutscene implements CameraOverride {
 			}
 		}
 
-		for (var step : cutscene.steps) {
+		for (var step : cutscene.steps()) {
 			if (totalTick >= step.start && totalTick < step.start + step.length) {
 				ctx.tick = (double) (totalTick - step.start);
 				ctx.maxTick = (double) step.length;
@@ -117,7 +117,7 @@ public class ClientCutscene implements CameraOverride {
 
 	@Override
 	public boolean renderPlayer() {
-		return !cutscene.hidePlayer;
+		return !cutscene.hidePlayer();
 	}
 
 	@Override

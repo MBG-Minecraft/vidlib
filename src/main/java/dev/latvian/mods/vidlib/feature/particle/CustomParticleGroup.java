@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.particle;
 import net.minecraft.client.Camera;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleGroup;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
@@ -13,21 +12,22 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class CustomParticleGroup extends ParticleGroup<CustomParticle> {
-	private final ParticleRenderType particleType;
-	private final CustomParticleRenderState state = new CustomParticleRenderState();
+	private final CustomParticleRenderState state;
 
-	public CustomParticleGroup(ParticleEngine engine, ParticleRenderType particleType) {
+	public CustomParticleGroup(ParticleEngine engine) {
 		super(engine);
-		this.particleType = particleType;
+		this.state = new CustomParticleRenderState();
 	}
 
 	@Override
 	public ParticleGroupRenderState extractRenderState(Frustum frustum, Camera camera, float partialTickTime) {
-		state.clear();
+		var cameraPos = camera.position();
 
-		for (var particle : this.particles) {
-			if (particle.extract(frustum, camera, partialTickTime)) {
-				state.add(particle);
+		for (var particle : particles) {
+			var s = particle.extract(frustum, camera, cameraPos, partialTickTime);
+
+			if (s != null) {
+				state.particles.add(s);
 			}
 		}
 
@@ -35,11 +35,7 @@ public class CustomParticleGroup extends ParticleGroup<CustomParticle> {
 	}
 
 	public static class CustomParticleRenderState implements ParticleGroupRenderState {
-		private final List<CustomParticle> particles = new LinkedList<>();
-
-		public void add(CustomParticle particle) {
-			particles.add(particle);
-		}
+		private final List<CustomParticleState> particles = new LinkedList<>();
 
 		@Override
 		public void clear() {
