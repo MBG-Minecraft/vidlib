@@ -6,8 +6,8 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.net.ConfigurationTaskHolder;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
-import dev.latvian.mods.vidlib.feature.net.VLConfigurationTask;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
+import dev.latvian.mods.vidlib.feature.net.VLConfigurationTask;
 
 public record ServerFeaturesPayload(FeatureSet featureSet) implements SimplePayload {
 	@AutoPacket(stage = AutoPacket.Stage.CONFIG)
@@ -18,7 +18,7 @@ public record ServerFeaturesPayload(FeatureSet featureSet) implements SimplePayl
 
 	private static void config(VLConfigurationTask.Context ctx) {
 		if (ctx.channelInfo().hasChannel(TYPE)) {
-			ctx.send(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()).toS2CPacket(0L));
+			ctx.send(new ServerFeaturesPayload(FeatureSet.SERVER_FEATURES.get()).toS2CPacket());
 		}
 	}
 
@@ -34,6 +34,6 @@ public record ServerFeaturesPayload(FeatureSet featureSet) implements SimplePayl
 
 	private void handleClient(Context ctx) {
 		FeatureSet.REMOTE_SERVER_FEATURES = featureSet;
-		ctx.send(new ClientFeaturesPayload(FeatureSet.CLIENT_FEATURES.get()).toC2SPacket(0L));
+		ctx.send(new ClientFeaturesPayload(FeatureSet.CLIENT_FEATURES.get()).toC2SPacket());
 	}
 }

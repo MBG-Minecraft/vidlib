@@ -1,7 +1,6 @@
-package dev.latvian.mods.vidlib.feature.prop;
+package dev.latvian.mods.vidlib.client;
 
 import dev.latvian.mods.klib.math.FrustumCheck;
-import dev.latvian.mods.vidlib.client.VidLibWorldRenderState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.world.phys.AABB;
@@ -9,7 +8,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import org.joml.FrustumIntersection;
 
-public record PropExtractContext(
+public record ExtractContext(
 	Minecraft mc,
 	VidLibWorldRenderState vl,
 	float delta,
@@ -17,7 +16,7 @@ public record PropExtractContext(
 	Vec3 cameraPos,
 	long gameTime
 ) implements FrustumCheck {
-	public PropExtractContext(Minecraft mc, VidLibWorldRenderState vidLibWorldRenderState, ExtractLevelRenderStateEvent event) {
+	public ExtractContext(Minecraft mc, VidLibWorldRenderState vidLibWorldRenderState, ExtractLevelRenderStateEvent event) {
 		this(
 			mc,
 			vidLibWorldRenderState,

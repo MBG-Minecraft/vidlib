@@ -10,13 +10,8 @@ import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.klib.util.SpreadType;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
-import dev.latvian.mods.vidlib.feature.clothing.PlayerClothingImBuilder;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
-import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.GameProfileImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ItemStackImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -68,9 +63,9 @@ public class NPCProp extends BaseGeoProp {
 		YAW,
 		PITCH,
 		ROLL,
-		PropData.create(NPCProp.class, "name", DataTypes.TEXT_COMPONENT, p -> p.name, (p, v) -> p.name = v, TextComponentImBuilder.TYPE),
+		PropData.create(NPCProp.class, "name", DataTypes.TEXT_COMPONENT, p -> p.name, (p, v) -> p.name = v),
 		PropData.createBoolean(NPCProp.class, "stone", p -> p.stone, (p, v) -> p.stone = v),
-		PropData.create(NPCProp.class, "profile", DataTypes.NAME_AND_ID, p -> p.profile, (p, v) -> p.profile = v, GameProfileImBuilder.TYPE),
+		PropData.create(NPCProp.class, "profile", DataTypes.NAME_AND_ID, p -> p.profile, (p, v) -> p.profile = v),
 		PropData.createInt(NPCProp.class, "count", p -> p.count, (p, v) -> {
 			p.count = v;
 			p.instances = null;
@@ -78,7 +73,7 @@ public class NPCProp extends BaseGeoProp {
 		PropData.create(NPCProp.class, "spread", SpreadType.DATA_TYPE, p -> p.spread, (p, v) -> {
 			p.spread = v;
 			p.instances = null;
-		}, () -> new EnumImBuilder<>(SpreadType.VALUES)),
+		}),
 		PropData.createFloat(NPCProp.class, "body_pitch", p -> p.bodyPitch, (p, v) -> p.bodyPitch = v, -90F, 90F),
 		PropData.createFloat(NPCProp.class, "spread_radius", p -> p.spreadRadius, (p, v) -> p.spreadRadius = v, 0F, 200F),
 		PropData.createFloat(NPCProp.class, "random_offset", p -> p.randomOffset, (p, v) -> p.randomOffset = v, 0F, 50F),
@@ -88,22 +83,22 @@ public class NPCProp extends BaseGeoProp {
 			p.rotation = v;
 			p.instances = null;
 		}, 0F, 360F),
-		PropData.create(NPCProp.class, "clothing", PlayerClothing.DATA_TYPE, p -> p.clothing, (p, v) -> p.clothing = v, PlayerClothingImBuilder.TYPE),
+		PropData.create(NPCProp.class, "clothing", PlayerClothing.DATA_TYPE, p -> p.clothing, (p, v) -> p.clothing = v),
 		PropData.createInt(NPCProp.class, "jumping", p -> p.jumping, (p, v) -> p.jumping = v, 0, 100),
 		PropData.createInt(NPCProp.class, "punching", p -> p.punching, (p, v) -> p.punching = v, 0, 100),
-		PropData.create(NPCProp.class, "main_hand_item", DataTypes.ITEM_STACK, p -> p.mainHandItem, (p, v) -> p.mainHandItem = v, ItemStackImBuilder.MAIN_HAND_EQUIPMENT_TYPE),
-		PropData.create(NPCProp.class, "off_hand_item", DataTypes.ITEM_STACK, p -> p.offHandItem, (p, v) -> p.offHandItem = v, ItemStackImBuilder.OFF_HAND_EQUIPMENT_TYPE),
-		PropData.create(NPCProp.class, "head_item", DataTypes.ITEM_STACK, p -> p.headItem, (p, v) -> p.headItem = v, ItemStackImBuilder.HEAD_EQUIPMENT_TYPE),
-		PropData.create(NPCProp.class, "chest_item", DataTypes.ITEM_STACK, p -> p.chestItem, (p, v) -> p.chestItem = v, ItemStackImBuilder.CHEST_EQUIPMENT_TYPE),
-		PropData.create(NPCProp.class, "legs_item", DataTypes.ITEM_STACK, p -> p.legsItem, (p, v) -> p.legsItem = v, ItemStackImBuilder.LEGS_EQUIPMENT_TYPE),
-		PropData.create(NPCProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v, ItemStackImBuilder.FEET_EQUIPMENT_TYPE),
-		PropData.create(NPCProp.class, "pose", POSE_TYPE, p -> p.pose, (p, v) -> p.pose = v, () -> new EnumImBuilder<>(VALID_POSES)),
+		PropData.create(NPCProp.class, "main_hand_item", DataTypes.ITEM_STACK, p -> p.mainHandItem, (p, v) -> p.mainHandItem = v),
+		PropData.create(NPCProp.class, "off_hand_item", DataTypes.ITEM_STACK, p -> p.offHandItem, (p, v) -> p.offHandItem = v),
+		PropData.create(NPCProp.class, "head_item", DataTypes.ITEM_STACK, p -> p.headItem, (p, v) -> p.headItem = v),
+		PropData.create(NPCProp.class, "chest_item", DataTypes.ITEM_STACK, p -> p.chestItem, (p, v) -> p.chestItem = v),
+		PropData.create(NPCProp.class, "legs_item", DataTypes.ITEM_STACK, p -> p.legsItem, (p, v) -> p.legsItem = v),
+		PropData.create(NPCProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v),
+		PropData.create(NPCProp.class, "pose", POSE_TYPE, p -> p.pose, (p, v) -> p.pose = v),
 		PropData.createBoolean(NPCProp.class, "breathing", p -> p.breathing, (p, v) -> p.breathing = v),
 		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F),
 		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
 		PropData.createFloat(NPCProp.class, "additional_head_yaw", p -> p.additionalHeadYaw, (p, v) -> p.additionalHeadYaw = v, -90F, 90F),
 		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
-		PropData.create(NPCProp.class, "random_skins", SkinTexture.SET_DATA_TYPE, p -> p.randomSkins, (p, v) -> p.randomSkins = v, NpcSkinImBuilder::new)
+		PropData.create(NPCProp.class, "random_skins", SkinTexture.SET_DATA_TYPE, p -> p.randomSkins, (p, v) -> p.randomSkins = v)
 	);
 
 	public static NPCProp createCloneFrom(Player player) {

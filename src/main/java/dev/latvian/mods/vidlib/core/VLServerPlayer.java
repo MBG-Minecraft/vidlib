@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.core.NoMixinException;
+import dev.latvian.mods.klib.util.CollectionUtils;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
-import dev.latvian.mods.vidlib.util.MiscUtils;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
@@ -31,7 +31,7 @@ public interface VLServerPlayer extends VLPlayer {
 	@Override
 	default void s2c(@Nullable Packet<? super ClientGamePacketListener> packet) {
 		if (packet instanceof ClientboundBundlePacket bundle) {
-			var collection = MiscUtils.toSequencedCollection(bundle.subPackets());
+			var collection = CollectionUtils.toSequencedCollection(bundle.subPackets());
 
 			if (collection.isEmpty()) {
 				return;

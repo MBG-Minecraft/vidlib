@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.maptextureoverride;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
+import dev.latvian.mods.klib.texture.SpriteKey;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

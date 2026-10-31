@@ -13,6 +13,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.FocusPoint;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
+import dev.latvian.mods.vidlib.math.knumber.KNumberFloatInstance;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.Mth;

@@ -36,6 +36,6 @@ public record SyncPlayerDataPayload(UUID player, List<DataMapValue> update) impl
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$sessionData().updatePlayerData(ctx.remoteGameTime(), ctx.player(), player, update);
+		ctx.player().vl$sessionData().updatePlayerData(ctx.player(), player, update);
 	}
 }

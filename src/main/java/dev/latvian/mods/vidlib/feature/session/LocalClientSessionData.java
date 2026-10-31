@@ -9,6 +9,7 @@ import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
@@ -42,7 +43,6 @@ import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
-import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.feature.zone.ZoneCache;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
@@ -325,12 +325,12 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	@Override
-	public void updateServerData(long gameTime, Player self, List<DataMapValue> update) {
+	public void updateServerData(Player self, List<DataMapValue> update) {
 		serverDataMap.update(mc.player, update);
 	}
 
 	@Override
-	public void updatePlayerData(long gameTime, Player self, UUID player, List<DataMapValue> update) {
+	public void updatePlayerData(Player self, UUID player, List<DataMapValue> update) {
 		if (self.getUUID().equals(player)) {
 			dataMap.update(self, update);
 		} else {

@@ -11,9 +11,6 @@ import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.RenderLightLayer;
-import dev.latvian.mods.vidlib.feature.imgui.builder.EnumImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.TextureImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -32,11 +29,11 @@ public class ShapeProp extends Prop {
 		HEIGHT,
 		CAN_COLLIDE,
 		CAN_INTERACT,
-		PropData.create(ShapeProp.class, "shape", Shape.DATA_TYPE, p -> p.shape, (p, v) -> p.shape = v, null),
-		PropData.create(ShapeProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v, GradientImBuilder.TYPE),
-		PropData.create(ShapeProp.class, "outline_color", Gradient.DATA_TYPE, p -> p.outlineColor, (p, v) -> p.outlineColor = v, GradientImBuilder.TYPE),
-		PropData.create(ShapeProp.class, "light_layer", RenderLightLayer.DATA_TYPE, p -> p.lightLayer, (p, v) -> p.lightLayer = v, () -> new EnumImBuilder<>(RenderLightLayer.VALUES)),
-		PropData.create(ShapeProp.class, "texture", DataTypes.RESOURCE_TEXTURE, p -> p.texture, (p, v) -> p.texture = v.equals(Empty.TEXTURE) ? Empty.TEXTURE : v, TextureImBuilder.ALL)
+		PropData.create(ShapeProp.class, "shape", Shape.DATA_TYPE, p -> p.shape, (p, v) -> p.shape = v),
+		PropData.create(ShapeProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v),
+		PropData.create(ShapeProp.class, "outline_color", Gradient.DATA_TYPE, p -> p.outlineColor, (p, v) -> p.outlineColor = v),
+		PropData.create(ShapeProp.class, "light_layer", RenderLightLayer.DATA_TYPE, p -> p.lightLayer, (p, v) -> p.lightLayer = v),
+		PropData.create(ShapeProp.class, "texture", DataTypes.RESOURCE_TEXTURE, p -> p.texture, (p, v) -> p.texture = v.equals(Empty.TEXTURE) ? Empty.TEXTURE : v)
 	);
 
 	public Ref<Shape> shape;

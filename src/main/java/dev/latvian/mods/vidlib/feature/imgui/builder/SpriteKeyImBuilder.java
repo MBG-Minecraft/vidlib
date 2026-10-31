@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
+import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.client.TextureSet;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import imgui.type.ImString;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.Identifier;
@@ -68,7 +68,7 @@ public class SpriteKeyImBuilder implements ImBuilder<SpriteKey> {
 		if (atlas[0] == null && sprite[0] == null) {
 			return SpriteKey.EMPTY;
 		} else if (atlas[0] == null) {
-			return SpriteKey.special(sprite[0]);
+			return SpriteKey.special(specialSprite[0]);
 		} else {
 			return SpriteKey.of(atlas[0], sprite[0] == null ? SpriteKey.MISSING_SPRITE : sprite[0]);
 		}

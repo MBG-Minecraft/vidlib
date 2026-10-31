@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.skin;
 
+import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -12,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.ListButtonImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ListItemAction;
 import dev.latvian.mods.vidlib.feature.imgui.builder.TextureImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import imgui.ImGui;
 import net.minecraft.core.ClientAsset;
 import org.jetbrains.annotations.Nullable;

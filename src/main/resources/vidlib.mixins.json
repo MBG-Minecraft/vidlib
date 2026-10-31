@@ -56,7 +56,6 @@
 		"ProjectileWeaponItemMixin",
 		"RecipeManagerMixin",
 		"RedStoneOreBlockMixin",
-		"ScoreboardMixin",
 		"ServerCommonPacketListenerImplMixin",
 		"ServerConfigurationPacketListenerImplMixin",
 		"ServerEntityMixin",

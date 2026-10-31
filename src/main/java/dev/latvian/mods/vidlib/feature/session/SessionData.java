@@ -65,10 +65,10 @@ public class SessionData implements Comparable<SessionData> {
 		suspended = player.get(InternalPlayerData.SUSPENDED);
 	}
 
-	public void updateServerData(long gameTime, Player self, List<DataMapValue> update) {
+	public void updateServerData(Player self, List<DataMapValue> update) {
 	}
 
-	public void updatePlayerData(long gameTime, Player self, UUID player, List<DataMapValue> update) {
+	public void updatePlayerData(Player self, UUID player, List<DataMapValue> update) {
 	}
 
 	@Override

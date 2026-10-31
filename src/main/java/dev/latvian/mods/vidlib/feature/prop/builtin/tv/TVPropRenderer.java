@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
+import dev.latvian.mods.vidlib.client.SubmitContext;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.util.ARGB;
@@ -20,7 +20,7 @@ public class TVPropRenderer implements PropRenderer<TVProp> {
 	public static final ClientAsset TEXTURE_NO_VIDEO = new ClientAsset.ResourceTexture(ID.vidlib("prop/tv/no_video"));
 
 	@Override
-	public void render(PropSubmitContext<TVProp> ctx) {
+	public void render(SubmitContext<TVProp> ctx) {
 		var prop = ctx.prop();
 		float delta = ctx.delta();
 
@@ -76,7 +76,7 @@ public class TVPropRenderer implements PropRenderer<TVProp> {
 		consumer.addVertex(m, x + w / 2F, y + h / 2F, z).setColor(color).setUv(1F, 0F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(n.x, n.y, n.z);
 	}
 
-	private static void renderTVImage(PropSubmitContext<TVProp> ctx, Matrix4f m, float videoW, float videoH, float videoS, float px, Vector3f n, int tint, int light) {
+	private static void renderTVImage(SubmitContext<TVProp> ctx, Matrix4f m, float videoW, float videoH, float videoS, float px, Vector3f n, int tint, int light) {
 		float offset = Math.clamp((float) ((ctx.distanceToCamera() - 1000D) / 1000D), 0.01F, 0.5F);
 
 		if (TVPlayer.hasVideo()) {

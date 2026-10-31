@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.core.mixin;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
 import dev.latvian.mods.vidlib.feature.visual.EphemeralTexture;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
@@ -31,7 +30,6 @@ public abstract class TextureManagerMixin {
 
 	@Inject(method = "reload", at = @At("HEAD"))
 	public void vl$reload(PreparableReloadListener.SharedState sharedState, Executor backgroundExecutor, PreparableReloadListener.PreparationBarrier barrier, Executor gameExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-		Minecraft.getInstance().vl$clearProfileCache();
 		var list = new ArrayList<Map.Entry<Identifier, AbstractTexture>>();
 
 		for (var entry : byPath.entrySet()) {

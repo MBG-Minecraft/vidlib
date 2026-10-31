@@ -6,7 +6,7 @@ import com.geckolib.renderer.GeoObjectRenderer;
 import com.geckolib.renderer.base.GeoRenderState;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
+import dev.latvian.mods.vidlib.client.SubmitContext;
 import dev.latvian.mods.vidlib.integration.VidLibGeoDataTickets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
@@ -23,7 +23,7 @@ public class GeoPropRenderer<P extends Prop & GeoProp, O> extends GeoObjectRende
 	}
 
 	@Override
-	public void render(PropSubmitContext<P> ctx) {
+	public void render(SubmitContext<P> ctx) {
 		var mc = Minecraft.getInstance();
 		var state = createRenderState(ctx.prop(), null);
 		extractRenderState(mc, ctx.prop(), state, ctx.delta());

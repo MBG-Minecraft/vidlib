@@ -2,7 +2,9 @@ package dev.latvian.mods.vidlib.feature.visual;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Directions;
+import dev.latvian.mods.klib.texture.FaceTexture;
 import dev.latvian.mods.klib.texture.LightUV;
+import dev.latvian.mods.klib.texture.ResolvedCubeTextures;
 import dev.latvian.mods.vidlib.feature.client.TerrainRenderTypes;
 import dev.latvian.mods.vidlib.util.client.FrameInfo;
 

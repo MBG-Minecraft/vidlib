@@ -7,8 +7,6 @@ import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.shape.VoxelShapeBox;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
-import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.TextComponentImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -25,13 +23,13 @@ public class TextProp extends Prop {
 		YAW,
 		PITCH,
 		HEIGHT,
-		PropData.create(TextProp.class, "text", DataTypes.TEXT_COMPONENT, p -> p.text, TextProp::setText, TextComponentImBuilder.MULTILINE_TYPE),
-		PropData.create(TextProp.class, "color", Color.DATA_TYPE, p -> p.color, (p, v) -> p.color = v, Color4ImBuilder.TYPE),
+		PropData.create(TextProp.class, "text", DataTypes.TEXT_COMPONENT, p -> p.text, TextProp::setText),
+		PropData.create(TextProp.class, "color", Color.DATA_TYPE, p -> p.color, (p, v) -> p.color = v),
 		PropData.createBoolean(TextProp.class, "shadow", p -> p.shadow, (p, v) -> p.shadow = v),
 		PropData.createBoolean(TextProp.class, "see_through", p -> p.seeThrough, (p, v) -> p.seeThrough = v),
 		PropData.createInt(TextProp.class, "wrap", p -> p.wrap, (p, v) -> p.wrap = v, 0, 1000),
 		PropData.createBoolean(TextProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v),
-		PropData.create(TextProp.class, "background_color", Color.DATA_TYPE, p -> p.backgroundColor, (p, v) -> p.backgroundColor = v, Color4ImBuilder.TYPE),
+		PropData.create(TextProp.class, "background_color", Color.DATA_TYPE, p -> p.backgroundColor, (p, v) -> p.backgroundColor = v),
 		PropData.createBoolean(TextProp.class, "centered", p -> p.centered, (p, v) -> p.centered = v),
 		PropData.createBoolean(TextProp.class, "auto_rotate_yaw", p -> p.autoRotateYaw, (p, v) -> p.autoRotateYaw = v),
 		PropData.createBoolean(TextProp.class, "auto_rotate_pitch", p -> p.autoRotatePitch, (p, v) -> p.autoRotatePitch = v),

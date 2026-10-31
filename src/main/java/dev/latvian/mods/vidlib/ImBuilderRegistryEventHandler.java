@@ -7,8 +7,6 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.particle.BlockParticleOptio
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ColorParticleOptionImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.DustParticleOptionImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.particle.ParticleOptionsImBuilderRegistryEvent;
-import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
-import dev.latvian.mods.vidlib.feature.particle.WindParticleOptionsImBuilder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -33,8 +31,6 @@ public class ImBuilderRegistryEventHandler {
 			ParticleTypes.ENTITY_EFFECT,
 			ParticleTypes.TINTED_LEAVES
 		), ColorParticleOptionImBuilder::new);
-
-		event.register(VidLibParticles.WIND.get(), t -> new WindParticleOptionsImBuilder());
 	}
 
 	@SubscribeEvent

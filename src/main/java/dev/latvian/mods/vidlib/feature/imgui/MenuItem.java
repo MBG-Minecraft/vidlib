@@ -235,9 +235,9 @@ public record MenuItem(
 					graphics.setItemFlag(ImGuiItemFlags.SelectableDontClosePopup, hasFlag(FLAG_REMAIN_OPEN));
 				}
 
-				label.push(graphics);
+				graphics.pushColor(label);
 				boolean menuOpen = ImGui.beginMenu(rIcon.formatLabel(graphics, label.text()), !hasFlag(FLAG_DISABLED));
-				label.pop(graphics);
+				graphics.popColor(label);
 
 				if (menuOpen) {
 					for (int i = 0; i < items.size(); i++) {
@@ -255,9 +255,9 @@ public record MenuItem(
 					graphics.popStack();
 				}
 			} else if (level > 0) {
-				label.push(graphics);
+				graphics.pushColor(label);
 				ImGui.beginMenu(rIcon.formatLabel(graphics, label.text()), false);
-				label.pop(graphics);
+				graphics.popColor(label);
 			}
 		} else if (onClick != null) {
 			boolean remainOpen = hasFlag(FLAG_REMAIN_OPEN);
@@ -267,9 +267,9 @@ public record MenuItem(
 				graphics.setItemFlag(ImGuiItemFlags.SelectableDontClosePopup, true);
 			}
 
-			label.push(graphics);
+			graphics.pushColor(label);
 			boolean menuItemClicked = ImGui.menuItem(rIcon.formatLabel(graphics, label.text()), shortcut, hasFlag(FLAG_CHECKMARK), !hasFlag(FLAG_DISABLED));
-			label.pop(graphics);
+			graphics.popColor(label);
 
 			if (menuItemClicked && !hasFlag(FLAG_DISABLED)) {
 				onClick.onClick(graphics);
@@ -281,9 +281,9 @@ public record MenuItem(
 				graphics.popStack();
 			}
 		} else {
-			label.push(graphics);
+			graphics.pushColor(label);
 			ImGui.text(rIcon.formatLabel(graphics, label.text()));
-			label.pop(graphics);
+			graphics.popColor(label);
 
 			graphics.hoveredTooltip(tooltip.text());
 		}

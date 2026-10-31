@@ -4,14 +4,15 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
+import dev.latvian.mods.vidlib.feature.decal.DecalEvent;
+import dev.latvian.mods.vidlib.feature.decal.DecalTexture;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderState;
-import dev.latvian.mods.vidlib.feature.prop.PropExtractContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderState;
-import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -40,7 +41,7 @@ public class VidLibWorldRenderState {
 
 		boolean hasState = false;
 
-		props = mc.level.getProps().extractAll(new PropExtractContext(mc, this, event));
+		props = mc.level.getProps().extractAll(new ExtractContext(mc, this, event));
 
 		if (props != null) {
 			hasState = true;
@@ -70,6 +71,8 @@ public class VidLibWorldRenderState {
 			hasState = true;
 		}
 
+		NeoForge.EVENT_BUS.post(new DecalEvent(decals));
+
 		if (decals != null) {
 			hasState = true;
 		}
@@ -94,7 +97,7 @@ public class VidLibWorldRenderState {
 		var lineWidth = mc.gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth;
 
 		if (props != null && !props.isEmpty()) {
-			var ctx = new PropSubmitContext(mc, event, poseStack, collector);
+			var ctx = new SubmitContext(mc, event, poseStack, collector);
 
 			for (var state : props) {
 				state.submitOffset(ctx, offsetX, offsetY, offsetZ);
@@ -133,6 +136,12 @@ public class VidLibWorldRenderState {
 
 		if (fluidPlaneState != null) {
 			// FIXME FluidPlaneRenderer.render(frame, session.fluidPlane);
+		}
+
+		if (!decals.isEmpty()) {
+			var texture = DecalTexture.HOLDER.texture().get();
+			// uCount = texture.update(decals, mc.gameRenderer.mainCamera().position());
+			decals.clear();
 		}
 	}
 

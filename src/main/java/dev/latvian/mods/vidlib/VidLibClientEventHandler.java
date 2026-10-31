@@ -36,6 +36,23 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
+import dev.latvian.mods.vidlib.feature.prop.PropRenderStateRegistryEvent;
+import dev.latvian.mods.vidlib.feature.prop.builtin.danger.DangerProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.danger.DangerPropRenderState;
+import dev.latvian.mods.vidlib.feature.prop.builtin.decal.DecalProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.decal.DecalPropRenderState;
+import dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay.GeoDisplayProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay.GeoDisplayPropRenderer;
+import dev.latvian.mods.vidlib.feature.prop.builtin.image.ImageProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.image.ImagePropRenderState;
+import dev.latvian.mods.vidlib.feature.prop.builtin.npc.NPCProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.npc.NPCPropRenderer;
+import dev.latvian.mods.vidlib.feature.prop.builtin.shape.ShapeProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.shape.ShapePropRenderer;
+import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextPropRenderer;
+import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVPropRenderer;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
@@ -180,6 +197,18 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void registerItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
 		event.register(ID.vidlib("rgb"), RainbowItemTint.MAP_CODEC);
+	}
+
+	@SubscribeEvent
+	public static void propRenderStateRegistry(PropRenderStateRegistryEvent event) {
+		event.register(DangerProp.TYPE, DangerPropRenderState::new);
+		event.register(DecalProp.TYPE, DecalPropRenderState::new);
+		event.register(GeoDisplayProp.TYPE, GeoDisplayPropRenderer::new);
+		event.register(ImageProp.TYPE, ImagePropRenderState::new);
+		event.register(NPCProp.TYPE, NPCPropRenderer::new);
+		event.register(ShapeProp.TYPE, ShapePropRenderer::new);
+		event.register(TextProp.TYPE, TextPropRenderer::new);
+		event.register(TVProp.TYPE, TVPropRenderer::new);
 	}
 
 	@SubscribeEvent

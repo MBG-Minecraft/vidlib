@@ -12,7 +12,7 @@ import dev.latvian.mods.vidlib.feature.client.RenderLightLayer;
 import dev.latvian.mods.vidlib.feature.client.TerrainRenderTypes;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
+import dev.latvian.mods.vidlib.client.SubmitContext;
 import dev.latvian.mods.vidlib.klib.shape.Shapes;
 import dev.latvian.mods.vidlib.klib.vertex.PoseTransforms;
 
@@ -21,7 +21,7 @@ public class ShapePropRenderer implements PropRenderer<ShapeProp> {
 	public static final Holder HOLDER = PropRenderer.holder(ShapeProp.TYPE, ShapePropRenderer::new);
 
 	@Override
-	public void render(PropSubmitContext<ShapeProp> ctx) {
+	public void render(SubmitContext<ShapeProp> ctx) {
 		var ms = ctx.poseStack();
 		var buffers = ctx.frame().buffers();
 		var prop = ctx.prop();

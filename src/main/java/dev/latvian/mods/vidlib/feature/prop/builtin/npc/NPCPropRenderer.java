@@ -10,7 +10,7 @@ import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gallery.PlayerSkins;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
+import dev.latvian.mods.vidlib.client.SubmitContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -43,7 +43,7 @@ public class NPCPropRenderer implements PropRenderer<NPCProp> {
 	private static final java.util.Set<String> DEBUG_LOGGED = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
 	@Override
-	public void render(PropSubmitContext<NPCProp> ctx) {
+	public void render(SubmitContext<NPCProp> ctx) {
 		var mc = Minecraft.getInstance();
 		var p = ctx.prop();
 		var ms = ctx.poseStack();

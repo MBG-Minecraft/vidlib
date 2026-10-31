@@ -2,10 +2,10 @@ package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.shape.VoxelShapeBox;
-import dev.latvian.mods.vidlib.feature.visual.FaceTexture;
-import dev.latvian.mods.vidlib.feature.visual.ResolvedCubeTextures;
+import dev.latvian.mods.klib.texture.FaceTexture;
+import dev.latvian.mods.klib.texture.ResolvedCubeTextures;
+import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.vidlib.feature.visual.ResolvedTexturedCube;
-import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.Direction;

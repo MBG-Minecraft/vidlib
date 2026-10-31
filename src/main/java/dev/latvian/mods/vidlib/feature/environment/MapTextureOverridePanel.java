@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.environment;
 
+import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
@@ -14,7 +15,6 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverride;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
-import dev.latvian.mods.vidlib.feature.visual.SpriteKey;
 import imgui.ImGui;
 import net.minecraft.nbt.TagParser;
 

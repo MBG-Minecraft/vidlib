@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.vidlib.client.ExtractContext;
+import dev.latvian.mods.vidlib.client.SubmitContext;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.client.renderstate.BaseRenderState;
 import net.neoforged.neoforge.common.NeoForge;
@@ -21,7 +23,7 @@ public class PropRenderState<P extends Prop> extends BaseRenderState implements 
 	public double squaredDistanceToCamera = 0D;
 	public boolean shouldSort = false;
 
-	public final void extractCore(P prop, PropExtractContext ctx) {
+	public final void extractCore(P prop, ExtractContext ctx) {
 		invisible = false;
 		double delta = ctx.delta();
 		x = Mth.lerp(delta, prop.prevPos.x, prop.pos.x);
@@ -31,7 +33,7 @@ public class PropRenderState<P extends Prop> extends BaseRenderState implements 
 		squaredDistanceToCamera = ctx.cameraPos().distanceToSqr(x, centerY, z);
 	}
 
-	public void submitOffset(PropSubmitContext ctx, double offsetX, double offsetY, double offsetZ) {
+	public void submitOffset(SubmitContext ctx, double offsetX, double offsetY, double offsetZ) {
 		ctx.poseStack().pushPose();
 		ctx.poseStack().translate(
 			(float) (x + offsetX),
@@ -43,10 +45,10 @@ public class PropRenderState<P extends Prop> extends BaseRenderState implements 
 		ctx.poseStack().popPose();
 	}
 
-	public void extract(P prop, PropExtractContext ctx) {
+	public void extract(P prop, ExtractContext ctx) {
 	}
 
-	public void submit(PropSubmitContext ctx) {
+	public void submit(SubmitContext ctx) {
 	}
 
 	@Override

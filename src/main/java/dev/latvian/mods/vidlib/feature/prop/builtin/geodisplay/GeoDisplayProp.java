@@ -5,9 +5,6 @@ import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
-import dev.latvian.mods.vidlib.feature.imgui.builder.GeoAnimationsImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.GeoModelImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.TextureImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
@@ -22,9 +19,9 @@ public class GeoDisplayProp extends BaseGeoProp {
 		POSITION,
 		HEIGHT,
 		YAW,
-		PropData.create(GeoDisplayProp.class, "model", ID.DATA_TYPE, p -> p.model, (p, v) -> p.model = v, GeoModelImBuilder.TYPE),
-		PropData.create(GeoDisplayProp.class, "texture", DataTypes.RESOURCE_TEXTURE, p -> p.texture, (p, v) -> p.texture = v, TextureImBuilder.GEO),
-		PropData.create(GeoDisplayProp.class, "animations", ID.DATA_TYPE, p -> p.animations, (p, v) -> p.animations = v, GeoAnimationsImBuilder.TYPE)
+		PropData.create(GeoDisplayProp.class, "model", ID.DATA_TYPE, p -> p.model, (p, v) -> p.model = v),
+		PropData.create(GeoDisplayProp.class, "texture", DataTypes.RESOURCE_TEXTURE, p -> p.texture, (p, v) -> p.texture = v),
+		PropData.create(GeoDisplayProp.class, "animations", ID.DATA_TYPE, p -> p.animations, (p, v) -> p.animations = v)
 	);
 
 	public Identifier model = ID.vidlib("prop/player");

@@ -5,8 +5,8 @@ import dev.latvian.mods.klib.bulk.BlockModificationConsumer;
 import dev.latvian.mods.klib.bulk.BlockPalette;
 import dev.latvian.mods.klib.bulk.BulkLevelModification;
 import dev.latvian.mods.klib.bulk.SectionData;
+import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -96,7 +96,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 		var rerender = new LongOpenHashSet();
 		var undo = new Reference2ObjectOpenHashMap<BlockState, LongArrayList>();
 		var server = !level.isClientSide();
-		var packets = server ? new S2CPacketBundleBuilder(level) : null;
+		var packets = server ? new S2CPacketBundleBuilder() : null;
 
 		boolean collectUndoable = (undoable && server) || (!future && !server && VLPlatformHelper.CURRENT.isReplayLevel(level));
 

@@ -6,7 +6,7 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.particle.VidLibParticleRenderTypes;
+import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import imgui.type.ImBoolean;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -32,10 +32,10 @@ import java.util.function.Consumer;
 
 @AutoInit(AutoInit.Type.CLIENT_LOADED)
 public class PhysicsParticleManager {
-	public static final PhysicsParticleManager CUTOUT_MIPPED = new PhysicsParticleManager("Cutout Mipped", VidLibParticleRenderTypes.Physics.CUTOUT_MIPPED, true);
-	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", VidLibParticleRenderTypes.Physics.TRANSLUCENT, true);
-	public static final PhysicsParticleManager TRIPWIRE = new PhysicsParticleManager("Tripwire", VidLibParticleRenderTypes.Physics.TRIPWIRE, true);
-	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", VidLibParticleRenderTypes.Physics.CUTOUT, false);
+	public static final PhysicsParticleManager CUTOUT_MIPPED = new PhysicsParticleManager("Cutout Mipped", VidLibClientParticles.Physics.CUTOUT_MIPPED, true);
+	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", VidLibClientParticles.Physics.TRANSLUCENT, true);
+	public static final PhysicsParticleManager TRIPWIRE = new PhysicsParticleManager("Tripwire", VidLibClientParticles.Physics.TRIPWIRE, true);
+	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", VidLibClientParticles.Physics.CUTOUT, false);
 	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("Solid", RenderTypes.solidMovingBlock(), true);
 
 	public static final ImBoolean VISIBLE = new ImBoolean(true);

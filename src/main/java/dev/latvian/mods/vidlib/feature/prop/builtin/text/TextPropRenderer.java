@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderer;
-import dev.latvian.mods.vidlib.feature.prop.PropSubmitContext;
+import dev.latvian.mods.vidlib.client.SubmitContext;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.TextRenderable;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -19,7 +19,7 @@ public class TextPropRenderer implements PropRenderer<TextProp> {
 	public static final Holder HOLDER = PropRenderer.holder(TextProp.TYPE, TextPropRenderer::new);
 
 	@Override
-	public void render(PropSubmitContext<TextProp> ctx) {
+	public void render(SubmitContext<TextProp> ctx) {
 		var prop = ctx.prop();
 		float delta = ctx.delta();
 

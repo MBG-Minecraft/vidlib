@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
-import dev.latvian.mods.vidlib.feature.decal.DecalImBuilder;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -24,7 +23,7 @@ public class DecalProp extends Prop {
 		HEIGHT,
 		CAN_COLLIDE,
 		CAN_INTERACT,
-		PropData.create(DecalProp.class, "decal", Decal.DATA_TYPE, p -> p.decal, (p, v) -> p.decal = v, DecalImBuilder.TYPE)
+		PropData.create(DecalProp.class, "decal", Decal.DATA_TYPE, p -> p.decal, (p, v) -> p.decal = v)
 	);
 
 	public Decal decal;

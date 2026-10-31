@@ -1,13 +1,14 @@
-package dev.latvian.mods.vidlib.feature.prop;
+package dev.latvian.mods.vidlib.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
+import org.jetbrains.annotations.Nullable;
 
-public record PropSubmitContext(
+public record SubmitContext(
 	Minecraft mc,
-	SubmitCustomGeometryEvent event,
+	@Nullable SubmitCustomGeometryEvent event,
 	PoseStack poseStack,
 	SubmitNodeCollector collector
 ) {

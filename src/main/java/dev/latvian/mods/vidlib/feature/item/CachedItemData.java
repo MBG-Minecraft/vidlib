@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.item;
 
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
-import dev.latvian.mods.vidlib.util.MiscUtils;
+import dev.latvian.mods.klib.util.MiscUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentPatch;

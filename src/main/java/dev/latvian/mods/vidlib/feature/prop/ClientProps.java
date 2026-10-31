@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.klib.util.Cast;
+import dev.latvian.mods.vidlib.client.ExtractContext;
+import dev.latvian.mods.vidlib.client.SubmitContext;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import imgui.type.ImBoolean;
@@ -17,16 +19,16 @@ import java.util.Set;
 
 public class ClientProps extends Props<ClientLevel> {
 	public record PropWithState<P extends Prop, S extends PropRenderState<P>>(P prop, S state) {
-		public S extractCore(PropExtractContext ctx) {
+		public S extractCore(ExtractContext ctx) {
 			state.extractCore(prop, ctx);
 			return state;
 		}
 
-		public void extract(PropExtractContext ctx) {
+		public void extract(ExtractContext ctx) {
 			state.extract(prop, ctx);
 		}
 
-		public void submit(PropSubmitContext ctx) {
+		public void submit(SubmitContext ctx) {
 			state.submit(ctx);
 		}
 	}
@@ -129,7 +131,7 @@ public class ClientProps extends Props<ClientLevel> {
 	}
 
 	@Nullable
-	public List<PropRenderState<?>> extractAll(PropExtractContext ctx) {
+	public List<PropRenderState<?>> extractAll(ExtractContext ctx) {
 		if (all.isEmpty() || !VISIBLE.get()) {
 			return null;
 		}

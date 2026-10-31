@@ -2,27 +2,18 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.danger;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.vidlib.client.ExtractContext;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
-import dev.latvian.mods.vidlib.feature.prop.PropExtractContext;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderState;
-import dev.latvian.mods.vidlib.feature.prop.PropRenderStateRegistryEvent;
 import net.minecraft.util.Ease;
 import net.minecraft.util.Mth;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import org.joml.Vector3d;
 
-@EventBusSubscriber
 public class DangerPropRenderState extends PropRenderState<DangerProp> {
-	@SubscribeEvent
-	public static void register(PropRenderStateRegistryEvent event) {
-		event.register(DangerProp.TYPE, DangerPropRenderState::new);
-	}
-
 	public Vector3d position = new Vector3d();
 
 	@Override
-	public void extract(DangerProp prop, PropExtractContext ctx) {
+	public void extract(DangerProp prop, ExtractContext ctx) {
 		invisible = true;
 
 		if (Double.isNaN(prop.groundY)) {
