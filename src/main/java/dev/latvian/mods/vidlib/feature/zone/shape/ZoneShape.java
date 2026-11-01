@@ -10,7 +10,7 @@ import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.vertex.LineVertexCallback;
 import dev.latvian.mods.klib.vertex.QuadVertexCallback;
-import dev.latvian.mods.vidlib.feature.zone.Zone;
+import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipContext;
 import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
@@ -57,8 +57,8 @@ public interface ZoneShape extends ZoneLike, CustomRegistryValue<ByteBuf, ZoneSh
 		return REGISTRY;
 	}
 
-	default Zone createInstance(ZoneContainer container, ZoneVolume zone) {
-		return new Zone(container, zone);
+	default ResolvedZone createInstance(ZoneContainer container, ZoneVolume zone) {
+		return new ResolvedZone(container, zone);
 	}
 
 	@Override

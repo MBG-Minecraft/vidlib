@@ -40,7 +40,7 @@ public class ImagePropRenderState extends PropRenderState<ImageProp> {
 		}
 
 		texture = prop.texture.getTexture();
-		uv = prop.texture.isSpecial() ? UV.FULL : ctx.mc().getSprite(prop.texture).uv();
+		uv = ctx.mc().getSpriteUV(prop.texture);
 		tint = prop.tint.argb();
 		light = prop.fullBright ? LightCoordsUtil.FULL_BRIGHT : prop.getPackedLight();
 
@@ -54,12 +54,11 @@ public class ImagePropRenderState extends PropRenderState<ImageProp> {
 		ms.mulPose(bbMat);
 
 		ctx.collector().submitCustomGeometry(ms, EntityRenderTypes.texture(texture, translucent), (pose, buffer) -> {
-			var matrix4f = pose.pose();
 			float w2 = width / 2F;
-			buffer.addVertex(matrix4f, -w2, y, 0F).setUv(uv.u1(), uv.v1()).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
-			buffer.addVertex(matrix4f, -w2, 0F, 0F).setUv(uv.u1(), uv.v0()).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
-			buffer.addVertex(matrix4f, w2, 0F, 0F).setUv(uv.u0(), uv.v0()).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
-			buffer.addVertex(matrix4f, w2, y, 0F).setUv(uv.u0(), uv.v1()).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
+			buffer.addVertex(pose, -w2, y, 0F).setUv(uv.u1(), uv.v1()).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
+			buffer.addVertex(pose, -w2, 0F, 0F).setUv(uv.u1(), uv.v0()).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
+			buffer.addVertex(pose, w2, 0F, 0F).setUv(uv.u0(), uv.v0()).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
+			buffer.addVertex(pose, w2, y, 0F).setUv(uv.u0(), uv.v1()).setColor(tint).setLight(light).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(0F, 1F, 0F);
 		});
 
 		ms.popPose();

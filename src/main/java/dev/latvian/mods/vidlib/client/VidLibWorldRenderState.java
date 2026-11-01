@@ -48,12 +48,12 @@ public class VidLibWorldRenderState {
 		}
 
 		if (VidLibClientOptions.getShowAnchor()) {
-			var areas = mc.getAnchor().shapes().get(mc.level.dimension());
+			var anchored = mc.getAnchor().volumeMap().get(mc.level.dimension());
 
-			if (areas != null && !areas.isEmpty()) {
-				anchorAreas = new ArrayList<>(areas.size());
+			if (anchored != null && !anchored.isEmpty()) {
+				anchorAreas = new ArrayList<>(anchored.size());
 
-				for (var area : areas) {
+				for (var area : anchored) {
 					if (event.getFrustum().isVisible(area.aabb())) {
 						anchorAreas.add(area);
 						hasState = true;
@@ -97,7 +97,7 @@ public class VidLibWorldRenderState {
 		var lineWidth = mc.gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth;
 
 		if (props != null && !props.isEmpty()) {
-			var ctx = new SubmitContext(mc, event, poseStack, collector);
+			var ctx = new SubmitContext(mc, event, poseStack, collector, lineWidth);
 
 			for (var state : props) {
 				state.submitOffset(ctx, offsetX, offsetY, offsetZ);

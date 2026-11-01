@@ -20,17 +20,17 @@ import java.util.Map;
 public class CachedZoneShape {
 	public static final CachedZoneShape[] EMPTY_ARRAY = new CachedZoneShape[0];
 
-	private final Zone instance;
+	private final ResolvedZone instance;
 	private final VoxelShape shape;
 	private VoxelShapeBox shapeBox;
 	private Map<TerrainRenderLayer, List<ResolvedTexturedCube>> cachedCubes;
 
-	public CachedZoneShape(Zone instance, VoxelShape shape) {
+	public CachedZoneShape(ResolvedZone instance, VoxelShape shape) {
 		this.instance = instance;
 		this.shape = shape;
 	}
 
-	public static void append(Collection<CachedZoneShape> list, Zone instance) {
+	public static void append(Collection<CachedZoneShape> list, ResolvedZone instance) {
 		var shape = instance.volume.shape().value().createVoxelShape().optimize();
 
 		if (!shape.isEmpty()) {
@@ -38,7 +38,7 @@ public class CachedZoneShape {
 		}
 	}
 
-	public Zone instance() {
+	public ResolvedZone instance() {
 		return instance;
 	}
 

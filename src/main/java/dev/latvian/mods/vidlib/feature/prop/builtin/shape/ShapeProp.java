@@ -1,13 +1,12 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.shape;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.shape.CubeShape;
 import dev.latvian.mods.klib.shape.Shape;
-import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.RenderLightLayer;
@@ -15,7 +14,6 @@ import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
-import net.minecraft.core.ClientAsset;
 
 public class ShapeProp extends Prop {
 	@AutoRegister
@@ -33,14 +31,14 @@ public class ShapeProp extends Prop {
 		PropData.create(ShapeProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v),
 		PropData.create(ShapeProp.class, "outline_color", Gradient.DATA_TYPE, p -> p.outlineColor, (p, v) -> p.outlineColor = v),
 		PropData.create(ShapeProp.class, "light_layer", RenderLightLayer.DATA_TYPE, p -> p.lightLayer, (p, v) -> p.lightLayer = v),
-		PropData.create(ShapeProp.class, "texture", DataTypes.RESOURCE_TEXTURE, p -> p.texture, (p, v) -> p.texture = v.equals(Empty.TEXTURE) ? Empty.TEXTURE : v)
+		PropData.create(ShapeProp.class, "texture", SpriteKey.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v)
 	);
 
 	public Ref<Shape> shape;
 	public Ref<Gradient> color;
 	public Ref<Gradient> outlineColor;
 	public RenderLightLayer lightLayer;
-	public ClientAsset.ResourceTexture texture;
+	public SpriteKey texture;
 
 	public ShapeProp(PropContext<?> ctx) {
 		super(ctx);
@@ -48,7 +46,7 @@ public class ShapeProp extends Prop {
 		this.color = Color.CYAN.withAlpha(50).toGradient().ref();
 		this.outlineColor = Color.WHITE.toGradient().ref();
 		this.lightLayer = RenderLightLayer.NORMAL;
-		this.texture = Empty.TEXTURE;
+		this.texture = SpriteKey.EMPTY;
 		this.canCollide = false;
 		this.canInteract = false;
 	}

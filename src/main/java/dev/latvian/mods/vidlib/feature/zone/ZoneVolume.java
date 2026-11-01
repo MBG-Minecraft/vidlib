@@ -54,7 +54,7 @@ public record ZoneVolume(
 		KLibStreamCodecs.linkedSetOf(ByteBufCodecs.STRING_UTF8), ZoneVolume::tags,
 		ByteBufCodecs.BOOL, ZoneVolume::forceLoaded,
 		ByteBufCodecs.optional(ZoneFluid.STREAM_CODEC), ZoneVolume::fluid,
-		CubeTextures.OPTIONAL_STREAM_CODEC, ZoneVolume::textures,
+		ByteBufCodecs.optional(CubeTextures.STREAM_CODEC), ZoneVolume::textures,
 		ZoneFog.STREAM_CODEC, ZoneVolume::fog,
 		ZoneVolume::new
 	);

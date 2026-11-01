@@ -21,8 +21,8 @@ import java.util.function.IntUnaryOperator;
 
 public class DynamicSpriteTexture extends AbstractTexture implements Dumpable, EphemeralTexture {
 	public static Identifier get(Minecraft mc, SpriteKey key) {
-		if (key.atlas() == SpriteKey.SPECIAL_ATLAS) {
-			return key.sprite().id();
+		if (key.isSpecial()) {
+			return key.sprite();
 		}
 
 		return mc.getSprite(key).vl$getDynamicSpriteTexture(mc).path;

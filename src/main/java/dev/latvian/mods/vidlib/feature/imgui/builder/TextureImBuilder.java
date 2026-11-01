@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui.builder;
 
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.vidlib.feature.client.TextureSet;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -10,26 +9,26 @@ import imgui.type.ImString;
 import net.minecraft.core.ClientAsset;
 import org.jetbrains.annotations.Nullable;
 
-public class TextureImBuilder implements ImBuilder<ClientAsset.ResourceTexture> {
-	public static ImBuilderType<ClientAsset.ResourceTexture> of(TextureSet textureSet, ClientAsset.ResourceTexture defaultTexture) {
+public class TextureImBuilder implements ImBuilder<ClientAsset.Texture> {
+	public static ImBuilderType<ClientAsset.Texture> of(TextureSet textureSet, ClientAsset.Texture defaultTexture) {
 		return () -> new TextureImBuilder(textureSet, defaultTexture);
 	}
 
-	public static final ImBuilderType<ClientAsset.ResourceTexture> GEO = of(TextureSet.ENTITIES_AND_PROPS, new ClientAsset.ResourceTexture(ID.mc("entity/skeleton/skeleton")));
-	public static final ImBuilderType<ClientAsset.ResourceTexture> SKIN = of(TextureSet.ENTITIES, SkinTexture.WIDE_STEVE.asset());
-	public static final ImBuilderType<ClientAsset.ResourceTexture> ALL = of(TextureSet.ALL, null);
+	public static final ImBuilderType<ClientAsset.Texture> GEO = of(TextureSet.ENTITIES_AND_PROPS, new ClientAsset.ResourceTexture(ID.mc("entity/skeleton/skeleton")));
+	public static final ImBuilderType<ClientAsset.Texture> SKIN = of(TextureSet.ENTITIES, new ClientAsset.ResourceTexture(ID.mc("entity/player/wide/steve")));
+	public static final ImBuilderType<ClientAsset.Texture> ALL = of(TextureSet.ALL, null);
 
 	public final ImString SEARCH = ImGuiUtils.resizableString();
-	public final ClientAsset.ResourceTexture[] value;
+	public final ClientAsset.Texture[] value;
 	public final TextureSet textureSet;
 
-	public TextureImBuilder(TextureSet textureSet, @Nullable ClientAsset.ResourceTexture defaultTexture) {
+	public TextureImBuilder(TextureSet textureSet, @Nullable ClientAsset.Texture defaultTexture) {
 		this.textureSet = textureSet;
-		this.value = new ClientAsset.ResourceTexture[]{defaultTexture};
+		this.value = new ClientAsset.Texture[]{defaultTexture};
 	}
 
 	@Override
-	public void set(ClientAsset.ResourceTexture value) {
+	public void set(ClientAsset.Texture value) {
 		this.value[0] = value;
 	}
 
@@ -39,7 +38,7 @@ public class TextureImBuilder implements ImBuilder<ClientAsset.ResourceTexture> 
 	}
 
 	@Override
-	public ClientAsset.ResourceTexture build() {
+	public ClientAsset.Texture build() {
 		return value[0];
 	}
 }

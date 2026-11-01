@@ -26,12 +26,14 @@ import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
+import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
@@ -60,6 +62,8 @@ import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
+import net.minecraft.client.renderer.state.level.BlockOutlineRenderState;
+import net.minecraft.client.renderer.state.level.WorldBorderRenderState;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.ClientAsset;
@@ -85,7 +89,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec2;
@@ -520,7 +524,9 @@ public class ClientGameEngine {
 		}
 	}
 
-	public WorldBorder getRenderedWorldBorder(Minecraft mc, ClientLevel level) {
+	@Nullable
+	public WorldBorderRenderState overrideRenderedWorldBorder(Minecraft mc) {
+		/*
 		var session = mc.player == null ? null : mc.player.vl$sessionData();
 
 		if (session != null && session.worldBorderOverrideEnd != null) {
@@ -529,7 +535,7 @@ public class ClientGameEngine {
 			}
 
 			var b = session.worldBorderOverrideEnd;
-			double now = level.getGameTime() - 1D + mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+			double now = mc.level.getGameTime() - 1D + mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 			boolean moving = false;
 
 			if (session.worldBorderOverrideStart != null) {
@@ -551,7 +557,38 @@ public class ClientGameEngine {
 			}
 		}
 
-		return level.getWorldBorder();
+		return mc.level.getWorldBorder();
+		 */
+
+		return null;
+	}
+
+	public boolean cancelBlockHighlight(BlockOutlineRenderState state) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.player == null || mc.level == null) {
+			return false;
+		}
+
+		var blockPos = state.pos();
+
+		if (!EntityUtils.isSpectatorOrCreative(mc.player) && mc.level.getBlockState(blockPos).is(Blocks.BARRIER)) {
+			return true;
+		}
+
+		var tool = VidLibTool.of(mc.player);
+
+		if (tool != null) {
+			tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
+
+			if (Visuals.TEMP.contains(blockPos)) {
+				return true;
+			}
+
+			Visuals.TEMP.clear();
+		}
+
+		return false;
 	}
 
 	public boolean shouldShowName(Entity entity, boolean original) {
@@ -657,12 +694,6 @@ public class ClientGameEngine {
 
 	public boolean getRecordVoiceChat() {
 		return false;
-	}
-
-	public void copyMainDepth(Minecraft mc) {
-	}
-
-	public void copyOutlineDepth(Minecraft mc) {
 	}
 
 	public boolean handleClientPacket(Context ctx) {
@@ -1016,5 +1047,9 @@ public class ClientGameEngine {
 		} else {
 			return "Main Menu";
 		}
+	}
+
+	public boolean shouldRenderDarkDisc(float partialTick, ClientLevel level, boolean original) {
+		return false;
 	}
 }

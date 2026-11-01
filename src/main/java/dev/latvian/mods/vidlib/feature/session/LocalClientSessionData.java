@@ -60,6 +60,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.client.renderer.state.level.WorldBorderRenderState;
 import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
@@ -109,7 +110,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public Component bottomInfoBarOverride;
 	public FluidPlane fluidPlane;
 	public Map<UUID, Color> glowColors;
-	public WorldBorder worldBorderOverride;
+	public WorldBorderRenderState worldBorderOverride;
 	public WorldBorderOverride worldBorderOverrideStart;
 	public WorldBorderOverride worldBorderOverrideEnd;
 	public boolean clientModListSentDuringConfig;

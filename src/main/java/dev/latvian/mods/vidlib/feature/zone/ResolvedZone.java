@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class Zone {
+public class ResolvedZone {
 	public final ZoneContainer container;
 	public int index;
 	public ZoneVolume volume;
@@ -19,7 +19,7 @@ public class Zone {
 	public Object renderer;
 	public final Set<String> tags;
 
-	public Zone(ZoneContainer container, ZoneVolume volume) {
+	public ResolvedZone(ZoneContainer container, ZoneVolume volume) {
 		this.container = container;
 		this.index = -1;
 		this.volume = volume;

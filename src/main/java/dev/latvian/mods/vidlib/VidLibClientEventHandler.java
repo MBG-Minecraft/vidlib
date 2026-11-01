@@ -1,8 +1,9 @@
 package dev.latvian.mods.vidlib;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.latvian.apps.tinyhttp.ws.FrameInfo;
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
-import dev.latvian.mods.klib.entity.EntityUtils;
+import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
@@ -41,18 +42,14 @@ import dev.latvian.mods.vidlib.feature.prop.builtin.danger.DangerProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.danger.DangerPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.decal.DecalProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.decal.DecalPropRenderState;
-import dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay.GeoDisplayProp;
-import dev.latvian.mods.vidlib.feature.prop.builtin.geodisplay.GeoDisplayPropRenderer;
 import dev.latvian.mods.vidlib.feature.prop.builtin.image.ImageProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.image.ImagePropRenderState;
-import dev.latvian.mods.vidlib.feature.prop.builtin.npc.NPCProp;
-import dev.latvian.mods.vidlib.feature.prop.builtin.npc.NPCPropRenderer;
 import dev.latvian.mods.vidlib.feature.prop.builtin.shape.ShapeProp;
-import dev.latvian.mods.vidlib.feature.prop.builtin.shape.ShapePropRenderer;
+import dev.latvian.mods.vidlib.feature.prop.builtin.shape.ShapePropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextProp;
-import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextPropRenderer;
+import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVProp;
-import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVPropRenderer;
+import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVPropRenderState;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
@@ -69,17 +66,17 @@ import dev.mrbeastgaming.mods.hub.client.LinkHubUserScreen;
 import dev.mrbeastgaming.mods.hub.client.LinkMinecraftScreen;
 import dev.mrbeastgaming.mods.hub.event.SyncClientFilesHubEvent;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.ClipContext;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -203,12 +200,10 @@ public class VidLibClientEventHandler {
 	public static void propRenderStateRegistry(PropRenderStateRegistryEvent event) {
 		event.register(DangerProp.TYPE, DangerPropRenderState::new);
 		event.register(DecalProp.TYPE, DecalPropRenderState::new);
-		event.register(GeoDisplayProp.TYPE, GeoDisplayPropRenderer::new);
 		event.register(ImageProp.TYPE, ImagePropRenderState::new);
-		event.register(NPCProp.TYPE, NPCPropRenderer::new);
-		event.register(ShapeProp.TYPE, ShapePropRenderer::new);
-		event.register(TextProp.TYPE, TextPropRenderer::new);
-		event.register(TVProp.TYPE, TVPropRenderer::new);
+		event.register(ShapeProp.TYPE, ShapePropRenderState::new);
+		event.register(TextProp.TYPE, TextPropRenderState::new);
+		event.register(TVProp.TYPE, TVPropRenderState::new);
 	}
 
 	@SubscribeEvent
@@ -287,7 +282,39 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void preFrameGraphSetup(FrameGraphSetupEvent event) {
-		Minecraft.getInstance().vl$renderSetup(event);
+		var mc = Minecraft.getInstance();
+		var player = mc.player;
+
+		if (player == null || mc.level == null) {
+			return;
+		}
+
+		var session = player.vl$sessionData();
+		var frameInfo = new FrameInfo(mc, session, event);
+		session.projectedCoordinates = ProjectedCoordinates.of(mc, frameInfo.camera().position());
+		FrameInfo.CURRENT = frameInfo;
+		var ctx = mc.level.getGlobalContext();
+
+		var rayLine = mc.gameRenderer.mainCamera().klib$ray(512D);
+		var ray = new ClipContext(rayLine.start(), rayLine.end(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
+
+		if (mc.options.getCameraType() == CameraType.FIRST_PERSON && VidLibClientOptions.getShowZones()) {
+			session.zoneClip = session.filteredZones.clip(ray);
+		} else {
+			session.zoneClip = null;
+		}
+
+		var tool = VidLibTool.of(player);
+
+		var screenDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
+
+		if (tool != null) {
+			tool.getSecond().renderSetup(player, tool.getFirst(), mc.hitResult, screenDelta);
+		}
+
+		GhostStructure.preRender(frameInfo, ctx);
+
+		// event.enableOutlineProcessing();
 	}
 
 	@SubscribeEvent
@@ -435,37 +462,6 @@ public class VidLibClientEventHandler {
 			event.setFOV(event.getFOV() * mc.player.getVehicle().adjustFOV(camera, event.getPartialTick(), changingFov));
 		}
 		 */
-	}
-
-	/**
-	 * Replacement for NeoForge 1.21.5's {@code RenderHighlightEvent.Block}, which no longer exists in
-	 * 26.3: the block outline is now submitted through {@code LevelRenderer#submitBlockOutline}, so
-	 * this hook is driven by {@code LevelRendererMixin} with the outlined block position.
-	 *
-	 * @return {@code true} when the vanilla block outline must be suppressed
-	 */
-	public static boolean renderBlockHighlight(BlockPos blockPos) {
-		var mc = Minecraft.getInstance();
-
-		if (mc.player != null && mc.level != null) {
-			if (!EntityUtils.isSpectatorOrCreative(mc.player) && mc.level.getBlockState(blockPos).is(Blocks.BARRIER)) {
-				return true;
-			}
-
-			var tool = VidLibTool.of(mc.player);
-
-			if (tool != null) {
-				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
-
-				if (Visuals.TEMP.contains(blockPos)) {
-					return true;
-				}
-
-				Visuals.TEMP.clear();
-			}
-		}
-
-		return false;
 	}
 
 	/**

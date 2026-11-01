@@ -8,7 +8,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.CompoundImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
-import dev.latvian.mods.vidlib.feature.imgui.builder.TextureImBuilder;
+import dev.latvian.mods.vidlib.feature.imgui.builder.ResourceTextureImBuilder;
 import net.minecraft.core.ClientAsset;
 
 public class ClothingPartImBuilder extends CompoundImBuilder<ClothingPart> {
@@ -16,7 +16,7 @@ public class ClothingPartImBuilder extends CompoundImBuilder<ClothingPart> {
 	public static final TextureSet TEXTURE_SET = new TextureSet("textures/vidlib/clothing");
 	public static final ClientAsset.ResourceTexture DEFAULT_TEXTURE = new ClientAsset.ResourceTexture(ID.vidlib("vidlib/clothing/tracksuit/top"));
 
-	public final ImBuilder<ClientAsset.ResourceTexture> texture = new TextureImBuilder(TEXTURE_SET, DEFAULT_TEXTURE);
+	public final ImBuilder<ClientAsset.ResourceTexture> texture = new ResourceTextureImBuilder(TEXTURE_SET, DEFAULT_TEXTURE);
 	public final ImBuilder<Ref<Gradient>> color = new GradientImBuilder();
 
 	public ClothingPartImBuilder() {

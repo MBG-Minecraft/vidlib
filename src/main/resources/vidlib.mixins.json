@@ -71,6 +71,7 @@
 		"WaterFluidMixin",
 		"WitherSkullBlockMixin",
 		"mod.PTTKeyHandlerMixin",
+		"neo.CustomEnvironmentEffectsRendererManagerMixin",
 		"neo.IBlockExtensionMixin",
 		"neo.IEntityExtensionMixin",
 		"neo.IPlayerExtensionMixin",

@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
+import dev.latvian.mods.klib.math.LevelVolume;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.CommandSourceStack;
@@ -26,16 +27,16 @@ public interface AnchorCommands {
 	);
 
 	private static int set(CommandSourceStack source, BlockPos start, BlockPos end) {
-		var list = new ArrayList<>(source.getServer().getAnchor().areas());
-		list.removeIf(area -> area.dimension() == source.getLevel().dimension());
-		list.add(new Area(source.getLevel().dimension(), start, end));
+		var list = new ArrayList<>(source.getServer().getAnchor().volumes());
+		list.removeIf(levelVolume -> levelVolume.dimension() == source.getLevel().dimension());
+		list.add(new LevelVolume(source.getLevel().dimension(), start, end));
 		source.getServer().setAnchor(Anchor.create(list));
 		return 1;
 	}
 
 	private static int remove(CommandSourceStack source) {
-		var list = new ArrayList<>(source.getServer().getAnchor().areas());
-		list.removeIf(area -> area.dimension() == source.getLevel().dimension());
+		var list = new ArrayList<>(source.getServer().getAnchor().volumes());
+		list.removeIf(levelVolume -> levelVolume.dimension() == source.getLevel().dimension());
 		source.getServer().setAnchor(Anchor.create(list));
 		return 1;
 	}

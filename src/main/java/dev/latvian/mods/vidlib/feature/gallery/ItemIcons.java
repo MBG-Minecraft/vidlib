@@ -24,9 +24,7 @@ import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -118,7 +116,7 @@ public interface ItemIcons {
 		var lighting = flat ? com.mojang.blaze3d.platform.Lighting.Entry.ITEMS_FLAT : com.mojang.blaze3d.platform.Lighting.Entry.ITEMS_3D;
 		Minecraft.getInstance().gameRenderer.lighting().setupFor(lighting);
 
-		scratchItemStackRenderState.submit(pose, offscreen, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
+		// FIXME scratchItemStackRenderState.submit(pose, offscreen, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
 	}
 
 	static AbstractTexture getTexture(Minecraft mc, @Nullable VisualItemKey key) {

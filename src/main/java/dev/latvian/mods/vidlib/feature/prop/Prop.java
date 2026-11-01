@@ -686,9 +686,9 @@ public class Prop {
 					continue;
 				}
 
-				if (data.imBuilder() != null) {
-					imguiBuilders.add(Pair.of(data, data.imBuilder().get()));
-				}
+				// FIXME if (data.imBuilder() != null) {
+				// 	imguiBuilders.add(Pair.of(data, data.imBuilder().get()));
+				// }
 			}
 
 			imguiBuilders = List.copyOf(imguiBuilders);

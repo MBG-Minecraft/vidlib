@@ -1,12 +1,5 @@
 package dev.latvian.mods.vidlib.feature.gallery;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.codec.KLibStreamCodecs;
-import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.klib.texture.SpriteKey;
-import dev.latvian.mods.klib.util.MiscUtils;
 import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.klib.util.client.ImagePreProcessor;
 import dev.latvian.mods.vidlib.VidLibPaths;
@@ -14,13 +7,9 @@ import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.core.ClientAsset;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.TriState;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
@@ -28,7 +17,6 @@ import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public interface PlayerSkins {
@@ -37,27 +25,6 @@ public interface PlayerSkins {
 
 	static PlayerSkin of(SkinTexture skin) {
 		return PlayerSkin.insecure(skin.asset(), null, null, skin.slim() ? PlayerModelType.SLIM : PlayerModelType.WIDE);
-	}
-
-	/**
-	 * 26.3 dropped the {@code textureUrl} component of {@link PlayerSkin}: a remote skin is now
-	 * expressed by wrapping it in a {@link ClientAsset.DownloadedTexture}.
-	 */
-	static String textureUrl(PlayerSkin skin) {
-		return skin.body() instanceof ClientAsset.DownloadedTexture downloaded ? downloaded.url() : "";
-	}
-
-	private static Optional<ClientAsset.ResourceTexture> resourceTexture(ClientAsset.@Nullable Texture texture) {
-		return Optional.ofNullable(texture).filter(ClientAsset.ResourceTexture.class::isInstance).map(ClientAsset.ResourceTexture.class::cast);
-	}
-
-	private static PlayerSkin skin(ClientAsset.ResourceTexture body, String textureUrl, ClientAsset.@Nullable ResourceTexture cape, ClientAsset.@Nullable ResourceTexture elytra, PlayerModelType modelType) {
-		return PlayerSkin.insecure(
-			textureUrl.isEmpty() ? body : new ClientAsset.DownloadedTexture(body.id(), textureUrl),
-			cape,
-			elytra,
-			modelType
-		);
 	}
 
 	PlayerSkin[] DEFAULT_WIDE_SKINS = new PlayerSkin[]{
@@ -83,35 +50,6 @@ public interface PlayerSkins {
 		of(SkinTexture.SLIM_SUNNY),
 		of(SkinTexture.SLIM_ZURI)
 	};
-
-	Codec<PlayerSkin> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		SkinTexture.CODEC.fieldOf("skin").forGetter(s -> new SkinTexture(SpriteKey.narrow(MiscUtils.assetFromPNG(s.body().texturePath())), s.model() == PlayerModelType.SLIM)),
-		Codec.STRING.optionalFieldOf("textureUrl", "").forGetter(PlayerSkins::textureUrl),
-		ClientAsset.ResourceTexture.CODEC.optionalFieldOf("capeTexture").forGetter(s -> resourceTexture(s.cape())),
-		ClientAsset.ResourceTexture.CODEC.optionalFieldOf("elytraTexture").forGetter(s -> resourceTexture(s.elytra()))
-	).apply(instance, (skin, textureUrl, capeTexture, elytraTexture) -> skin(
-		skin.asset(),
-		textureUrl,
-		capeTexture.orElse(null),
-		elytraTexture.orElse(null),
-		skin.slim() ? PlayerModelType.SLIM : PlayerModelType.WIDE
-	)));
-
-	StreamCodec<ByteBuf, PlayerSkin> STREAM_CODEC = CompositeStreamCodec.of(
-		SkinTexture.STREAM_CODEC, s -> new SkinTexture(SpriteKey.narrow(MiscUtils.assetFromPNG(s.body().texturePath())), s.model() == PlayerModelType.SLIM),
-		ByteBufCodecs.STRING_UTF8, PlayerSkins::textureUrl,
-		KLibStreamCodecs.optional(ClientAsset.ResourceTexture.STREAM_CODEC, null), s -> resourceTexture(s.cape()).orElse(null),
-		KLibStreamCodecs.optional(ClientAsset.ResourceTexture.STREAM_CODEC, null), s -> resourceTexture(s.elytra()).orElse(null),
-		(skin, textureUrl, capeTexture, elytraTexture) -> skin(
-			skin.asset(),
-			textureUrl,
-			capeTexture,
-			elytraTexture,
-			skin.slim() ? PlayerModelType.SLIM : PlayerModelType.WIDE
-		)
-	);
-
-	DataType<PlayerSkin> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	static GalleryImage<UUID> get(Minecraft mc, UUID uuid) {
 		return GALLERY.getRemote(mc, uuid, PlayerProfiles::getName, (id, n) -> PlayerProfiles.get(id).skinUrl().orElse(null), ImagePreProcessor.NONE);

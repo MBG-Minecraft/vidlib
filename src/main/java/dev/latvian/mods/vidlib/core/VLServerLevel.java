@@ -7,7 +7,6 @@ import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
-import dev.latvian.mods.vidlib.feature.zone.ActiveZones;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -40,9 +39,6 @@ public interface VLServerLevel extends VLLevel {
 	@Override
 	default ServerProps getProps() {
 		throw new NoMixinException(this);
-	}
-
-	default void vl$setActiveZones(ActiveZones zones) {
 	}
 
 	@Override
@@ -86,7 +82,7 @@ public interface VLServerLevel extends VLLevel {
 			}
 		}
 
-		var anchored = getAnchor().shapes().get(level.dimension());
+		var anchored = getAnchor().volumeMap().get(level.dimension());
 
 		if (anchored != null) {
 			for (var area : anchored) {

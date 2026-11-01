@@ -10,6 +10,7 @@ public record SubmitContext(
 	Minecraft mc,
 	@Nullable SubmitCustomGeometryEvent event,
 	PoseStack poseStack,
-	SubmitNodeCollector collector
+	SubmitNodeCollector collector,
+	float lineWidth
 ) {
 }

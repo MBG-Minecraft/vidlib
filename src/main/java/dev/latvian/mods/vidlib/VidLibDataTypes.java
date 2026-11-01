@@ -15,7 +15,6 @@ import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.builtin.npc.NPCProp;
-import dev.latvian.mods.vidlib.feature.skybox.SkyboxData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
@@ -28,8 +27,6 @@ public interface VidLibDataTypes {
 	static void register(CustomRegistryTypeCollector<ByteBuf, DataType<?>> registry) {
 		registry.register("clothing_set", ClothingSet.DATA_TYPE);
 		registry.register("player_clothing", PlayerClothing.DATA_TYPE);
-		registry.register("skybox_data", SkyboxData.DATA_TYPE);
-		registry.register("skybox_id", SkyboxData.ID_DATA_TYPE);
 		registry.register("fog_override", FogOverride.DATA_TYPE);
 		registry.register("chanced_particle", ChancedParticle.DATA_TYPE);
 		registry.register("chanced_particle_list", ChancedParticle.LIST_DATA_TYPE);

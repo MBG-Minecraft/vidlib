@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.skin;
 
-import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -20,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public class SkinTextureImBuilder extends CompoundImBuilder<SkinTexture> implements ListButtonImBuilder {
 	public static final ImBuilderType<SkinTexture> TYPE = SkinTextureImBuilder::new;
 
-	public final ImBuilder<ClientAsset.ResourceTexture> texture = TextureImBuilder.SKIN.get();
+	public final ImBuilder<ClientAsset.Texture> texture = TextureImBuilder.SKIN.get();
 	public final BooleanImBuilder slim = new BooleanImBuilder();
 	public ListItemAction listItemAction = ListItemAction.NONE;
 	public int enableListItemButtons = -1;
@@ -82,7 +81,7 @@ public class SkinTextureImBuilder extends CompoundImBuilder<SkinTexture> impleme
 		var tex = texture.build();
 
 		if (tex != null) {
-			return new SkinTexture(SpriteKey.narrow(tex), slim.build());
+			return new SkinTexture(tex, slim.build());
 		} else {
 			return null;
 		}

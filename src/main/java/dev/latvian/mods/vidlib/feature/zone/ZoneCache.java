@@ -56,7 +56,7 @@ public class ZoneCache implements Iterable<ZoneContainer> {
 	}
 
 	public final ResourceKey<Level> dimension;
-	public final Int2ObjectOpenHashMap<List<Zone>> entityZones;
+	public final Int2ObjectOpenHashMap<List<ResolvedZone>> entityZones;
 	public final Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
 	CachedZoneShape[] visible;
 	CachedZoneShape[] solidZones;

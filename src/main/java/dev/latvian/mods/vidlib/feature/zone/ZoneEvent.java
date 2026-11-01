@@ -9,17 +9,17 @@ import java.util.List;
 
 public class ZoneEvent extends Event {
 	public static class EntityEvent extends ZoneEvent {
-		private final Zone zone;
+		private final ResolvedZone zone;
 		private final Level level;
 		private final Entity entity;
 
-		public EntityEvent(Zone zone, Level level, Entity entity) {
+		public EntityEvent(ResolvedZone zone, Level level, Entity entity) {
 			this.zone = zone;
 			this.level = level;
 			this.entity = entity;
 		}
 
-		public Zone getZone() {
+		public ResolvedZone getZone() {
 			return zone;
 		}
 
@@ -37,13 +37,13 @@ public class ZoneEvent extends Event {
 	}
 
 	public static class EntityEntered extends EntityEvent {
-		public EntityEntered(Zone zone, Level level, Entity entity) {
+		public EntityEntered(ResolvedZone zone, Level level, Entity entity) {
 			super(zone, level, entity);
 		}
 	}
 
 	public static class EntityExited extends EntityEvent {
-		public EntityExited(Zone zone, Level level, Entity entity) {
+		public EntityExited(ResolvedZone zone, Level level, Entity entity) {
 			super(zone, level, entity);
 		}
 	}

@@ -77,13 +77,15 @@ public record SphereZoneShape(Vec3 pos, double radius, AABB box) implements Zone
 		double t1 = (-b - dsq) / (2D * a);
 		double t2 = (-b + dsq) / (2D * a);
 
-		// Check if either intersection is within the segment range [0, 1]
-		if (t1 >= 0D && t1 <= 1D || t2 >= 0D && t2 <= 1D) {
-			// FIXME: Get actual intersection point
-			return ZoneClipResult.of(ctx, pos);
+		if (t1 >= 0D && t1 <= 1D && t2 >= 0D && t2 <= 1D) {
+			return ZoneClipResult.of(ctx, ctx.getFrom().lerp(ctx.getTo(), Math.min(t1, t2)));
+		} else if (t1 >= 0D && t1 <= 1D) {
+			return ZoneClipResult.of(ctx, ctx.getFrom().lerp(ctx.getTo(), t1));
+		} else if (t2 >= 0D && t2 <= 1D) {
+			return ZoneClipResult.of(ctx, ctx.getFrom().lerp(ctx.getTo(), t2));
+		} else {
+			return null;
 		}
-
-		return null;
 	}
 
 	@Override

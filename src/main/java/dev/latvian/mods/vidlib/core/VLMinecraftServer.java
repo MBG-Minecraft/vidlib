@@ -15,7 +15,7 @@ import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
-import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
+import dev.latvian.mods.vidlib.feature.zone.ZoneCache;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -94,13 +94,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	default void vl$preTick(PauseType paused) {
 		for (var level : vl$self().getAllLevels()) {
 			level.vl$preTick(paused);
-
-			var zones = ZoneLoader.SERVER_BY_DIMENSION.get(level.dimension());
-			level.vl$setActiveZones(zones);
-
-			if (zones != null) {
-				zones.tick(level);
-			}
+			ZoneCache.of(level.dimension(), false).tick(level);
 		}
 
 		for (var player : vl$self().getPlayerList().getPlayers()) {

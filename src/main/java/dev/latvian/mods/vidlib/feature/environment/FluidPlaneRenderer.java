@@ -11,7 +11,7 @@ import java.util.Map;
 public class FluidPlaneRenderer {
 	public static final Map<ClientAsset, StaticBuffers> BUFFERS = new Object2ObjectOpenHashMap<>();
 
-	@AutoInit({AutoInit.Type.TEXTURES_RELOADED, AutoInit.Type.CHUNKS_RENDERED})
+	@AutoInit({AutoInit.Type.TEXTURES_RELOADED, AutoInit.Type.CHUNKS_RELOADED})
 	public static void refreshBuffers() {
 		for (var buffer : BUFFERS.values()) {
 			buffer.close();

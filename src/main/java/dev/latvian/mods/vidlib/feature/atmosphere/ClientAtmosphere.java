@@ -1,18 +1,11 @@
 package dev.latvian.mods.vidlib.feature.atmosphere;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderTypes;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.state.level.LevelRenderState;
-import net.minecraft.client.renderer.state.level.SkyRenderState;
-import net.minecraft.util.ARGB;
 import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.neoforged.neoforge.client.CustomSkyboxRenderer;
-import org.joml.Matrix4fc;
 
 public class ClientAtmosphere implements CustomSkyboxRenderer {
 	public final String id;
@@ -52,6 +45,7 @@ public class ClientAtmosphere implements CustomSkyboxRenderer {
 		return skyboxTexture;
 	}
 
+	/*
 	@Override
 	public boolean renderSky(LevelRenderState levelRenderState, SkyRenderState skyRenderState, Matrix4fc modelViewMatrix, Runnable setupFog) {
 		var mc = Minecraft.getInstance();
@@ -158,4 +152,5 @@ public class ClientAtmosphere implements CustomSkyboxRenderer {
 		ms.popPose();
 		return false;
 	}
+	 */
 }

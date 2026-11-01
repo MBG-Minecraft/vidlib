@@ -29,6 +29,6 @@ public record SyncServerDataPayload(List<DataMapValue> update) implements Simple
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$sessionData().updateServerData(ctx.remoteGameTime(), ctx.player(), update);
+		ctx.player().vl$sessionData().updateServerData(ctx.player(), update);
 	}
 }

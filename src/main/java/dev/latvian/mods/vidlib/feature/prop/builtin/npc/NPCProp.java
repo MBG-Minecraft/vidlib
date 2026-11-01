@@ -13,10 +13,10 @@ import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfile;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
-import dev.latvian.mods.vidlib.feature.prop.geo.BaseGeoProp;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.util.Mth;
@@ -34,7 +34,7 @@ import org.joml.Vector3f;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NPCProp extends BaseGeoProp {
+public class NPCProp extends Prop {
 	public static final Pose[] POSES = Pose.values();
 	public static final Pose[] VALID_POSES = {Pose.STANDING, Pose.CROUCHING, Pose.SLEEPING, Pose.SWIMMING, Pose.SITTING};
 

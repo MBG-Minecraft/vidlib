@@ -44,7 +44,7 @@ public class ClientProps extends Props<ClientLevel> {
 		return HIDDEN_PROPS.contains(prop.id) || HIDDEN_PROP_TYPES.contains(prop.type);
 	}
 
-	@AutoInit(AutoInit.Type.CHUNKS_RENDERED)
+	@AutoInit(AutoInit.Type.CHUNKS_RELOADED)
 	public static void chunksRendered(ClientLevel level) {
 		level.getProps().reloadAll();
 	}

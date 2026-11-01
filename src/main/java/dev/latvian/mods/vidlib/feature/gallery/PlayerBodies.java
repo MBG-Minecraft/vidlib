@@ -23,7 +23,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
@@ -195,7 +194,7 @@ public interface PlayerBodies {
 		var ms = new PoseStack();
 		ms.scale(-1F, 1F, -1F);
 		ms.translate(0F, 0.25F, 0F);
-		renderer.submit(state, ms, offscreen, new CameraRenderState());
+		// FIXME renderer.submit(state, ms, offscreen, new CameraRenderState());
 	}
 
 	static AbstractTexture getTexture(Minecraft mc, @Nullable UUID uuid) {

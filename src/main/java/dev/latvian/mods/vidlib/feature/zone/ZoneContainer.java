@@ -38,13 +38,15 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBuf, ZoneContainer>, ZoneLike, Comparable<ZoneContainer> {
-	public static final DynamicType<RegistryFriendlyByteBuf, ZoneContainer> TYPE = DynamicType.create("default",
+	public static final DynamicType<RegistryFriendlyByteBuf, ZoneContainer> TYPE = DynamicType.create(
+		"default",
 		RecordCodecBuilder.mapCodec(i -> i.group(
 			Ref.<ZoneContainer>contextRefCodec().forGetter(ZoneContainer::ref),
 			MapCodec.unit(false).forGetter(z -> z.generated),
 			MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(z -> z.dimension),
 			Codec.STRING.listOf().optionalFieldOf("tags", List.of()).forGetter(z -> List.copyOf(z.tags)),
-			ZoneVolume.CODEC.listOf().fieldOf("zones").forGetter(z -> z.zones.stream().map(zi -> zi.volume).toList())
+			ZoneVolume.CODEC.listOf().fieldOf("volumes").forGetter(z -> z.zones.stream().map(zi -> zi.volume).toList()),
+			Codec.INT.optionalFieldOf("priority", 0).forGetter(z -> z.priority)
 		).apply(i, ZoneContainer::new)),
 		CompositeStreamCodec.of(
 			Ref.contextRefStreamCodec(), ZoneContainer::ref,
@@ -52,6 +54,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 			KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), z -> z.dimension,
 			KLibStreamCodecs.listOf(ByteBufCodecs.STRING_UTF8), z -> List.copyOf(z.tags),
 			KLibStreamCodecs.listOf(ZoneVolume.STREAM_CODEC), z -> z.zones.stream().map(zi -> zi.volume).toList(),
+			ByteBufCodecs.INT, z -> z.priority,
 			ZoneContainer::new
 		)
 	);
@@ -64,10 +67,10 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 
 	public final Ref<ZoneContainer> ref;
 	public final ResourceKey<Level> dimension;
-	public final List<Zone> zones;
+	public final List<ResolvedZone> zones;
 	public final Set<String> tags;
 	public int priority;
-	public final Int2ObjectOpenHashMap<List<Zone>> entityZones;
+	public final Int2ObjectOpenHashMap<List<ResolvedZone>> entityZones;
 	boolean generated;
 	private AABB boundingBox;
 	private AAIBB intBoundingBox;
@@ -84,7 +87,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 		this.intBoundingBox = null;
 	}
 
-	private ZoneContainer(Ref<ZoneContainer> ref, boolean generated, ResourceKey<Level> dimension, List<String> tags, List<ZoneVolume> zones) {
+	private ZoneContainer(Ref<ZoneContainer> ref, boolean generated, ResourceKey<Level> dimension, List<String> tags, List<ZoneVolume> zones, int priority) {
 		this(ref, dimension);
 		this.generated = generated;
 		this.tags.addAll(tags);
@@ -92,6 +95,8 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 		for (var zone : zones) {
 			add(zone);
 		}
+
+		this.priority = priority;
 	}
 
 	@Override
@@ -139,7 +144,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 	}
 
 	@Nullable
-	public Zone getFirst(Vec3 pos) {
+	public ResolvedZone getFirst(Vec3 pos) {
 		for (var instance : zones) {
 			if (instance.volume.shape().value().contains(pos)) {
 				return instance;
@@ -149,8 +154,8 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 		return null;
 	}
 
-	public List<Zone> getAll(Vec3 pos) {
-		var list = new ArrayList<Zone>(1);
+	public List<ResolvedZone> getAll(Vec3 pos) {
+		var list = new ArrayList<ResolvedZone>(1);
 
 		for (var instance : zones) {
 			if (instance.volume.shape().value().contains(pos)) {
@@ -162,7 +167,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 	}
 
 	@Nullable
-	public Zone getFirst(AABB box) {
+	public ResolvedZone getFirst(AABB box) {
 		for (var instance : zones) {
 			if (instance.volume.shape().value().intersects(box)) {
 				return instance;
@@ -172,8 +177,8 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 		return null;
 	}
 
-	public List<Zone> getAll(AABB box) {
-		var list = new ArrayList<Zone>(1);
+	public List<ResolvedZone> getAll(AABB box) {
+		var list = new ArrayList<ResolvedZone>(1);
 
 		for (var instance : zones) {
 			if (instance.volume.shape().value().intersects(box)) {

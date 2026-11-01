@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.command.CustomRegistryRegistryEvent;
+import dev.latvian.mods.klib.data.DataTypeRegistryEvent;
 import dev.latvian.mods.klib.entity.filter.EntityFilterTypeRegistryEvent;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
@@ -11,14 +12,13 @@ import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.entity.filter.VidLibEntityFilters;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
-import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
+import dev.latvian.mods.vidlib.feature.zone.ZoneServerLoader;
 import dev.mrbeastgaming.mods.hub.api.HubServerSession;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import io.netty.util.NettyRuntime;
@@ -61,7 +61,6 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 @EventBusSubscriber(modid = VidLib.ID)
 public class VidLibEventHandler {
@@ -115,16 +114,20 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddServerReloadListenersEvent event) {
-		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.SERVER_BY_DIMENSION, true));
+		event.addListener(ID.vidlib("zone"), new ZoneServerLoader());
 		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.SERVER));
 		event.addListener(ID.vidlib("cutscene"), new Cutscene.Loader());
 	}
 
 	@SubscribeEvent
-	public static void registries(CustomRegistryRegistryEvent event) {
+	public static void customRegistryRegistry(CustomRegistryRegistryEvent event) {
 		VidLib.builtInRegistries(event.getRegistry());
 	}
 
+	@SubscribeEvent
+	public static void dataTypeRegistry(DataTypeRegistryEvent event) {
+		VidLibDataTypes.register(event.getCollector());
+	}
 
 	@SubscribeEvent
 	public static void registries(EntityFilterTypeRegistryEvent event) {
@@ -134,10 +137,6 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void syncReload(OnDatapackSyncEvent event) {
 		if (event.getPlayer() == null) {
-			if (ServerLifecycleHooks.getCurrentServer() != null) {
-				ServerLifecycleHooks.getCurrentServer().vl$clearProfileCache();
-			}
-
 			AutoInit.Type.DATA_LOADED.invoke();
 
 			for (var player : event.getPlayerList().getPlayers()) {
@@ -149,7 +148,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			((ServerLevel) player.level()).getServer().vl$playerJoined(player);
+			player.level().getServer().vl$playerJoined(player);
 			HubServerGateway.playerLoggedIn(player);
 		}
 	}
@@ -157,7 +156,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			((ServerLevel) player.level()).getServer().vl$playerLeft(player);
+			player.level().getServer().vl$playerLeft(player);
 			HubServerGateway.playerLoggedOut(player, true);
 		}
 	}
@@ -166,7 +165,7 @@ public class VidLibEventHandler {
 	public static void playerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
 			var level = event.getEntity().level();
-			var packets = new S2CPacketBundleBuilder(level);
+			var packets = new S2CPacketBundleBuilder();
 			var props = VLPlatformHelper.CURRENT.getProps(level);
 
 			for (var list : props.propLists.values()) {
@@ -192,7 +191,6 @@ public class VidLibEventHandler {
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void serverStarting(ServerStartingEvent event) {
 		VidLib.LOGGER.info("Netty Threads: " + Math.max(1, SystemPropertyUtil.getInt("io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2)));
-		SimplePayload.S2C.set(0L);
 		gameLoaded();
 		HubServerSession.loadAsync(event.getServer());
 	}
@@ -348,10 +346,7 @@ public class VidLibEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void serverTagsUpdated(TagsUpdatedEvent event) {
-		if (event instanceof TagsUpdatedEvent.ServerDataLoad) {
-			// datapacks loaded?
-		}
+	public static void serverTagsUpdated(TagsUpdatedEvent.ServerDataLoad event) {
 	}
 
 	@SubscribeEvent

@@ -9,6 +9,7 @@ import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.texture.SpriteKey;
+import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
@@ -16,7 +17,6 @@ import dev.latvian.mods.vidlib.feature.camera.DetachedCamera;
 import dev.latvian.mods.vidlib.feature.camera.FreeCamera;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
-import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneScreen;
@@ -26,7 +26,6 @@ import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
-import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
@@ -38,15 +37,12 @@ import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.VidLibSoundInstance;
-import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
-import dev.latvian.mods.vidlib.util.client.FrameInfo;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.client.Camera;
-import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.GenericMessageScreen;
@@ -63,11 +59,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
@@ -127,43 +120,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	@Nullable
 	default ProjectedCoordinates getProjectedCoordinates() {
 		return vl$self().player.vl$sessionData().projectedCoordinates;
-	}
-
-	@ApiStatus.Internal
-	default void vl$renderSetup(FrameGraphSetupEvent event) {
-		var mc = vl$self();
-		var player = vl$self().player;
-
-		if (player == null || mc.level == null) {
-			return;
-		}
-
-		var session = player.vl$sessionData();
-		var frameInfo = new FrameInfo(mc, session, event);
-		session.projectedCoordinates = ProjectedCoordinates.of(mc, frameInfo.camera().position());
-		FrameInfo.CURRENT = frameInfo;
-		var ctx = mc.level.getGlobalContext();
-
-		var rayLine = vl$self().gameRenderer.mainCamera().klib$ray(512D);
-		var ray = new ClipContext(rayLine.start(), rayLine.end(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
-
-		if (vl$self().options.getCameraType() == CameraType.FIRST_PERSON && VidLibClientOptions.getShowZones()) {
-			session.zoneClip = session.filteredZones.clip(ray);
-		} else {
-			session.zoneClip = null;
-		}
-
-		var tool = VidLibTool.of(player);
-
-		var screenDelta = vl$self().getDeltaTracker().getGameTimeDeltaPartialTick(true);
-
-		if (tool != null) {
-			tool.getSecond().renderSetup(player, tool.getFirst(), mc.hitResult, screenDelta);
-		}
-
-		GhostStructure.preRender(frameInfo, ctx);
-
-		// event.enableOutlineProcessing();
 	}
 
 	default Vector2dc vl$getCameraShakeOffset(float delta) {
@@ -494,6 +450,10 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default TextureAtlasSprite getSprite(SpriteKey sprite) {
 		return vl$self().getAtlasManager().get(new SpriteId(sprite.atlas(), sprite.sprite()));
+	}
+
+	default UV getSpriteUV(SpriteKey sprite) {
+		return sprite.isSpecial() ? UV.FULL : getSprite(sprite).uv();
 	}
 
 	default <T> void updateServerDataValue(DataKey<T> key, T value) {

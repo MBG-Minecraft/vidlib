@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
+import dev.latvian.mods.klib.math.LevelVolume;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.core.VLServerLevel;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
@@ -23,30 +24,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public record Anchor(List<Area> areas, Map<ResourceKey<Level>, List<AAIBB>> shapes) {
+public record Anchor(List<LevelVolume> volumes, Map<ResourceKey<Level>, List<AAIBB>> volumeMap) {
 	public static final Anchor NONE = new Anchor(List.of(), Map.of());
 	public static Anchor client = NONE;
 
-	public static Anchor create(List<Area> areas) {
+	public static Anchor create(List<LevelVolume> volumes) {
 		var map = new Reference2ObjectArrayMap<ResourceKey<Level>, List<AAIBB>>(1);
 
-		for (var area : areas) {
-			map.computeIfAbsent(area.dimension(), k -> new ArrayList<>()).add(area.shape());
+		for (var area : volumes) {
+			map.computeIfAbsent(area.dimension(), k -> new ArrayList<>()).add(area.volume());
 		}
 
-		return new Anchor(List.copyOf(areas), map);
+		return new Anchor(List.copyOf(volumes), map);
 	}
 
 	public static Anchor create(ResourceKey<Level> dimension, BlockPos start, BlockPos end) {
-		return create(List.of(new Area(dimension, start, end)));
+		return create(List.of(new LevelVolume(dimension, start, end)));
 	}
 
 	public static final Codec<Anchor> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		Area.CODEC.listOf().optionalFieldOf("areas", List.of()).forGetter(Anchor::areas)
+		LevelVolume.CODEC.listOf().optionalFieldOf("volumes", List.of()).forGetter(Anchor::volumes)
 	).apply(instance, list -> list.isEmpty() ? NONE : create(list)));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Anchor> STREAM_CODEC = CompositeStreamCodec.of(
-		KLibStreamCodecs.listOf(Area.STREAM_CODEC), Anchor::areas,
+		KLibStreamCodecs.listOf(LevelVolume.STREAM_CODEC), Anchor::volumes,
 		list -> list.isEmpty() ? NONE : create(list)
 	);
 

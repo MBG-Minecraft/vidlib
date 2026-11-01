@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
 import imgui.type.ImBoolean;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3fc;
 
 public class DepthOfField {
 	public static DepthOfFieldData REPLAY = new DepthOfFieldData(KVector.ZERO, 8F, 16F, 0F, DepthOfFieldShape.SPHERE, DepthOfFieldBlurMode.DEPTH);
@@ -21,7 +22,7 @@ public class DepthOfField {
 		DEBUG_FAR_COLOR.set(Color.of(0x7FFF0000));
 	}
 
-	private static Vec3f uFocusPos = Vec3f.ZERO;
+	private static Vector3fc uFocusPos = Vec3f.ZERO;
 	private static float uFocusRange = 0F;
 	private static float uBlurRange = 0F;
 	private static float uStrength = 0F;

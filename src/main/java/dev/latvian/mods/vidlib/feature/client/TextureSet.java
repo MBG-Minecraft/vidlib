@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.util.MiscUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
@@ -21,7 +22,7 @@ public class TextureSet {
 
 	public final String prefix;
 	public final List<String> paths;
-	private List<ClientAsset.ResourceTexture> list;
+	private List<ClientAsset.Texture> list;
 	private int lastReload;
 
 	public TextureSet(String prefix, List<String> paths) {
@@ -35,7 +36,7 @@ public class TextureSet {
 		this(path + "/", List.of(path));
 	}
 
-	public List<ClientAsset.ResourceTexture> get(Minecraft mc) {
+	public List<ClientAsset.Texture> get(Minecraft mc) {
 		int reload = mc.vl$reloadCount();
 
 		if (lastReload != reload) {
@@ -48,11 +49,11 @@ public class TextureSet {
 
 			for (var path : paths) {
 				for (var tex : mc.getResourceManager().listResources(path, id -> id.getPath().endsWith(".png")).keySet()) {
-					list.add(MiscUtils.assetFromPNG(tex));
+					list.add(SpriteKey.assetFromPNG(tex));
 				}
 			}
 
-			list.sort(Comparator.comparing(ClientAsset.ResourceTexture::id));
+			list.sort(Comparator.comparing(ClientAsset.Texture::id));
 			list = List.copyOf(list);
 		}
 
@@ -67,11 +68,11 @@ public class TextureSet {
 		return asset.id().toString();
 	}
 
-	public ImUpdate imgui(ImGraphics graphics, ClientAsset[] value, @Nullable ImString search) {
+	public ImUpdate imgui(ImGraphics graphics, ClientAsset.Texture[] value, @Nullable ImString search) {
 		return graphics.combo("###texture", value, "", get(graphics.mc), this::format, search);
 	}
 
-	public ImUpdate optionalImgui(ImGraphics graphics, ClientAsset[] value, @Nullable ImString search) {
+	public ImUpdate optionalImgui(ImGraphics graphics, ClientAsset.Texture[] value, @Nullable ImString search) {
 		return graphics.combo("###texture", value, "None", get(graphics.mc), this::format, search);
 	}
 }

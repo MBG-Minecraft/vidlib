@@ -22,7 +22,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 	public record ClothedPlayerSkinCache(NativeImage setImage, Map<Identifier, ClothedPlayerSkinTexture> cache) {
@@ -65,7 +64,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 		MiscClientUtils.BUILTIN_SKIN_IMAGE_MAP.values().forEach(NativeImage::close);
 		MiscClientUtils.BUILTIN_SKIN_IMAGE_MAP.clear();
 
-		Stream.concat(Stream.of(SkinTexture.DEFAULT_WIDE), Stream.of(SkinTexture.DEFAULT_SLIM)).forEach(skin -> {
+		for (var skin : SkinTexture.DEFAULT) {
 			try (var in = Minecraft.getInstance().getResourceManager().getResourceOrThrow(skin.asset().id()).open()) {
 				var img = NativeImage.read(in);
 
@@ -74,7 +73,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 				}
 			} catch (Exception ignore) {
 			}
-		});
+		}
 
 		PART_CACHE.clear();
 		SET_CACHE.clear();

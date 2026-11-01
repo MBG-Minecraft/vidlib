@@ -7,7 +7,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public record ZoneClipResult(Zone instance, double distanceSq, @Nullable Vec3 pos, Object result) {
+public record ZoneClipResult(ResolvedZone instance, double distanceSq, @Nullable Vec3 pos, Object result) {
 	public static ZoneClipResult of(ZoneClipContext ctx, HitResult hit) {
 		return new ZoneClipResult(ctx.zone, hit.getLocation().distanceToSqr(ctx.getFrom()), hit.getLocation(), hit);
 	}
