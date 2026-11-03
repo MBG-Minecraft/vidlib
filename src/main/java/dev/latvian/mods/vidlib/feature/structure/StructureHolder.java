@@ -140,10 +140,6 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		return () -> holder;
 	}
 
-	public static Supplier<StructureHolder> refSupplier(@Nullable RegistryRef<LazyStructures> structureRef) {
-		return () -> structureRef == null ? null : structureRef.get().get().getFirst();
-	}
-
 	public static StructureHolder fromVStruct(ByteBuf buf) {
 		VarInt.read(buf); // Binary Indicator
 		VarInt.read(buf); // Format Version

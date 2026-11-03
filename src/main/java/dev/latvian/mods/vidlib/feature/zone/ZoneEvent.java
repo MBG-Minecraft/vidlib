@@ -9,22 +9,26 @@ import java.util.List;
 
 public class ZoneEvent extends Event {
 	public static class EntityEvent extends ZoneEvent {
-		private final ResolvedZone zone;
+		private final ResolvedZone resolvedZone;
 		private final Level level;
 		private final Entity entity;
 
-		public EntityEvent(ResolvedZone zone, Level level, Entity entity) {
-			this.zone = zone;
+		public EntityEvent(ResolvedZone resolvedZone, Level level, Entity entity) {
+			this.resolvedZone = resolvedZone;
 			this.level = level;
 			this.entity = entity;
 		}
 
-		public ResolvedZone getZone() {
-			return zone;
+		public ResolvedZone getResolvedZone() {
+			return resolvedZone;
+		}
+
+		public Zone getZone() {
+			return resolvedZone.zone;
 		}
 
 		public CompoundTag getData() {
-			return zone.volume.data();
+			return resolvedZone.zone.data();
 		}
 
 		public Level getLevel() {
@@ -49,15 +53,15 @@ public class ZoneEvent extends Event {
 	}
 
 	public static class ClickedOn extends EntityEvent {
-		private final ZoneClipResult clip;
+		private final ZoneHit hit;
 
-		public ClickedOn(ZoneClipResult clip, Level level, Entity entity) {
-			super(clip.instance(), level, entity);
-			this.clip = clip;
+		public ClickedOn(ZoneHit hit, Level level, Entity entity) {
+			super(hit.resolvedZone(), level, entity);
+			this.hit = hit;
 		}
 
-		public ZoneClipResult getClip() {
-			return clip;
+		public ZoneHit getHit() {
+			return hit;
 		}
 	}
 

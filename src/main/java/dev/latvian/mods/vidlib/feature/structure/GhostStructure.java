@@ -97,7 +97,7 @@ public record GhostStructure(
 		}
 	}
 
-	public static void preRender(FrameInfo frame, KNumberContext ctx) {
+	public static void preRender(FrameInfo frame, KNumberContext numCtx) {
 		// TODO: Collect visible structures here first
 
 		var mc = frame.mc();
@@ -109,7 +109,7 @@ public record GhostStructure(
 			}
 
 			for (var loc : gs.locations) {
-				var pos = loc.value().get(ctx);
+				var pos = loc.value().get(numCtx);
 
 				if (pos == null) {
 					continue;
@@ -119,7 +119,7 @@ public record GhostStructure(
 					continue;
 				}
 
-				var scale = gs.scale.value().get(ctx);
+				var scale = gs.scale.value().get(numCtx);
 
 				if (scale == null) {
 					continue;
@@ -131,7 +131,7 @@ public record GhostStructure(
 					continue;
 				}
 
-				var rotation = gs.rotation.value().get(ctx);
+				var rotation = gs.rotation.value().get(numCtx);
 
 				var rotation3f = rotation == null ? Vec3f.ZERO : Vec3f.of(rotation);
 

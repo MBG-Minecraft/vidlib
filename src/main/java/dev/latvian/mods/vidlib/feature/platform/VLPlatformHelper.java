@@ -12,7 +12,6 @@ import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
-import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import io.netty.buffer.ByteBuf;
@@ -43,10 +42,6 @@ public class VLPlatformHelper {
 	}
 
 	public void collectDynamicResources(PackType type, Consumer<Identifier> callback) {
-	}
-
-	public void collectZoneShapeTypes(CustomRegistryTypeCollector<ByteBuf, ZoneShape> registry) {
-		ZoneShape.builtInTypes(registry);
 	}
 
 	public void collectScreenShakeTypes(CustomRegistryTypeCollector<ByteBuf, ScreenShakeType> registry) {

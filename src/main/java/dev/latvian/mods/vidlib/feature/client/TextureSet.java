@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
-import dev.latvian.mods.klib.texture.SpriteKey;
-import dev.latvian.mods.klib.util.MiscUtils;
+import dev.latvian.mods.klib.util.client.ImageUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import imgui.type.ImString;
@@ -49,7 +48,7 @@ public class TextureSet {
 
 			for (var path : paths) {
 				for (var tex : mc.getResourceManager().listResources(path, id -> id.getPath().endsWith(".png")).keySet()) {
-					list.add(SpriteKey.assetFromPNG(tex));
+					list.add(ImageUtils.assetFromPNG(tex));
 				}
 			}
 

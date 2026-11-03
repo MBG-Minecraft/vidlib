@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
 import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
-import dev.latvian.mods.vidlib.feature.npc.NPCParticle;
+import dev.latvian.mods.vidlib.feature.actor.ActorParticle;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesRenderTypes;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SingleQuadParticle;
@@ -72,7 +72,7 @@ public interface VidLibClientParticles {
 		// event.registerSpecial(VidLibParticles.LINE.get(), LineParticle::new);
 		// event.registerSpecial(VidLibParticles.TEXT.get(), TextParticle::new);
 		// event.registerSpecial(VidLibParticles.ITEM.get(), ItemParticle::new);
-		event.registerSpecial(VidLibParticles.NPC.get(), NPCParticle::new);
+		event.registerSpecial(VidLibParticles.ACTOR.get(), ActorParticle::create);
 		// event.registerSpecial(VidLibParticles.LIGHTNING.get(), LightningParticle::new);
 		// event.registerSpriteSet(VidLibParticles.BURN_SMOKE.get(), BurnSmokeParticle::create);
 		// event.registerSpriteSet(VidLibParticles.SPARK.get(), SparkParticle::create);

@@ -381,9 +381,9 @@ public class CommonGameEngine {
 		var original = level.getFluidState(pos);
 
 		if (original.isEmpty()) {
-			var zones = level.vl$getActiveZones();
-			var state = zones == null ? null : zones.getZoneFluidState(pos);
-			return state == null ? original : state;
+			//var zones = level.vl$getActiveZones();
+			//var state = zones == null ? null : zones.getZoneFluidState(pos);
+			// return state == null ? original : state;
 		}
 
 		return original;

@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
+import dev.latvian.mods.klib.render.SubmitContext;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleGroup;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -44,8 +46,10 @@ public class CustomParticleGroup extends ParticleGroup<CustomParticle> {
 
 		@Override
 		public void submit(SubmitNodeCollector collector, CameraRenderState cameraRenderState) {
+			var ctx = new SubmitContext(Minecraft.getInstance(), collector, cameraRenderState);
+
 			for (var particle : particles) {
-				particle.submit(collector, cameraRenderState);
+				particle.submit(ctx);
 			}
 		}
 	}

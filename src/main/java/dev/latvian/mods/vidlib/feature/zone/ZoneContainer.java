@@ -9,8 +9,8 @@ import dev.latvian.mods.klib.codec.MCCodecs;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
+import dev.latvian.mods.klib.math.HitBuilder;
 import dev.latvian.mods.klib.registry.CustomRegistry;
-import dev.latvian.mods.klib.registry.CustomRegistryType;
 import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
@@ -20,7 +20,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -37,7 +36,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBuf, ZoneContainer>, ZoneLike, Comparable<ZoneContainer> {
+public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBuf, ZoneContainer>, VolumeLike, Comparable<ZoneContainer> {
 	public static final DynamicType<RegistryFriendlyByteBuf, ZoneContainer> TYPE = DynamicType.create(
 		"default",
 		RecordCodecBuilder.mapCodec(i -> i.group(
@@ -45,7 +44,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 			MapCodec.unit(false).forGetter(z -> z.generated),
 			MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(z -> z.dimension),
 			Codec.STRING.listOf().optionalFieldOf("tags", List.of()).forGetter(z -> List.copyOf(z.tags)),
-			ZoneVolume.CODEC.listOf().fieldOf("volumes").forGetter(z -> z.zones.stream().map(zi -> zi.volume).toList()),
+			Zone.CODEC.listOf().fieldOf("volumes").forGetter(z -> z.zones.stream().map(zi -> zi.zone).toList()),
 			Codec.INT.optionalFieldOf("priority", 0).forGetter(z -> z.priority)
 		).apply(i, ZoneContainer::new)),
 		CompositeStreamCodec.of(
@@ -53,7 +52,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 			ByteBufCodecs.BOOL, z -> z.generated,
 			KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), z -> z.dimension,
 			KLibStreamCodecs.listOf(ByteBufCodecs.STRING_UTF8), z -> List.copyOf(z.tags),
-			KLibStreamCodecs.listOf(ZoneVolume.STREAM_CODEC), z -> z.zones.stream().map(zi -> zi.volume).toList(),
+			KLibStreamCodecs.listOf(Zone.STREAM_CODEC), z -> z.zones.stream().map(zi -> zi.zone).toList(),
 			ByteBufCodecs.INT, z -> z.priority,
 			ZoneContainer::new
 		)
@@ -87,7 +86,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 		this.intBoundingBox = null;
 	}
 
-	private ZoneContainer(Ref<ZoneContainer> ref, boolean generated, ResourceKey<Level> dimension, List<String> tags, List<ZoneVolume> zones, int priority) {
+	private ZoneContainer(Ref<ZoneContainer> ref, boolean generated, ResourceKey<Level> dimension, List<String> tags, List<Zone> zones, int priority) {
 		this(ref, dimension);
 		this.generated = generated;
 		this.tags.addAll(tags);
@@ -105,12 +104,12 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 	}
 
 	@Override
-	public CustomRegistryType<RegistryFriendlyByteBuf, ZoneContainer> type() {
+	public DynamicType<RegistryFriendlyByteBuf, ZoneContainer> type() {
 		return TYPE;
 	}
 
-	public ZoneContainer add(ZoneVolume zone) {
-		var instance = zone.shape().value().createInstance(this, zone);
+	public ZoneContainer add(Zone zone) {
+		var instance = new ResolvedZone(this, zone);
 		instance.index = zones.size();
 
 		instance.tags.add(ref.key());
@@ -146,7 +145,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 	@Nullable
 	public ResolvedZone getFirst(Vec3 pos) {
 		for (var instance : zones) {
-			if (instance.volume.shape().value().contains(pos)) {
+			if (instance.zone.volume().value().contains(pos)) {
 				return instance;
 			}
 		}
@@ -158,7 +157,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 		var list = new ArrayList<ResolvedZone>(1);
 
 		for (var instance : zones) {
-			if (instance.volume.shape().value().contains(pos)) {
+			if (instance.zone.volume().value().contains(pos)) {
 				list.add(instance);
 			}
 		}
@@ -169,7 +168,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 	@Nullable
 	public ResolvedZone getFirst(AABB box) {
 		for (var instance : zones) {
-			if (instance.volume.shape().value().intersects(box)) {
+			if (instance.zone.volume().value().intersects(box)) {
 				return instance;
 			}
 		}
@@ -181,7 +180,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 		var list = new ArrayList<ResolvedZone>(1);
 
 		for (var instance : zones) {
-			if (instance.volume.shape().value().intersects(box)) {
+			if (instance.zone.volume().value().intersects(box)) {
 				list.add(instance);
 			}
 		}
@@ -212,7 +211,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 		intBoundingBox = null;
 	}
 
-	public void update(int index, ZoneVolume zoneVolume) {
+	public void update(int index, Zone zone) {
 	}
 
 	public boolean isGenerated() {
@@ -232,7 +231,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 			double maxZ = Double.NEGATIVE_INFINITY;
 
 			for (var instance : zones) {
-				var box = instance.volume.shape().value().toAABB();
+				var box = instance.zone.volume().value().box();
 				minX = Math.min(minX, box.minX);
 				minY = Math.min(minY, box.minY);
 				minZ = Math.min(minZ, box.minZ);
@@ -258,7 +257,7 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 			int maxZ = Integer.MIN_VALUE;
 
 			for (var instance : zones) {
-				var box = instance.volume.shape().value().toAAIBB();
+				var box = instance.zone.volume().value().intBox();
 				minX = Math.min(minX, box.minX());
 				minY = Math.min(minY, box.minY());
 				minZ = Math.min(minZ, box.minZ());
@@ -274,23 +273,14 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 	}
 
 	@Nullable
-	public ZoneClipResult clip(ClipContext ctx) {
-		if (zones.isEmpty()) {
-			return null;
-		} else if (zones.size() == 1) {
-			var instance = zones.getFirst();
-			return instance.volume.shape().value().clip(new ZoneClipContext(instance, ctx));
-		}
+	public ZoneHit hit(HitBuilder hit) {
+		ZoneHit result = null;
 
-		ZoneClipResult result = null;
+		for (var zone : zones) {
+			zone.zone.volume().value().hit(hit);
 
-		for (var instance : zones) {
-			var clip = instance.volume.shape().value().clip(new ZoneClipContext(instance, ctx));
-
-			if (clip != null) {
-				if (result == null || clip.distanceSq() < result.distanceSq()) {
-					result = clip;
-				}
+			if (hit.hit != null && (result == null || hit.distanceSq < result.distanceSq())) {
+				result = new ZoneHit(zone, hit.hit, hit.distanceSq, hit.direction);
 			}
 		}
 
@@ -305,11 +295,11 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 
 		if (toAABB().contains(x, y, z)) {
 			if (zones.size() == 1) {
-				return zones.getFirst().volume.shape().value().contains(x, y, z);
+				return zones.getFirst().zone.volume().value().contains(x, y, z);
 			}
 
 			for (var instance : zones) {
-				if (instance.volume.shape().value().contains(x, y, z)) {
+				if (instance.zone.volume().value().contains(x, y, z)) {
 					return true;
 				}
 			}
@@ -326,11 +316,11 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 
 		if (toAABB().contains(x, y, z)) {
 			if (zones.size() == 1) {
-				return zones.getFirst().volume.shape().value().contains(x, y, z);
+				return zones.getFirst().zone.volume().value().contains(x, y, z);
 			}
 
 			for (var instance : zones) {
-				if (instance.volume.shape().value().contains(x, y, z)) {
+				if (instance.zone.volume().value().contains(x, y, z)) {
 					return true;
 				}
 			}
@@ -344,11 +334,11 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 		if (zones.isEmpty()) {
 			return false;
 		} else if (zones.size() == 1) {
-			return zones.getFirst().volume.shape().value().intersects(box);
+			return zones.getFirst().zone.volume().value().intersects(box);
 		}
 
 		for (var instance : zones) {
-			if (instance.volume.shape().value().intersects(box)) {
+			if (instance.zone.volume().value().intersects(box)) {
 				return true;
 			}
 		}
@@ -359,13 +349,13 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 	@Override
 	public Stream<BlockPos> getBlocks() {
 		if (zones.size() == 1) {
-			return zones.getFirst().volume.shape().value().getBlocks();
+			return zones.getFirst().zone.volume().value().getBlocks();
 		}
 
 		var stream = Stream.<BlockPos>empty();
 
 		for (var instance : zones) {
-			stream = Stream.concat(stream, instance.volume.shape().value().getBlocks());
+			stream = Stream.concat(stream, instance.zone.volume().value().getBlocks());
 		}
 
 		return stream;
@@ -377,10 +367,10 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 			return Shapes.empty();
 		}
 
-		var shape = zones.getFirst().volume.shape().value().createVoxelShape();
+		var shape = zones.getFirst().zone.volume().value().createVoxelShape();
 
 		for (int i = 1; i < zones.size(); i++) {
-			shape = Shapes.or(shape, zones.get(i).volume.shape().value().createVoxelShape());
+			shape = Shapes.or(shape, zones.get(i).zone.volume().value().createVoxelShape());
 		}
 
 		return shape;
@@ -392,10 +382,10 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 			return Shapes.empty();
 		}
 
-		var shape = zones.getFirst().volume.shape().value().createBlockRenderingShape(predicate);
+		var shape = zones.getFirst().zone.volume().value().createBlockRenderingShape(predicate);
 
 		for (int i = 1; i < zones.size(); i++) {
-			shape = Shapes.or(shape, zones.get(i).volume.shape().value().createBlockRenderingShape(predicate));
+			shape = Shapes.or(shape, zones.get(i).zone.volume().value().createBlockRenderingShape(predicate));
 		}
 
 		return shape;
@@ -404,13 +394,13 @@ public class ZoneContainer implements CustomRegistryValue<RegistryFriendlyByteBu
 	@Override
 	public double closestDistanceTo(Vec3 pos) {
 		if (zones.size() == 1) {
-			return zones.getFirst().volume.shape().value().closestDistanceTo(pos);
+			return zones.getFirst().zone.volume().value().closestDistanceTo(pos);
 		}
 
 		var dist = Double.POSITIVE_INFINITY;
 
 		for (var instance : zones) {
-			dist = Math.min(dist, instance.volume.shape().value().closestDistanceTo(pos));
+			dist = Math.min(dist, instance.zone.volume().value().closestDistanceTo(pos));
 
 			if (dist <= 0D) {
 				return 0D;

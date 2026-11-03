@@ -14,7 +14,6 @@ import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
-import dev.latvian.mods.vidlib.feature.prop.builtin.npc.NPCProp;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
@@ -46,6 +45,5 @@ public interface VidLibDataTypes {
 		registry.register("map_texture_overrides", MapTextureOverrides.DATA_TYPE);
 		registry.register("decal", Decal.DATA_TYPE);
 		registry.register("render_light_layer", RenderLightLayer.DATA_TYPE);
-		registry.register("npc_pose", NPCProp.POSE_TYPE);
 	}
 }

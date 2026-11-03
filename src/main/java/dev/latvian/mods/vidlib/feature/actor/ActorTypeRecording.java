@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.npc;
+package dev.latvian.mods.vidlib.feature.actor;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.VarInt;
@@ -8,14 +8,14 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NPCTypeRecording<T> {
-	public final NPCDataType<T> type;
+public class ActorTypeRecording<T> {
+	public final ActorDataType<T> type;
 	public T initial;
 	public T latest;
-	private final List<NPCUpdate<T>> updates;
-	private NPCUpdate<T>[] updateArray;
+	private final List<ActorUpdate<T>> updates;
+	private ActorUpdate<T>[] updateArray;
 
-	public NPCTypeRecording(NPCDataType<T> type) {
+	public ActorTypeRecording(ActorDataType<T> type) {
 		this.type = type;
 		this.latest = null;
 		this.updates = new ArrayList<>();
@@ -35,7 +35,7 @@ public class NPCTypeRecording<T> {
 
 		if (latest != value && !type.isSimilar(value, latest)) {
 			latest = value;
-			updates.add(new NPCUpdate<>(offset, value));
+			updates.add(new ActorUpdate<>(offset, value));
 			updateArray = null;
 		}
 	}
@@ -47,7 +47,7 @@ public class NPCTypeRecording<T> {
 		for (int i = 0; i < size; i++) {
 			long offset = VarLong.read(buf);
 			var value = type.read(buf);
-			updates.add(new NPCUpdate<>(offset, value));
+			updates.add(new ActorUpdate<>(offset, value));
 		}
 
 		updateArray = null;
@@ -69,10 +69,10 @@ public class NPCTypeRecording<T> {
 		}
 
 		if (updateArray == null) {
-			var list = new ArrayList<NPCUpdate<T>>();
-			list.add(new NPCUpdate<>(0L, initial));
+			var list = new ArrayList<ActorUpdate<T>>();
+			list.add(new ActorUpdate<>(0L, initial));
 			list.addAll(updates);
-			updateArray = list.reversed().toArray(new NPCUpdate[0]);
+			updateArray = list.reversed().toArray(new ActorUpdate[0]);
 		}
 
 		for (var entry : updateArray) {
@@ -86,6 +86,6 @@ public class NPCTypeRecording<T> {
 
 	@Override
 	public String toString() {
-		return "NPCTypeRecording[type=" + type.name() + ", initial=" + initial + ", updates=" + updates.size() + "]";
+		return "ActorTypeRecording[type=" + type.name() + ", initial=" + initial + ", updates=" + updates.size() + "]";
 	}
 }

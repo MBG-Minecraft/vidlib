@@ -7,6 +7,7 @@ import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
 import imgui.type.ImBoolean;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 public class DepthOfField {
@@ -86,7 +87,7 @@ public class DepthOfField {
 		// CANVAS.markActive();
 		var cam = mc.gameRenderer.mainCamera().position();
 
-		uFocusPos = new Vec3f((float) (vec.x - cam.x), (float) (vec.y - cam.y), (float) (vec.z - cam.z));
+		uFocusPos = new Vector3f((float) (vec.x - cam.x), (float) (vec.y - cam.y), (float) (vec.z - cam.z));
 		uFocusRange = Math.max(data.focusRange(), 0F);
 		uBlurRange = Math.max(data.focusRange(), 0F) + Math.max(data.blurRange(), 0F);
 		uStrength = DEBUG_ENABLED.get() ? 0F : Math.max(data.strength() * mc.getEffectScale(), 0F);

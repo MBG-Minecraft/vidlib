@@ -1,6 +1,5 @@
-package dev.latvian.mods.vidlib.feature.prop.builtin.npc;
+package dev.latvian.mods.vidlib.feature.prop.builtin.mannequin;
 
-import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Identity;
@@ -34,74 +33,57 @@ import org.joml.Vector3f;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NPCProp extends Prop {
+public class MannequinProp extends Prop {
 	public static final Pose[] POSES = Pose.values();
 	public static final Pose[] VALID_POSES = {Pose.STANDING, Pose.CROUCHING, Pose.SLEEPING, Pose.SWIMMING, Pose.SITTING};
 
-	// Named instead of an inline DataType.of(POSES) so the command argument type has a stable registration id.
-	public static final DataType<Pose> POSE_TYPE = DataType.of(POSES);
-
-	public static class NPCInstance {
-		public int index;
-		public int profile;
-		public float x;
-		public float y, prevY;
-		public float z;
-		public float randomOffsetX;
-		public float randomOffsetZ;
-		public float randomYaw;
-		public float randomPitch;
-		public float jump;
-		public int punching, prevPunching;
-	}
-
 	@AutoRegister
-	public static final PropType<NPCProp> TYPE = PropType.create(ID.vidlib("npc"), NPCProp::new,
+	public static final PropType<MannequinProp> TYPE = PropType.create(ID.vidlib("mannequin"), MannequinProp::new,
 		TICK,
 		POSITION,
 		HEIGHT,
 		YAW,
 		PITCH,
 		ROLL,
-		PropData.create(NPCProp.class, "name", DataTypes.TEXT_COMPONENT, p -> p.name, (p, v) -> p.name = v),
-		PropData.createBoolean(NPCProp.class, "stone", p -> p.stone, (p, v) -> p.stone = v),
-		PropData.create(NPCProp.class, "profile", DataTypes.NAME_AND_ID, p -> p.profile, (p, v) -> p.profile = v),
-		PropData.createInt(NPCProp.class, "count", p -> p.count, (p, v) -> {
+		PropData.create(MannequinProp.class, "name", DataTypes.TEXT_COMPONENT, p -> p.name, (p, v) -> p.name = v),
+		PropData.createBoolean(MannequinProp.class, "stone", p -> p.stone, (p, v) -> p.stone = v),
+		PropData.create(MannequinProp.class, "profile", DataTypes.NAME_AND_ID, p -> p.profile, (p, v) -> p.profile = v),
+		PropData.createInt(MannequinProp.class, "count", p -> p.count, (p, v) -> {
 			p.count = v;
 			p.instances = null;
 		}, 1, 1000),
-		PropData.create(NPCProp.class, "spread", SpreadType.DATA_TYPE, p -> p.spread, (p, v) -> {
+		PropData.create(MannequinProp.class, "spread", SpreadType.DATA_TYPE, p -> p.spread, (p, v) -> {
 			p.spread = v;
 			p.instances = null;
 		}),
-		PropData.createFloat(NPCProp.class, "body_pitch", p -> p.bodyPitch, (p, v) -> p.bodyPitch = v, -90F, 90F),
-		PropData.createFloat(NPCProp.class, "spread_radius", p -> p.spreadRadius, (p, v) -> p.spreadRadius = v, 0F, 200F),
-		PropData.createFloat(NPCProp.class, "random_offset", p -> p.randomOffset, (p, v) -> p.randomOffset = v, 0F, 50F),
-		PropData.createFloat(NPCProp.class, "random_yaw", p -> p.randomYaw, (p, v) -> p.randomYaw = v, 0F, 180F),
-		PropData.createFloat(NPCProp.class, "random_head_pitch", p -> p.randomPitch, (p, v) -> p.randomPitch = v, 0F, 90F),
-		PropData.createFloat(NPCProp.class, "rotation", p -> p.rotation, (p, v) -> {
+		PropData.createFloat(MannequinProp.class, "body_pitch", p -> p.bodyPitch, (p, v) -> p.bodyPitch = v, -90F, 90F),
+		PropData.createFloat(MannequinProp.class, "spread_radius", p -> p.spreadRadius, (p, v) -> p.spreadRadius = v, 0F, 200F),
+		PropData.createFloat(MannequinProp.class, "random_offset", p -> p.randomOffset, (p, v) -> p.randomOffset = v, 0F, 50F),
+		PropData.createFloat(MannequinProp.class, "random_yaw", p -> p.randomYaw, (p, v) -> p.randomYaw = v, 0F, 180F),
+		PropData.createFloat(MannequinProp.class, "random_head_pitch", p -> p.randomPitch, (p, v) -> p.randomPitch = v, 0F, 90F),
+		PropData.createFloat(MannequinProp.class, "rotation", p -> p.rotation, (p, v) -> {
 			p.rotation = v;
 			p.instances = null;
 		}, 0F, 360F),
-		PropData.create(NPCProp.class, "clothing", PlayerClothing.DATA_TYPE, p -> p.clothing, (p, v) -> p.clothing = v),
-		PropData.createInt(NPCProp.class, "jumping", p -> p.jumping, (p, v) -> p.jumping = v, 0, 100),
-		PropData.createInt(NPCProp.class, "punching", p -> p.punching, (p, v) -> p.punching = v, 0, 100),
-		PropData.create(NPCProp.class, "main_hand_item", DataTypes.ITEM_STACK, p -> p.mainHandItem, (p, v) -> p.mainHandItem = v),
-		PropData.create(NPCProp.class, "off_hand_item", DataTypes.ITEM_STACK, p -> p.offHandItem, (p, v) -> p.offHandItem = v),
-		PropData.create(NPCProp.class, "head_item", DataTypes.ITEM_STACK, p -> p.headItem, (p, v) -> p.headItem = v),
-		PropData.create(NPCProp.class, "chest_item", DataTypes.ITEM_STACK, p -> p.chestItem, (p, v) -> p.chestItem = v),
-		PropData.create(NPCProp.class, "legs_item", DataTypes.ITEM_STACK, p -> p.legsItem, (p, v) -> p.legsItem = v),
-		PropData.create(NPCProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v),
-		PropData.create(NPCProp.class, "pose", POSE_TYPE, p -> p.pose, (p, v) -> p.pose = v),
-		PropData.createBoolean(NPCProp.class, "breathing", p -> p.breathing, (p, v) -> p.breathing = v),
-		PropData.createFloat(NPCProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F),
-		PropData.createFloat(NPCProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
-		PropData.createFloat(NPCProp.class, "additional_head_yaw", p -> p.additionalHeadYaw, (p, v) -> p.additionalHeadYaw = v, -90F, 90F),
-		PropData.createBoolean(NPCProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
-		PropData.create(NPCProp.class, "random_skins", SkinTexture.SET_DATA_TYPE, p -> p.randomSkins, (p, v) -> p.randomSkins = v)
+		PropData.create(MannequinProp.class, "clothing", PlayerClothing.DATA_TYPE, p -> p.clothing, (p, v) -> p.clothing = v),
+		PropData.createInt(MannequinProp.class, "jumping", p -> p.jumping, (p, v) -> p.jumping = v, 0, 100),
+		PropData.createInt(MannequinProp.class, "punching", p -> p.punching, (p, v) -> p.punching = v, 0, 100),
+		PropData.create(MannequinProp.class, "main_hand_item", DataTypes.ITEM_STACK, p -> p.mainHandItem, (p, v) -> p.mainHandItem = v),
+		PropData.create(MannequinProp.class, "off_hand_item", DataTypes.ITEM_STACK, p -> p.offHandItem, (p, v) -> p.offHandItem = v),
+		PropData.create(MannequinProp.class, "head_item", DataTypes.ITEM_STACK, p -> p.headItem, (p, v) -> p.headItem = v),
+		PropData.create(MannequinProp.class, "chest_item", DataTypes.ITEM_STACK, p -> p.chestItem, (p, v) -> p.chestItem = v),
+		PropData.create(MannequinProp.class, "legs_item", DataTypes.ITEM_STACK, p -> p.legsItem, (p, v) -> p.legsItem = v),
+		PropData.create(MannequinProp.class, "feet_item", DataTypes.ITEM_STACK, p -> p.feetItem, (p, v) -> p.feetItem = v),
+		PropData.create(MannequinProp.class, "pose", DataTypes.POSE, p -> p.pose, (p, v) -> p.pose = v),
+		PropData.createBoolean(MannequinProp.class, "breathing", p -> p.breathing, (p, v) -> p.breathing = v),
+		PropData.createFloat(MannequinProp.class, "running_distance", p -> p.runningDistance, (p, v) -> p.runningDistance = v, 0F, 200F),
+		PropData.createFloat(MannequinProp.class, "render_distance", p -> p.renderDistance, (p, v) -> p.renderDistance = v, 0F, 1024F),
+		PropData.createFloat(MannequinProp.class, "additional_head_yaw", p -> p.additionalHeadYaw, (p, v) -> p.additionalHeadYaw = v, -90F, 90F),
+		PropData.createBoolean(MannequinProp.class, "random_skin", p -> p.randomSkin, (p, v) -> p.randomSkin = v),
+		PropData.create(MannequinProp.class, "random_skins", SkinTexture.SET_DATA_TYPE, p -> p.randomSkins, (p, v) -> p.randomSkins = v)
 	);
 
-	public static NPCProp createCloneFrom(Player player) {
+	public static MannequinProp createCloneFrom(Player player) {
 		var props = VLPlatformHelper.CURRENT.getProps(player.level());
 		return props.add(TYPE, prop -> prop.cloneFrom(player));
 	}
@@ -134,9 +116,9 @@ public class NPCProp extends Prop {
 	public float rotation;
 
 	public float renderDistance = 256F;
-	public NPCInstance[] instances;
+	public MannequinPropInstance[] instances;
 
-	public NPCProp(PropContext<?> ctx) {
+	public MannequinProp(PropContext<?> ctx) {
 		super(ctx);
 		this.width = 0.6F;
 		this.height = 1.92F;
@@ -268,7 +250,7 @@ public class NPCProp extends Prop {
 		return !Empty.isEmpty(name);
 	}
 
-	public NPCInstance[] getInstances() {
+	public MannequinPropInstance[] getInstances() {
 		var arr = instances;
 
 		if (arr == null) {
@@ -280,11 +262,11 @@ public class NPCProp extends Prop {
 				spreadPositions = spread.spread(Math.clamp(count, 1, 10000), rotation);
 			}
 
-			arr = new NPCInstance[spreadPositions.length];
+			arr = new MannequinPropInstance[spreadPositions.length];
 			var random = new XoroshiroRandomSource(Double.doubleToLongBits(pos.x + id), Double.doubleToLongBits(pos.z + arr.length));
 
 			for (int i = 0; i < arr.length; i++) {
-				arr[i] = new NPCInstance();
+				arr[i] = new MannequinPropInstance();
 				arr[i].index = i;
 				arr[i].profile = random.nextInt(Integer.MAX_VALUE);
 				arr[i].x = spreadPositions[i].x();

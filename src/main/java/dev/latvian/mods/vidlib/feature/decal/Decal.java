@@ -1,13 +1,16 @@
 package dev.latvian.mods.vidlib.feature.decal;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.JOMLCodecs;
 import dev.latvian.mods.klib.codec.JOMLStreamCodecs;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataType;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.util.ColorBlendMode;
+import dev.latvian.mods.klib.visual.Visual;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
@@ -19,6 +22,7 @@ import imgui.flag.ImGuiSliderFlags;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.core.Position;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
@@ -27,7 +31,7 @@ import org.joml.Vector3d;
 import java.util.Collection;
 import java.util.List;
 
-public class Decal {
+public class Decal implements Visual {
 	public static Color DANGER_INNER_COLOR = Color.ofRGB(0xFFAA00);
 	public static Color DANGER_OUTER_COLOR = Color.RED;
 
@@ -44,7 +48,7 @@ public class Decal {
 		return d;
 	}
 
-	public static final Codec<Decal> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+	public static final MapCodec<Decal> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 		DecalType.CODEC.optionalFieldOf("type", DecalType.CYLINDER).forGetter(d -> d.type),
 		JOMLCodecs.DVEC3.optionalFieldOf("position", new Vector3d()).forGetter(d -> d.position),
 		Codec.FLOAT.optionalFieldOf("inner_size", 0F).forGetter(d -> d.innerSize),
@@ -61,6 +65,8 @@ public class Decal {
 		ColorBlendMode.CODEC.optionalFieldOf("blend_mode", ColorBlendMode.MULTIPLICATIVE).forGetter(d -> d.blendMode),
 		Codec.FLOAT.optionalFieldOf("edges", 4F).forGetter(d -> d.edges)
 	).apply(instance, Decal::new));
+
+	public static final Codec<Decal> CODEC = MAP_CODEC.codec();
 
 	public static final StreamCodec<ByteBuf, Decal> STREAM_CODEC = CompositeStreamCodec.of(
 		DecalType.STREAM_CODEC, d -> d.type,
@@ -82,6 +88,8 @@ public class Decal {
 	);
 
 	public static final DataType<Decal> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
+
+	public static final DynamicType<RegistryFriendlyByteBuf, Visual> TYPE = DynamicType.create("decal", MAP_CODEC, STREAM_CODEC);
 
 	public Decal parent;
 	public DecalType type;
@@ -171,6 +179,11 @@ public class Decal {
 		this.terrain = other.terrain;
 		this.blendMode = other.blendMode;
 		this.edges = other.edges;
+	}
+
+	@Override
+	public DynamicType<RegistryFriendlyByteBuf, Visual> type() {
+		return TYPE;
 	}
 
 	public void setPosition(Vector3d pos, boolean joined) {

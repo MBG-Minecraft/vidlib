@@ -1,10 +1,10 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.tv;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.latvian.mods.klib.render.SubmitContext;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.client.EntityRenderTypes;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
-import dev.latvian.mods.vidlib.client.SubmitContext;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.util.ARGB;
@@ -20,8 +20,7 @@ public class TVPropRenderer implements PropRenderer<TVProp> {
 	public static final ClientAsset TEXTURE_NO_VIDEO = new ClientAsset.ResourceTexture(ID.vidlib("prop/tv/no_video"));
 
 	@Override
-	public void render(SubmitContext<TVProp> ctx) {
-		var prop = ctx.prop();
+	public void render(TVProp prop, SubmitContext ctx) {
 		float delta = ctx.delta();
 
 		float w = (float) prop.width;

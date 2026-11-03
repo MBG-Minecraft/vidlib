@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.Range;
 import dev.latvian.mods.klib.registry.CustomRegistry;
-import dev.latvian.mods.klib.registry.CustomRegistryType;
 import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
@@ -203,7 +202,7 @@ public record PhysicsParticleData(
 	}
 
 	@Override
-	public CustomRegistryType<ByteBuf, PhysicsParticleData> type() {
+	public DynamicType<ByteBuf, PhysicsParticleData> type() {
 		return TYPE;
 	}
 }

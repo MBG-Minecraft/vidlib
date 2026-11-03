@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.texture.TextureContents;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 
 import java.io.IOException;
@@ -48,8 +49,8 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 	public TextureContents loadContents(ResourceManager manager) throws IOException {
 		if (atmosphere.skybox == null) {
 			var src = new NativeImage(4, 512, false);
-			var topCol = Color.ofRGB(atmosphere.attributes.applyModifier(EnvironmentAttributes.SKY_COLOR, 0x000000));
-			var bottomCol = Color.ofRGB(atmosphere.attributes.applyModifier(EnvironmentAttributes.FOG_COLOR, 0xFFFFFF));
+			var topCol = Color.ofRGB(ARGB.colorFromVector3f(atmosphere.attributes.applyModifier(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(0x000000))));
+			var bottomCol = Color.ofRGB(ARGB.colorFromVector3f(atmosphere.attributes.applyModifier(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(0xFFFFFF))));
 
 			for (int y = 0; y < 512; y++) {
 				int col = topCol.lerp(y / 511F, bottomCol).argb();

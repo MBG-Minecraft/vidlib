@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public interface ZoneLike {
+public interface VolumeLike {
 	AABB toAABB();
 
 	default AAIBB toAAIBB() {

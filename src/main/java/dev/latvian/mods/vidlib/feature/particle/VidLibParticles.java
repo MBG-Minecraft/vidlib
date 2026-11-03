@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle;
 import com.mojang.serialization.MapCodec;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
+import dev.latvian.mods.vidlib.feature.actor.ActorParticleOptions;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -49,7 +49,7 @@ public interface VidLibParticles {
 	// Supplier<ParticleType<LineParticleOptions>> LINE = register(ID.vidlib("line"), () -> LineParticleOptions.MAP_CODEC, () -> LineParticleOptions.STREAM_CODEC);
 	// Supplier<ParticleType<TextParticleOptions>> TEXT = register(ID.vidlib("text"), () -> TextParticleOptions.MAP_CODEC, () -> TextParticleOptions.STREAM_CODEC);
 	// Supplier<ParticleType<ItemParticleOptions>> ITEM = register(ID.vidlib("item"), () -> ItemParticleOptions.MAP_CODEC, () -> ItemParticleOptions.STREAM_CODEC);
-	Supplier<ParticleType<NPCParticleOptions>> NPC = register(ID.vidlib("npc"), () -> NPCParticleOptions.MAP_CODEC, () -> NPCParticleOptions.STREAM_CODEC);
+	Supplier<ParticleType<ActorParticleOptions>> ACTOR = register(ID.vidlib("actor"), () -> ActorParticleOptions.MAP_CODEC, () -> ActorParticleOptions.STREAM_CODEC);
 	// Supplier<ParticleType<LightningParticleOptions>> LIGHTNING = register(ID.vidlib("lightning"), () -> LightningParticleOptions.MAP_CODEC, () -> LightningParticleOptions.STREAM_CODEC);
 	// Supplier<SimpleParticleType> BURN_SMOKE = register(ID.vidlib("burn_smoke"));
 	// Supplier<SimpleParticleType> SPARK = register(ID.vidlib("spark"));

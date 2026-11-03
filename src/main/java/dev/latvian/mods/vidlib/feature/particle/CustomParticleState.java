@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
+import dev.latvian.mods.klib.render.Submittable;
 
-public interface CustomParticleState {
-	void submit(SubmitNodeCollector collector, CameraRenderState cameraRenderState);
+public interface CustomParticleState extends Submittable {
 }

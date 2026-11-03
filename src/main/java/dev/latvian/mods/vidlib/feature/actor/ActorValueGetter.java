@@ -1,8 +1,8 @@
-package dev.latvian.mods.vidlib.feature.npc;
+package dev.latvian.mods.vidlib.feature.actor;
 
 import net.minecraft.world.entity.player.Player;
 
 @FunctionalInterface
-public interface NPCValueGetter<T> {
+public interface ActorValueGetter<T> {
 	T get(Player player, float delta);
 }

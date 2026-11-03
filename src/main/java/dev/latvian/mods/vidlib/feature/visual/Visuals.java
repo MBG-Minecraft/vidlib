@@ -1,84 +1,69 @@
 package dev.latvian.mods.vidlib.feature.visual;
 
-import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.math.Line;
-import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.knumber.KNumber;
+import dev.latvian.mods.klib.kvector.KVector;
+import dev.latvian.mods.klib.math.AAFBB;
+import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.PositionedColoredShape;
 import dev.latvian.mods.klib.shape.VoxelShapeBox;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.ApiStatus;
+import dev.latvian.mods.klib.visual.LineVisual;
+import dev.latvian.mods.klib.visual.Visual;
+import dev.latvian.mods.klib.visual.VisualVertex;
+import net.minecraft.core.Vec3i;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record Visuals(List<CubeVisual> cubes, List<LineVisual> lines, List<ResolvedTexturedCube> texturedCubes, List<PositionedColoredShape> shapes, List<PositionedColoredShape> brightShapes, List<PositionedColoredShape> outlineShapes) {
-	public static final Visuals NONE = new Visuals(List.of(), List.of(), List.of(), List.of(), List.of(), List.of());
-	public static final Visuals FRAME_DEBUG = new Visuals();
-	public static final Visuals TICK_DEBUG = new Visuals();
-
-	@ApiStatus.Internal
-	public static final Visuals TEMP = new Visuals();
+public record Visuals(List<Visual> visuals) {
+	public static final Visuals NONE = new Visuals(List.of());
+	public static final Visuals EXTRACT = new Visuals();
+	public static final Visuals TICK = new Visuals();
 
 	public Visuals() {
-		this(new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0));
+		this(new ArrayList<>(0));
 	}
 
 	public boolean hasAny() {
-		return !cubes.isEmpty() || !lines.isEmpty() || !texturedCubes.isEmpty() || !shapes.isEmpty() || !brightShapes.isEmpty() || !outlineShapes.isEmpty();
+		return !visuals.isEmpty();
 	}
 
 	public void clear() {
-		cubes.clear();
-		lines.clear();
-		texturedCubes.clear();
-		shapes.clear();
-		brightShapes.clear();
-		outlineShapes.clear();
+		visuals.clear();
 	}
 
-	public void copyFrom(Visuals from) {
-		cubes.addAll(from.cubes);
-		lines.addAll(from.lines);
-		texturedCubes.addAll(from.texturedCubes);
-		shapes.addAll(from.shapes);
-		brightShapes.addAll(from.brightShapes);
-		outlineShapes.addAll(from.outlineShapes);
-	}
-
-	public void addCube(Vec3 pos, VoxelShapeBox shape, Color color, Color lineColor, Rotation rotation) {
-		cubes.add(new CubeVisual(pos, shape, color, lineColor, rotation));
-	}
-
-	public void addCube(Vec3 pos) {
-		addCube(pos, VoxelShapeBox.CENTERED, Color.CYAN, Color.WHITE, Rotation.NONE);
-	}
-
-	public void addLine(Line line, Color startColor, Color endColor) {
-		lines.add(new LineVisual(line, startColor, endColor));
-	}
-
-	public void addLine(Line line, Color color) {
-		lines.add(new LineVisual(line, color, color));
-	}
-
-	public void addLine(Line line) {
-		lines.add(new LineVisual(line, Color.WHITE, Color.WHITE));
+	public void add(Visual visual) {
+		visuals.add(visual);
 	}
 
 	public void add(PositionedColoredShape shape) {
-		shapes.add(shape);
+		add(shape.asVisual());
 	}
 
-	public void addBright(PositionedColoredShape shape) {
-		brightShapes.add(shape);
+	public void addCube(Ref<KVector> pos, VoxelShapeBox shape, Ref<Gradient> quadColor, Ref<Gradient> lineColor) {
+		add(new ColoredShape(shape.ref(), quadColor, lineColor).at(pos));
+	}
+
+	public void addDebugCube(double x, double y, double z, AAFBB box, boolean selected) {
+		addCube(KVector.of(x, y, z).ref(), VoxelShapeBox.of(selected ? box.inflate(0.0625F) : box), Gradient.EMPTY, selected ? Gradient.YELLOW : Gradient.WHITE);
+	}
+
+	public void addLine(Ref<KVector> startPos, Ref<KVector> endPos, Ref<Gradient> startColor, Ref<Gradient> endColor) {
+		visuals.add(new LineVisual(new VisualVertex(startPos, startColor), new VisualVertex(endPos, endColor), KNumber.PROGRESS));
 	}
 
 	public void addOutline(PositionedColoredShape shape) {
-		outlineShapes.add(shape);
+		// FIXME entity outline-like rendering of visual, requires shaders
 	}
 
-	public boolean contains(BlockPos pos) {
-		return !cubes.isEmpty();
+	public boolean contains(Vec3i pos) {
+		for (var visual : visuals) {
+			if (visual.containsBlock(pos)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

@@ -18,8 +18,6 @@ import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRegistryEvent;
-import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
-import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShapeRegistryEvent;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGatewayEventRegistryEvent;
 import io.netty.buffer.ByteBuf;
@@ -74,12 +72,6 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	@Override
 	public void collectDynamicResources(PackType type, Consumer<Identifier> callback) {
 		ModLoader.postEvent(type == PackType.CLIENT_RESOURCES ? new DynamicResourceEvent.Assets(callback) : new DynamicResourceEvent.Data(callback));
-	}
-
-	@Override
-	public void collectZoneShapeTypes(CustomRegistryTypeCollector<ByteBuf, ZoneShape> registry) {
-		super.collectZoneShapeTypes(registry);
-		ModLoader.postEvent(new ZoneShapeRegistryEvent(registry));
 	}
 
 	@Override

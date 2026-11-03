@@ -42,11 +42,11 @@ public enum ZoneTool implements VidLibTool {
 	}
 
 	private void clickedOnZone(Player player) {
-		var clip = Minecraft.getInstance().player.vl$sessionData().zoneClip;
+		var hit = Minecraft.getInstance().player.vl$sessionData().zoneHit;
 
-		if (clip != null) {
-			NeoForge.EVENT_BUS.post(new ZoneEvent.ClickedOn(clip, player.level(), player));
-			player.c2s(new ZoneClickedPayload(clip.instance().container.ref, clip.instance().index, clip.distanceSq(), Optional.ofNullable(clip.pos())));
+		if (hit != null) {
+			NeoForge.EVENT_BUS.post(new ZoneEvent.ClickedOn(hit, player.level(), player));
+			player.c2s(new ZoneClickedPayload(hit.resolvedZone().container.ref, hit.resolvedZone().index, hit.pos(), hit.distanceSq(), Optional.ofNullable(hit.direction())));
 		}
 	}
 }

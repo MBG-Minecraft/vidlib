@@ -17,7 +17,6 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
-import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
@@ -49,7 +48,6 @@ public class VidLib {
 
 	public static void builtInRegistries(CustomRegistryCollector registry) {
 		var platform = VLPlatformHelper.CURRENT;
-		registry.register(ZoneShape.REGISTRY, platform::collectZoneShapeTypes);
 		registry.register(ScreenShakeType.REGISTRY, platform::collectScreenShakeTypes);
 		registry.register(ScreenEffect.REGISTRY, platform::collectScreenEffectTypes);
 		registry.register(Atmosphere.REGISTRY);

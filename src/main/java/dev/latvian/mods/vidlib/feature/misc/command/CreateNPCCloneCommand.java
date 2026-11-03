@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc.command;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.prop.builtin.npc.NPCProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.mannequin.MannequinProp;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,7 +18,7 @@ public interface CreateNPCCloneCommand {
 	);
 
 	private static int createNPCClone(ServerPlayer player) {
-		NPCProp.createCloneFrom(player);
+		MannequinProp.createCloneFrom(player);
 		return 1;
 	}
 }

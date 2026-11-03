@@ -1,10 +1,8 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.tv;
 
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.RotatedQuadData;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.shape.VoxelShapeBox;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
@@ -13,7 +11,6 @@ import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.phys.Vec3;
 
 public class TVProp extends Prop {
 	@AutoRegister
@@ -67,7 +64,7 @@ public class TVProp extends Prop {
 
 	@Override
 	public boolean isVisibleInFrustum(double x, double y, double z, FrustumCheck frustum) {
-		return frustum.isVisible(x, y, z, rotatedQuadData.getClipBox());
+		return frustum.isVisible(rotatedQuadData.getClipBox().aabb(x, y, z));
 	}
 
 	@Override
@@ -98,7 +95,7 @@ public class TVProp extends Prop {
 	@Override
 	public void debugVisuals(Visuals visuals, double x, double y, double z, float delta, boolean selected) {
 		if (rotatedQuadData != null) {
-			visuals.addCube(new Vec3(x, y, z), VoxelShapeBox.of(selected ? rotatedQuadData.getClipBox().inflate(0.0625D) : rotatedQuadData.getClipBox()), Color.TRANSPARENT, selected ? Color.YELLOW : Color.WHITE, Rotation.NONE);
+			visuals.addDebugCube(x, y, z, rotatedQuadData.getClipBox(), selected);
 		}
 	}
 }

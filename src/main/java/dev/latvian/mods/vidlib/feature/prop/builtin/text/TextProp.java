@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.shape.VoxelShapeBox;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
@@ -14,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.phys.Vec3;
 
 public class TextProp extends Prop {
 	@AutoRegister
@@ -81,7 +79,7 @@ public class TextProp extends Prop {
 
 	@Override
 	public boolean isVisibleInFrustum(double x, double y, double z, FrustumCheck frustum) {
-		return cachedData == null || cachedData.lines.length > 0 && frustum.isVisible(x, y, z, cachedData.box);
+		return cachedData == null || cachedData.lines.length > 0 && frustum.isVisible(cachedData.box.aabb(x, y, z));
 	}
 
 	@Override
@@ -110,7 +108,7 @@ public class TextProp extends Prop {
 	@Override
 	public void debugVisuals(Visuals visuals, double x, double y, double z, float delta, boolean selected) {
 		if (cachedData != null) {
-			visuals.addCube(new Vec3(x, y, z), VoxelShapeBox.of(selected ? cachedData.box.inflate(0.0625D) : cachedData.box), Color.TRANSPARENT, selected ? Color.YELLOW : Color.WHITE, Rotation.NONE);
+			visuals.addDebugCube(x, y, z, cachedData.box, selected);
 		}
 	}
 }

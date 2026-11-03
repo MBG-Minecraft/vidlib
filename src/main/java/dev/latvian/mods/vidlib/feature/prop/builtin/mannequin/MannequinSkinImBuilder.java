@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.prop.builtin.npc;
+package dev.latvian.mods.vidlib.feature.prop.builtin.mannequin;
 
 import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.vidlib.feature.client.TextureSet;
@@ -13,11 +13,11 @@ import imgui.type.ImInt;
 
 import java.util.Objects;
 
-public class NpcSkinImBuilder extends SetImBuilder<SkinTexture> {
+public class MannequinSkinImBuilder extends SetImBuilder<SkinTexture> {
 	private final ListImBuilder<String> randomGrabFrom = new ListImBuilder<>(StringImBuilder.TYPE);
 	private final ImInt randomCount = new ImInt(10);
 
-	public NpcSkinImBuilder() {
+	public MannequinSkinImBuilder() {
 		super(SkinTextureImBuilder::new);
 	}
 

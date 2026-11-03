@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.shape.VoxelShapeBox;
 import dev.latvian.mods.klib.texture.FaceTexture;
 import dev.latvian.mods.klib.texture.ResolvedCubeTextures;
 import dev.latvian.mods.klib.texture.SpriteKey;
-import dev.latvian.mods.vidlib.feature.visual.ResolvedTexturedCube;
+import dev.latvian.mods.klib.visual.TexturedCubeVisual;
 import dev.latvian.mods.vidlib.util.TerrainRenderLayer;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.Direction;
@@ -23,7 +23,7 @@ public class CachedZoneShape {
 	private final ResolvedZone instance;
 	private final VoxelShape shape;
 	private VoxelShapeBox shapeBox;
-	private Map<TerrainRenderLayer, List<ResolvedTexturedCube>> cachedCubes;
+	private Map<TerrainRenderLayer, List<TexturedCubeVisual>> cachedCubes;
 
 	public CachedZoneShape(ResolvedZone instance, VoxelShape shape) {
 		this.instance = instance;
@@ -31,7 +31,7 @@ public class CachedZoneShape {
 	}
 
 	public static void append(Collection<CachedZoneShape> list, ResolvedZone instance) {
-		var shape = instance.volume.shape().value().createVoxelShape().optimize();
+		var shape = instance.zone.volume().value().createVoxelShape().optimize();
 
 		if (!shape.isEmpty()) {
 			list.add(new CachedZoneShape(instance, shape));
@@ -62,33 +62,33 @@ public class CachedZoneShape {
 			"shapeBox=" + shapeBox + ']';
 	}
 
-	public Map<TerrainRenderLayer, List<ResolvedTexturedCube>> cachedCubes() {
+	public Map<TerrainRenderLayer, List<TexturedCubeVisual>> cachedCubes() {
 		if (cachedCubes == null) {
 			cachedCubes = new Reference2ObjectOpenHashMap<>();
 
 			double yOff = 0D;
 
-			if (instance.volume.fluid().isPresent()) {
-				yOff = 1D - instance.volume.fluid().get().fluidState().getOwnHeight();
+			if (instance.zone.fluid().isPresent()) {
+				yOff = 1D - instance.zone.fluid().get().fluidState().getOwnHeight();
 				// yOff += Math.clamp(-frame.y(yOff) / 50D, 0D, 0.5D);
 			}
 
 			for (var box : shapeBox().boxes()) {
-				var bminX = box.minX;
-				var bminY = box.minY;
-				var bminZ = box.minZ;
-				var bmaxX = box.maxX;
-				var bmaxY = box.maxY - yOff;
-				var bmaxZ = box.maxZ;
+				var bminX = box.minX();
+				var bminY = box.minY();
+				var bminZ = box.minZ();
+				var bmaxX = box.maxX();
+				var bmaxY = box.maxY() - yOff;
+				var bmaxZ = box.maxZ();
 
 				var textures = ResolvedCubeTextures.EMPTY;
 
-				if (instance.volume.fluid().isPresent()) {
-					textures = textures.merge(ResolvedCubeTextures.resolve(instance.volume.fluid().get().textures().cubeTextures()));
+				if (instance.zone.fluid().isPresent()) {
+					textures = textures.merge(ResolvedCubeTextures.resolve(instance.zone.fluid().get().textures().cubeTextures()));
 				}
 
-				if (instance.volume.textures().isPresent()) {
-					textures = textures.merge(ResolvedCubeTextures.resolve(instance.volume.textures().get()));
+				if (instance.zone.textures().isPresent()) {
+					textures = textures.merge(ResolvedCubeTextures.resolve(instance.zone.textures().get()));
 				}
 
 				if (!textures.isEmpty()) {
@@ -96,12 +96,12 @@ public class CachedZoneShape {
 						var tex = textures.filter(renderLayerFilter, false);
 
 						if (!tex.isEmpty()) {
-							cachedCubes.computeIfAbsent(renderLayerFilter, k -> new ArrayList<>(1)).add(new ResolvedTexturedCube(new AABB(bminX, bminY, bminZ, bmaxX, bmaxY, bmaxZ), tex));
+							cachedCubes.computeIfAbsent(renderLayerFilter, k -> new ArrayList<>(1)).add(new TexturedCubeVisual(new AABB(bminX, bminY, bminZ, bmaxX, bmaxY, bmaxZ), tex));
 						}
 					}
 				}
 
-				var fog = instance.volume.fog();
+				var fog = instance.zone.fog();
 
 				// directionless fog not supported yet
 				if (!fog.isNone() && fog.direction().isPresent()) {
@@ -124,15 +124,15 @@ public class CachedZoneShape {
 						switch (dir) {
 							case DOWN, UP -> {
 								double y = KMath.lerp(dir == Direction.UP ? (1D - l) : l, bminY, bmaxY);
-								cubes.add(new ResolvedTexturedCube(new AABB(bminX, y, bminZ, bmaxX, y, bmaxZ), tex));
+								cubes.add(new TexturedCubeVisual(new AABB(bminX, y, bminZ, bmaxX, y, bmaxZ), tex));
 							}
 							case NORTH, SOUTH -> {
 								double z = KMath.lerp(dir == Direction.SOUTH ? (1D - l) : l, bminZ, bmaxZ);
-								cubes.add(new ResolvedTexturedCube(new AABB(bminX, bminY, z, bmaxX, bmaxY, z), tex));
+								cubes.add(new TexturedCubeVisual(new AABB(bminX, bminY, z, bmaxX, bmaxY, z), tex));
 							}
 							case WEST, EAST -> {
 								double x = KMath.lerp(dir == Direction.EAST ? (1D - l) : l, bminX, bmaxX);
-								cubes.add(new ResolvedTexturedCube(new AABB(x, bminY, bminZ, x, bmaxY, bmaxZ), tex));
+								cubes.add(new TexturedCubeVisual(new AABB(x, bminY, bminZ, x, bmaxY, bmaxZ), tex));
 							}
 						}
 					}

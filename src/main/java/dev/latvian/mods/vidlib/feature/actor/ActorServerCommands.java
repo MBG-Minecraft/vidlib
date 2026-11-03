@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.npc;
+package dev.latvian.mods.vidlib.feature.actor;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -16,11 +16,11 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
-public interface NPCServerCommands {
+public interface ActorServerCommands {
 	SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = (ctx, builder) -> {
 		var input = builder.getRemaining().toLowerCase(Locale.ROOT);
 
-		for (var id : NPCRecording.getReplay(ctx.getSource().registryAccess()).keySet()) {
+		for (var id : ActorRecording.getReplay(ctx.getSource().registryAccess()).keySet()) {
 			if (SharedSuggestionProvider.matchesSubStr(input, id)) {
 				builder.suggest(id);
 			}
@@ -53,7 +53,7 @@ public interface NPCServerCommands {
 	});
 
 	private static int summon(CommandSourceStack source, String npc, boolean relativePosition, Vec3 pos) {
-		source.getLevel().s2c(new SummonNPCPayload(new NPCParticleOptions(npc, relativePosition, 0, Optional.empty()), pos));
+		source.getLevel().s2c(new SummonActorPayload(new ActorParticleOptions(npc, relativePosition, 0, Optional.empty()), pos));
 		return 1;
 	}
 
@@ -65,7 +65,7 @@ public interface NPCServerCommands {
 		}
 
 		profile = new NameAndId(source.getServer().services().sessionService().fetchProfile(profile.id(), true).profile());
-		source.getLevel().s2c(new SummonNPCPayload(new NPCParticleOptions(npc, relativePosition, 0, Optional.of(profile)), pos));
+		source.getLevel().s2c(new SummonActorPayload(new ActorParticleOptions(npc, relativePosition, 0, Optional.of(profile)), pos));
 		return 1;
 	}
 }

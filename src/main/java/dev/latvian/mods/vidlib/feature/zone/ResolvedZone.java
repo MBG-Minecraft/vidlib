@@ -14,15 +14,15 @@ import java.util.Set;
 public class ResolvedZone {
 	public final ZoneContainer container;
 	public int index;
-	public ZoneVolume volume;
+	public Zone zone;
 	public final Int2ObjectMap<Entity> entities;
 	public Object renderer;
 	public final Set<String> tags;
 
-	public ResolvedZone(ZoneContainer container, ZoneVolume volume) {
+	public ResolvedZone(ZoneContainer container, Zone zone) {
 		this.container = container;
 		this.index = -1;
-		this.volume = volume;
+		this.zone = zone;
 		this.entities = new Int2ObjectOpenHashMap<>();
 		this.renderer = null;
 		this.tags = new LinkedHashSet<>();
@@ -41,10 +41,10 @@ public class ResolvedZone {
 		entities.clear();
 
 		if (level != null) {
-			var shape = volume.shape().value();
+			var volume = zone.volume().value();
 
-			for (var entity : shape.collectEntities(level, volume.entityFilter().value())) {
-				if (entity.isAlive() && shape.intersects(entity.getBoundingBox())) {
+			for (var entity : volume.collectEntities(level, zone.entityFilter().value())) {
+				if (entity.isAlive() && volume.intersects(entity.getBoundingBox())) {
 					entities.put(entity.getId(), entity);
 
 					var list = container.entityZones.get(entity.getId());
@@ -78,8 +78,8 @@ public class ResolvedZone {
 		NeoForge.EVENT_BUS.post(new ZoneEvent.EntityExited(this, level, entity));
 	}
 
-	public void updateZone(ZoneVolume newVolume) {
-		volume = newVolume;
+	public void updateZone(Zone newVolume) {
+		zone = newVolume;
 		renderer = null;
 	}
 }

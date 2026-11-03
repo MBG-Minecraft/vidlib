@@ -1,8 +1,9 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
+import dev.latvian.mods.klib.render.SubmitContext;
+import dev.latvian.mods.klib.render.Submittable;
 import dev.latvian.mods.klib.util.Lazy;
-import dev.latvian.mods.vidlib.client.ExtractContext;
-import dev.latvian.mods.vidlib.client.SubmitContext;
+import dev.latvian.mods.vidlib.feature.client.VidLibExtractContext;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.client.renderstate.BaseRenderState;
 import net.neoforged.neoforge.common.NeoForge;
@@ -11,7 +12,7 @@ import org.jspecify.annotations.NonNull;
 import java.util.Comparator;
 import java.util.Map;
 
-public class PropRenderState<P extends Prop> extends BaseRenderState implements Comparable<PropRenderState<?>> {
+public class PropRenderState<P extends Prop> extends BaseRenderState implements Submittable, Comparable<PropRenderState<?>> {
 	public static final Comparator<PropRenderState<?>> COMPARATOR = PropRenderState::compareTo;
 	public static final Lazy<Map<PropType<?>, PropRenderStateFactory<?, ?>>> BY_TYPE = Lazy.identityMap(map -> NeoForge.EVENT_BUS.post(new PropRenderStateRegistryEvent(map::put)));
 
@@ -23,7 +24,7 @@ public class PropRenderState<P extends Prop> extends BaseRenderState implements 
 	public double squaredDistanceToCamera = 0D;
 	public boolean shouldSort = false;
 
-	public final void extractCore(P prop, ExtractContext ctx) {
+	public final void extractCore(P prop, VidLibExtractContext ctx) {
 		invisible = false;
 		double delta = ctx.delta();
 		x = Mth.lerp(delta, prop.prevPos.x, prop.pos.x);
@@ -33,21 +34,10 @@ public class PropRenderState<P extends Prop> extends BaseRenderState implements 
 		squaredDistanceToCamera = ctx.cameraPos().distanceToSqr(x, centerY, z);
 	}
 
-	public void submitOffset(SubmitContext ctx, double offsetX, double offsetY, double offsetZ) {
-		ctx.poseStack().pushPose();
-		ctx.poseStack().translate(
-			(float) (x + offsetX),
-			(float) (y + offsetY),
-			(float) (z + offsetZ)
-		);
-
-		submit(ctx);
-		ctx.poseStack().popPose();
+	public void extract(P prop, VidLibExtractContext ctx) {
 	}
 
-	public void extract(P prop, ExtractContext ctx) {
-	}
-
+	@Override
 	public void submit(SubmitContext ctx) {
 	}
 

@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.client;
+package dev.latvian.mods.vidlib.feature.client;
 
 import dev.latvian.mods.klib.math.FrustumCheck;
 import net.minecraft.client.Minecraft;
@@ -8,7 +8,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import org.joml.FrustumIntersection;
 
-public record ExtractContext(
+public record VidLibExtractContext(
 	Minecraft mc,
 	VidLibWorldRenderState vl,
 	float delta,
@@ -16,10 +16,10 @@ public record ExtractContext(
 	Vec3 cameraPos,
 	long gameTime
 ) implements FrustumCheck {
-	public ExtractContext(Minecraft mc, VidLibWorldRenderState vidLibWorldRenderState, ExtractLevelRenderStateEvent event) {
+	public VidLibExtractContext(Minecraft mc, VidLibWorldRenderState vl, ExtractLevelRenderStateEvent event) {
 		this(
 			mc,
-			vidLibWorldRenderState,
+			vl,
 			event.getDeltaTracker().getGameTimeDeltaPartialTick(false),
 			event.getRenderState().cameraRenderState.cullFrustum,
 			event.getRenderState().cameraRenderState.pos,

@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.data.JOMLDataTypes;
 import dev.latvian.mods.klib.entity.PositionType;
@@ -26,7 +25,6 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
-import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
@@ -419,15 +417,10 @@ public class Prop {
 
 	public void debugVisuals(Visuals visuals, double x, double y, double z, float delta, boolean selected) {
 		if (selected) {
-			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width + 0.125D, height + 0.125D, getDepth() + 0.125D)).ref(), Gradient.EMPTY, Color.YELLOW.toGradient().ref()).at(x, y + height / 2D, z));
+			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width + 0.125D, height + 0.125D, getDepth() + 0.125D)).ref(), Gradient.EMPTY, Gradient.YELLOW).at(x, y + height / 2D, z));
 		} else {
-			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, getDepth())).ref(), Gradient.EMPTY, Color.WHITE.toGradient().ref()).at(x, y + height / 2D, z));
+			visuals.add(new ColoredShape(new CuboidShape(Vec3f.of(width, height, getDepth())).ref(), Gradient.EMPTY, Gradient.WHITE).at(x, y + height / 2D, z));
 		}
-	}
-
-	public float getDebugVisualsProgress(float delta) {
-		// return getRelativeTick(delta, 1F);
-		return -1F;
 	}
 
 	public Entity asEntity() {
@@ -641,7 +634,6 @@ public class Prop {
 
 				if (ImGui.button(ImIcons.APERTURE + "###focus-dof")) {
 					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(new FollowingPropKVector(id, PositionType.EYES).ref());
-					DepthOfFieldPanel.INSTANCE.builder.set(DepthOfField.OVERRIDE);
 				}
 
 				graphics.hoveredTooltip("Focus DoF");

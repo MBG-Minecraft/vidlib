@@ -15,6 +15,8 @@ import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
+import dev.latvian.mods.vidlib.feature.actor.ActorParticleOptions;
+import dev.latvian.mods.vidlib.feature.actor.ActorRecording;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.atmosphere.ClientAtmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
@@ -38,14 +40,12 @@ import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.note.Note;
-import dev.latvian.mods.vidlib.feature.npc.NPCParticleOptions;
-import dev.latvian.mods.vidlib.feature.npc.NPCRecording;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.zone.ZoneCache;
-import dev.latvian.mods.vidlib.feature.zone.ZoneClipResult;
 import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
+import dev.latvian.mods.vidlib.feature.zone.ZoneHit;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -70,7 +70,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.border.WorldBorder;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -91,7 +90,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	private final Map<UUID, RemoteClientSessionData> remoteSessionData;
 	private List<ClientSessionData> allClientSessionData;
 	private ScheduledTask.Handler scheduledTaskHandler;
-	public ZoneClipResult zoneClip;
+	public ZoneHit zoneHit;
 	public final List<ScreenShakeInstance> screenShakeInstances;
 	public Vector2dc prevCameraShake;
 	public Vector2dc cameraShake;
@@ -103,7 +102,7 @@ public class LocalClientSessionData extends ClientSessionData {
 	public ClientCutscene currentCutscene;
 	public ScreenFadeInstance screenFade;
 	public ProjectedCoordinates projectedCoordinates;
-	public NPCRecording npcRecording;
+	public ActorRecording actorRecording;
 	public final List<Decal> debugDecals;
 	public final List<ScreenEffectInstance> screenEffects;
 	public Component topInfoBarOverride;
@@ -125,7 +124,7 @@ public class LocalClientSessionData extends ClientSessionData {
 		this.mc = mc;
 		this.remoteSessionData = new Object2ObjectOpenHashMap<>();
 
-		this.zoneClip = null;
+		this.zoneHit = null;
 		this.screenShakeInstances = new ArrayList<>();
 		this.prevCameraShake = this.cameraShake = Identity.DVEC_2;
 		this.atmosphereCache = new Reference2ObjectOpenHashMap<>();
@@ -398,20 +397,20 @@ public class LocalClientSessionData extends ClientSessionData {
 	}
 
 	public void startNPCRecording(Minecraft mc, NameAndId profile) {
-		if (npcRecording == null) {
-			npcRecording = new NPCRecording(profile);
-			npcRecording.record(npcRecording.start, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true), mc.player);
+		if (actorRecording == null) {
+			actorRecording = new ActorRecording(profile);
+			actorRecording.record(actorRecording.start, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true), mc.player);
 		} else {
 			mc.tell(Component.literal("Already recording NPC '" + profile.name() + "'!"));
 		}
 	}
 
 	public void stopNPCRecording(Minecraft mc) {
-		if (npcRecording != null) {
-			npcRecording.length = System.currentTimeMillis() - npcRecording.start;
+		if (actorRecording != null) {
+			actorRecording.length = System.currentTimeMillis() - actorRecording.start;
 
 			var buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), mc.level.registryAccess());
-			var path = VidLibPaths.GAME.get().resolve("npc/" + npcRecording.start + "_" + npcRecording.profile.name().toLowerCase(Locale.ROOT) + ".npcrec");
+			var path = VidLibPaths.GAME.get().resolve("npc/" + actorRecording.start + "_" + actorRecording.profile.name().toLowerCase(Locale.ROOT) + ".npcrec");
 
 			if (Files.notExists(path.getParent())) {
 				try {
@@ -422,31 +421,31 @@ public class LocalClientSessionData extends ClientSessionData {
 			}
 
 			try (var out = new BufferedOutputStream(Files.newOutputStream(path))) {
-				npcRecording.write(buf);
+				actorRecording.write(buf);
 				buf.readBytes(out, buf.readableBytes());
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 
-			npcRecording = null;
-			NPCRecording.REPLAY = null;
+			actorRecording = null;
+			ActorRecording.REPLAY = null;
 			mc.tell(Component.literal("NPC recording '" + path.getFileName() + "' saved!"));
 		}
 	}
 
-	public void replayNPCRecording(Minecraft mc) {
-		replayNPCRecording(mc, "latest");
+	public void replayActorRecording(Minecraft mc) {
+		replayActorRecording(mc, "latest");
 	}
 
-	public void replayNPCRecording(Minecraft mc, String name) {
-		var map = NPCRecording.getReplay(mc.level.registryAccess());
+	public void replayActorRecording(Minecraft mc, String name) {
+		var map = ActorRecording.getReplay(mc.level.registryAccess());
 
 		if (!map.containsKey(name)) {
-			mc.tell(Component.literal("NPC recording '" + name + "' not found!"));
+			mc.tell(Component.literal("Actor recording '" + name + "' not found!"));
 			return;
 		}
 
-		mc.level.addParticle(new NPCParticleOptions(name, false, 0, Optional.empty()), true, true, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0D, 0D, 0D);
+		mc.level.addParticle(new ActorParticleOptions(name, false, 0, Optional.empty()), true, true, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0D, 0D, 0D);
 	}
 
 	@Override

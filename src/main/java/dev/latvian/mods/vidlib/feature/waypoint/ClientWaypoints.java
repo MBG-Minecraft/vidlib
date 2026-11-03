@@ -1,9 +1,10 @@
 package dev.latvian.mods.vidlib.feature.waypoint;
 
 import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.icon.renderer.IconGuiExtractContext;
+import dev.latvian.mods.klib.icon.renderer.IconRenderer;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.vidlib.feature.icon.renderer.IconRenderer;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -16,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Mth;
 import org.joml.Vector2d;
+import org.joml.Vector2f;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -93,6 +95,8 @@ public interface ClientWaypoints {
 
 		graphics.vl$pushShift();
 
+		var wpos = new Vector2f();
+
 		for (var wp : list) {
 			float alpha = wp.waypoint().alpha() * (ALPHA.get() / 255F);
 			double minDistance = wp.waypoint().minDistance();
@@ -108,9 +112,7 @@ public interface ClientWaypoints {
 
 			alpha = Math.min(alpha, 1F);
 
-			var wpos = projectedCoordinates.screen(wp.pos());
-
-			if (wpos != null) {
+			if (projectedCoordinates.screen(wp.pos(), wpos)) {
 				wpos.x = Math.clamp(wpos.x, 16F, projectedCoordinates.width() - 16F);
 				wpos.y = Math.clamp(wpos.y, 16F, projectedCoordinates.height() - 16F);
 
@@ -137,8 +139,7 @@ public interface ClientWaypoints {
 					graphics.text(mc.font, dist, -mc.font.width(dist) / 2, 2, textColor, true);
 				}
 
-				graphics.pose().translate(0F, -8F);
-				IconRenderer.draw(wp.waypoint().icon(), mc, graphics, (int) (alpha * 255));
+				IconRenderer.draw(wp.waypoint().icon(), new IconGuiExtractContext(mc, graphics, 0, -8, (int) (alpha * 255)));
 			}
 		}
 

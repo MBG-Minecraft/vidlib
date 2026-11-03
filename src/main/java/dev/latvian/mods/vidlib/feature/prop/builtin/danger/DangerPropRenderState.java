@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.danger;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
-import dev.latvian.mods.vidlib.client.ExtractContext;
+import dev.latvian.mods.vidlib.feature.client.VidLibExtractContext;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderState;
 import net.minecraft.util.Ease;
@@ -13,7 +13,7 @@ public class DangerPropRenderState extends PropRenderState<DangerProp> {
 	public Vector3d position = new Vector3d();
 
 	@Override
-	public void extract(DangerProp prop, ExtractContext ctx) {
+	public void extract(DangerProp prop, VidLibExtractContext ctx) {
 		invisible = true;
 
 		if (Double.isNaN(prop.groundY)) {
@@ -24,7 +24,6 @@ public class DangerPropRenderState extends PropRenderState<DangerProp> {
 		var progress = 1F - Ease.outQuint((float) (1D - distance));
 
 		if (progress <= 0F) {
-
 			return;
 		}
 
@@ -50,6 +49,6 @@ public class DangerPropRenderState extends PropRenderState<DangerProp> {
 		}
 
 		decal.applyProgress(progress);
-		ctx.vl().addDecal(decal);
+		ctx.vl().addVisual(decal);
 	}
 }

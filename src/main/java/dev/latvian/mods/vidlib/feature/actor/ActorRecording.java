@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.npc;
+package dev.latvian.mods.vidlib.feature.actor;
 
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
@@ -21,15 +21,15 @@ import java.io.BufferedInputStream;
 import java.nio.file.Files;
 import java.util.Map;
 
-public class NPCRecording {
-	public static Object2ObjectSortedMap<String, Lazy<NPCRecording>> REPLAY = null;
+public class ActorRecording {
+	public static Object2ObjectSortedMap<String, Lazy<ActorRecording>> REPLAY = null;
 
 	private static final StreamCodec<ByteBuf, NameAndId> PROFILE_STREAM_CODEC = ByteBufCodecs.GAME_PROFILE.map(
 		NameAndId::new,
 		profile -> new com.mojang.authlib.GameProfile(profile.id(), profile.name())
 	);
 
-	public static Object2ObjectSortedMap<String, Lazy<NPCRecording>> getReplay(RegistryAccess registryAccess) {
+	public static Object2ObjectSortedMap<String, Lazy<ActorRecording>> getReplay(RegistryAccess registryAccess) {
 		if (REPLAY == null) {
 			REPLAY = new Object2ObjectLinkedOpenHashMap<>();
 
@@ -37,7 +37,7 @@ public class NPCRecording {
 
 			if (Files.exists(rootPath)) {
 				try (var stream = Files.walk(rootPath)) {
-					Lazy<NPCRecording> latest = null;
+					Lazy<ActorRecording> latest = null;
 
 					for (var path : stream.filter(Files::isRegularFile).filter(path -> path.getFileName().toString().endsWith(".npcrec")).sorted().toList()) {
 						var fname = rootPath.relativize(path).toString();
@@ -46,7 +46,7 @@ public class NPCRecording {
 						latest = Lazy.of(() -> {
 							try (var in = new BufferedInputStream(Files.newInputStream(path))) {
 								var buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(in.readAllBytes()), registryAccess);
-								var recording = new NPCRecording(buf);
+								var recording = new ActorRecording(buf);
 								VidLib.LOGGER.info("Loaded NPC recording '" + name + "'");
 								return recording;
 							} catch (Exception ex) {
@@ -72,26 +72,26 @@ public class NPCRecording {
 
 	public final long start;
 	public final NameAndId profile;
-	public final Map<NPCDataType<?>, NPCTypeRecording<?>> actions;
+	public final Map<ActorDataType<?>, ActorTypeRecording<?>> actions;
 	public long length;
 
-	public NPCRecording(NameAndId profile) {
+	public ActorRecording(NameAndId profile) {
 		this.start = System.currentTimeMillis();
 		this.profile = profile;
-		this.actions = new Reference2ObjectLinkedOpenHashMap<>(NPCDataType.MAP.size());
+		this.actions = new Reference2ObjectLinkedOpenHashMap<>(ActorDataType.MAP.size());
 
-		for (var type : NPCDataType.MAP.values()) {
-			actions.put(type, new NPCTypeRecording(type));
+		for (var type : ActorDataType.MAP.values()) {
+			actions.put(type, new ActorTypeRecording(type));
 		}
 	}
 
-	public NPCRecording(RegistryFriendlyByteBuf buf) {
+	public ActorRecording(RegistryFriendlyByteBuf buf) {
 		this(PROFILE_STREAM_CODEC.decode(buf));
 		this.length = VarLong.read(buf);
 		int size = VarInt.read(buf);
 
 		for (int i = 0; i < size; i++) {
-			var type = actions.get(NPCDataType.MAP.get(ByteBufCodecs.STRING_UTF8.decode(buf)));
+			var type = actions.get(ActorDataType.MAP.get(ByteBufCodecs.STRING_UTF8.decode(buf)));
 			type.read(buf);
 		}
 	}
@@ -120,7 +120,7 @@ public class NPCRecording {
 		return "NPCRecording[profile=" + profile + ", actions=" + actions + "]";
 	}
 
-	public <T> T get(NPCDataType<T> type, long offset) {
+	public <T> T get(ActorDataType<T> type, long offset) {
 		var map = actions.get(type);
 		return map == null ? type.defaultValue() : (T) map.get(offset);
 	}

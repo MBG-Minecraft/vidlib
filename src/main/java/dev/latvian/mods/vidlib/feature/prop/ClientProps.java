@@ -1,14 +1,14 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
+import dev.latvian.mods.klib.render.SubmitContext;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.vidlib.client.ExtractContext;
-import dev.latvian.mods.vidlib.client.SubmitContext;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.visual.Visuals;
+import dev.latvian.mods.vidlib.feature.client.VidLibExtractContext;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,12 +19,12 @@ import java.util.Set;
 
 public class ClientProps extends Props<ClientLevel> {
 	public record PropWithState<P extends Prop, S extends PropRenderState<P>>(P prop, S state) {
-		public S extractCore(ExtractContext ctx) {
+		public S extractCore(VidLibExtractContext ctx) {
 			state.extractCore(prop, ctx);
 			return state;
 		}
 
-		public void extract(ExtractContext ctx) {
+		public void extract(VidLibExtractContext ctx) {
 			state.extract(prop, ctx);
 		}
 
@@ -37,7 +37,6 @@ public class ClientProps extends Props<ClientLevel> {
 	public static final IntSet OPEN_PROPS = new IntOpenHashSet();
 	public static final IntSet HIDDEN_PROPS = new IntOpenHashSet();
 	public static final Set<PropType<?>> HIDDEN_PROP_TYPES = new ReferenceOpenHashSet<>();
-	public static final Visuals DEBUG_VISUALS = new Visuals();
 	public static final ImBoolean HIDE_OUTLINE = new ImBoolean(true);
 
 	public static boolean isPropHidden(Prop prop) {
@@ -131,7 +130,7 @@ public class ClientProps extends Props<ClientLevel> {
 	}
 
 	@Nullable
-	public List<PropRenderState<?>> extractAll(ExtractContext ctx) {
+	public List<PropRenderState<?>> extractAll(VidLibExtractContext ctx) {
 		if (all.isEmpty() || !VISIBLE.get()) {
 			return null;
 		}
@@ -139,8 +138,10 @@ public class ClientProps extends Props<ClientLevel> {
 		List<PropRenderState<?>> states = null;
 		List<PropRenderState<?>> sortedStates = null;
 
-		for (var propWithState : all) {
-			var prop = propWithState.prop();
+		boolean renderDebug = ctx.mc().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES) || !ClientProps.OPEN_PROPS.isEmpty();
+
+		for (var entry : all) {
+			var prop = entry.prop;
 
 			if (prop.isRemoved()) {
 				continue;
@@ -150,10 +151,10 @@ public class ClientProps extends Props<ClientLevel> {
 				continue;
 			}
 
-			var state = propWithState.extractCore(ctx);
+			var state = entry.extractCore(ctx);
 
 			if (prop.isVisible(state.x, state.y, state.z, ctx, ctx.cameraPos(), state.squaredDistanceToCamera)) {
-				propWithState.extract(ctx);
+				entry.extract(ctx);
 
 				if (state.invisible) {
 					continue;
@@ -171,6 +172,11 @@ public class ClientProps extends Props<ClientLevel> {
 					}
 
 					states.add(state);
+				}
+
+				if (renderDebug) {
+					boolean selected = !HIDE_OUTLINE.get() && OPEN_PROPS.contains(prop.id);
+					prop.debugVisuals(ctx.vl().visuals, state.x, state.y, state.z, ctx.delta(), selected);
 				}
 			}
 		}
@@ -191,40 +197,4 @@ public class ClientProps extends Props<ClientLevel> {
 
 		return states;
 	}
-
-	/*
-	public void renderDebug(FrameInfo frame) {
-		var ms = frame.poseStack();
-		var cam = frame.camera().position();
-		var delta = frame.worldDelta();
-
-		for (var list : propLists.values()) {
-			for (var prop : list) {
-				double x = KMath.lerp(delta, prop.prevPos.x, prop.pos.x);
-				double y = KMath.lerp(delta, prop.prevPos.y, prop.pos.y);
-				double z = KMath.lerp(delta, prop.prevPos.z, prop.pos.z);
-				double cd = cam.distanceToSqr(x, y + prop.height / 2D, z);
-
-				if (prop.isVisible(x, y, z, frame, cam, cd)) {
-					boolean selected = !HIDE_OUTLINE.get() && OPEN_PROPS.contains(prop.id);
-
-					if (selected || frame.mc().debugEntries.isCurrentlyEnabled(net.minecraft.client.gui.components.debug.DebugScreenEntries.ENTITY_HITBOXES)) {
-						var progress = prop.getDebugVisualsProgress(delta);
-
-						if (progress >= 0F && progress <= 1F) {
-							prop.debugVisuals(Visuals.TEMP, x, y, z, delta, selected);
-							MiscClientUtils.renderVisuals(ms, cam, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.TEMP, progress);
-							Visuals.TEMP.clear();
-						} else {
-							prop.debugVisuals(DEBUG_VISUALS, x, y, z, delta, selected);
-						}
-					}
-				}
-			}
-		}
-
-		MiscClientUtils.renderVisuals(ms, cam, frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, DEBUG_VISUALS, 1F);
-		DEBUG_VISUALS.clear();
-	}
-	 */
 }

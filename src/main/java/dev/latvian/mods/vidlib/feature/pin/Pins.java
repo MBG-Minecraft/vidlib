@@ -29,6 +29,7 @@ import net.minecraft.util.TriState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,10 +109,10 @@ public interface Pins {
 			list.sort(new DistanceComparator<>(mc.gameRenderer.mainCamera().position(), ScreenPin::pos));
 		}
 
-		for (var screenPin : list) {
-			var wpos = projectedCoordinates.screen(screenPin.pos());
+		var wpos = new Vector2f();
 
-			if (wpos != null) {
+		for (var screenPin : list) {
+			if (projectedCoordinates.screen(screenPin.pos(), wpos)) {
 				var pin = screenPin.pin();
 				int pinAlpha = pin.alpha << 24;
 				int pinSize = (int) (pin.size * mc.getEffectScale());
@@ -140,8 +141,6 @@ public interface Pins {
 				if (shape.overlayTexture != null) {
 					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.overlayTexture, 0, 0, 0F, 0F, 512, 512, 512, 512, color);
 				}
-
-				;
 			}
 		}
 	}

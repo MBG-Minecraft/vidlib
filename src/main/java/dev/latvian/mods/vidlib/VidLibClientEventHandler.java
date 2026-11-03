@@ -1,14 +1,12 @@
 package dev.latvian.mods.vidlib;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.latvian.apps.tinyhttp.ws.FrameInfo;
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
-import dev.latvian.mods.vidlib.client.VidLibWorldRenderState;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
@@ -19,6 +17,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
+import dev.latvian.mods.vidlib.feature.client.VidLibWorldRenderState;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresetLoader;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
@@ -44,6 +43,8 @@ import dev.latvian.mods.vidlib.feature.prop.builtin.decal.DecalProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.decal.DecalPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.image.ImageProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.image.ImagePropRenderState;
+import dev.latvian.mods.vidlib.feature.prop.builtin.mannequin.MannequinProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.mannequin.MannequinPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.shape.ShapeProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.shape.ShapePropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextProp;
@@ -56,7 +57,6 @@ import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
 import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
-import dev.latvian.mods.vidlib.feature.zone.ZoneLoader;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
@@ -150,7 +150,6 @@ public class VidLibClientEventHandler {
 		event.addListener(ID.vidlib("clothing_preset"), new ClothingPresetLoader());
 		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.ClientLoader());
 		event.addListener(ID.vidlib("atmosphere"), new Atmosphere.ClientLoader());
-		event.addListener(ID.vidlib("zone"), new ZoneLoader(ZoneLoader.CLIENT_BY_DIMENSION, false));
 
 		event.addDependency(ID.vidlib("gradient"), ID.vidlib("clothing_preset"));
 		event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
@@ -204,6 +203,7 @@ public class VidLibClientEventHandler {
 		event.register(ShapeProp.TYPE, ShapePropRenderState::new);
 		event.register(TextProp.TYPE, TextPropRenderState::new);
 		event.register(TVProp.TYPE, TVPropRenderState::new);
+		event.register(MannequinProp.TYPE, MannequinPropRenderState::new);
 	}
 
 	@SubscribeEvent
@@ -225,7 +225,7 @@ public class VidLibClientEventHandler {
 			AutoInit.Type.CLIENT_LOADED.invoke();
 		}
 
-		Visuals.TICK_DEBUG.clear();
+		Visuals.TICK.clear();
 		ScreenText.CLIENT_TICK.clear();
 		var mc = Minecraft.getInstance();
 
@@ -290,18 +290,15 @@ public class VidLibClientEventHandler {
 		}
 
 		var session = player.vl$sessionData();
-		var frameInfo = new FrameInfo(mc, session, event);
-		session.projectedCoordinates = ProjectedCoordinates.of(mc, frameInfo.camera().position());
-		FrameInfo.CURRENT = frameInfo;
-		var ctx = mc.level.getGlobalContext();
+		session.projectedCoordinates = ProjectedCoordinates.of(mc, event.getCameraState());
 
 		var rayLine = mc.gameRenderer.mainCamera().klib$ray(512D);
 		var ray = new ClipContext(rayLine.start(), rayLine.end(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
 
 		if (mc.options.getCameraType() == CameraType.FIRST_PERSON && VidLibClientOptions.getShowZones()) {
-			session.zoneClip = session.filteredZones.clip(ray);
+			session.zoneHit = session.filteredZones.clip(ray);
 		} else {
-			session.zoneClip = null;
+			session.zoneHit = null;
 		}
 
 		var tool = VidLibTool.of(player);
@@ -311,10 +308,6 @@ public class VidLibClientEventHandler {
 		if (tool != null) {
 			tool.getSecond().renderSetup(player, tool.getFirst(), mc.hitResult, screenDelta);
 		}
-
-		GhostStructure.preRender(frameInfo, ctx);
-
-		// event.enableOutlineProcessing();
 	}
 
 	@SubscribeEvent
@@ -402,22 +395,22 @@ public class VidLibClientEventHandler {
 			if (mc.gui.screen() == null || mc.gui.screen() instanceof ChatScreen) {
 				NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(ScreenText.RENDER));
 
-				var zoneClip = session.zoneClip;
+				var zoneHit = session.zoneHit;
 
-				if (zoneClip != null) {
-					var component = Component.literal("Zone: ").append(Component.literal(zoneClip.zone().container.id.toString()).withStyle(ChatFormatting.AQUA));
+				if (zoneHit != null) {
+					var component = Component.literal("Zone: ").append(Component.literal(zoneHit.resolvedZone().container.key()).withStyle(ChatFormatting.AQUA));
 
-					if (zoneClip.zone().container.zones.size() > 1) {
-						component.append(Component.literal("[" + zoneClip.zone().index + "]").withStyle(ChatFormatting.GREEN));
+					if (zoneHit.resolvedZone().container.zones.size() > 1) {
+						component.append(Component.literal("[" + zoneHit.resolvedZone().index + "]").withStyle(ChatFormatting.GREEN));
 					}
 
-					if (zoneClip.zone().container.isGenerated()) {
+					if (zoneHit.resolvedZone().container.isGenerated()) {
 						component.append(Component.literal("*").withStyle(ChatFormatting.LIGHT_PURPLE));
 					}
 
 					ScreenText.RENDER.topLeft.add(component);
 
-					var zoneTag = zoneClip.zone().volume.data();
+					var zoneTag = zoneHit.resolvedZone().zone.data();
 
 					if (!zoneTag.isEmpty()) {
 						for (var key : zoneTag.keySet()) {
@@ -583,7 +576,6 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void clientResourceLoadFinished(ClientResourceLoadFinishedEvent event) {
 		var mc = Minecraft.getInstance();
-		mc.vl$clearProfileCache();
 		AutoInit.Type.ASSETS_LOADED.invoke(mc.getResourceManager());
 	}
 

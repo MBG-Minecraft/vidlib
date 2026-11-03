@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.npc;
+package dev.latvian.mods.vidlib.feature.actor;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -13,11 +13,11 @@ import net.minecraft.server.players.NameAndId;
 
 import java.util.Locale;
 
-public interface NPCCommands {
+public interface ActorCommands {
 	SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = (ctx, builder) -> {
 		var input = builder.getRemaining().toLowerCase(Locale.ROOT);
 
-		for (var id : NPCRecording.getReplay(Minecraft.getInstance().level.registryAccess()).keySet()) {
+		for (var id : ActorRecording.getReplay(Minecraft.getInstance().level.registryAccess()).keySet()) {
 			if (SharedSuggestionProvider.matchesSubStr(input, id)) {
 				builder.suggest(id);
 			}
@@ -27,7 +27,7 @@ public interface NPCCommands {
 	};
 
 	@ClientAutoRegister
-	ClientCommandHolder COMMAND = new ClientCommandHolder("npc", (command, buildContext) -> {
+	ClientCommandHolder COMMAND = new ClientCommandHolder("actor", (command, buildContext) -> {
 		command.then(Commands.literal("record")
 			.then(Commands.argument("username", StringArgumentType.word())
 				.executes(ctx -> {
@@ -60,13 +60,13 @@ public interface NPCCommands {
 				.suggests(SUGGESTION_PROVIDER)
 				.executes(ctx -> {
 					var mc = Minecraft.getInstance();
-					mc.player.vl$sessionData().replayNPCRecording(mc, StringArgumentType.getString(ctx, "recording"));
+					mc.player.vl$sessionData().replayActorRecording(mc, StringArgumentType.getString(ctx, "recording"));
 					return 1;
 				})
 			)
 			.executes(ctx -> {
 				var mc = Minecraft.getInstance();
-				mc.player.vl$sessionData().replayNPCRecording(mc);
+				mc.player.vl$sessionData().replayActorRecording(mc);
 				return 1;
 			})
 		);

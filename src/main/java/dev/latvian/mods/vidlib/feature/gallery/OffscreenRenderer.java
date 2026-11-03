@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.klib.util.client.FramebufferUtils;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class OffscreenRenderer {
 	private static final int BUFFER_SIZE = 65536;
@@ -17,7 +18,7 @@ public class OffscreenRenderer {
 		boolean useDepth,
 		Consumer<PoseStack> poseSetup,
 		Consumer<OffscreenRenderer> body,
-		java.util.function.Function<RenderTarget, T> capture
+		Function<RenderTarget, T> capture
 	) {
 		var target = new TextureTarget("VidLibGalleryCanvas", width, height, com.mojang.renderpearl.api.GpuFormat.RGBA8_UNORM, useDepth ? com.mojang.renderpearl.api.GpuFormat.D32_FLOAT : null);
 

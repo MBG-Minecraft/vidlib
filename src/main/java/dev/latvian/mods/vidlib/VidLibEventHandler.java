@@ -6,10 +6,12 @@ import dev.latvian.mods.klib.entity.filter.EntityFilterTypeRegistryEvent;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.klib.visual.VisualTypeRegistryEvent;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
+import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.filter.VidLibEntityFilters;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
@@ -130,8 +132,14 @@ public class VidLibEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void registries(EntityFilterTypeRegistryEvent event) {
+	public static void entityFilterTypeRegistry(EntityFilterTypeRegistryEvent event) {
 		VidLibEntityFilters.register(event.getCollector());
+	}
+
+	@SubscribeEvent
+	public static void visualTypeRegistry(VisualTypeRegistryEvent event) {
+		var registry = event.getCollector();
+		registry.register(Decal.TYPE);
 	}
 
 	@SubscribeEvent

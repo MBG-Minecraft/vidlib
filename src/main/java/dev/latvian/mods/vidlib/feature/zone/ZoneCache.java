@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.shape.VoxelShapeBox;
-import dev.latvian.mods.vidlib.feature.zone.shape.ZoneShape;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.Vec3i;
@@ -57,7 +56,7 @@ public class ZoneCache implements Iterable<ZoneContainer> {
 
 	public final ResourceKey<Level> dimension;
 	public final Int2ObjectOpenHashMap<List<ResolvedZone>> entityZones;
-	public final Map<ZoneShape, VoxelShapeBox> cachedZoneShapes;
+	public final Map<Zone, VoxelShapeBox> cachedZoneShapes;
 	CachedZoneShape[] visible;
 	CachedZoneShape[] solidZones;
 	CachedZoneShape[] fluidZones;
@@ -97,7 +96,7 @@ public class ZoneCache implements Iterable<ZoneContainer> {
 	}
 
 	@Nullable
-	public ZoneClipResult clip(ClipContext ctx) {
+	public ZoneHit clip(ClipContext ctx) {
 		ZoneClipResult result = null;
 
 		for (var container : this) {
@@ -155,11 +154,9 @@ public class ZoneCache implements Iterable<ZoneContainer> {
 		}
 
 		for (var sz : getSolidZones()) {
-			if (sz.instance().volume.solid().value().test(entity)) {
-				for (var box : sz.shapeBox().boxes()) {
-					if (box.intersects(collisionBox)) {
-						return true;
-					}
+			if (sz.instance().zone.solid().value().test(entity)) {
+				if (sz.instance().zone.volume().value().intersects(collisionBox)) {
+					return true;
 				}
 			}
 		}
@@ -181,7 +178,7 @@ public class ZoneCache implements Iterable<ZoneContainer> {
 		var shapes = List.<VoxelShape>of();
 
 		for (var sz : solidZones) {
-			if (sz.instance().volume.solid().value().test(entity)) {
+			if (sz.instance().zone.solid().value().test(entity)) {
 				for (var box : sz.shapeBox().boxes()) {
 					if (box.intersects(collisionBox)) {
 						if (shapes.isEmpty()) {
@@ -210,7 +207,7 @@ public class ZoneCache implements Iterable<ZoneContainer> {
 	}
 
 	@ApiStatus.Internal
-	public void update(Ref<ZoneContainer> zone, int index, ZoneVolume zoneVolume) {
+	public void update(Ref<ZoneContainer> zone, int index, Zone zoneVolume) {
 		var container = containers.get(zone);
 
 		if (container != null) {
@@ -241,8 +238,8 @@ public class ZoneCache implements Iterable<ZoneContainer> {
 	@Nullable
 	public FluidState getZoneFluidState(Vec3i pos) {
 		for (var c : getFluidZones()) {
-			if (c.instance().volume.fluid().isPresent() && c.instance().volume.shape().value().contains(pos)) {
-				return c.instance().volume.fluid().get().fluidState();
+			if (c.instance().zone.fluid().isPresent() && c.instance().zone.volume().value().contains(pos)) {
+				return c.instance().zone.fluid().get().fluidState();
 			}
 		}
 
@@ -264,7 +261,7 @@ public class ZoneCache implements Iterable<ZoneContainer> {
 		ZoneClipResult result = null;
 
 		for (var z : getFluidZones()) {
-			var clip = z.instance().volume.shape().value().clip(new ZoneClipContext(z.instance(), ctx));
+			var clip = z.instance().zone.volume().value().clip(new ZoneClipContext(z.instance(), ctx));
 
 			if (clip != null) {
 				if (result == null || clip.distanceSq() < result.distanceSq()) {

@@ -25,6 +25,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.scores.DisplaySlot;
 import net.neoforged.neoforge.common.NeoForge;
+import org.joml.Vector2f;
 
 import java.util.ArrayList;
 
@@ -69,6 +70,8 @@ public interface VidLibHUD {
 		var delta = deltaTracker.getGameTimeDeltaPartialTick(false);
 		var selfDelta = deltaTracker.getGameTimeDeltaPartialTick(true);
 		var local = mc.player;
+
+		var wpos = new Vector2f();
 
 		for (var player : level.players()) {
 			if (replay && ReplayAPI.getActive().isEntityHidden(player.getUUID())) {
@@ -117,9 +120,7 @@ public interface VidLibHUD {
 			}
 
 			if (renderName || renderHealth) {
-				var wpos = projectedCoordinates.screen(pos);
-
-				if (wpos != null) {
+				if (projectedCoordinates.screen(pos, wpos)) {
 					var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F) * NAME_SCALE.get();
 
 					lines.clear();
@@ -182,9 +183,7 @@ public interface VidLibHUD {
 						continue;
 					}
 
-					var wpos = projectedCoordinates.screen(pos);
-
-					if (wpos != null) {
+					if (projectedCoordinates.screen(pos, wpos)) {
 						var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F) * NAME_SCALE.get();
 
 						lines.clear();

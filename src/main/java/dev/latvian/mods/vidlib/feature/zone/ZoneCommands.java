@@ -97,7 +97,7 @@ public interface ZoneCommands {
 		var processor = new BlockProcessor(source.getServer().getLevel(container.value().dimension), filter.value(), container.value());
 
 		for (var zone : container.value().zones) {
-			zone.volume.shape().value().getBlocks().forEach(processor::process);
+			zone.zone.volume().value().getBlocks().forEach(processor::process);
 		}
 
 		processor.complete(source);
@@ -108,7 +108,7 @@ public interface ZoneCommands {
 		var processor = new SaveBlockProcessor(source.getServer().getLevel(container.value().dimension), filter.value(), container.value());
 
 		for (var zone : container.value().zones) {
-			zone.volume.shape().value().getBlocks().forEach(processor::process);
+			zone.zone.volume().value().getBlocks().forEach(processor::process);
 		}
 
 		processor.complete(source);

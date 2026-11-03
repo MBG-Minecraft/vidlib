@@ -6,7 +6,6 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.entity.PositionType;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.kvector.KVector;
-import dev.latvian.mods.klib.registry.CustomRegistryType;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -29,7 +28,7 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 	);
 
 	@Override
-	public CustomRegistryType<RegistryFriendlyByteBuf, KVector> type() {
+	public DynamicType<RegistryFriendlyByteBuf, KVector> type() {
 		return TYPE;
 	}
 
