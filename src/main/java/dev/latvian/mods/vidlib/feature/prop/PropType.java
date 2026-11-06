@@ -180,7 +180,7 @@ public record PropType<P extends Prop>(
 			return null;
 		}
 
-		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), registryAccess);
+		var buf = PlatformHelper.INSTANCE.createBuffer(Unpooled.buffer(), registryAccess);
 
 		try {
 			buf.writeVarInt(syncSet.size());
@@ -201,7 +201,7 @@ public record PropType<P extends Prop>(
 	}
 
 	public void readUpdate(int propId, RegistryAccess registryAccess, byte[] update, boolean allData, BiConsumer<PropData<?, ?>, Object> setData) {
-		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.wrappedBuffer(update), registryAccess);
+		var buf = PlatformHelper.INSTANCE.createBuffer(Unpooled.wrappedBuffer(update), registryAccess);
 
 		try {
 			int size = buf.readVarInt();

@@ -10,8 +10,8 @@ import dev.latvian.mods.klib.io.CompressionMethod;
 import dev.latvian.mods.klib.io.bytes.ByteInput;
 import dev.latvian.mods.klib.io.bytes.ByteOutput;
 import dev.latvian.mods.klib.io.checksum.Checksum;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.JsonUtils;
-import dev.latvian.mods.klib.util.MiscUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
@@ -464,7 +464,7 @@ public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>>
 		var time = Instant.now();
 
 		return log(() -> {
-			var p = player == null ? MiscUtils.CLIENT_PLAYER.getValue().get() : player;
+			var p = player == null ? PlatformHelper.INSTANCE.getClientPlayer() : player;
 
 			if (p != null) {
 				return new HubLogRequest(
@@ -608,7 +608,7 @@ public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>>
 
 	public CompletableFuture<Void> sendVersion() {
 		var json = new JsonObject();
-		json.addProperty("version", VLPlatformHelper.CURRENT.getVersionString());
+		json.addProperty("version", VLPlatformHelper.INSTANCE.getVersionString());
 		return send("version", json);
 	}
 }

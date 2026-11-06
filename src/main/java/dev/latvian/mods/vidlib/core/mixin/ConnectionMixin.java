@@ -39,7 +39,7 @@ public class ConnectionMixin {
 	}
 
 	private static void capture(net.minecraft.server.MinecraftServer server, java.util.UUID player, Packet<?> packet, boolean config) {
-		if (server == null || VLPlatformHelper.CURRENT.isReplayLevel(server.overworld())) {
+		if (server == null || VLPlatformHelper.INSTANCE.isReplayLevel(server.overworld())) {
 			return;
 		}
 

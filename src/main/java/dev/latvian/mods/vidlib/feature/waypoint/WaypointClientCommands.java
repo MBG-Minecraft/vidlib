@@ -24,7 +24,7 @@ public interface WaypointClientCommands {
 						.executes(ctx -> {
 							var mc = Minecraft.getInstance();
 
-							if (mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+							if (mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
 								var id = StringArgumentType.getString(ctx, "id");
 								var position = Vec3Argument.getVec3(ctx, "position");
 								var label = ComponentArgument.getResolvedComponent(ctx, "label");
@@ -57,7 +57,7 @@ public interface WaypointClientCommands {
 				.executes(ctx -> {
 					var mc = Minecraft.getInstance();
 
-					if (mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+					if (mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
 						var id = StringArgumentType.getString(ctx, "id");
 
 						var session = mc.player.vl$sessionData();

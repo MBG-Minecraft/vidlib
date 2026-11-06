@@ -84,7 +84,7 @@ public class MannequinProp extends Prop {
 	);
 
 	public static MannequinProp createCloneFrom(Player player) {
-		var props = VLPlatformHelper.CURRENT.getProps(player.level());
+		var props = VLPlatformHelper.INSTANCE.getProps(player.level());
 		return props.add(TYPE, prop -> prop.cloneFrom(player));
 	}
 

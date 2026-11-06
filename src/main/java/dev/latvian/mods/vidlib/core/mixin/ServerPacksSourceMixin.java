@@ -24,7 +24,7 @@ public abstract class ServerPacksSourceMixin extends BuiltInPackSource {
 	protected void populatePackList(BiConsumer<String, Function<String, Pack>> consumer) {
 		super.populatePackList(consumer);
 
-		var path = PlatformHelper.CURRENT.getGameDirectory().resolve("datapacks");
+		var path = PlatformHelper.INSTANCE.getGameDirectory().resolve("datapacks");
 
 		if (Files.notExists(path)) {
 			try {

@@ -25,7 +25,6 @@ import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
-import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
@@ -34,7 +33,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesDisplayD
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
-import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.VidLibSoundInstance;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
@@ -106,17 +105,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		return vl$self().player.vl$sessionData().serverDataMap;
 	}
 
-	@Override
-	default FeatureSet getServerFeatures() {
-		return FeatureSet.REMOTE_SERVER_FEATURES;
-	}
-
-	@Override
-	default PauseType getPauseType() {
-		var mc = vl$self();
-		return mc.isPaused() ? PauseType.GAME : mc.level != null && mc.level.tickRateManager().runsNormally() ? PauseType.NONE : PauseType.TICK;
-	}
-
 	@Nullable
 	default ProjectedCoordinates getProjectedCoordinates() {
 		return vl$self().player.vl$sessionData().projectedCoordinates;
@@ -138,7 +126,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 		if (shake != Identity.DVEC_2) {
 			var vec = new Vector4f((float) shake.x(), (float) shake.y(), 0F, 1F).rotate(camera.rotation());
-			((dev.latvian.mods.klib.core.KLibCamera) (Object) camera).klib$setPosition(camera.position().add(vec.x(), vec.y(), vec.z()));
+			camera.klib$setPosition(camera.position().add(vec.x(), vec.y(), vec.z()));
 		}
 	}
 
@@ -469,7 +457,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default List<ClientSessionData> vl$getAllSessionData() {
+	default List<ClientPlayerSessionData> vl$getAllSessionData() {
 		return vl$self().player.vl$sessionData().getAllClientSessionData();
 	}
 

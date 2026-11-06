@@ -75,10 +75,8 @@ public class ClientProps extends Props<ClientLevel> {
 	public void reloadAll() {
 		all.clear();
 
-		for (var list : propLists.values()) {
-			for (var prop : list) {
-				onAdded(prop);
-			}
+		for (var prop : levelProps) {
+			onAdded(prop);
 		}
 	}
 

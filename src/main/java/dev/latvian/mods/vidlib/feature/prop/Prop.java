@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.data.JOMLDataTypes;
 import dev.latvian.mods.klib.entity.PositionType;
@@ -13,7 +14,6 @@ import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CuboidShape;
-import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
@@ -152,7 +152,7 @@ public class Prop {
 
 		snap();
 
-		boolean replay = VLPlatformHelper.CURRENT.isReplayLevel(level);
+		boolean replay = VLPlatformHelper.INSTANCE.isReplayLevel(level);
 
 		if (replay) {
 			tick = Math.max(0, (int) (time - createdTime));
@@ -838,7 +838,7 @@ public class Prop {
 
 		setData(data, value);
 
-		if (sync && !VLPlatformHelper.CURRENT.isReplayLevel(level)) {
+		if (sync && !VLPlatformHelper.INSTANCE.isReplayLevel(level)) {
 			var payload = UpdatePropRequestPayload.of(this, List.of(data));
 
 			if (payload != null) {
@@ -901,7 +901,7 @@ public class Prop {
 	}
 
 	public DataResult<Prop> copy() {
-		var props = VLPlatformHelper.CURRENT.getProps(level);
+		var props = VLPlatformHelper.INSTANCE.getProps(level);
 		var ctx = props.context(type, PropSpawnType.GAME, level.getGameTime());
 		var newProp = type.factory().create(ctx);
 

@@ -45,7 +45,7 @@ public record PropPacketType<P extends Prop, T>(Handler<P, T> handler, StreamCod
 		RegistryFriendlyByteBuf buf = null;
 
 		try {
-			buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), prop.level.registryAccess());
+			buf = PlatformHelper.INSTANCE.createBuffer(Unpooled.buffer(), prop.level.registryAccess());
 			streamCodec.encode(buf, payload);
 			var bytes = new byte[buf.readableBytes()];
 			buf.getBytes(buf.readerIndex(), bytes);
@@ -64,7 +64,7 @@ public record PropPacketType<P extends Prop, T>(Handler<P, T> handler, StreamCod
 		var buf0 = Unpooled.wrappedBuffer(data);
 
 		try {
-			var buf = PlatformHelper.CURRENT.createBuffer(buf0, prop.level.registryAccess());
+			var buf = PlatformHelper.INSTANCE.createBuffer(buf0, prop.level.registryAccess());
 			var payload = streamCodec.decode(buf);
 			handler.handle(Cast.to(prop), ctx, payload);
 		} catch (Exception ex) {

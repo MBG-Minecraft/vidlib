@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.icon.Icon;
 import dev.latvian.mods.klib.icon.renderer.IconRenderer;
@@ -8,7 +9,6 @@ import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.klib.render.SubmitContext;
 import dev.latvian.mods.klib.render.Submittable;
-import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.visual.Visual;
 import dev.latvian.mods.klib.visual.renderer.VisualExactContext;

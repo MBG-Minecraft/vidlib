@@ -31,7 +31,7 @@ public record HubUserCapabilities(
 	public static final long REQUIRE_LINK = 1L << 9L;
 	public static final long PARALLEL_UPLOADS = 1L << 10L;
 
-	public static final boolean DEFAULT_ENABLE_ADMIN_BUTTONS = "true".equals(System.getenv("ENABLE_ADMIN_BUTTONS")) || PlatformHelper.CURRENT.isDevEnv();
+	public static final boolean DEFAULT_ENABLE_ADMIN_BUTTONS = "true".equals(System.getenv("ENABLE_ADMIN_BUTTONS")) || PlatformHelper.INSTANCE.isDevEnv();
 
 	public static final HubUserCapabilities DEFAULT = new HubUserCapabilities(
 		Hex64.NONE,

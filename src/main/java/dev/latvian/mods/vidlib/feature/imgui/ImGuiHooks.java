@@ -218,7 +218,7 @@ public class ImGuiHooks {
 		var centralNodePos = centralDockNode.getPos();
 		var centralNodeSize = centralDockNode.getSize();
 
-		float h = ClientGameEngine.DISABLE_IMGUI ? 0F : (mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
+		float h = ClientGameEngine.DISABLE_IMGUI ? 0F : (mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
 
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
@@ -245,7 +245,7 @@ public class ImGuiHooks {
 		}
 
 		if (ready && VidLibClientEventHandler.clientLoaded && !ImGuiAPI.getHide()) {
-			if (mc.level == null || !VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+			if (mc.level == null || !VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
 				var old = context.push();
 				var graphics = new ImGraphics(mc);
 				graphics.pushRootStack();

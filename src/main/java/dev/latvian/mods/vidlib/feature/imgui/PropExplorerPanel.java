@@ -31,7 +31,7 @@ public class PropExplorerPanel extends Panel {
 		var allProps = new ArrayList<Prop>();
 		var clientProps = new ArrayList<Prop>();
 
-		var props = VLPlatformHelper.CURRENT.getProps(graphics.mc.level);
+		var props = VLPlatformHelper.INSTANCE.getProps(graphics.mc.level);
 
 		for (var propList : props.propLists.values()) {
 			for (var prop : propList) {

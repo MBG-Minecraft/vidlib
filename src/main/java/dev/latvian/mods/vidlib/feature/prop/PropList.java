@@ -24,7 +24,6 @@ import java.util.function.Predicate;
 
 public class PropList implements Iterable<Prop> {
 	public final Props<?> props;
-	public final PropListType type;
 	final Int2ObjectMap<Prop> map;
 	public final Map<PropRemoveType, IntList> removed;
 	public final List<Prop> collidingProps;
@@ -32,9 +31,8 @@ public class PropList implements Iterable<Prop> {
 	boolean queueNewProps;
 	private final List<Prop> propQueue;
 
-	public PropList(Props<?> props, PropListType type) {
+	public PropList(Props<?> props) {
 		this.props = props;
-		this.type = type;
 		this.map = new Int2ObjectLinkedOpenHashMap<>();
 		this.removed = new EnumMap<>(PropRemoveType.class);
 		this.collidingProps = new ArrayList<>(0);
@@ -87,7 +85,7 @@ public class PropList implements Iterable<Prop> {
 
 	public void tick(@Nullable S2CPacketConsumer updates, boolean tick) {
 		if (!tick) {
-			if (!map.isEmpty() && VLPlatformHelper.CURRENT.isReplayLevel(props.level)) {
+			if (!map.isEmpty() && VLPlatformHelper.INSTANCE.isReplayLevel(props.level)) {
 				var time = props.level.getGameTime();
 
 				for (var prop : map.values()) {
@@ -132,7 +130,7 @@ public class PropList implements Iterable<Prop> {
 
 			if (!list.isEmpty()) {
 				if (updates != null) {
-					updates.s2c(new RemovePropsPayload(type, new IntArrayList(list), entry.getKey()));
+					updates.s2c(new RemovePropsPayload(new IntArrayList(list), entry.getKey()));
 				}
 
 				list.clear();
@@ -178,7 +176,7 @@ public class PropList implements Iterable<Prop> {
 
 			if (!list.isEmpty()) {
 				if (updates != null) {
-					updates.s2c(new RemovePropsPayload(type, new IntArrayList(list), entry.getKey()));
+					updates.s2c(new RemovePropsPayload(new IntArrayList(list), entry.getKey()));
 				}
 
 				list.clear();
@@ -288,24 +286,14 @@ public class PropList implements Iterable<Prop> {
 		return false;
 	}
 
-	public List<VoxelShape> getShapesIntersecting(@Nullable Entity entity, AABB collisionBox) {
-		if (collidingProps.isEmpty()) {
-			return List.of();
-		}
-
-		var shapes = List.<VoxelShape>of();
-
-		for (var prop : collidingProps) {
-			if (prop.isCollidingWith(entity, collisionBox)) {
-				if (shapes.isEmpty()) {
-					shapes = new ArrayList<>();
+	public void collectShapesIntersecting(@Nullable Entity entity, AABB collisionBox, List<VoxelShape> shapes) {
+		if (!collidingProps.isEmpty()) {
+			for (var prop : collidingProps) {
+				if (prop.isCollidingWith(entity, collisionBox)) {
+					prop.addCollisionShapes(entity, shapes);
 				}
-
-				prop.addCollisionShapes(entity, shapes);
 			}
 		}
-
-		return shapes;
 	}
 
 	@Nullable

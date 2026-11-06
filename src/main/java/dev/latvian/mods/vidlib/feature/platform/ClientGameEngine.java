@@ -1040,7 +1040,7 @@ public class ClientGameEngine {
 
 		if (server != null) {
 			return "Server - " + server.name;
-		} else if (mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+		} else if (mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
 			return "Replay Editor";
 		} else if (mc.level != null) {
 			return "Singleplayer";

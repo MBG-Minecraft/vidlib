@@ -8,8 +8,8 @@ import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 
 public interface VidLibEntityFilters {
-	UnitType<RegistryFriendlyByteBuf, EntityFilter> STAFF = EntityFilter.simple("staff", entity -> VLPlatformHelper.CURRENT.isStaff(entity));
-	UnitType<RegistryFriendlyByteBuf, EntityFilter> STAFF_OR_TALENT = EntityFilter.simple("staff_or_talent", entity -> VLPlatformHelper.CURRENT.isStaffOrTalent(entity));
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> STAFF = EntityFilter.simple("staff", entity -> VLPlatformHelper.INSTANCE.isStaff(entity));
+	UnitType<RegistryFriendlyByteBuf, EntityFilter> STAFF_OR_TALENT = EntityFilter.simple("staff_or_talent", entity -> VLPlatformHelper.INSTANCE.isStaffOrTalent(entity));
 
 	static void register(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, EntityFilter> registry) {
 		registry.register(STAFF);

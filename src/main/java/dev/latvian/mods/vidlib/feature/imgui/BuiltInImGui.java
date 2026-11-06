@@ -29,7 +29,6 @@ import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.chromaticaberration.ChromaticAberrationPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
-import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
@@ -83,7 +82,7 @@ public class BuiltInImGui {
 				}
 			}));
 
-			if (PlatformHelper.CURRENT.isDevEnv()) {
+			if (PlatformHelper.INSTANCE.isDevEnv()) {
 				list.add(MenuItem.item(ImIcons.PERSON, "Force Link Profile", g -> LinkHubUserScreen.open(g.mc)));
 			}
 		}
@@ -160,7 +159,7 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.STOP, "Stop all Sounds", g -> g.mc.getSoundManager().stop()));
 
 		list.add(MenuItem.item(ImIcons.DATABASE, "Dump Textures", g -> {
-			var gameDir = PlatformHelper.CURRENT.getGameDirectory().toAbsolutePath();
+			var gameDir = PlatformHelper.INSTANCE.getGameDirectory().toAbsolutePath();
 			var textures = TextureUtil.getDebugTexturePath(gameDir);
 			g.mc.getTextureManager().dumpAllSheets(textures);
 			g.mc.tell(Component.translatableEscape("debug.dump_dynamic_textures", Component.literal(gameDir.relativize(textures).toString())
@@ -187,14 +186,14 @@ public class BuiltInImGui {
 			}
 		}));
 
-		if (PlatformHelper.CURRENT.isDevEnv()) {
+		if (PlatformHelper.INSTANCE.isDevEnv()) {
 			list.add(MenuItem.item(ImIcons.SCHEDULE, "Post Main Menu Event", g -> NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(g.mc, true))));
 		}
 
 		list.add(MenuItem.SEPARATOR);
 		list.add(MenuItem.item(ImIcons.LEAF, "JVM Threads", JVMThreadsPanel.INSTANCE));
 
-		if (PlatformHelper.CURRENT.isDevEnv()) {
+		if (PlatformHelper.INSTANCE.isDevEnv()) {
 			list.add(MenuItem.item(ImIcons.BUG, "Packet Debugger", PacketDebuggerPanel.INSTANCE).enabled(graphics.isAdmin));
 			list.add(MenuItem.item(ImIcons.MEMORY, "ID Stack Tool", SHOW_STACK_TOOL));
 			list.add(MenuItem.item(ImIcons.EDIT, "Style Editor Tool", SHOW_STYLE_EDITOR_TOOL));
@@ -247,7 +246,7 @@ public class BuiltInImGui {
 		}
 
 		list.add(MenuItem.item(ImIcons.STAR, "Physics Particles", PhysicsParticleManager.VISIBLE).enabled(graphics.isAdmin));
-		list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Ghost Structures", GhostStructure.VISIBLE_CONFIG).enabled(graphics.isAdmin));
+		// list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Ghost Structures", GhostStructure.VISIBLE_CONFIG).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.LOCATION, "Waypoints", ClientWaypoints.VISIBLE).enabled(graphics.inGame));
 
 		list.add(MenuItem.SEPARATOR);

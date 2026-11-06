@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.capture;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
+import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.io.IOUtils;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.JsonUtils;
@@ -37,7 +38,7 @@ public class PacketCapture {
 	public final LevelData levelData;
 	public final Timestamp sessionStart;
 	public Timestamp sessionEnd;
-	public final int sessionId;
+	public final UUID sessionId;
 	private final String toString;
 	public final Path directory;
 	public final Path tempDirectory;
@@ -49,7 +50,7 @@ public class PacketCapture {
 	private final Lock identifierMapLock;
 	public final Map<UUID, MutableInt> sessionCounts;
 
-	public PacketCapture(MinecraftServer server, int sessionId, Path directory) {
+	public PacketCapture(MinecraftServer server, UUID sessionId, Path directory) {
 		this.server = server;
 		this.levelData = server.getWorldData().overworldData();
 		this.sessionStart = Timestamp.now(levelData.getGameTime());
@@ -109,7 +110,7 @@ public class PacketCapture {
 
 		VidLib.LOGGER.info("Saving captured packets... (%,d second session)".formatted(seconds));
 
-		VLPlatformHelper.CURRENT.finishPacketCapture(this);
+		VLPlatformHelper.INSTANCE.finishPacketCapture(this);
 
 		for (var session : sessions.values()) {
 			session.disconnect();
@@ -125,7 +126,9 @@ public class PacketCapture {
 
 		var filename = new StringBuilder();
 		filename.append(Timestamp.deflateUTC(sessionStart.utc()));
-		filename.append("-%08x-".formatted(sessionId));
+		filename.append('-');
+		filename.append(UndashedUuid.toString(sessionId));
+		filename.append('-');
 		filename.append(seconds / 60L / 60L);
 		filename.append("h-");
 		appendDec(filename, (seconds / 60L) % 60L);
@@ -137,8 +140,8 @@ public class PacketCapture {
 
 		try (var fs = IOUtils.openAsZip(outputFile, Map.of("create", "true"))) {
 			var metadata = new JsonObject();
-			metadata.addProperty("platform", PlatformHelper.CURRENT.getPlatform().getSerializedName());
-			metadata.addProperty("id", "%08x".formatted(sessionId));
+			metadata.addProperty("platform", PlatformHelper.INSTANCE.getPlatform().getSerializedName());
+			metadata.addProperty("id", UndashedUuid.toString(sessionId));
 			metadata.add("start", Timestamp.CODEC.encodeStart(JsonOps.INSTANCE, sessionStart).getOrThrow());
 			metadata.add("end", Timestamp.CODEC.encodeStart(JsonOps.INSTANCE, sessionEnd).getOrThrow());
 			metadata.addProperty("length", seconds);
@@ -171,7 +174,7 @@ public class PacketCapture {
 
 			metadata.add("sessions", sessionMeta);
 
-			VLPlatformHelper.CURRENT.packetCaptureMetadata(this, metadata);
+			VLPlatformHelper.INSTANCE.packetCaptureMetadata(this, metadata);
 
 			JsonUtils.write(fs.getPath("metadata.json"), metadata, false);
 		} catch (Exception ex) {

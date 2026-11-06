@@ -35,7 +35,7 @@ public record AddPropPayload(PropType<?> propType, PropSpawnType spawnType, int 
 		}
 
 		var level = ctx.level();
-		var props = VLPlatformHelper.CURRENT.getProps(level);
+		var props = VLPlatformHelper.INSTANCE.getProps(level);
 
 		var prop = props.levelProps.get(id);
 

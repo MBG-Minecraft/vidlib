@@ -1,26 +1,11 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.klib.knumber.KNumberVariables;
-import dev.latvian.mods.klib.util.PauseType;
-import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.VLMinecraftServer;
-import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import dev.latvian.mods.vidlib.feature.data.DataKey;
-import dev.latvian.mods.vidlib.feature.data.DataMap;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.session.RemovePlayerDataPayload;
-import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
-import dev.latvian.mods.vidlib.util.ScheduledTask;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.network.chat.Component;
+import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
-import net.minecraft.util.Util;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,10 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.nio.file.Files;
-import java.util.Collection;
 import java.util.Map;
-import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements VLMinecraftServer {
@@ -43,73 +25,10 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	private Map<ResourceKey<Level>, ServerLevel> levels;
 
 	@Unique
-	private final RandomSource vl$sessionRandom = RandomSource.create();
-
-	@Unique
-	private int vl$sessionId = 0;
-
-	@Unique
-	private ScheduledTask.Handler vl$scheduledTaskHandler;
-
-	@Unique
 	private ServerLevel vl$overworld;
 
 	@Unique
-	private DataMap vl$serverDataMap;
-
-	@Unique
-	private final KNumberVariables vl$globalVariables = new KNumberVariables();
-
-	@Unique
-	private PacketCapture vl$packetCapture;
-
-	@Unique
-	private final Map<UUID, ServerSessionData> vl$serverSessionData = new Object2ObjectOpenHashMap<>();
-
-	@Unique
-	private Boolean vl$isReplayServer;
-
-	@Override
-	public RandomSource vl$sessionRandom() {
-		return vl$sessionRandom;
-	}
-
-	@Override
-	public int vl$sessionId() {
-		while (vl$sessionId == 0) {
-			vl$sessionId = vl$sessionRandom.nextInt();
-		}
-
-		return vl$sessionId;
-	}
-
-	@Override
-	public ScheduledTask.Handler vl$getScheduledTaskHandler() {
-		if (vl$scheduledTaskHandler == null) {
-			vl$scheduledTaskHandler = new ScheduledTask.Handler(this);
-		}
-
-		return vl$scheduledTaskHandler;
-	}
-
-	@Override
-	public DataMap getDataMap() {
-		if (vl$serverDataMap == null) {
-			vl$serverDataMap = new DataMap(Util.NIL_UUID, DataKey.SERVER, this);
-			vl$serverDataMap.load(vl$self(), vl$self().getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
-		}
-
-		return vl$serverDataMap;
-	}
-
-	@Override
-	public void vl$postTick(PauseType paused) {
-		if (vl$scheduledTaskHandler != null && paused.tick()) {
-			vl$scheduledTaskHandler.tick();
-		}
-
-		VLMinecraftServer.super.vl$postTick(paused);
-	}
+	private ServerWorldSessionData vl$worldData;
 
 	@Inject(method = "createLevels", at = @At("RETURN"))
 	private void vl$createLevels(CallbackInfo ci) {
@@ -126,78 +45,13 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	}
 
 	@Override
-	public KNumberVariables globalVariables() {
-		return vl$globalVariables;
-	}
-
-	@Override
-	public Collection<ServerSessionData> vl$getAllSessionData() {
-		return vl$serverSessionData.values();
-	}
-
-	@Override
 	@Nullable
-	public PacketCapture vl$getPacketCapture(boolean start) {
-		if (vl$packetCapture == null && start && !CommonGameEngine.INSTANCE.disablePacketCapture()) {
-			var directory = VidLibPaths.LOCAL.get().resolve("packet-capture");
-
-			if (Files.notExists(directory)) {
-				try {
-					Files.createDirectories(directory);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-
-			vl$packetCapture = new PacketCapture(vl$self(), vl$sessionId(), directory);
-		}
-
-		return vl$packetCapture;
+	public ServerWorldSessionData vl$getWorldData() {
+		return vl$worldData;
 	}
 
 	@Override
-	public ServerSessionData vl$getOrLoadServerSession(UUID uuid) {
-		var session = vl$serverSessionData.get(uuid);
-
-		if (session == null) {
-			session = new ServerSessionData(vl$self(), uuid);
-			session.load();
-			vl$serverSessionData.put(uuid, session);
-		}
-
-		return session;
-	}
-
-	@Override
-	public void vl$eraseServerSession(UUID uuid) {
-		var player = vl$self().getPlayerList().getPlayer(uuid);
-
-		if (player != null) {
-			player.connection.disconnect(Component.literal("Your player data was reset"));
-		}
-
-		schedule(1, () -> {
-			var data = vl$serverSessionData.remove(uuid);
-
-			if (data != null) {
-				data.dataMap.set(InternalPlayerData.ONLINE, false);
-				vl$self().s2c(new RemovePlayerDataPayload(uuid));
-
-				try {
-					Files.deleteIfExists(data.dataMapPath);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-		});
-	}
-
-	@Override
-	public boolean vl$isReplayServer() {
-		if (vl$isReplayServer == null) {
-			vl$isReplayServer = getClass().getName().contains("ReplayServer");
-		}
-
-		return vl$isReplayServer;
+	public void vl$setWorldData(@Nullable ServerWorldSessionData data) {
+		vl$worldData = data;
 	}
 }

@@ -106,7 +106,7 @@ public record HubUploadContext(
 		var requestItems = new ArrayList<HubUploadRequestItem>();
 
 		try {
-			callback.accept(new HubFileUploadsImpl(this, PlatformHelper.CURRENT.getGameDirectory().toAbsolutePath().toRealPath(), requestItems));
+			callback.accept(new HubFileUploadsImpl(this, PlatformHelper.INSTANCE.getGameDirectory().toAbsolutePath().toRealPath(), requestItems));
 		} catch (IOException ex) {
 			VidLib.LOGGER.error("Failed to collect files to upload", ex);
 		}

@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.data;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
@@ -21,7 +22,8 @@ public interface ServerDataCommand {
 			cmd.then(Commands.literal("get")
 				.executes(ctx -> {
 					ctx.getSource().sendSuccess(() -> {
-						var value = ctx.getSource().getServer().get(key);
+						var vl = ServerWorldSessionData.of(ctx.getSource().getServer());
+						var value = vl.dataMap.get(key);
 						var nbt = key.type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
 						return Component.literal("Server: ").append(NbtUtils.toPrettyComponent(nbt));
 					}, false);
@@ -32,8 +34,9 @@ public interface ServerDataCommand {
 			cmd.then(Commands.literal("set")
 				.then(Commands.argument("value", key.type().argument(buildContext))
 					.executes(ctx -> {
+						var vl = ServerWorldSessionData.of(ctx.getSource().getServer());
 						var value = key.type().get(ctx, "value");
-						ctx.getSource().getServer().set(key, Cast.to(value));
+						vl.dataMap.set(key, Cast.to(value));
 						return 1;
 					})
 				)

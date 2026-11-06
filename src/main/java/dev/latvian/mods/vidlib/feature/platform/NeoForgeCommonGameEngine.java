@@ -60,7 +60,7 @@ public class NeoForgeCommonGameEngine extends CommonGameEngine {
 		super.getUsedPorts(server, list);
 		NeoForge.EVENT_BUS.post(new UsedPortsEvent(server, list));
 
-		if (PlatformHelper.CURRENT.isModLoaded(Voicechat.MODID)) {
+		if (PlatformHelper.INSTANCE.isModLoaded(Voicechat.MODID)) {
 			voiceChatIntegration(list);
 		}
 	}

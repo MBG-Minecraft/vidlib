@@ -9,10 +9,9 @@ import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.network.codec.ByteBufCodecs;
 import org.jetbrains.annotations.Nullable;
 
-public record UpdatePropPayload(PropListType propListType, int id, byte[] update) implements SimplePayload {
+public record UpdatePropPayload(int id, byte[] update) implements SimplePayload {
 	@AutoPacket
 	public static final SimplePayloadType<UpdatePropPayload> TYPE = SimplePayloadType.vidlib("prop/update", CompositeStreamCodec.of(
-		PropListType.STREAM_CODEC, UpdatePropPayload::propListType,
 		ByteBufCodecs.VAR_INT, UpdatePropPayload::id,
 		ByteBufCodecs.BYTE_ARRAY, UpdatePropPayload::update,
 		UpdatePropPayload::new
@@ -23,7 +22,7 @@ public record UpdatePropPayload(PropListType propListType, int id, byte[] update
 		var update = prop.isRemoved() ? null : prop.getDataUpdates(false);
 
 		if (update != null) {
-			return new UpdatePropPayload(prop.spawnType.listType, prop.id, update);
+			return new UpdatePropPayload(prop.id, update);
 		}
 
 		return null;
@@ -36,8 +35,8 @@ public record UpdatePropPayload(PropListType propListType, int id, byte[] update
 
 	@Override
 	public void handle(Context ctx) {
-		var props = VLPlatformHelper.CURRENT.getProps(ctx.level());
-		var prop = props.propLists.get(propListType).get(id);
+		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level());
+		var prop = props.levelProps.get(id);
 
 		if (prop != null) {
 			prop.update(ctx.level().registryAccess(), update, false);

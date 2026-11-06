@@ -1,74 +1,54 @@
 package dev.latvian.mods.vidlib.feature.session;
 
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.klib.registry.CustomRegistry;
-import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
-import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
-import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
-import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
+import dev.latvian.mods.vidlib.feature.zone.ZoneTag;
 import dev.latvian.mods.vidlib.math.knumber.SyncGlobalNumberVariablesPayload;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class SessionData implements Comparable<SessionData> {
+public class PlayerSessionData implements Comparable<PlayerSessionData> {
+	public final WorldSessionData worldData;
 	public final UUID uuid;
 	public final DataMap dataMap;
 	public final long startTime;
-	public int tick;
 	public PlayerInput prevInput;
 	public PlayerInput input;
 	public List<ResolvedZone> zonesIn;
-	public Set<String> zonesTagsIn;
+	public Set<ZoneTag> zoneTagsIn;
 
 	public boolean suspended;
 
-	public SessionData(UUID uuid, LevelGameTimeProvider timeProvider) {
+	public PlayerSessionData(WorldSessionData worldData, UUID uuid) {
+		this.worldData = worldData;
 		this.uuid = uuid;
-		this.dataMap = new DataMap(uuid, DataKey.PLAYER, timeProvider);
+		this.dataMap = new DataMap(worldData, uuid, DataKey.PLAYER);
 		this.startTime = System.currentTimeMillis();
 		this.prevInput = PlayerInput.NONE;
 		this.input = PlayerInput.NONE;
 		this.zonesIn = List.of();
-		this.zonesTagsIn = Set.of();
+		this.zoneTagsIn = Set.of();
 
 		this.suspended = false;
 	}
 
-	public void respawned(Level level, boolean loggedIn) {
-	}
-
 	public void closed() {
-	}
-
-	public void updateOverrides(Player player) {
-		suspended = player.get(InternalPlayerData.SUSPENDED);
-	}
-
-	public void updateServerData(Player self, List<DataMapValue> update) {
-	}
-
-	public void updatePlayerData(Player self, UUID player, List<DataMapValue> update) {
 	}
 
 	@Override
@@ -76,17 +56,6 @@ public class SessionData implements Comparable<SessionData> {
 		return getClass().getSimpleName() + "[" + uuid + "]";
 	}
 
-	public void refreshBlockZones() {
-	}
-
-	public void updateInput(Level level, UUID player, PlayerInput input) {
-	}
-
-	public void updateAtmospheres() {
-	}
-
-	public void setGlowColor(@Nullable UUID uuid, @Nullable Color color) {
-	}
 
 	/**
 	 * syncType 0 = reload
@@ -128,16 +97,14 @@ public class SessionData implements Comparable<SessionData> {
 		}
 
 		if (syncType > 0) {
-			var props = VLPlatformHelper.CURRENT.getProps(level);
+			var props = VLPlatformHelper.INSTANCE.getProps(level);
 
-			for (var list : props.propLists.values()) {
-				if (syncType == 1) {
-					packets.s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.REPLAY));
-				}
+			if (syncType == 1) {
+				packets.s2c(new RemoveAllPropsPayload(PropRemoveType.REPLAY));
+			}
 
-				for (var prop : list) {
-					packets.s2c(prop.createAddPacket());
-				}
+			for (var prop : props.levelProps) {
+				packets.s2c(prop.createAddPacket());
 			}
 		}
 	}
@@ -150,13 +117,6 @@ public class SessionData implements Comparable<SessionData> {
 		if (!getTags().equals(tags)) {
 			dataMap.set(InternalPlayerData.PLAYER_TAGS, tags);
 		}
-	}
-
-	public FeatureSet getClientFeatures() {
-		return FeatureSet.EMPTY;
-	}
-
-	public void setClientModListSentDuringConfig() {
 	}
 
 	public boolean isOnline() {
@@ -174,24 +134,12 @@ public class SessionData implements Comparable<SessionData> {
 		return name;
 	}
 
-	public void removeSessionData(UUID player) {
+	public void updateOverrides(Player player) {
+		suspended = dataMap.get(InternalPlayerData.SUSPENDED);
 	}
 
 	@Override
-	public int compareTo(@NotNull SessionData o) {
+	public int compareTo(@NotNull PlayerSessionData o) {
 		return getName().compareToIgnoreCase(o.getName());
-	}
-
-	public void createNote(Note note) {
-	}
-
-	public void deleteNote(UUID id) {
-	}
-
-	public void setEntityBrightnessOverride(int entityId, int override) {
-	}
-
-	public ParticleOptions getParticleOptions(String string) {
-		return DustParticleOptions.REDSTONE;
 	}
 }

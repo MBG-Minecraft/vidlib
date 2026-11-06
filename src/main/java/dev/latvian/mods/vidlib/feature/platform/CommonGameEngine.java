@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.platform.PlatformModInfo;
 import dev.latvian.mods.klib.util.RuntimeDebugger;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
@@ -45,6 +46,8 @@ import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -57,6 +60,7 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -377,13 +381,25 @@ public class CommonGameEngine {
 		return true;
 	}
 
+	public boolean intersectsSolid(CollisionGetter collisionGetter, @Nullable Entity entity, AABB collisionBox) {
+		return collisionGetter instanceof Level level && LevelSessionData.of(level).intersectsSolid(entity, collisionBox);
+	}
+
+	public void collectShapesIntersecting(CollisionGetter collisionGetter, @Nullable Entity entity, AABB collisionBox, List<VoxelShape> shapes) {
+		if (collisionGetter instanceof Level level) {
+			LevelSessionData.of(level).collectShapesIntersecting(entity, collisionBox, shapes);
+		}
+	}
+
 	public FluidState overrideFluidState(Level level, BlockPos pos) {
 		var original = level.getFluidState(pos);
 
 		if (original.isEmpty()) {
-			//var zones = level.vl$getActiveZones();
-			//var state = zones == null ? null : zones.getZoneFluidState(pos);
-			// return state == null ? original : state;
+			var state = LevelSessionData.of(level).getFluidState(pos);
+
+			if (state != null) {
+				return state;
+			}
 		}
 
 		return original;
@@ -395,8 +411,7 @@ public class CommonGameEngine {
 
 	public float overrideFluidHeight(Level level, FluidState state, BlockPos pos) {
 		if (state.getType() instanceof FlowingFluid flowing) {
-			var zones = level.vl$getActiveZones();
-			var height = zones == null ? 0F : zones.getZoneFluidHeight(flowing, pos);
+			var height = LevelSessionData.of(level).getFluidHeight(flowing, pos);
 
 			if (height > 0F) {
 				return height;
@@ -404,6 +419,14 @@ public class CommonGameEngine {
 		}
 
 		return state.getHeight(level, pos);
+	}
+
+	public BlockHitResult clip(BlockGetter blockGetter, BlockHitResult result, ClipContext ctx) {
+		if (blockGetter instanceof Level level) {
+			return LevelSessionData.of(level).clip(result, ctx);
+		}
+
+		return result;
 	}
 
 	public void blockChanged(Level level, BlockPos pos, BlockState from, BlockState to) {
@@ -540,7 +563,7 @@ public class CommonGameEngine {
 
 	public void getAvailableWorlds(MinecraftServer server, List<HubWorldDirectory> list) {
 		try {
-			var root = PlatformHelper.CURRENT.getGameDirectory().toRealPath().toAbsolutePath();
+			var root = PlatformHelper.INSTANCE.getGameDirectory().toRealPath().toAbsolutePath();
 			var path = server.getWorldPath(LevelResource.ROOT).toRealPath();
 			list.add(HubWorldDirectory.of(root, server.getWorldData().getLevelName(), path.getFileName().toString(), path));
 		} catch (Exception ex) {

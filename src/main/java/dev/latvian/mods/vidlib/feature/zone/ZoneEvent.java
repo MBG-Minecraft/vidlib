@@ -1,34 +1,31 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.Event;
 
-import java.util.List;
+import java.util.function.BiConsumer;
 
 public class ZoneEvent extends Event {
 	public static class EntityEvent extends ZoneEvent {
-		private final ResolvedZone resolvedZone;
+		private final ResolvedZone zone;
 		private final Level level;
 		private final Entity entity;
 
-		public EntityEvent(ResolvedZone resolvedZone, Level level, Entity entity) {
-			this.resolvedZone = resolvedZone;
+		public EntityEvent(ResolvedZone zone, Level level, Entity entity) {
+			this.zone = zone;
 			this.level = level;
 			this.entity = entity;
 		}
 
-		public ResolvedZone getResolvedZone() {
-			return resolvedZone;
-		}
-
-		public Zone getZone() {
-			return resolvedZone.zone;
+		public ResolvedZone getZone() {
+			return zone;
 		}
 
 		public CompoundTag getData() {
-			return resolvedZone.zone.data();
+			return zone.data;
 		}
 
 		public Level getLevel() {
@@ -53,11 +50,17 @@ public class ZoneEvent extends Event {
 	}
 
 	public static class ClickedOn extends EntityEvent {
+		private final ServerPlayer player;
 		private final ZoneHit hit;
 
-		public ClickedOn(ZoneHit hit, Level level, Entity entity) {
-			super(hit.resolvedZone(), level, entity);
+		public ClickedOn(ServerPlayer player, ZoneHit hit) {
+			super(hit.resolvedZone(), player.level(), player);
+			this.player = player;
 			this.hit = hit;
+		}
+
+		public ServerPlayer getPlayer() {
+			return player;
 		}
 
 		public ZoneHit getHit() {
@@ -66,15 +69,14 @@ public class ZoneEvent extends Event {
 	}
 
 	public static class Generate extends ZoneEvent {
-		private final List<ZoneContainer> zoneContainers;
+		private final BiConsumer<String, Zone> callback;
 
-		public Generate(List<ZoneContainer> zoneContainers) {
-			this.zoneContainers = zoneContainers;
+		public Generate(BiConsumer<String, Zone> callback) {
+			this.callback = callback;
 		}
 
-		public void add(ZoneContainer zoneContainer) {
-			zoneContainers.add(zoneContainer);
-			zoneContainer.generated = true;
+		public void add(String id, Zone zone) {
+			callback.accept(id, zone);
 		}
 	}
 }

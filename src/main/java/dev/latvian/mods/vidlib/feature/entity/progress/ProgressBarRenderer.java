@@ -10,7 +10,7 @@ import net.minecraft.util.Mth;
 
 public interface ProgressBarRenderer {
 	static void draw(Minecraft mc, GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
-		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
 			return;
 		}
 

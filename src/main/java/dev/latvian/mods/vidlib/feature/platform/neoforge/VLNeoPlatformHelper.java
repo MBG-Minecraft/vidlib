@@ -18,12 +18,17 @@ import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRegistryEvent;
+import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
+import dev.latvian.mods.vidlib.feature.zone.ZoneEvent;
+import dev.latvian.mods.vidlib.feature.zone.ZoneHit;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGatewayEventRegistryEvent;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -33,6 +38,7 @@ import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.common.NeoForge;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class VLNeoPlatformHelper extends VLPlatformHelper {
@@ -140,5 +146,25 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	public String getVersionString() {
 		return super.getVersionString()
 			+ "\nNeoForge:" + FMLLoader.getCurrent().getVersionInfo().neoForgeVersion();
+	}
+
+	@Override
+	public void generateZones(BiConsumer<String, Zone> callback) {
+		NeoForge.EVENT_BUS.post(new ZoneEvent.Generate(callback));
+	}
+
+	@Override
+	public void entityEnteredZone(ResolvedZone zone, Level level, Entity entity) {
+		NeoForge.EVENT_BUS.post(new ZoneEvent.EntityEntered(zone, level, entity));
+	}
+
+	@Override
+	public void entityExitedZone(ResolvedZone zone, Level level, Entity entity) {
+		NeoForge.EVENT_BUS.post(new ZoneEvent.EntityExited(zone, level, entity));
+	}
+
+	@Override
+	public void playerClickedOnZone(ServerPlayer player, ZoneHit hit) {
+		NeoForge.EVENT_BUS.post(new ZoneEvent.ClickedOn(player, hit));
 	}
 }

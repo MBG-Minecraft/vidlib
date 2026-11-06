@@ -35,7 +35,7 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 	@Override
 	@Nullable
 	public Vec3 get(KNumberContext ctx) {
-		var props = VLPlatformHelper.CURRENT.getProps(ctx.level);
+		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level);
 		var p = props.levelProps.get(prop);
 		return p == null ? null : p.getPos(positionType);
 	}

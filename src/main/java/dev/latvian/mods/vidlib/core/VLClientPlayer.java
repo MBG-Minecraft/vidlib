@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.core.NoMixinException;
-import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientPlayerSessionData;
 import net.minecraft.client.player.AbstractClientPlayer;
 
 public interface VLClientPlayer extends VLPlayer {
@@ -11,7 +11,7 @@ public interface VLClientPlayer extends VLPlayer {
 	}
 
 	@Override
-	default ClientSessionData vl$sessionData() {
+	default ClientPlayerSessionData vl$sessionData() {
 		throw new NoMixinException(this);
 	}
 }

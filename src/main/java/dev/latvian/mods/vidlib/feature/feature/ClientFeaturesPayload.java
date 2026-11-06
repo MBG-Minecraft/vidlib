@@ -4,7 +4,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
-import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
 
 public record ClientFeaturesPayload(FeatureSet featureSet) implements SimplePayload {
 	@AutoPacket(to = AutoPacket.To.SERVER, stage = AutoPacket.Stage.CONFIG)
@@ -17,7 +17,7 @@ public record ClientFeaturesPayload(FeatureSet featureSet) implements SimplePayl
 
 	@Override
 	public void handle(Context ctx) {
-		if (ctx.sessionData() instanceof ServerSessionData sessionData) {
+		if (ctx.sessionData() instanceof ServerPlayerSessionData sessionData) {
 			sessionData.clientFeatureSet = featureSet;
 		}
 

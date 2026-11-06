@@ -3,13 +3,9 @@ package dev.latvian.mods.vidlib.core;
 import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.PlayerDataMapHolder;
-import dev.latvian.mods.vidlib.feature.session.SessionData;
-import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.Set;
 
 public interface VLPlayer extends VLLivingEntity, VLPlayerContainer, PlayerDataMapHolder {
 	@Override
@@ -17,7 +13,7 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer, PlayerDataM
 		return (Player) this;
 	}
 
-	default SessionData vl$sessionData() {
+	default PlayerSessionData vl$sessionData() {
 		throw new NoMixinException(this);
 	}
 
@@ -26,15 +22,6 @@ public interface VLPlayer extends VLLivingEntity, VLPlayerContainer, PlayerDataM
 	default DataMap getDataMap() {
 		var session = vl$sessionData();
 		return session == null ? null : session.dataMap;
-	}
-
-	@Override
-	default List<ResolvedZone> getZones() {
-		return vl$sessionData().zonesIn;
-	}
-
-	default Set<String> getZoneTags() {
-		return vl$sessionData().zonesTagsIn;
 	}
 
 	default boolean isReplayCamera() {

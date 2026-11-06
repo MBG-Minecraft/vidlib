@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.core.VLRemotePlayer;
-import dev.latvian.mods.vidlib.feature.session.RemoteClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.RemoteClientPlayerSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -15,14 +15,14 @@ import java.util.Set;
 @Mixin(RemotePlayer.class)
 public class RemotePlayerMixin extends AbstractClientPlayer implements VLRemotePlayer {
 	@Unique
-	private RemoteClientSessionData vl$sessionData;
+	private RemoteClientPlayerSessionData vl$sessionData;
 
 	public RemotePlayerMixin(ClientLevel clientLevel, NameAndId NameAndId) {
 		super(clientLevel, new com.mojang.authlib.GameProfile(NameAndId.id(), NameAndId.name()));
 	}
 
 	@Override
-	public RemoteClientSessionData vl$sessionData() {
+	public RemoteClientPlayerSessionData vl$sessionData() {
 		if (vl$sessionData == null) {
 			vl$sessionData = Minecraft.getInstance().player.vl$sessionData().getRemoteSessionData(getUUID());
 		}

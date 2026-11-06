@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.clothing;
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.klib.util.client.ImagePreProcessor;
+import dev.latvian.mods.klib.util.client.ImageUtils;
 import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import it.unimi.dsi.fastutil.ints.Int2FloatArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2FloatMap;
@@ -99,7 +99,7 @@ public class ClothingPartImage {
 			}
 		}
 
-		return ImagePreProcessor.remapImage(pixels, remap);
+		return ImageUtils.remapImage(pixels, remap);
 	}
 
 	public NativeImage withGradient(Ref<Gradient> gradient) {

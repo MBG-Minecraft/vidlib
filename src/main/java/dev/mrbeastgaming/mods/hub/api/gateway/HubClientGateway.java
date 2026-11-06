@@ -239,7 +239,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 
 		var fileDownloads = new HashMap<String, FileDownload>(count);
 
-		var templateDir = PlatformHelper.CURRENT.getGameDirectory().resolve("saves-templates");
+		var templateDir = PlatformHelper.INSTANCE.getGameDirectory().resolve("saves-templates");
 		var directory = templateDir.resolve(uniqueId);
 
 		if (Files.notExists(directory)) {

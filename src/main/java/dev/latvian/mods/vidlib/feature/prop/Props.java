@@ -8,21 +8,15 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public abstract class Props<L extends Level> {
 	public final L level;
-	public final Map<PropListType, PropList> propLists;
 	public final PropList levelProps;
-	public final PropList dataProps;
 
 	public Props(L level) {
 		this.level = level;
-		this.propLists = new EnumMap<>(PropListType.class);
-		this.propLists.put(PropListType.LEVEL, levelProps = new PropList(this, PropListType.LEVEL));
-		this.propLists.put(PropListType.DATA, dataProps = new PropList(this, PropListType.DATA));
+		levelProps = new PropList(this);
 	}
 
 	public <P extends Prop> PropContext<P> context(PropType<P> type, PropSpawnType spawnType, long createdTime) {
@@ -30,15 +24,11 @@ public abstract class Props<L extends Level> {
 	}
 
 	public void tick(boolean tick) {
-		for (var list : propLists.values()) {
-			list.tick(null, tick);
-		}
+		levelProps.tick(null, tick);
 	}
 
 	public void tickBukkit(@Nullable S2CPacketConsumer updates, boolean tick) {
-		for (var list : propLists.values()) {
-			list.tickBukkit(null, tick);
-		}
+		levelProps.tickBukkit(null, tick);
 	}
 
 	protected void onAdded(Prop prop) {
@@ -53,13 +43,11 @@ public abstract class Props<L extends Level> {
 
 	public void add(Prop prop) {
 		if (isValid(prop.spawnType)) {
-			var list = propLists.get(prop.spawnType.listType);
-
-			if (list.queueNewProps || level.isClientSide()) {
-				list.add(prop, null);
+			if (levelProps.queueNewProps || level.isClientSide()) {
+				levelProps.add(prop, null);
 			} else {
 				var builder = new S2CPacketBundleBuilder();
-				list.add(prop, builder);
+				levelProps.add(prop, builder);
 				builder.send(level);
 			}
 		}
@@ -126,13 +114,11 @@ public abstract class Props<L extends Level> {
 	public PropHitResult clip(ClipContext ctx, boolean ignoreInteractable) {
 		PropHitResult result = null;
 
-		for (var propList : propLists.values()) {
-			var propClip = propList.clip(ctx, ignoreInteractable);
+		var propClip = levelProps.clip(ctx, ignoreInteractable);
 
-			if (propClip != null) {
-				if (result == null || propClip.getLocation().distanceToSqr(ctx.getFrom()) < result.getLocation().distanceToSqr(ctx.getFrom())) {
-					result = propClip;
-				}
+		if (propClip != null) {
+			if (result == null || propClip.getLocation().distanceToSqr(ctx.getFrom()) < result.getLocation().distanceToSqr(ctx.getFrom())) {
+				result = propClip;
 			}
 		}
 

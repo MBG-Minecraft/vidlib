@@ -98,7 +98,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 		var server = !level.isClientSide();
 		var packets = server ? new S2CPacketBundleBuilder() : null;
 
-		boolean collectUndoable = (undoable && server) || (!future && !server && VLPlatformHelper.CURRENT.isReplayLevel(level));
+		boolean collectUndoable = (undoable && server) || (!future && !server && VLPlatformHelper.INSTANCE.isReplayLevel(level));
 
 		for (var sd : sections.values()) {
 			if (!sd.modified) {

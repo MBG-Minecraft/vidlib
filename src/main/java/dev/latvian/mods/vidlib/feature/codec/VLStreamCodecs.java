@@ -49,7 +49,7 @@ public interface VLStreamCodecs {
 	}
 
 	static Object decodeValue(RegistryFriendlyByteBuf buf, DataType<?> type, byte[] bytes) {
-		var buf1 = PlatformHelper.CURRENT.createBuffer(Unpooled.wrappedBuffer(bytes), buf);
+		var buf1 = PlatformHelper.INSTANCE.createBuffer(Unpooled.wrappedBuffer(bytes), buf);
 
 		try {
 			return type.streamCodec().decode(buf1);
@@ -101,7 +101,7 @@ public interface VLStreamCodecs {
 			buf.writeBlockPos(v);
 		} else {
 			buf.writeVarInt(1);
-			var buf1 = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), buf);
+			var buf1 = PlatformHelper.INSTANCE.createBuffer(Unpooled.buffer(), buf);
 
 			try {
 				type.streamCodec().encode(buf1, Cast.to(value));

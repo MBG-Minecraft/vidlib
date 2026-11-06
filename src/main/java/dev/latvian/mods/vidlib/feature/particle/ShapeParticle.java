@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.particle;
 
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.render.SubmitContext;
@@ -27,8 +28,8 @@ public class ShapeParticle extends CustomParticle {
 		public void submit(SubmitContext ctx) {
 			ctx.push(x, y, z);
 			ctx.poseStack().scale(scale, scale, scale);
-			ctx.submitQuads(shape, color);
-			ctx.submitLines(shape, outlineColor);
+			ctx.submitQuads(Identity.VEC_3, shape, color);
+			ctx.submitLines(Identity.VEC_3, shape, outlineColor);
 			ctx.pop();
 		}
 	}

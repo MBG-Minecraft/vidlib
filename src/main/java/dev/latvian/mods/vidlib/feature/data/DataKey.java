@@ -17,11 +17,17 @@ public record DataKey<T>(
 	DataType<T> type,
 	boolean save,
 	boolean sync,
-	List<BiConsumer<Player, T>> onReceived,
+	List<UpdateCallback<T>> onReceived,
 	boolean allowClientUpdates,
 	boolean skipLogging,
 	@Nullable ImBuilderType<T> imBuilder
 ) {
+	@FunctionalInterface
+	public interface UpdateCallback<T> extends BiConsumer<@Nullable Player, T> {
+		@Override
+		void accept(@Nullable Player player, T value);
+	}
+
 	public static final DataKeyStorage SERVER = new DataKeyStorage("server");
 	public static final DataKeyStorage PLAYER = new DataKeyStorage("player");
 
@@ -106,7 +112,7 @@ public record DataKey<T>(
 		return storage + "/" + id;
 	}
 
-	public void addUpdateListener(BiConsumer<Player, T> onReceived) {
+	public void addUpdateListener(UpdateCallback<T> onReceived) {
 		this.onReceived.add(onReceived);
 	}
 }

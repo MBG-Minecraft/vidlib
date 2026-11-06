@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.visual;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.texture.CubeTextures;
+import dev.latvian.mods.klib.texture.CubeTexturePatch;
 import dev.latvian.mods.klib.texture.FaceTexture;
 import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.util.ID;
@@ -9,9 +9,9 @@ import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 
-public record FluidTextures(Identifier still, Identifier flowing, Color tint, CubeTextures cubeTextures) {
+public record FluidTextures(Identifier still, Identifier flowing, Color tint, CubeTexturePatch cubeTextures) {
 	public static FluidTextures of(Identifier still, Identifier flowing, Color tint) {
-		return new FluidTextures(still, flowing, tint, new CubeTextures(
+		return new FluidTextures(still, flowing, tint, new CubeTexturePatch(
 			Optional.of(new FaceTexture(SpriteKey.block(flowing), true, tint, 0.5F, 0D)),
 			Optional.of(new FaceTexture(SpriteKey.block(still), true, tint, 1F, 0D)),
 			Optional.of(new FaceTexture(SpriteKey.block(still), false, tint, 1F, 0D)),

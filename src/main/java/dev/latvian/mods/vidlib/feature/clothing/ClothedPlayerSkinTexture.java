@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.klib.util.SkinTexture;
-import dev.latvian.mods.klib.util.client.ImagePreProcessor;
+import dev.latvian.mods.klib.util.client.ImageUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.PersistentPixelTexture;
@@ -122,7 +122,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 				}
 			}
 
-			img = ImagePreProcessor.layeredImage(layers, true);
+			img = ImageUtils.layeredImage(layers, true);
 			map.put(uniqueId, img);
 		}
 
@@ -142,7 +142,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 		var tex = cache.cache.get(skinId);
 
 		if (tex == null) {
-			var pixels = ImagePreProcessor.layeredImage(List.of(skinImage, cache.setImage), false);
+			var pixels = ImageUtils.layeredImage(List.of(skinImage, cache.setImage), false);
 			var genTex = new ClothedPlayerSkinTexture(uniqueId.withPath("textures/vidlib/generated/clothed_player/" + skinId.getPath() + "/" + uniqueId.getPath() + "/" + model.getSerializedName() + ".png"), pixels);
 			mc.execute(() -> mc.getTextureManager().registerAndLoad(genTex.resourceId(), genTex));
 			tex = genTex;

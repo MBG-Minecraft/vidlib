@@ -1,11 +1,11 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.core.NoMixinException;
+import dev.latvian.mods.vidlib.feature.session.WorldSessionData;
 import dev.latvian.mods.vidlib.feature.session.LoginData;
-import dev.latvian.mods.vidlib.feature.session.SessionData;
 
 public interface VLPacketListener {
-	default SessionData vl$sessionData() {
+	default WorldSessionData vl$getWorldData() {
 		throw new NoMixinException(this);
 	}
 

@@ -197,7 +197,7 @@ public class HubServerGateway extends HubCommonGateway<MinecraftServer> {
 
 	@Override
 	public void collectEventHandlers(HubGatewayEventRegistry<MinecraftServer> registry) {
-		VLPlatformHelper.CURRENT.collectServerGatewayEventHandlers(registry);
+		VLPlatformHelper.INSTANCE.collectServerGatewayEventHandlers(registry);
 	}
 
 	@Override

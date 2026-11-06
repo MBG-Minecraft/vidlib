@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.explosion;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.block.filter.BlockFilter;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
@@ -10,7 +11,6 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.entity.filter.EntityFilter;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;

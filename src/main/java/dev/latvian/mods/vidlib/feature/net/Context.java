@@ -1,10 +1,11 @@
 package dev.latvian.mods.vidlib.feature.net;
 
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.core.VLPacketListener;
 import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.session.LoginData;
-import dev.latvian.mods.vidlib.feature.session.SessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
@@ -32,7 +33,7 @@ public interface Context {
 		return player().level();
 	}
 
-	default SessionData sessionData() {
+	default PlayerSessionData sessionData() {
 		return ((VLPacketListener) listener()).vl$sessionData();
 	}
 
@@ -50,7 +51,7 @@ public interface Context {
 	}
 
 	default boolean isReplay() {
-		return VLPlatformHelper.CURRENT.isReplayLevel(level());
+		return VLPlatformHelper.INSTANCE.isReplayLevel(level());
 	}
 
 	default UUID uuid() {
@@ -79,5 +80,9 @@ public interface Context {
 
 	default boolean isConfig() {
 		return listener() instanceof ServerConfigurationPacketListener || listener() instanceof ClientConfigurationPacketListener;
+	}
+
+	default LevelSessionData vl() {
+		return LevelSessionData.of(level());
 	}
 }

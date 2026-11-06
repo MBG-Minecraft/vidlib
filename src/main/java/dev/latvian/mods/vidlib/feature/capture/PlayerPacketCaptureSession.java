@@ -64,9 +64,9 @@ public class PlayerPacketCaptureSession {
 		this.taskQueue.add(info);
 		this.lock = new ReentrantLock();
 		this.configBuf = new FriendlyByteBuf(Unpooled.buffer());
-		this.gameBuf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), packetCapture.server.registryAccess());
+		this.gameBuf = PlatformHelper.INSTANCE.createBuffer(Unpooled.buffer(), packetCapture.server.registryAccess());
 		this.configPacketFactory = ConfigurationProtocols.CLIENTBOUND.codec();
-		this.gamePacketFactory = GameProtocols.CLIENTBOUND_TEMPLATE.bind(PlatformHelper.CURRENT.createDecorator(packetCapture.server.registryAccess())).codec();
+		this.gamePacketFactory = GameProtocols.CLIENTBOUND_TEMPLATE.bind(PlatformHelper.INSTANCE.createDecorator(packetCapture.server.registryAccess())).codec();
 		this.disconnected = Timestamp.NONE;
 	}
 

@@ -12,12 +12,17 @@ import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
+import dev.latvian.mods.vidlib.feature.zone.ZoneHit;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubGatewayEventRegistry;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -26,10 +31,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Path;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class VLPlatformHelper {
-	public static VLPlatformHelper CURRENT = new VLPlatformHelper();
+	public static VLPlatformHelper INSTANCE = new VLPlatformHelper();
 
 	public PlatformType getPlatform() {
 		return PlatformType.OTHER;
@@ -123,5 +129,21 @@ public class VLPlatformHelper {
 
 	public String getVersionString() {
 		return "KLib:" + KLib.VERSION + "\nVidLib:" + VidLib.VERSION;
+	}
+
+	public void generateZones(BiConsumer<String, Zone> zone) {
+	}
+
+	public void entityEnteredZone(ResolvedZone zone, Level level, Entity entity) {
+	}
+
+	public void entityExitedZone(ResolvedZone zone, Level level, Entity entity) {
+	}
+
+	public void playerClickedOnZone(ServerPlayer player, ZoneHit hit) {
+	}
+
+	public LevelSessionData getLevelData(Level level) {
+		return level.vl$getLevelData();
 	}
 }

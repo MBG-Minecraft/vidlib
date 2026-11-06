@@ -141,8 +141,8 @@ public interface PropCommands {
 			return 0;
 		}
 
-		var level = PlatformHelper.CURRENT.getLevel(source);
-		var props = VLPlatformHelper.CURRENT.getProps(level);
+		var level = PlatformHelper.INSTANCE.getLevel(source);
+		var props = VLPlatformHelper.INSTANCE.getProps(level);
 
 		var propResult = props.create(props.context(type, PropSpawnType.USER, level.getGameTime()), true, true, initialData == null ? null : level.nbtOps(), initialData, prop -> {
 			if (level.isClientSide()) {
@@ -162,8 +162,8 @@ public interface PropCommands {
 	}
 
 	static int remove(CommandSourceStack source, Predicate<Prop> predicate) {
-		var level = PlatformHelper.CURRENT.getLevel(source);
-		var props = VLPlatformHelper.CURRENT.getProps(level);
+		var level = PlatformHelper.INSTANCE.getLevel(source);
+		var props = VLPlatformHelper.INSTANCE.getProps(level);
 		var list = props.propLists.get(PropListType.LEVEL);
 		int killed = list.removeAll(PropRemoveType.COMMAND, predicate);
 		source.broadcast("Removed " + killed + " props");
@@ -171,8 +171,8 @@ public interface PropCommands {
 	}
 
 	static int move(CommandSourceStack source, int propId, Coordinates coordinates) {
-		var level = PlatformHelper.CURRENT.getLevel(source);
-		var props = VLPlatformHelper.CURRENT.getProps(level);
+		var level = PlatformHelper.INSTANCE.getLevel(source);
+		var props = VLPlatformHelper.INSTANCE.getProps(level);
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -185,8 +185,8 @@ public interface PropCommands {
 	}
 
 	static int rotate(CommandSourceStack source, int propId, Coordinates coordinates) {
-		var level = PlatformHelper.CURRENT.getLevel(source);
-		var props = VLPlatformHelper.CURRENT.getProps(level);
+		var level = PlatformHelper.INSTANCE.getLevel(source);
+		var props = VLPlatformHelper.INSTANCE.getProps(level);
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -200,8 +200,8 @@ public interface PropCommands {
 	}
 
 	static int clone(CommandSourceStack source, int propId) {
-		var level = PlatformHelper.CURRENT.getLevel(source);
-		var props = VLPlatformHelper.CURRENT.getProps(level);
+		var level = PlatformHelper.INSTANCE.getLevel(source);
+		var props = VLPlatformHelper.INSTANCE.getProps(level);
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -212,8 +212,8 @@ public interface PropCommands {
 	}
 
 	static int pause(CommandSourceStack source, int propId, boolean paused) {
-		var level = PlatformHelper.CURRENT.getLevel(source);
-		var props = VLPlatformHelper.CURRENT.getProps(level);
+		var level = PlatformHelper.INSTANCE.getLevel(source);
+		var props = VLPlatformHelper.INSTANCE.getProps(level);
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -231,8 +231,8 @@ public interface PropCommands {
 	}
 
 	static int merge(CommandSourceStack source, int propId, Tag data) {
-		var level = PlatformHelper.CURRENT.getLevel(source);
-		var props = VLPlatformHelper.CURRENT.getProps(level);
+		var level = PlatformHelper.INSTANCE.getLevel(source);
+		var props = VLPlatformHelper.INSTANCE.getProps(level);
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {

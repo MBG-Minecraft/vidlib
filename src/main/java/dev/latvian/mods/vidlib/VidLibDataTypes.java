@@ -17,7 +17,6 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
-import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import io.netty.buffer.ByteBuf;
@@ -35,7 +34,6 @@ public interface VidLibDataTypes {
 		registry.register("physics_particle_data", PhysicsParticleData.DATA_TYPE);
 		registry.register("prop_type", PropType.DATA_TYPE);
 		registry.register("explosion_data", ExplosionData.DATA_TYPE);
-		registry.register("zone_container", ZoneContainer.DATA_TYPE);
 		registry.register("positioned_sound_data", PositionedSoundData.DATA_TYPE);
 		registry.register("name_draw_type", NameDrawType.DATA_TYPE);
 		registry.register("entity_snapshot", EntitySnapshot.DATA_TYPE);

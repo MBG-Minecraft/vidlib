@@ -54,7 +54,7 @@ public interface ZipCommand {
 	}
 
 	static CompletableFuture<String> zip(MinecraftServer server, Instant now, String customName) {
-		VLPlatformHelper.CURRENT.pauseSaving(server);
+		VLPlatformHelper.INSTANCE.pauseSaving(server);
 
 		return CompletableFuture.supplyAsync(() -> {
 			try {
@@ -83,7 +83,7 @@ public interface ZipCommand {
 			} catch (Throwable ex) {
 				ex.printStackTrace();
 			} finally {
-				server.execute(() -> VLPlatformHelper.CURRENT.resumeSaving(server));
+				server.execute(() -> VLPlatformHelper.INSTANCE.resumeSaving(server));
 			}
 
 			throw new IllegalStateException("Failed to create a backup");

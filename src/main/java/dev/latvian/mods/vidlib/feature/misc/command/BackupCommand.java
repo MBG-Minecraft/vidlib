@@ -38,7 +38,7 @@ public interface BackupCommand {
 	);
 
 	static CompletableFuture<Path> backup(MinecraftServer server, Path worldPath, Instant now, String customName) {
-		VLPlatformHelper.CURRENT.pauseSaving(server);
+		VLPlatformHelper.INSTANCE.pauseSaving(server);
 		var name = CommonGameEngine.INSTANCE.getFullBackupInfo(server, now, customName);
 
 		try {
@@ -61,19 +61,19 @@ public interface BackupCommand {
 
 				item.remove();
 				VidLib.LOGGER.info("Files of " + toName + " created");
-				server.execute(() -> VLPlatformHelper.CURRENT.resumeSaving(server));
+				server.execute(() -> VLPlatformHelper.INSTANCE.resumeSaving(server));
 				return to;
 			});
 		} catch (Throwable ex) {
 			VidLib.LOGGER.error("Error creating a world backup '" + name + "'", ex);
-			server.execute(() -> VLPlatformHelper.CURRENT.resumeSaving(server));
+			server.execute(() -> VLPlatformHelper.INSTANCE.resumeSaving(server));
 			return CompletableFuture.failedFuture(ex);
 		}
 	}
 
 	static int testCompression(CommandSourceStack source) {
 		var server = source.getServer();
-		VLPlatformHelper.CURRENT.pauseSaving(server);
+		VLPlatformHelper.INSTANCE.pauseSaving(server);
 		source.tell("Calculating...");
 
 		Thread.startVirtualThread(() -> {
@@ -129,7 +129,7 @@ public interface BackupCommand {
 			}
 
 			server.execute(() -> {
-				VLPlatformHelper.CURRENT.resumeSaving(server);
+				VLPlatformHelper.INSTANCE.resumeSaving(server);
 				source.tell("Done! Results:");
 
 				for (var method : methods) {

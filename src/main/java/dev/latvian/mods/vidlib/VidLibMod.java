@@ -28,7 +28,7 @@ import java.util.HashMap;
 public class VidLibMod {
 	public VidLibMod(ModContainer mod, IEventBus bus) {
 		VidLib.VERSION = mod.getModInfo().getVersion().toString();
-		VLPlatformHelper.CURRENT = new VLNeoPlatformHelper(mod);
+		VLPlatformHelper.INSTANCE = new VLNeoPlatformHelper(mod);
 		CommonGameEngine.INSTANCE = new NeoForgeCommonGameEngine();
 		VidLib.init();
 
@@ -73,7 +73,7 @@ public class VidLibMod {
 
 	@SubscribeEvent
 	public static void setup(FMLCommonSetupEvent event) {
-		if (PlatformHelper.CURRENT.getSide().isClient()) {
+		if (PlatformHelper.INSTANCE.getSide().isClient()) {
 			VidLib.initClient();
 		}
 	}

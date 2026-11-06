@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import com.mojang.authlib.GameProfile;
 import dev.latvian.mods.vidlib.core.VLServerPlayer;
-import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
@@ -23,7 +23,7 @@ public abstract class ServerPlayerMixin implements VLServerPlayer {
 	public ServerGamePacketListenerImpl connection;
 
 	@Unique
-	private ServerSessionData vl$sessionData;
+	private ServerPlayerSessionData vl$sessionData;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void vl$init(MinecraftServer server, ServerLevel level, GameProfile gameProfile, ClientInformation clientInformation, CallbackInfo ci) {
@@ -31,7 +31,7 @@ public abstract class ServerPlayerMixin implements VLServerPlayer {
 	}
 
 	@Override
-	public ServerSessionData vl$sessionData() {
+	public ServerPlayerSessionData vl$sessionData() {
 		return vl$sessionData;
 	}
 

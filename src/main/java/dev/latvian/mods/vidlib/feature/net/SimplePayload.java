@@ -44,7 +44,7 @@ public interface SimplePayload extends CustomPacketPayload {
 	}
 
 	default byte[] toBytes(Level level) {
-		var buf = PlatformHelper.CURRENT.createBuffer(Unpooled.buffer(), level.registryAccess());
+		var buf = PlatformHelper.INSTANCE.createBuffer(Unpooled.buffer(), level.registryAccess());
 		getType().streamCodec().encode(buf, Cast.to(this));
 		return IOUtils.toByteArray(buf, true);
 	}

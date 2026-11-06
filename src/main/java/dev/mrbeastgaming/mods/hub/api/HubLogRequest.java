@@ -52,7 +52,7 @@ public record HubLogRequest(
 			type,
 			content,
 			0,
-			(VLPlatformHelper.CURRENT.isReplayLevel(player.level()) ? "replay:" : "") + player.level().dimension().identifier().toString(),
+			(VLPlatformHelper.INSTANCE.isReplayLevel(player.level()) ? "replay:" : "") + player.level().dimension().identifier().toString(),
 			Optional.of(player.position()),
 			player.level().getGameTime(),
 			Optional.empty()

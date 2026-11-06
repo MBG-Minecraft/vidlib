@@ -1,13 +1,13 @@
 package dev.latvian.mods.vidlib.feature.actor;
 
 import com.mojang.authlib.GameProfile;
+import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.icon.Icon;
 import dev.latvian.mods.klib.icon.renderer.IconRenderState;
 import dev.latvian.mods.klib.icon.renderer.IconRenderer;
 import dev.latvian.mods.klib.icon.renderer.IconWorldExactContext;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.SubmitContext;
-import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresets;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;

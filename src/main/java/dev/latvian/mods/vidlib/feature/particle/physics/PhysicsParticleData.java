@@ -9,6 +9,7 @@ import dev.latvian.mods.klib.registry.CustomRegistry;
 import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.registry.UnitType;
 import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import io.netty.buffer.ByteBuf;
@@ -185,14 +186,14 @@ public record PhysicsParticleData(
 		DIRECT_STREAM_CODEC
 	);
 
-	public static final CustomRegistry<ByteBuf, PhysicsParticleData> REGISTRY = CustomRegistry.createNoValueSync("physics_particle_data", TYPE);
+	public static final CustomRegistry<ByteBuf, PhysicsParticleData> REGISTRY = CustomRegistry.create("physics_particle_data", TYPE);
 	public static final Codec<Ref<PhysicsParticleData>> CODEC = REGISTRY.codec();
 	public static final StreamCodec<ByteBuf, Ref<PhysicsParticleData>> STREAM_CODEC = REGISTRY.streamCodec();
 	public static final DataType<Ref<PhysicsParticleData>> DATA_TYPE = REGISTRY.dataType();
 
-	public static class ClientLoader extends JsonRegistryReloadListener<PhysicsParticleData> {
-		public ClientLoader() {
-			super("vidlib/physics_particle_data", REGISTRY);
+	public static class Loader extends JsonRegistryReloadListener<PhysicsParticleData> {
+		public Loader(RefType refType) {
+			super("vidlib/physics_particle_data", REGISTRY, refType);
 		}
 	}
 

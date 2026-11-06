@@ -8,16 +8,13 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
 public enum PropSpawnType implements StringRepresentable {
-	DUMMY(PropListType.LEVEL, "dummy"),
-	USER(PropListType.LEVEL, "user"),
-	GAME(PropListType.LEVEL, "game"),
-	DATA(PropListType.DATA, "data");
+	DUMMY("dummy"),
+	USER("user"),
+	GAME("game");
 
-	public final PropListType listType;
 	private final String name;
 
-	PropSpawnType(PropListType listType, String name) {
-		this.listType = listType;
+	PropSpawnType(String name) {
 		this.name = name;
 	}
 

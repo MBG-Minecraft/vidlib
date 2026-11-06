@@ -20,7 +20,7 @@ import java.util.Set;
 
 public class AutoHelper {
 	public static void load(Class<? extends Annotation> annotation, Set<ElementType> elementTypes, ScannedAnnotationCallback callback) {
-		PlatformHelper.CURRENT.load(annotation, elementTypes, callback);
+		PlatformHelper.INSTANCE.load(annotation, elementTypes, callback);
 	}
 
 	public static final EnumSet<Side> BOTH_SIDES = EnumSet.of(Side.CLIENT, Side.SERVER);

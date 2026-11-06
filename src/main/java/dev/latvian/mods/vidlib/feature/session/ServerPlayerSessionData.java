@@ -18,23 +18,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class ServerSessionData extends SessionData {
+public class ServerPlayerSessionData extends PlayerSessionData {
 	public final MinecraftServer server;
 	public final Path dataMapPath;
 	private Set<String> currentTags;
 	public FeatureSet clientFeatureSet;
 	public Map<String, PlatformModInfo> clientMods;
 
-	public ServerSessionData(MinecraftServer server, UUID uuid) {
-		super(uuid, server);
+	public ServerPlayerSessionData(ServerWorldSessionData worldData, MinecraftServer server, UUID uuid) {
+		super(worldData, uuid, server);
 		this.server = server;
-		this.dataMapPath = VLPlatformHelper.CURRENT.getPlayerDataDirectory(server).resolve(uuid + ".nbt");
+		this.dataMapPath = VLPlatformHelper.INSTANCE.getPlayerDataDirectory(server).resolve(uuid + ".nbt");
 		this.currentTags = Set.of();
 		this.clientFeatureSet = FeatureSet.EMPTY;
 		this.clientMods = Map.of();
 	}
 
-	public void vl$preTick(ServerPlayer player) {
+	public void preTick(ServerPlayer player) {
 		updateOverrides(player);
 	}
 
@@ -47,7 +47,7 @@ public class ServerSessionData extends SessionData {
 
 			if (!currentTags.equals(newTags)) {
 				currentTags = Set.copyOf(newTags);
-				player.set(InternalPlayerData.PLAYER_TAGS, currentTags);
+				dataMap.set(InternalPlayerData.PLAYER_TAGS, currentTags);
 			}
 		}
 	}
@@ -80,10 +80,5 @@ public class ServerSessionData extends SessionData {
 		} else {
 			throw new IllegalStateException("hasImprovedPlayerTags() must be true to use setTags");
 		}
-	}
-
-	@Override
-	public FeatureSet getClientFeatures() {
-		return clientFeatureSet;
 	}
 }

@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.replay.api.ReplaySessionData;
 import dev.latvian.mods.replay.api.ReplaySessionDataType;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
-import dev.latvian.mods.vidlib.feature.prop.PropListType;
 import net.minecraft.nbt.Tag;
 
 import java.util.LinkedHashSet;
@@ -14,7 +13,6 @@ public class SelectedPropReplaySessionData implements ReplaySessionData {
 
 	public int selectedProp = 0;
 	public Tag selectedPropData = null;
-	public PropListType selectedPropList = PropListType.LEVEL;
 	public boolean openSelectedPropPopup = false;
 	public LinkedHashSet<Prop> makePropKeyframes = new LinkedHashSet<>();
 

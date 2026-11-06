@@ -86,17 +86,17 @@ public abstract class ClientPacketListenerMixin implements VLClientPlayPacketLis
 
 	@Inject(method = "handleLogin", at = @At("RETURN"))
 	private void vl$handleLogin(CallbackInfo ci) {
-		vl$sessionData().respawned(level, true);
+		vl$setWorldData().respawned(level, true);
 	}
 
 	@Inject(method = "handleRespawn", at = @At("RETURN"))
 	private void vl$handleRespawn(CallbackInfo ci) {
-		vl$sessionData().respawned(level, false);
+		vl$setWorldData().respawned(level, false);
 	}
 
 	@Inject(method = "close", at = @At("RETURN"))
 	private void vl$close(CallbackInfo ci) {
-		vl$sessionData().closed();
+		vl$setWorldData().closed();
 	}
 
 	@ModifyExpressionValue(method = "handleSetEntityPassengersPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"))

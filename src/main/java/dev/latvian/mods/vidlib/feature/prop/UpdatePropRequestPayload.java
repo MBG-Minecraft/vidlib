@@ -12,10 +12,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public record UpdatePropRequestPayload(PropListType propListType, int id, byte[] update) implements SimplePayload {
+public record UpdatePropRequestPayload(int id, byte[] update) implements SimplePayload {
 	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final SimplePayloadType<UpdatePropRequestPayload> TYPE = SimplePayloadType.vidlib("prop/update_request", CompositeStreamCodec.of(
-		PropListType.STREAM_CODEC, UpdatePropRequestPayload::propListType,
 		ByteBufCodecs.VAR_INT, UpdatePropRequestPayload::id,
 		ByteBufCodecs.BYTE_ARRAY, UpdatePropRequestPayload::update,
 		UpdatePropRequestPayload::new
@@ -36,7 +35,7 @@ public record UpdatePropRequestPayload(PropListType propListType, int id, byte[]
 		var update = prop.isRemoved() ? null : prop.getDataUpdates(data);
 
 		if (update != null) {
-			return new UpdatePropRequestPayload(prop.spawnType.listType, prop.id, update);
+			return new UpdatePropRequestPayload(prop.id, update);
 		}
 
 		return null;
@@ -50,12 +49,12 @@ public record UpdatePropRequestPayload(PropListType propListType, int id, byte[]
 	@Override
 	public void handle(Context ctx) {
 		if (ctx.isAdmin()) {
-			var props = VLPlatformHelper.CURRENT.getProps(ctx.level());
-			var prop = props.propLists.get(propListType).get(id);
+			var props = VLPlatformHelper.INSTANCE.getProps(ctx.level());
+			var prop = props.levelProps.get(id);
 
 			if (prop != null) {
 				prop.update(ctx.level().registryAccess(), update, false);
-				ctx.level().s2c(new UpdatePropPayload(propListType, id, update));
+				ctx.level().s2c(new UpdatePropPayload(id, update));
 			}
 		}
 	}

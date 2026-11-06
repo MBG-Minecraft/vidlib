@@ -126,7 +126,7 @@ public class ProgressQueue {
 			if (!active) {
 				active = true;
 				open = true;
-				VLPlatformHelper.CURRENT.displayProgressQueue(this);
+				VLPlatformHelper.INSTANCE.displayProgressQueue(this);
 			}
 		} finally {
 			LOCK.unlock();

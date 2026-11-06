@@ -15,16 +15,12 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
-import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
@@ -41,16 +37,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	@Override
 	default Level vl$level() {
 		return vl$self().level();
-	}
-
-	default List<ResolvedZone> getZones() {
-		var zones = vl$level().vl$getActiveZones();
-		return zones == null ? List.of() : zones.entityZones.getOrDefault((vl$self()).getId(), List.of());
-	}
-
-	@Nullable
-	default GameType getGameMode() {
-		return null;
 	}
 
 	default boolean vl$isSuspended() {
@@ -194,18 +180,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	default Rotation viewRotation(float delta) {
 		var e = vl$self();
 		return Rotation.deg(e.getViewYRot(delta), e.getViewXRot(delta));
-	}
-
-	default boolean isVisible() {
-		return !vl$self().isInvisible();
-	}
-
-	default boolean isProjectile() {
-		return this instanceof Projectile;
-	}
-
-	default boolean isItemEntity() {
-		return this instanceof ItemEntity;
 	}
 
 	default void replaySnapshot(S2CPacketConsumer packets) {

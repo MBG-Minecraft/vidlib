@@ -33,13 +33,13 @@ public class ActorRecording {
 		if (REPLAY == null) {
 			REPLAY = new Object2ObjectLinkedOpenHashMap<>();
 
-			var rootPath = VidLibPaths.GAME.get().resolve("npc");
+			var rootPath = VidLibPaths.ACTOR_RECORDINGS.get();
 
 			if (Files.exists(rootPath)) {
 				try (var stream = Files.walk(rootPath)) {
 					Lazy<ActorRecording> latest = null;
 
-					for (var path : stream.filter(Files::isRegularFile).filter(path -> path.getFileName().toString().endsWith(".npcrec")).sorted().toList()) {
+					for (var path : stream.filter(Files::isRegularFile).filter(path -> path.getFileName().toString().endsWith(".acred")).sorted().toList()) {
 						var fname = rootPath.relativize(path).toString();
 						var name = fname.substring(0, fname.length() - 7);
 

@@ -76,7 +76,7 @@ public interface VidLibEntityRenderStates {
 	}
 
 	static void lod(Minecraft mc, EntityRenderState state, Vec3 camPos) {
-		var replay = mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level);
+		var replay = mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level);
 		boolean hideDetails = !(replay || LevelOfDetailValue.ENTITY_DETAILS.isVisible(camPos, state.x, state.y, state.z));
 		boolean hideArmor = !(replay || (state instanceof AvatarRenderState ? LevelOfDetailValue.PLAYER_ARMOR : LevelOfDetailValue.ENTITY_ARMOR).isVisible(camPos, state.x, state.y, state.z));
 		boolean hideHandItems = !(replay || LevelOfDetailValue.HELD_ITEM.isVisible(camPos, state.x, state.y, state.z));

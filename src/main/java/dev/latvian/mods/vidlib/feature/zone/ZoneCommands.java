@@ -16,18 +16,18 @@ public interface ZoneCommands {
 	ServerCommandHolder COMMAND = new ServerCommandHolder("zones", (command, buildContext) -> command
 		.requires(source -> Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("count-blocks")
-			.then(Commands.argument("id", ZoneContainer.DATA_TYPE.argument(buildContext))
-				.executes(ctx -> countBlocks(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.NONE))
+			.then(Commands.argument("id", Zone.DATA_TYPE.argument(buildContext))
+				.executes(ctx -> countBlocks(ctx.getSource(), Zone.DATA_TYPE.get(ctx, "id"), BlockFilter.NONE))
 				.then(Commands.argument("ignored-blocks", BlockFilter.DATA_TYPE.argument(buildContext))
-					.executes(ctx -> countBlocks(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.DATA_TYPE.get(ctx, "ignored-blocks")))
+					.executes(ctx -> countBlocks(ctx.getSource(), Zone.DATA_TYPE.get(ctx, "id"), BlockFilter.DATA_TYPE.get(ctx, "ignored-blocks")))
 				)
 			)
 		)
 		.then(Commands.literal("save-structure")
-			.then(Commands.argument("id", ZoneContainer.DATA_TYPE.argument(buildContext))
-				.executes(ctx -> saveStructure(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.NONE))
+			.then(Commands.argument("id", Zone.DATA_TYPE.argument(buildContext))
+				.executes(ctx -> saveStructure(ctx.getSource(), Zone.DATA_TYPE.get(ctx, "id"), BlockFilter.NONE))
 				.then(Commands.argument("ignored-blocks", BlockFilter.DATA_TYPE.argument(buildContext))
-					.executes(ctx -> saveStructure(ctx.getSource(), ZoneContainer.DATA_TYPE.get(ctx, "id"), BlockFilter.DATA_TYPE.get(ctx, "ignored-blocks")))
+					.executes(ctx -> saveStructure(ctx.getSource(), Zone.DATA_TYPE.get(ctx, "id"), BlockFilter.DATA_TYPE.get(ctx, "ignored-blocks")))
 				)
 			)
 		)
@@ -36,11 +36,11 @@ public interface ZoneCommands {
 	class BlockProcessor {
 		public final Level level;
 		public final BlockFilter filter;
-		public final ZoneContainer zoneContainer;
+		public final Zone zoneContainer;
 		public long count = 0L;
 		public int minX, minY, minZ, maxX, maxY, maxZ;
 
-		public BlockProcessor(Level level, BlockFilter filter, ZoneContainer zoneContainer) {
+		public BlockProcessor(Level level, BlockFilter filter, Zone zoneContainer) {
 			this.level = level;
 			this.filter = filter;
 			this.zoneContainer = zoneContainer;
@@ -78,7 +78,7 @@ public interface ZoneCommands {
 	}
 
 	class SaveBlockProcessor extends BlockProcessor {
-		public SaveBlockProcessor(Level level, BlockFilter filter, ZoneContainer zoneContainer) {
+		public SaveBlockProcessor(Level level, BlockFilter filter, Zone zoneContainer) {
 			super(level, filter, zoneContainer);
 		}
 
@@ -93,24 +93,16 @@ public interface ZoneCommands {
 		}
 	}
 
-	private static int countBlocks(CommandSourceStack source, Ref<ZoneContainer> container, Ref<BlockFilter> filter) {
-		var processor = new BlockProcessor(source.getServer().getLevel(container.value().dimension), filter.value(), container.value());
-
-		for (var zone : container.value().zones) {
-			zone.zone.volume().value().getBlocks().forEach(processor::process);
-		}
-
+	private static int countBlocks(CommandSourceStack source, Ref<Zone> zone, Ref<BlockFilter> filter) {
+		var processor = new BlockProcessor(source.getServer().getLevel(zone.value().dimension()), filter.value(), zone.value());
+		zone.value().volume().value().getBlocks().forEach(processor::process);
 		processor.complete(source);
 		return 1;
 	}
 
-	private static int saveStructure(CommandSourceStack source, Ref<ZoneContainer> container, Ref<BlockFilter> filter) {
-		var processor = new SaveBlockProcessor(source.getServer().getLevel(container.value().dimension), filter.value(), container.value());
-
-		for (var zone : container.value().zones) {
-			zone.zone.volume().value().getBlocks().forEach(processor::process);
-		}
-
+	private static int saveStructure(CommandSourceStack source, Ref<Zone> zone, Ref<BlockFilter> filter) {
+		var processor = new SaveBlockProcessor(source.getServer().getLevel(zone.value().dimension()), filter.value(), zone.value());
+		zone.value().volume().value().getBlocks().forEach(processor::process);
 		processor.complete(source);
 		return 1;
 	}

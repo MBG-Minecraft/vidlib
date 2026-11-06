@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.danger;
 
+import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.math.FrustumCheck;
-import dev.latvian.mods.klib.util.BlockUtils;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;

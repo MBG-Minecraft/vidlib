@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 
 public record FFMPEGBinaries(String ffmpeg, String ffprobe, String ffplay) {
 	public static final Lazy<Path> FFMPEG_DIRECTORY = CommonPaths.USER.<Path>map(p -> p.resolve("ffmpeg"));
-	public static final Lazy<File> FFMPEG_LOG_FILE = Lazy.of(() -> PlatformHelper.CURRENT.getGameDirectory().resolve("ffmpeg.log").toFile());
+	public static final Lazy<File> FFMPEG_LOG_FILE = Lazy.of(() -> PlatformHelper.INSTANCE.getGameDirectory().resolve("ffmpeg.log").toFile());
 	private static final FFMPEGBinaries UNKNOWN = new FFMPEGBinaries("", "", "");
 	public static final FFMPEGBinaries SYSTEM = new FFMPEGBinaries("ffmpeg", "ffprobe", "ffplay");
 	public static FFMPEGBinaries INSTANCE = UNKNOWN;

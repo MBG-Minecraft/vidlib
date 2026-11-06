@@ -17,7 +17,7 @@ public class HubConfig {
 		projectToken = "";
 		identity = "";
 
-		var userConfigPath = PlatformHelper.CURRENT.getGameDirectory().resolve("beast-hub-user-config.json");
+		var userConfigPath = PlatformHelper.INSTANCE.getGameDirectory().resolve("beast-hub-user-config.json");
 
 		if (Files.notExists(userConfigPath)) {
 			userConfigPath = HubPaths.DATA_DIRECTORY.get().resolve("beast-hub-user-config.json");
@@ -31,7 +31,7 @@ public class HubConfig {
 			}
 		}
 
-		var projectConfigPath = PlatformHelper.CURRENT.getGameDirectory().resolve("beast-hub-project-config.json");
+		var projectConfigPath = PlatformHelper.INSTANCE.getGameDirectory().resolve("beast-hub-project-config.json");
 
 		if (Files.exists(projectConfigPath)) {
 			try {
@@ -41,7 +41,7 @@ public class HubConfig {
 			}
 		}
 
-		var identityConfigPath = PlatformHelper.CURRENT.getGameDirectory().resolve("beast-hub-identity-config.json");
+		var identityConfigPath = PlatformHelper.INSTANCE.getGameDirectory().resolve("beast-hub-identity-config.json");
 
 		if (Files.exists(identityConfigPath)) {
 			try {
@@ -53,7 +53,7 @@ public class HubConfig {
 	}
 
 	public static void saveUser() {
-		var userConfigPath = PlatformHelper.CURRENT.getGameDirectory().resolve("beast-hub-user-config.json");
+		var userConfigPath = PlatformHelper.INSTANCE.getGameDirectory().resolve("beast-hub-user-config.json");
 
 		if (Files.notExists(userConfigPath)) {
 			userConfigPath = HubPaths.DATA_DIRECTORY.get().resolve("beast-hub-user-config.json");

@@ -173,7 +173,7 @@ public class WindowMixin implements VLWindow {
 
 	@Inject(method = "calculateScale", at = @At("HEAD"), cancellable = true)
 	private void vl$calculateScale(int guiScale, boolean forceUnicode, CallbackInfoReturnable<Integer> cir) {
-		if (Minecraft.getInstance().level != null && VLPlatformHelper.CURRENT.isReplayLevel(Minecraft.getInstance().level)) {
+		if (Minecraft.getInstance().level != null && VLPlatformHelper.INSTANCE.isReplayLevel(Minecraft.getInstance().level)) {
 			return;
 		}
 

@@ -9,10 +9,9 @@ import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import it.unimi.dsi.fastutil.ints.IntList;
 
-public record RemovePropsPayload(PropListType propListType, IntList ids, PropRemoveType removeType) implements SimplePayload {
+public record RemovePropsPayload(IntList ids, PropRemoveType removeType) implements SimplePayload {
 	@AutoPacket
 	public static final SimplePayloadType<RemovePropsPayload> TYPE = SimplePayloadType.vidlib("prop/remove", CompositeStreamCodec.of(
-		PropListType.STREAM_CODEC, RemovePropsPayload::propListType,
 		CollectionStreamCodecs.VAR_INT_LIST, RemovePropsPayload::ids,
 		PropRemoveType.STREAM_CODEC, RemovePropsPayload::removeType,
 		RemovePropsPayload::new
@@ -29,11 +28,10 @@ public record RemovePropsPayload(PropListType propListType, IntList ids, PropRem
 			return;
 		}
 
-		var props = VLPlatformHelper.CURRENT.getProps(ctx.level());
-		var propList = props.propLists.get(propListType);
+		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level());
 
 		for (var id : ids) {
-			var prop = propList.get(id);
+			var prop = props.levelProps.get(id);
 
 			if (prop != null) {
 				prop.remove(removeType);

@@ -46,7 +46,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.prop.ReplayProp;
-import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.LocalClientPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import imgui.ImGui;
@@ -246,7 +246,7 @@ public class VLReplayIntegration {
 		VidLib.LOGGER.info("Replay Game snapshot");
 		var packets = event.getPackets();
 		var player = event.getSession().getPlayer();
-		var session = (LocalClientSessionData) player.vl$sessionData();
+		var session = (LocalClientPlayerSessionData) player.vl$sessionData();
 		session.sync(packets, player, 1);
 
 		if (!session.markers.isEmpty()) {
@@ -333,7 +333,7 @@ public class VLReplayIntegration {
 	public static void clickTarget(ReplayGetClickTargetEvent event) {
 		var mc = Minecraft.getInstance();
 		var ctx = new ClipContext(event.getFrom(), event.getTo(), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player);
-		var props = VLPlatformHelper.CURRENT.getProps(mc.level);
+		var props = VLPlatformHelper.INSTANCE.getProps(mc.level);
 		event.setHitResult(props.clip(ctx, true));
 	}
 
@@ -355,7 +355,7 @@ public class VLReplayIntegration {
 	public static void popups(ReplayPopupEvent event) {
 		var mc = Minecraft.getInstance();
 
-		if (VidLibClientEventHandler.clientLoaded && mc.level != null && VLPlatformHelper.CURRENT.isReplayLevel(mc.level)) {
+		if (VidLibClientEventHandler.clientLoaded && mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
 			BuiltInImGui.handle(event.getGraphics());
 		}
 
@@ -371,7 +371,7 @@ public class VLReplayIntegration {
 		}
 
 		if (data.selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup")) {
-			var props = VLPlatformHelper.CURRENT.getProps(mc.level);
+			var props = VLPlatformHelper.INSTANCE.getProps(mc.level);
 			var propList = props.propLists.get(data.selectedPropList);
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 
@@ -385,7 +385,7 @@ public class VLReplayIntegration {
 		}
 
 		if (!ImGui.isPopupOpen("###vidlib-prop-popup")) {
-			var props = VLPlatformHelper.CURRENT.getProps(mc.level);
+			var props = VLPlatformHelper.INSTANCE.getProps(mc.level);
 			var propList = props.propLists.get(data.selectedPropList);
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 

@@ -10,6 +10,7 @@ import dev.latvian.mods.klib.registry.CustomRegistry;
 import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -50,9 +51,9 @@ public record Atmosphere(
 	public static final StreamCodec<RegistryFriendlyByteBuf, Ref<Atmosphere>> STREAM_CODEC = REGISTRY.streamCodec();
 	public static final DataType<Ref<Atmosphere>> DATA_TYPE = REGISTRY.dataType();
 
-	public static class ClientLoader extends JsonRegistryReloadListener<Atmosphere> {
-		public ClientLoader() {
-			super("vidlib/atmosphere", REGISTRY);
+	public static class Loader extends JsonRegistryReloadListener<Atmosphere> {
+		public Loader(RefType refType) {
+			super("vidlib/atmosphere", REGISTRY, refType);
 		}
 	}
 

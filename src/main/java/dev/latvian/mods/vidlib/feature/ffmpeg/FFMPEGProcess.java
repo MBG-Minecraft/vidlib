@@ -95,7 +95,7 @@ public class FFMPEGProcess implements AutoCloseable {
 
 		this.process = new ProcessBuilder(command)
 			.redirectError(ProcessBuilder.Redirect.to(FFMPEGBinaries.FFMPEG_LOG_FILE.get()))
-			.directory(PlatformHelper.CURRENT.getGameDirectory().toFile())
+			.directory(PlatformHelper.INSTANCE.getGameDirectory().toFile())
 			.start();
 
 		this.outputStream = process.getOutputStream();

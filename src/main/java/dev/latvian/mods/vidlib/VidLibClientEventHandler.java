@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.platform.PlatformHelper;
+import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
@@ -51,10 +52,8 @@ import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVPropRenderState;
-import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.structure.StructureCapture;
 import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
-import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
@@ -145,11 +144,11 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
-		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.CLIENT));
-		event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.ClientLoader());
+		// event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.CLIENT));
+		// event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.ClientLoader());
 		event.addListener(ID.vidlib("clothing_preset"), new ClothingPresetLoader());
-		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.ClientLoader());
-		event.addListener(ID.vidlib("atmosphere"), new Atmosphere.ClientLoader());
+		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader(RefType.CLIENT));
+		event.addListener(ID.vidlib("atmosphere"), new Atmosphere.Loader(RefType.CLIENT));
 
 		event.addDependency(ID.vidlib("gradient"), ID.vidlib("clothing_preset"));
 		event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
@@ -398,19 +397,15 @@ public class VidLibClientEventHandler {
 				var zoneHit = session.zoneHit;
 
 				if (zoneHit != null) {
-					var component = Component.literal("Zone: ").append(Component.literal(zoneHit.resolvedZone().container.key()).withStyle(ChatFormatting.AQUA));
+					var component = Component.literal("Zone: ").append(Component.literal(zoneHit.resolvedZone().ref.key()).withStyle(ChatFormatting.AQUA));
 
-					if (zoneHit.resolvedZone().container.zones.size() > 1) {
-						component.append(Component.literal("[" + zoneHit.resolvedZone().index + "]").withStyle(ChatFormatting.GREEN));
-					}
-
-					if (zoneHit.resolvedZone().container.isGenerated()) {
+					if (zoneHit.resolvedZone().generated) {
 						component.append(Component.literal("*").withStyle(ChatFormatting.LIGHT_PURPLE));
 					}
 
 					ScreenText.RENDER.topLeft.add(component);
 
-					var zoneTag = zoneHit.resolvedZone().zone.data();
+					var zoneTag = zoneHit.resolvedZone().data;
 
 					if (!zoneTag.isEmpty()) {
 						for (var key : zoneTag.keySet()) {
@@ -419,10 +414,10 @@ public class VidLibClientEventHandler {
 					}
 				}
 
-				if (!session.zonesTagsIn.isEmpty() && VidLibClientOptions.getShowZones()) {
+				if (!session.zoneTagsIn.isEmpty() && VidLibClientOptions.getShowZones()) {
 					ScreenText.RENDER.topRight.add("Zones in:");
 
-					for (var tag : session.zonesTagsIn) {
+					for (var tag : session.zoneTagsIn) {
 						ScreenText.RENDER.topRight.add(tag);
 					}
 				}
@@ -564,7 +559,7 @@ public class VidLibClientEventHandler {
 		PlayerProfiles.cache(event.getPlayer().getGameProfile());
 
 		if (!event.getPlayer().vl$sessionData().clientModListSentDuringConfig) {
-			event.getPlayer().c2s(new ClientModListPayload(PlatformHelper.CURRENT.getModList()));
+			event.getPlayer().c2s(new ClientModListPayload(PlatformHelper.INSTANCE.getModList()));
 		}
 	}
 
@@ -625,7 +620,7 @@ public class VidLibClientEventHandler {
 				LinkHubUserScreen.open(event.getMinecraft());
 			}
 		} else if (session.minecraftLink == null) {
-			if (!PlatformHelper.CURRENT.isDevEnv()) {
+			if (!PlatformHelper.INSTANCE.isDevEnv()) {
 				LinkMinecraftScreen.handle(event.getMinecraft(), true);
 			}
 		}

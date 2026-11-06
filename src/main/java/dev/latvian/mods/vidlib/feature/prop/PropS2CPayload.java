@@ -24,7 +24,7 @@ public record PropS2CPayload(int prop, int packet, byte[] data) implements Simpl
 
 	@Override
 	public void handle(Context ctx) {
-		var props = VLPlatformHelper.CURRENT.getProps(ctx.level());
+		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level());
 		var prop = props.levelProps.get(prop());
 
 		if (prop != null) {

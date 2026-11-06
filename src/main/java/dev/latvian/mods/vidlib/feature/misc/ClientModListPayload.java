@@ -7,7 +7,7 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,7 +36,7 @@ public record ClientModListPayload(List<PlatformModInfo> modList) implements Sim
 			return;
 		}
 
-		if (ctx.sessionData() instanceof ServerSessionData sessionData) {
+		if (ctx.sessionData() instanceof ServerPlayerSessionData sessionData) {
 			sessionData.clientMods = map;
 		}
 

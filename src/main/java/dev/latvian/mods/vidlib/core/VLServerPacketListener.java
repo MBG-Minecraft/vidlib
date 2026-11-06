@@ -1,15 +1,15 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.core.NoMixinException;
-import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
 
 public interface VLServerPacketListener extends VLPacketListener {
 	@Override
-	default ServerSessionData vl$sessionData() {
+	default ServerWorldSessionData vl$getWorldData() {
 		throw new NoMixinException(this);
 	}
 
-	default void vl$sessionData(ServerSessionData data) {
+	default void vl$setWorldData(ServerWorldSessionData data) {
 		throw new NoMixinException(this);
 	}
 }

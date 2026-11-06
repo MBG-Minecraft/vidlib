@@ -80,8 +80,8 @@ public class HubWorldsPanel extends Panel {
 	public void content(ImGraphics graphics) {
 		if (reload) {
 			HubWorldsResponse.update(data -> {
-				var savesDir = PlatformHelper.CURRENT.getGameDirectory().resolve("saves");
-				var templatesDir = PlatformHelper.CURRENT.getGameDirectory().resolve("saves-templates");
+				var savesDir = PlatformHelper.INSTANCE.getGameDirectory().resolve("saves");
+				var templatesDir = PlatformHelper.INSTANCE.getGameDirectory().resolve("saves-templates");
 
 				try {
 					if (Files.notExists(savesDir)) {
@@ -196,8 +196,8 @@ public class HubWorldsPanel extends Panel {
 						HubClientGateway.PROGRESS_BARS.put(uuid, item);
 						PROGRESS.put(world.uniqueId(), uuid);
 
-						var src = PlatformHelper.CURRENT.getGameDirectory().resolve("saves-templates").resolve(world.uniqueId());
-						var dst = PlatformHelper.CURRENT.getGameDirectory().resolve("saves").resolve(world.uniqueId());
+						var src = PlatformHelper.INSTANCE.getGameDirectory().resolve("saves-templates").resolve(world.uniqueId());
+						var dst = PlatformHelper.INSTANCE.getGameDirectory().resolve("saves").resolve(world.uniqueId());
 
 						try {
 							if (Files.exists(dst)) {

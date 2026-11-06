@@ -5,7 +5,8 @@ import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.session.SessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -16,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.permissions.Permissions;
 
 public interface PlayerDataCommand {
-	SuggestionProvider<CommandSourceStack> SESSION_NAMES = (ctx, builder) -> SharedSuggestionProvider.suggest(PlatformHelper.CURRENT.getLevel(ctx.getSource()).getEnvironment().vl$getAllSessionData().stream().map(SessionData::getName), builder);
+	SuggestionProvider<CommandSourceStack> SESSION_NAMES = (ctx, builder) -> SharedSuggestionProvider.suggest(PlatformHelper.INSTANCE.getLevel(ctx.getSource()).getEnvironment().vl$getAllSessionData().stream().map(PlayerSessionData::getName), builder);
 
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("player-data", (command, buildContext) -> {
@@ -36,8 +37,10 @@ public interface PlayerDataCommand {
 
 		playerCmd.then(Commands.literal("erase")
 			.executes(ctx -> {
+				var vl = ServerWorldSessionData.of(ctx.getSource().getServer());
+
 				for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
-					ctx.getSource().getServer().vl$eraseServerSession(player.id());
+					vl.eraseServerSession(player.id());
 				}
 
 				return 1;
@@ -49,8 +52,10 @@ public interface PlayerDataCommand {
 
 			cmd.then(Commands.literal("get")
 				.executes(ctx -> {
+					var vl = ServerWorldSessionData.of(ctx.getSource().getServer());
+
 					for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
-						var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.id());
+						var playerData = vl.getPlayer(player.id());
 
 						ctx.getSource().sendSuccess(() -> {
 							var value = playerData.dataMap.get(key);
@@ -66,10 +71,11 @@ public interface PlayerDataCommand {
 			cmd.then(Commands.literal("set")
 				.then(Commands.argument("value", key.type().argument(buildContext))
 					.executes(ctx -> {
+						var vl = ServerWorldSessionData.of(ctx.getSource().getServer());
 						var value = key.type().get(ctx, "value");
 
 						for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
-							var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.id());
+							var playerData = vl.getPlayer(player.id());
 							playerData.dataMap.set(key, Cast.to(value));
 						}
 
@@ -80,8 +86,10 @@ public interface PlayerDataCommand {
 
 			cmd.then(Commands.literal("reset")
 				.executes(ctx -> {
+					var vl = ServerWorldSessionData.of(ctx.getSource().getServer());
+
 					for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
-						var playerData = ctx.getSource().getServer().vl$getOrLoadServerSession(player.id());
+						var playerData = vl.getPlayer(player.id());
 						playerData.dataMap.set(key, Cast.to(key.defaultValue()));
 					}
 

@@ -16,7 +16,7 @@ import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
-import dev.latvian.mods.vidlib.feature.zone.ZoneContainer;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
@@ -34,7 +34,7 @@ public class VidLib {
 		VidLib.LOGGER.info("VidLib " + VERSION + " loaded");
 		Runtime.getRuntime().addShutdownHook(new Thread(HubServerGateway::stopGateway, "Stop-Server-Hub-Gateway"));
 
-		if (PlatformHelper.CURRENT.isDevEnv()) {
+		if (PlatformHelper.INSTANCE.isDevEnv()) {
 			FFMPEGBinaries.initialize();
 		}
 
@@ -47,19 +47,19 @@ public class VidLib {
 	}
 
 	public static void builtInRegistries(CustomRegistryCollector registry) {
-		var platform = VLPlatformHelper.CURRENT;
+		var platform = VLPlatformHelper.INSTANCE;
 		registry.register(ScreenShakeType.REGISTRY, platform::collectScreenShakeTypes);
 		registry.register(ScreenEffect.REGISTRY, platform::collectScreenEffectTypes);
 		registry.register(Atmosphere.REGISTRY);
 		registry.register(PhysicsParticleData.REGISTRY);
-		registry.register(ZoneContainer.REGISTRY);
+		registry.register(Zone.REGISTRY);
 		registry.register(NewCutsceneStepType.REGISTRY, platform::collectCutsceneStepTypes);
 		registry.register(Cutscene.REGISTRY);
 		registry.register(TTFFile.REGISTRY, platform::collectTTFFiles);
 	}
 
 	public static void sync(ServerPlayer player, int syncType) {
-		if (VLPlatformHelper.CURRENT.isReplayLevel(player.level())) {
+		if (VLPlatformHelper.INSTANCE.isReplayLevel(player.level())) {
 			return;
 		}
 

@@ -66,7 +66,7 @@ public class HubLocalServer {
 					VidLibClient.checkFileSync(false);
 				}
 
-				if (!PlatformHelper.CURRENT.isDevEnv()) {
+				if (!PlatformHelper.INSTANCE.isDevEnv()) {
 					LinkMinecraftScreen.handle(mc, true);
 				}
 			});

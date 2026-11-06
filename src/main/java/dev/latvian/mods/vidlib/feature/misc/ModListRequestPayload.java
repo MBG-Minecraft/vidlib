@@ -32,6 +32,6 @@ public enum ModListRequestPayload implements SimplePayload {
 	@Override
 	public void handle(Context ctx) {
 		ctx.sessionData().setClientModListSentDuringConfig();
-		ctx.send(new ClientModListPayload(PlatformHelper.CURRENT.getModList()).toC2SPacket());
+		ctx.send(new ClientModListPayload(PlatformHelper.INSTANCE.getModList()).toC2SPacket());
 	}
 }

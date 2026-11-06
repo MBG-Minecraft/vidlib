@@ -5,7 +5,7 @@ import dev.latvian.mods.vidlib.core.VLClientPlayPacketListener;
 import dev.latvian.mods.vidlib.core.VLLocalPlayer;
 import dev.latvian.mods.vidlib.feature.item.ItemScreen;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.session.LocalClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.LocalClientPlayerSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -35,7 +35,7 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 	protected Minecraft minecraft;
 
 	@Unique
-	private LocalClientSessionData vl$sessionData;
+	private LocalClientPlayerSessionData vl$sessionData;
 
 	@Unique
 	private Boolean vl$isReplayCamera;
@@ -45,9 +45,9 @@ public abstract class LocalPlayerMixin extends AbstractClientPlayer implements V
 	}
 
 	@Override
-	public LocalClientSessionData vl$sessionData() {
+	public LocalClientPlayerSessionData vl$sessionData() {
 		if (vl$sessionData == null && connection instanceof VLClientPlayPacketListener listener) {
-			vl$sessionData = listener.vl$sessionData();
+			vl$sessionData = listener.vl$getWorldData();
 		}
 
 		return vl$sessionData;

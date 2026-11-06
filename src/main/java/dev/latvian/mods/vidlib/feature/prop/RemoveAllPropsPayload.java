@@ -7,10 +7,9 @@ import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 
-public record RemoveAllPropsPayload(PropListType propListType, PropRemoveType removeType) implements SimplePayload {
+public record RemoveAllPropsPayload(PropRemoveType removeType) implements SimplePayload {
 	@AutoPacket
 	public static final SimplePayloadType<RemoveAllPropsPayload> TYPE = SimplePayloadType.vidlib("prop/remove_all", CompositeStreamCodec.of(
-		PropListType.STREAM_CODEC, RemoveAllPropsPayload::propListType,
 		PropRemoveType.STREAM_CODEC, RemoveAllPropsPayload::removeType,
 		RemoveAllPropsPayload::new
 	));
@@ -22,7 +21,7 @@ public record RemoveAllPropsPayload(PropListType propListType, PropRemoveType re
 
 	@Override
 	public void handle(Context ctx) {
-		var props = VLPlatformHelper.CURRENT.getProps(ctx.level());
-		props.propLists.get(propListType).removeAll(removeType);
+		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level());
+		props.levelProps.removeAll(removeType);
 	}
 }

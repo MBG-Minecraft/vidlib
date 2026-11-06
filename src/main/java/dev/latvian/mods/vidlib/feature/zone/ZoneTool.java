@@ -46,7 +46,7 @@ public enum ZoneTool implements VidLibTool {
 
 		if (hit != null) {
 			NeoForge.EVENT_BUS.post(new ZoneEvent.ClickedOn(hit, player.level(), player));
-			player.c2s(new ZoneClickedPayload(hit.resolvedZone().container.ref, hit.resolvedZone().index, hit.pos(), hit.distanceSq(), Optional.ofNullable(hit.direction())));
+			player.c2s(new ZoneClickedPayload(hit.resolvedZone().ref, hit.resolvedZone().index, hit.pos(), hit.distanceSq(), Optional.ofNullable(hit.direction())));
 		}
 	}
 }

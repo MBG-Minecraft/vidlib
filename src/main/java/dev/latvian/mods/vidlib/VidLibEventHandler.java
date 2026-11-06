@@ -174,7 +174,7 @@ public class VidLibEventHandler {
 		if (event.getEntity() instanceof ServerPlayer player) {
 			var level = event.getEntity().level();
 			var packets = new S2CPacketBundleBuilder();
-			var props = VLPlatformHelper.CURRENT.getProps(level);
+			var props = VLPlatformHelper.INSTANCE.getProps(level);
 
 			for (var list : props.propLists.values()) {
 				packets.s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.DIMENSION_CHANGE));

@@ -156,7 +156,7 @@ public interface VidLibHUD {
 			}
 		}
 
-		var props = VLPlatformHelper.CURRENT.getProps(level);
+		var props = VLPlatformHelper.INSTANCE.getProps(level);
 
 		for (var propList : props.propLists.values()) {
 			for (var prop : propList) {
