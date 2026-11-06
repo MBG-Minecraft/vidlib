@@ -136,7 +136,7 @@ repositories {
 
 			credentials {
 				username = findProperty('mrbeastUsername') ?: ENV.MBG_MAVEN_USERNAME
-				password = findProperty('mrbeastPassword') ?: ENV.MBG_MAVEN_TOKEN
+				password = findProperty('mrbeastPassword') ?: ENV.MBG_MAVEN_PASSWORD
 			}
 		}
 	}
@@ -280,12 +280,12 @@ publishing {
 	}
 
 	repositories {
-		if (ENV.MAVEN_URL && ENV.MAVEN_USERNAME && ENV.MAVEN_TOKEN) {
+		if (ENV.MBG_PUBLISH_MAVEN_URL && ENV.MBG_PUBLISH_MAVEN_USERNAME && ENV.MBG_PUBLISH_MAVEN_PASSWORD) {
 			maven {
-				url = ENV.MAVEN_URL
+				url = ENV.MBG_PUBLISH_MAVEN_URL
 				credentials {
-					username = ENV.MAVEN_USERNAME
-					password = ENV.MAVEN_TOKEN
+					username = ENV.MBG_PUBLISH_MAVEN_USERNAME
+					password = ENV.MBG_PUBLISH_MAVEN_PASSWORD
 				}
 			}
 		}
@@ -354,7 +354,7 @@ tasks.register('webHookUpdate') {
 	group 'other'
 	description 'Send webhook update'
 
-	def content = "New VidLib version: [`${version}`](<${ENV.MAVEN_ARTIFACT_LOCATION}/${version}>) (KLib `${klib_version}`)"
+	def content = "New VidLib version: [`${version}`](<${ENV.MBG_PUBLISH_MAVEN_URL}/dev/latvian/mods/vidlib/${version}/vidlib-${version}.jar>) (KLib `${klib_version}`)"
 
 	doLast {
 		println("Sending webhook update...")
@@ -363,7 +363,7 @@ tasks.register('webHookUpdate') {
 		def client = HttpClient.newHttpClient()
 
 		def request = HttpRequest.newBuilder()
-				.uri(URI.create("${ENV.DISCORD_WEBHOOK_URL}"))
+				.uri(URI.create("${ENV.MBG_PUBLISH_DISCORD_WEBHOOK_URL}"))
 				.header("Content-Type", "application/json")
 				.POST(HttpRequest.BodyPublishers.ofString(
 						'{"content":"' + content + '"}'
@@ -383,14 +383,14 @@ tasks.register('releaseLocalBuild') {
 	dependsOn tasks.build
 	dependsOn tasks.publishToMavenLocal
 
-	if (ENV.MAVEN_URL && ENV.MAVEN_USERNAME && ENV.MAVEN_TOKEN) {
-		println("Publishing enabled, ${ENV.MAVEN_USERNAME} to ${ENV.MAVEN_URL}")
+	if (ENV.MBG_PUBLISH_MAVEN_URL && ENV.MBG_PUBLISH_MAVEN_USERNAME && ENV.MBG_PUBLISH_MAVEN_PASSWORD) {
+		println("Publishing enabled, ${ENV.MBG_PUBLISH_MAVEN_USERNAME} to ${ENV.MBG_PUBLISH_MAVEN_URL}")
 		dependsOn tasks.publish
 	} else {
 		println("Publishing disabled")
 	}
 
-	if (ENV.DISCORD_WEBHOOK_URL) {
+	if (ENV.MBG_PUBLISH_MAVEN_URL && ENV.MBG_PUBLISH_DISCORD_WEBHOOK_URL) {
 		dependsOn tasks.webHookUpdate
 	}
 }
