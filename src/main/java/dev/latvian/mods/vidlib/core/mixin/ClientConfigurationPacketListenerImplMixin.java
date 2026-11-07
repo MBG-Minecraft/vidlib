@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.core.VLClientConfigPacketListener;
 import dev.latvian.mods.vidlib.core.VLClientPlayPacketListener;
-import dev.latvian.mods.vidlib.feature.session.LocalClientPlayerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
 import dev.latvian.mods.vidlib.feature.session.LoginData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientConfigurationPacketListenerImpl;
@@ -25,7 +25,7 @@ public class ClientConfigurationPacketListenerImplMixin implements VLClientConfi
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void vl$init(Minecraft mc, Connection connection, CommonListenerCookie cookie, CallbackInfo ci) {
-		vl$setWorldData(new LocalClientPlayerSessionData(mc, cookie.localGameProfile().id()));
+		vl$setWorldData(new ClientWorldSessionData(mc, cookie.localGameProfile().id()));
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class ClientConfigurationPacketListenerImplMixin implements VLClientConfi
 
 	@Override
 	public void vl$transfer(VLClientPlayPacketListener play, PacketListener packetListener) {
-		play.vl$setWorldData(vl$setWorldData());
+		play.vl$setWorldData(vl$getWorldData());
 
 		for (var data : vl$loginData) {
 			data.transfer(packetListener);

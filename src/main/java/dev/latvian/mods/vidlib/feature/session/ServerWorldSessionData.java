@@ -12,10 +12,11 @@ import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -28,14 +29,13 @@ import java.util.UUID;
 
 public class ServerWorldSessionData extends WorldSessionData {
 	public static ServerWorldSessionData of(MinecraftServer server) {
-		return new ServerWorldSessionData(server);
+		return VLPlatformHelper.INSTANCE.getServerWorldData(server);
 	}
 
 	public final MinecraftServer server;
 	public final RandomSource random;
 	public final UUID sessionId;
 	public final Map<UUID, ServerPlayerSessionData> serverSessionData;
-	public final boolean isReplayServer;
 	public PacketCapture packetCapture;
 
 	public ServerWorldSessionData(MinecraftServer server) {
@@ -44,7 +44,10 @@ public class ServerWorldSessionData extends WorldSessionData {
 		this.random = RandomSource.create();
 		this.sessionId = UUID.randomUUID();
 		this.serverSessionData = new Object2ObjectOpenHashMap<>();
-		this.isReplayServer = server.getClass().getName().contains("ReplayServer");
+
+		if (server.getClass().getName().contains("ReplayServer")) {
+			isReplay = true;
+		}
 
 		dataMap.load(server, server.getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
 	}
@@ -55,8 +58,8 @@ public class ServerWorldSessionData extends WorldSessionData {
 	}
 
 	@Override
-	protected ServerLevelSessionData createLevelData(ResourceKey<Level> level) {
-		return new ServerLevelSessionData(this, level);
+	protected ServerLevelSessionData createLevelData(Level level) {
+		return new ServerLevelSessionData(this, (ServerLevel) level);
 	}
 
 	@Override
@@ -99,7 +102,7 @@ public class ServerWorldSessionData extends WorldSessionData {
 
 		var packetsToEveryone = new S2CPacketBundleBuilder();
 
-		if (!VLPlatformHelper.INSTANCE.isReplayServer(server)) {
+		if (!isReplay) {
 			dataMap.sync(packetsToEveryone, (playerId, update) -> new SyncServerDataPayload(update));
 
 			for (var session : server.vl$getAllSessionData()) {
@@ -124,6 +127,8 @@ public class ServerWorldSessionData extends WorldSessionData {
 			} catch (Exception ignore) {
 			}
 		}
+
+		HubServerGateway.tickGateway();
 	}
 
 	public void eraseServerSession(UUID uuid) {
@@ -150,8 +155,8 @@ public class ServerWorldSessionData extends WorldSessionData {
 	}
 
 	@Nullable
-	public PacketCapture getPacketCapture(boolean start) {
-		if (packetCapture == null && start && !CommonGameEngine.INSTANCE.disablePacketCapture()) {
+	public PacketCapture startPacketCapture() {
+		if (packetCapture == null && !CommonGameEngine.INSTANCE.disablePacketCapture()) {
 			var directory = VidLibPaths.LOCAL.get().resolve("packet-capture");
 
 			if (Files.notExists(directory)) {
@@ -195,5 +200,13 @@ public class ServerWorldSessionData extends WorldSessionData {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public void stopped() {
+		if (packetCapture != null) {
+			packetCapture.finish();
+		}
+
+		HubServerGateway.stopGateway();
 	}
 }

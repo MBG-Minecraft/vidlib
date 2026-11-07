@@ -13,6 +13,8 @@ import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
 import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneHit;
@@ -22,7 +24,6 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -94,14 +95,6 @@ public class VLPlatformHelper {
 		HubServerGateway.registerBuiltIn(registry);
 	}
 
-	public boolean isReplayLevel(Level level) {
-		return false;
-	}
-
-	public boolean isReplayServer(MinecraftServer server) {
-		return false;
-	}
-
 	public Props<?> getProps(Level level) {
 		throw new UnsupportedOperationException("Not supported on this platform");
 	}
@@ -140,10 +133,18 @@ public class VLPlatformHelper {
 	public void entityExitedZone(ResolvedZone zone, Level level, Entity entity) {
 	}
 
-	public void playerClickedOnZone(ServerPlayer player, ZoneHit hit) {
+	public void playerClickedOnZone(Player player, ZoneHit hit) {
+	}
+
+	public ServerWorldSessionData getServerWorldData(MinecraftServer server) {
+		throw new NullPointerException("WorldSessionData storage is not implemented");
 	}
 
 	public LevelSessionData getLevelData(Level level) {
-		return level.vl$getLevelData();
+		throw new NullPointerException("LevelSessionData storage is not implemented");
+	}
+
+	public PlayerSessionData getPlayerData(Player player) {
+		throw new NullPointerException("PlayerSessionData storage is not implemented");
 	}
 }

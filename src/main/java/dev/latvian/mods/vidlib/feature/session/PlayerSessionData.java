@@ -24,6 +24,10 @@ import java.util.Set;
 import java.util.UUID;
 
 public class PlayerSessionData implements Comparable<PlayerSessionData> {
+	public static PlayerSessionData of(Player player) {
+		return VLPlatformHelper.INSTANCE.getPlayerData(player);
+	}
+
 	public final WorldSessionData worldData;
 	public final UUID uuid;
 	public final DataMap dataMap;
@@ -48,9 +52,6 @@ public class PlayerSessionData implements Comparable<PlayerSessionData> {
 		this.suspended = false;
 	}
 
-	public void closed() {
-	}
-
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "[" + uuid + "]";
@@ -64,7 +65,6 @@ public class PlayerSessionData implements Comparable<PlayerSessionData> {
 	 */
 	public void sync(S2CPacketConsumer packets, Player player, int syncType) {
 		var level = player.level();
-		var environment = level.getEnvironment();
 
 		if (level.getServer() != null) {
 			packets.s2c(level.getServer().clockManager().createFullSyncPacket());
@@ -73,7 +73,7 @@ public class PlayerSessionData implements Comparable<PlayerSessionData> {
 
 		CustomRegistry.syncAll(player, packets);
 
-		packets.s2c(new SyncGlobalNumberVariablesPayload(environment.globalVariables()));
+		packets.s2c(new SyncGlobalNumberVariablesPayload(worldData.globalVariables));
 
 		updateOverrides(player);
 
@@ -85,12 +85,12 @@ public class PlayerSessionData implements Comparable<PlayerSessionData> {
 			}
 		}
 
-		environment.sync(packets);
+		worldData.sync(packets);
 
 		dataMap.syncAll(packets, SyncPlayerDataPayload::new);
 
-		for (var s : environment.vl$getAllSessionData()) {
-			if (!s.uuid.equals(player.getUUID())) {
+		for (var s : worldData.playerMap.values()) {
+			if (s != this) {
 				packets.s2c(new SyncPlayerInputToClient(s.uuid, s.input));
 				s.dataMap.syncAll(packets, SyncPlayerDataPayload::new);
 			}

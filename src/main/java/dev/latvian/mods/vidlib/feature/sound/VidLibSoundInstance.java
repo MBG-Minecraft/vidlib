@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.sound;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.world.level.Level;
@@ -35,7 +36,7 @@ public class VidLibSoundInstance extends AbstractTickableSoundInstance {
 
 	@Override
 	public void tick() {
-		volume = level.getEnvironment().getPauseType().tick() ? targetVolume : 0F;
+		volume = LevelSessionData.of(level).worldData.getPauseType().tick() ? targetVolume : 0F;
 
 		var pos = position == null ? null : position.value().get(numberContext);
 

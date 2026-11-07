@@ -1,12 +1,11 @@
 package dev.latvian.mods.vidlib.feature.net;
 
-import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.core.VLPacketListener;
 import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.LoginData;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
-import net.minecraft.client.Minecraft;
+import dev.latvian.mods.vidlib.feature.session.WorldSessionData;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
@@ -16,7 +15,6 @@ import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -33,8 +31,16 @@ public interface Context {
 		return player().level();
 	}
 
-	default PlayerSessionData sessionData() {
-		return ((VLPacketListener) listener()).vl$sessionData();
+	default WorldSessionData worldSessionData() {
+		return levelSessionData().worldData;
+	}
+
+	default LevelSessionData levelSessionData() {
+		return LevelSessionData.of(level());
+	}
+
+	default PlayerSessionData playerSessionData() {
+		return PlayerSessionData.of(player());
 	}
 
 	default CompletableFuture<Void> enqueueWork(Runnable task) {
@@ -51,15 +57,7 @@ public interface Context {
 	}
 
 	default boolean isReplay() {
-		return VLPlatformHelper.INSTANCE.isReplayLevel(level());
-	}
-
-	default UUID uuid() {
-		return ((VLPacketListener) listener()).vl$sessionData().uuid;
-	}
-
-	private UUID clientUuid() {
-		return Minecraft.getInstance().getUser().getProfileId();
+		return worldSessionData().isReplay;
 	}
 
 	default void finishTask(ConfigurationTask.Type type) {

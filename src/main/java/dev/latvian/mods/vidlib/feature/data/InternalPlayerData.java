@@ -28,6 +28,7 @@ public interface InternalPlayerData {
 	DataKey<Boolean> CAN_FLY = DataKey.PLAYER.createBoolean("can_fly", false);
 	DataKey<Boolean> TRANSLUCENT = DataKey.PLAYER.createBoolean("translucent", false);
 	DataKey<Float> BRIGHTNESS_OVERRIDE = DataKey.PLAYER.createFloat("brightness_override", 0F, 0F, 1F);
+	DataKey<Boolean> HARDCORE_HEARTS = DataKey.PLAYER.createBoolean("hardcore_hearts", false);
 
 	@AutoInit
 	static void bootstrap() {

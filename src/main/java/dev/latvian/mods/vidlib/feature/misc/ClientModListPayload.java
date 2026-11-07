@@ -36,7 +36,7 @@ public record ClientModListPayload(List<PlatformModInfo> modList) implements Sim
 			return;
 		}
 
-		if (ctx.sessionData() instanceof ServerPlayerSessionData sessionData) {
+		if (ctx.playerSessionData() instanceof ServerPlayerSessionData sessionData) {
 			sessionData.clientMods = map;
 		}
 

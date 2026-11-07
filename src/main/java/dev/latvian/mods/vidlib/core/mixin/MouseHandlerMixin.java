@@ -3,11 +3,10 @@ package dev.latvian.mods.vidlib.core.mixin;
 import dev.latvian.mods.vidlib.core.VLMouseHandler;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
+import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
-import net.minecraft.client.ScrollWheelHandler;
 import net.minecraft.client.player.LocalPlayer;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,10 +37,6 @@ public abstract class MouseHandlerMixin implements VLMouseHandler {
 	@Shadow
 	private double xpos;
 
-	@Shadow
-	@Final
-	private ScrollWheelHandler scrollWheelHandler;
-
 	@ModifyConstant(method = "onScroll", constant = @Constant(floatValue = 0.2F))
 	private float vl$maxFlySpeed(float constant) {
 		return 3F;
@@ -49,7 +44,7 @@ public abstract class MouseHandlerMixin implements VLMouseHandler {
 
 	@Redirect(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
 	private void vl$turnPlayer(LocalPlayer instance, double yaw, double pitch) {
-		if (!(instance.vl$sessionData().cameraOverride instanceof ControlledCameraOverride c) || !c.turn(yaw, pitch)) {
+		if (!(ClientWorldSessionData.of(instance).cameraOverride instanceof ControlledCameraOverride c) || !c.turn(yaw, pitch)) {
 			instance.turn(yaw, pitch);
 		}
 	}

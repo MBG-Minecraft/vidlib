@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
+import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,7 +35,9 @@ public class ClientCutscene implements CameraOverride {
 		this.totalLength = 0;
 		this.state = new CutsceneState();
 
-		var ctx = mc.level.getGlobalContext().fork(variables);
+		var session = ClientLevelSessionData.of(mc.level);
+
+		var ctx = session.createGlobalContext().fork(variables);
 		ctx.sourcePos = originPos;
 		ctx.originPos = originPos;
 
@@ -71,7 +74,9 @@ public class ClientCutscene implements CameraOverride {
 		state.topBar.clear();
 		state.bottomBar.clear();
 
-		var ctx = mc.level.getGlobalContext().fork(variables);
+		var session = ClientLevelSessionData.of(mc.level);
+
+		var ctx = session.createGlobalContext().fork(variables);
 		ctx.sourcePos = sourcePos.get();
 		ctx.originPos = originPos;
 		ctx.targetPos = state.target;

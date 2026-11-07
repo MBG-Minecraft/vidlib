@@ -1,47 +1,20 @@
 package dev.latvian.mods.vidlib.feature.session;
 
-import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.klib.core.KLibLocalPlayer;
 import dev.latvian.mods.klib.core.NoMixinException;
-import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.klib.util.PauseType;
-import dev.latvian.mods.vidlib.VidLibPaths;
-import dev.latvian.mods.vidlib.feature.actor.ActorParticleOptions;
-import dev.latvian.mods.vidlib.feature.actor.ActorRecording;
-import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
-import dev.latvian.mods.vidlib.feature.atmosphere.ClientAtmosphere;
-import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
-import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChangedEvent;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToServer;
-import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.util.ScheduledTask;
-import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedOutputStream;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public class LocalClientPlayerSessionData extends ClientPlayerSessionData {
@@ -57,15 +30,7 @@ public class LocalClientPlayerSessionData extends ClientPlayerSessionData {
 	}
 
 	@ApiStatus.Internal
-	public void preTick(ClientLevel level, LocalPlayer player, Window window, PauseType paused) {
-		if (DataMapOverrides.INSTANCE != null) {
-			serverDataMap.overrides = DataMapOverrides.INSTANCE.serverData;
-
-			for (var session : getAllClientSessionData()) {
-				session.dataMap.overrides = DataMapOverrides.INSTANCE.getPlayerMap(session.uuid);
-			}
-		}
-
+	public void preTick(ClientLevel level, LocalPlayer player) {
 		updateOverrides(player);
 
 		input = KLibLocalPlayer.fromInput(mc, player/*, mc.gui.screen() == null && mc.isWindowActive()*/);
@@ -96,13 +61,5 @@ public class LocalClientPlayerSessionData extends ClientPlayerSessionData {
 			KeyMapping.set(mc.options.keySprint.getKey(), false);
 			mc.options.keySprint.setDown(false);
 		}
-	}
-
-	@ApiStatus.Internal
-	public void postTick(ClientLevel level, @Nullable LocalPlayer player, PauseType paused) {
-		if (scheduledTaskHandler != null && paused.tick()) {
-			scheduledTaskHandler.tick();
-		}
-
 	}
 }

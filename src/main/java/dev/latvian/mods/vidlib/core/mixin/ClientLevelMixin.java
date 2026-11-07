@@ -1,10 +1,8 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.core.VLClientLevel;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -14,7 +12,6 @@ import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -26,18 +23,6 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 	@Shadow
 	@Final
 	public Minecraft minecraft;
-
-	@Unique
-	private ClientProps vl$props;
-
-	@Override
-	public ClientProps getProps() {
-		if (vl$props == null || vl$props.level != vl$level()) {
-			vl$props = new ClientProps(vl$level());
-		}
-
-		return vl$props;
-	}
 
 	@Inject(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;animateTick(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"))
 	private void vl$doAnimateTick(int posX, int posY, int posZ, int range, RandomSource random, Block block, BlockPos.MutableBlockPos blockPos, CallbackInfo ci) {
@@ -54,12 +39,5 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 		if (Minecraft.getInstance().showOnlyReducedInfo()) {
 			cir.setReturnValue("");
 		}
-	}
-
-	@Override
-	public KNumberContext getGlobalContext() {
-		var v = super.getGlobalContext();
-		v.entity = minecraft.player;
-		return v;
 	}
 }

@@ -4,6 +4,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.klib.net.S2CPacketConsumer;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -11,10 +12,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 
 public abstract class Props<L extends Level> {
+	public final LevelSessionData levelData;
 	public final L level;
 	public final PropList levelProps;
 
-	public Props(L level) {
+	public Props(LevelSessionData levelData, L level) {
+		this.levelData = levelData;
 		this.level = level;
 		levelProps = new PropList(this);
 	}
@@ -97,7 +100,7 @@ public abstract class Props<L extends Level> {
 
 		if (result.isSuccess()) {
 			var prop = result.getOrThrow();
-			level.getEnvironment().schedule(delay, () -> add(prop));
+			levelData.worldData.schedule(delay, () -> add(prop));
 			return prop;
 		}
 

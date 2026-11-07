@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.Event;
 
@@ -50,16 +50,16 @@ public class ZoneEvent extends Event {
 	}
 
 	public static class ClickedOn extends EntityEvent {
-		private final ServerPlayer player;
+		private final Player player;
 		private final ZoneHit hit;
 
-		public ClickedOn(ServerPlayer player, ZoneHit hit) {
+		public ClickedOn(Player player, ZoneHit hit) {
 			super(hit.resolvedZone(), player.level(), player);
 			this.player = player;
 			this.hit = hit;
 		}
 
-		public ServerPlayer getPlayer() {
+		public Player getPlayer() {
 			return player;
 		}
 

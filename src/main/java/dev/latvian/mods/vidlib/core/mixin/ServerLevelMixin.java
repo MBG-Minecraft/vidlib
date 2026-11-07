@@ -1,12 +1,10 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.latvian.mods.vidlib.core.VLChunkMap;
 import dev.latvian.mods.vidlib.core.VLServerLevel;
 import dev.latvian.mods.vidlib.core.VLServerPacketListener;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -23,7 +21,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -43,35 +40,13 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	@Final
 	private MinecraftServer server;
 
-	@Unique
-	private ServerProps vl$props;
-
 	protected ServerLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
 		super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
 	}
 
 	@Override
-	public ServerProps getProps() {
-		if (vl$props == null) {
-			vl$props = new ServerProps(vl$level());
-		}
-
-		return vl$props;
-	}
-
-	@Override
 	public void createFireworks(double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, List<FireworkExplosion> explosions, boolean playSound) {
 		s2c(new CreateFireworksPayload(x, y, z, xSpeed, ySpeed, zSpeed, explosions));
-	}
-
-	@Override
-	public void vl$reloadChunks() {
-		((VLChunkMap) chunkSource.chunkMap).vl$reloadChunks();
-	}
-
-	@Override
-	public boolean vl$isReplayLevel() {
-		return vl$level().getServer().vl$isReplayServer();
 	}
 
 	// Other mods like Motion Capture mod create fake players, so this avoids a null pointer.

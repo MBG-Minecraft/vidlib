@@ -32,6 +32,8 @@ import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
+import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
@@ -133,12 +135,12 @@ public class ClientGameEngine {
 			return playerInfo.getProfile().id().equals(self.getGameProfile().id());
 		}
 
-		var sessionData = self.vl$sessionData().getClientSessionData(playerInfo.getProfile().id());
+		var sessionData = ClientWorldSessionData.of(self).getPlayer(playerInfo.getProfile().id());
 		return !CommonGameEngine.INSTANCE.isPlayerStaff(sessionData.dataMap.get(InternalPlayerData.PLAYER_TAGS), playerInfo.getGameMode());
 	}
 
 	public Component getPlayerListName(Minecraft mc, PlayerInfo playerInfo, Component fallback) {
-		var nickname = mc.player.vl$sessionData().getClientSessionData(playerInfo.getProfile().id()).dataMap.get(InternalPlayerData.NICKNAME);
+		var nickname = ClientWorldSessionData.of(mc).getPlayer(playerInfo.getProfile().id()).dataMap.get(InternalPlayerData.NICKNAME);
 		return Empty.isEmpty(nickname) ? fallback : nickname;
 	}
 
@@ -147,12 +149,12 @@ public class ClientGameEngine {
 			return true;
 		}
 
-		return mc.player != null && mc.player.vl$sessionData().glowColors.get(entity.getUUID()) != null;
+		return mc.player != null && ClientWorldSessionData.of(mc).glowColors.get(entity.getUUID()) != null;
 	}
 
 	@Nullable
 	public Color getTeamColor(Minecraft mc, Entity entity) {
-		return mc.player != null ? mc.player.vl$sessionData().glowColors.get(entity.getUUID()) : null;
+		return mc.player != null ? ClientWorldSessionData.of(mc).glowColors.get(entity.getUUID()) : null;
 	}
 
 	public Component getPlayerWorldName(Player player, Component fallback) {
@@ -365,7 +367,7 @@ public class ClientGameEngine {
 
 	public void handleEnvironmentalEffects(Minecraft mc, ClientLevel level, BlockPos pos) {
 		var effects = getEnvironmentEffects(mc, level, pos);
-		var ctx = level.getGlobalContext();
+		var ctx = ClientLevelSessionData.of(level).createGlobalContext();
 
 		if (!effects.isEmpty()) {
 			var random = level.getRandom();
@@ -628,7 +630,7 @@ public class ClientGameEngine {
 			return false;
 		}
 
-		var session = mc.player.vl$sessionData();
+		var session = ClientWorldSessionData.of(mc);
 		return session.cameraOverride != null && session.cameraOverride.hideGui();
 	}
 
@@ -637,8 +639,8 @@ public class ClientGameEngine {
 			return true;
 		}
 
-		var player = Minecraft.getInstance().player;
-		return player != null && player.vl$sessionData().hardcoreHearts;
+		var session = ClientWorldSessionData.of(Minecraft.getInstance());
+		return session.localPlayer.dataMap.get(InternalPlayerData.HARDCORE_HEARTS);
 	}
 
 	public boolean hideCrosshair(Minecraft mc) {
@@ -817,7 +819,7 @@ public class ClientGameEngine {
 	}
 
 	public void tickPlayerInput(LocalPlayer player, KeyboardInput in) {
-		if (player != null && player.vl$sessionData().cameraOverride instanceof ControlledCameraOverride c && c.move(in)) {
+		if (player != null && ClientWorldSessionData.of(player).cameraOverride instanceof ControlledCameraOverride c && c.move(in)) {
 			in.keyPresses = Input.EMPTY;
 			in.moveVector = Vec2.ZERO;
 		} else if (player != null && player.vl$sessionData().suspended) {
@@ -891,11 +893,15 @@ public class ClientGameEngine {
 	public CameraOverride overrideCamera(Minecraft mc) {
 		if (mc.gui.screen() != null && mc.gui.screen().overrideCamera()) {
 			return mc.gui.screen();
-		} else if (mc.player != null && mc.player.vl$sessionData().cameraOverride != null) {
-			return mc.player.vl$sessionData().cameraOverride;
-		} else {
-			return null;
+		} else if (mc.player != null) {
+			var session = ClientWorldSessionData.of(mc);
+
+			if (session.cameraOverride != null) {
+				return session.cameraOverride;
+			}
 		}
+
+		return null;
 	}
 
 	@Nullable
@@ -1040,7 +1046,7 @@ public class ClientGameEngine {
 
 		if (server != null) {
 			return "Server - " + server.name;
-		} else if (mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
+		} else if (mc.level != null && ClientWorldSessionData.of(mc).isReplay) {
 			return "Replay Editor";
 		} else if (mc.level != null) {
 			return "Singleplayer";

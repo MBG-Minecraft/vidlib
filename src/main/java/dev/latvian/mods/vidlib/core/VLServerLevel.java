@@ -3,10 +3,8 @@ package dev.latvian.mods.vidlib.core;
 import dev.latvian.mods.klib.bulk.BlockModificationBuilder;
 import dev.latvian.mods.klib.bulk.BulkLevelModification;
 import dev.latvian.mods.klib.bulk.BulkLevelModificationBundle;
-import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -37,11 +35,6 @@ public interface VLServerLevel extends VLLevel {
 	}
 
 	@Override
-	default ServerProps getProps() {
-		throw new NoMixinException(this);
-	}
-
-	@Override
 	default int bulkModify(boolean undoable, Ref<BulkLevelModification> modification) {
 		var optimized = modification.optimizedRef();
 
@@ -60,10 +53,6 @@ public interface VLServerLevel extends VLLevel {
 		}
 
 		return VLLevel.super.bulkModify(undoable, optimized);
-	}
-
-	default void vl$reloadChunks() {
-		throw new NoMixinException(this);
 	}
 
 	default LongOpenHashSet vl$getChunksToLoad() {

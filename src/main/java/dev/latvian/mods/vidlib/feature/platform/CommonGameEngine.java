@@ -1,16 +1,17 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
+import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.platform.PlatformModInfo;
 import dev.latvian.mods.klib.util.RuntimeDebugger;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
-import dev.latvian.mods.vidlib.feature.entity.ExactEntitySpawnPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.net.Context;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
@@ -28,7 +29,6 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
@@ -63,6 +63,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
@@ -201,11 +203,21 @@ public class CommonGameEngine {
 
 	@Nullable
 	public VoxelShape overrideBarrierShape(BlockState state, BlockGetter blockGetter, BlockPos pos, CollisionContext context) {
+		if (context instanceof EntityCollisionContext ctx && ctx.getEntity() != null && blockGetter instanceof Level level && LevelSessionData.of(level).worldData.getServerFeatures().has(Feature.SOFT_BARRIERS)) {
+			if (ctx.getEntity() instanceof AbstractArrow) {
+				return Shapes.empty();
+			}
+
+			if (EntityUtils.isCreative(ctx.getEntity())) {
+				return Shapes.empty();
+			}
+		}
+
 		return null;
 	}
 
 	public boolean isSmallTallGrassHitbox(BlockGetter blockGetter) {
-		return blockGetter instanceof Level level && level.getServerFeatures().has(Feature.SMALL_GRASS_HITBOX);
+		return blockGetter instanceof Level level && LevelSessionData.of(level).worldData.getServerFeatures().has(Feature.SMALL_GRASS_HITBOX);
 	}
 
 	public boolean disablePOI() {
@@ -250,15 +262,6 @@ public class CommonGameEngine {
 
 	public boolean replaceFoodTick(ServerPlayer player, FoodData foodData) {
 		return false;
-	}
-
-	@Nullable
-	public Packet<ClientGamePacketListener> overrideEntitySpawnPacket(Entity entity, ServerEntity serverEntity) {
-		if (!entity.getType().builtInRegistryHolder().key().identifier().getNamespace().equals("minecraft")) {
-			return (Packet) new ExactEntitySpawnPayload(entity, serverEntity, 0).toS2CPacket();
-		}
-
-		return null;
 	}
 
 	public boolean disableJoinMessages() {
@@ -346,11 +349,11 @@ public class CommonGameEngine {
 	}
 
 	public double getGravityModifier(Entity entity) {
-		return entity.vl$isSuspended() ? 0D : 1D;
+		return isSuspended(entity) ? 0D : 1D;
 	}
 
 	public float getSpeedModifier(LivingEntity entity) {
-		return entity.vl$isSuspended() ? 0F : 1F;
+		return isSuspended(entity) ? 0F : 1F;
 	}
 
 	public float getFlightSpeedModifier(Player player) {
@@ -370,11 +373,11 @@ public class CommonGameEngine {
 	}
 
 	public float getAttackDamage(LivingEntity entity, DamageSource source, float original) {
-		return entity.vl$isSuspended() ? 0F : original;
+		return isSuspended(entity) ? 0F : original;
 	}
 
 	public boolean isUnpushable(LivingEntity entity) {
-		return entity.vl$isSuspended();
+		return isSuspended(entity);
 	}
 
 	public boolean getScaleDamageWithDifficulty(ServerPlayer player) {
@@ -409,7 +412,7 @@ public class CommonGameEngine {
 		return overrideFluidState(level, pos).createLegacyBlock();
 	}
 
-	public float overrideFluidHeight(Level level, FluidState state, BlockPos pos) {
+	public float overrideFluidHeight(Level level, FluidState state, BlockPos pos, float original) {
 		if (state.getType() instanceof FlowingFluid flowing) {
 			var height = LevelSessionData.of(level).getFluidHeight(flowing, pos);
 
@@ -418,7 +421,7 @@ public class CommonGameEngine {
 			}
 		}
 
-		return state.getHeight(level, pos);
+		return original;
 	}
 
 	public BlockHitResult clip(BlockGetter blockGetter, BlockHitResult result, ClipContext ctx) {
@@ -528,7 +531,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean allowFlight(Player player) {
-		return false;
+		return PlayerSessionData.of(player).dataMap.get(InternalPlayerData.CAN_FLY);
 	}
 
 	public String getServerGatewayName(MinecraftServer server) {

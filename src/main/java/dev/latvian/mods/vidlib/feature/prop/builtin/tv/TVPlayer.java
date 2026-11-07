@@ -10,7 +10,7 @@ import org.watermedia.api.player.videolan.VideoPlayer;
 import java.net.URI;
 
 public class TVPlayer {
-	public static final ClientAsset TEXTURE = new ClientAsset.ResourceTexture(ID.vidlib("prop/tv/video"));
+	public static final ClientAsset.ResourceTexture TEXTURE = new ClientAsset.ResourceTexture(ID.vidlib("prop/tv/video"));
 
 	private static URI current;
 	private static VideoPlayer player;

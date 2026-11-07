@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
@@ -23,8 +23,9 @@ public interface WaypointClientCommands {
 					.then(Commands.argument("label", ComponentArgument.textComponent(buildContext))
 						.executes(ctx -> {
 							var mc = Minecraft.getInstance();
+							var session = ClientWorldSessionData.of(mc);
 
-							if (mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
+							if (mc.level != null && session.isReplay) {
 								var id = StringArgumentType.getString(ctx, "id");
 								var position = Vec3Argument.getVec3(ctx, "position");
 								var label = ComponentArgument.getResolvedComponent(ctx, "label");
@@ -36,10 +37,9 @@ public interface WaypointClientCommands {
 									.distance(6D, 20D, 0D)
 									.build();
 
-								var session = mc.player.vl$sessionData();
-								var current = new ArrayList<>(session.serverDataMap.get(InternalServerData.WAYPOINTS));
+								var current = new ArrayList<>(session.dataMap.get(InternalServerData.WAYPOINTS));
 								current.add(waypoint);
-								session.serverDataMap.setSuperOverride(InternalServerData.WAYPOINTS, current);
+								session.dataMap.setSuperOverride(InternalServerData.WAYPOINTS, current);
 								return 1;
 							} else {
 								var cmd = ctx.getInput().replace("waypoint-client", "waypoint");
@@ -56,14 +56,14 @@ public interface WaypointClientCommands {
 			.then(Commands.argument("id", StringArgumentType.word())
 				.executes(ctx -> {
 					var mc = Minecraft.getInstance();
+					var session = ClientWorldSessionData.of(mc);
 
-					if (mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
+					if (mc.level != null && session.isReplay) {
 						var id = StringArgumentType.getString(ctx, "id");
 
-						var session = mc.player.vl$sessionData();
-						var current = new ArrayList<>(session.serverDataMap.get(InternalServerData.WAYPOINTS));
+						var current = new ArrayList<>(session.dataMap.get(InternalServerData.WAYPOINTS));
 						current.removeIf(w -> w.id().equals(id));
-						session.serverDataMap.setSuperOverride(InternalServerData.WAYPOINTS, current);
+						session.dataMap.setSuperOverride(InternalServerData.WAYPOINTS, current);
 						return 1;
 					} else {
 						var cmd = ctx.getInput().replace("waypoint-client", "waypoint");

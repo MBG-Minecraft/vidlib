@@ -1,22 +1,16 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.klib.bulk.BlockModificationBuilder;
 import dev.latvian.mods.klib.bulk.BlockModificationConsumer;
 import dev.latvian.mods.klib.bulk.BulkLevelModification;
 import dev.latvian.mods.klib.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.klib.core.NoMixinException;
-import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationHolder;
-import dev.latvian.mods.vidlib.feature.bulk.UndoableModification;
-import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
-import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHolder {
@@ -29,7 +23,7 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		throw new NoMixinException(this);
 	}
 
-	default Props<?> getProps() {
+	default void vl$setLevelData(LevelSessionData levelData) {
 		throw new NoMixinException(this);
 	}
 
@@ -50,16 +44,5 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		var m = new BulkLevelModificationBundle(new ArrayList<>());
 		modifications.accept(m);
 		return bulkModify(undoable, m.ref());
-	}
-
-	default boolean vl$isReplayLevel() {
-		return false;
-	}
-
-	default KNumberContext getGlobalContext() {
-		var level = vl$level();
-		var ctx = new KNumberContext(level.getEnvironment().globalVariables());
-		ctx.updateLevelData(level);
-		return ctx;
 	}
 }

@@ -15,11 +15,14 @@ import dev.latvian.mods.klib.registry.CustomRegistry;
 import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.texture.CubeTexturePatch;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import dev.latvian.mods.klib.volume.BlockVolume;
 import dev.latvian.mods.klib.volume.JoinedVolume;
 import dev.latvian.mods.klib.volume.Volume;
+import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -32,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public record Zone(
 	int priority,
@@ -201,6 +205,18 @@ public record Zone(
 		public Builder fog(ZoneFog fog) {
 			this.fog = fog;
 			return this;
+		}
+	}
+
+	public static class Loader extends JsonRegistryReloadListener<Zone> {
+		public Loader(RefType refType) {
+			super("vidlib/zone", Zone.REGISTRY, refType);
+		}
+
+		@Override
+		public void generate(BiConsumer<String, Zone> callback) {
+			super.generate(callback);
+			VLPlatformHelper.INSTANCE.generateZones(callback);
 		}
 	}
 

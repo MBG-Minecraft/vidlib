@@ -10,7 +10,6 @@ import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.texture.UV;
-import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.camera.DetachedCamera;
@@ -136,32 +135,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default <T> void updatePlayerData(DataKey<T> type, T value) {
 		updatePlayerData(List.of(new DataMapValue(type, value)));
-	}
-
-	@Override
-	default void vl$preTick(PauseType paused) {
-		var level = vl$self().level;
-		var player = vl$self().player;
-
-		if (level == null || player == null) {
-			return;
-		}
-
-		player.vl$sessionData().preTick(level, player, vl$self().getWindow(), paused);
-	}
-
-	@Override
-	default void vl$postTick(PauseType paused) {
-		var level = vl$self().level;
-		var player = vl$self().player;
-
-		if (player != null && level != null) {
-			player.vl$sessionData().postTick(level, player, paused);
-		}
-
-		if (level != null && paused.tick()) {
-			PhysicsParticleManager.tickAll(level, level.getGameTime());
-		}
 	}
 
 	@Override

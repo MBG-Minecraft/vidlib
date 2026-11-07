@@ -27,15 +27,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LevelSessionData {
-	public static LevelSessionData of(Level level) {
+public class LevelSessionData<P extends Props<?>> {
+	public static LevelSessionData<?> of(Level level) {
 		return VLPlatformHelper.INSTANCE.getLevelData(level);
 	}
 
 	public final WorldSessionData worldData;
 	public final ResourceKey<Level> dimension;
 	public LevelZones zones;
-	public Props<?> props;
+	public P props;
 	public final List<UndoableModificationHolder> undoable;
 
 	public LevelSessionData(WorldSessionData worldData, ResourceKey<Level> dimension) {
@@ -46,10 +46,11 @@ public class LevelSessionData {
 		this.undoable = new ArrayList<>();
 	}
 
-	public void tick(Level level, PauseType pauseType) {
-		var globalNumberContext = new KNumberContext(worldData.globalVariables);
-		globalNumberContext.updateLevelData(level);
+	public KNumberContext createGlobalContext() {
+		return new KNumberContext(worldData.globalVariables);
+	}
 
+	public void tick(Level level, PauseType pauseType) {
 		var allEntities = EntityUtils.getAllEntities(level);
 
 		if (props != null) {

@@ -18,6 +18,8 @@ import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderState;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderState;
+import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -74,13 +76,16 @@ public class VidLibWorldRenderState {
 			return false;
 		}
 
+		var session = ClientWorldSessionData.of(mc);
+		var levelSession = ClientLevelSessionData.of(mc.level);
+
 		worldDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		playerDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(!mc.level.tickRateManager().isEntityFrozen(mc.player));
 		frustum = event.getRenderState().cameraRenderState.cullFrustum;
 		cameraPos = event.getRenderState().cameraRenderState.pos;
 		cameraRotation = event.getCamera().rotation();
 		gameTime = mc.level.getGameTime();
-		numberContext = mc.level.getGlobalContext();
+		numberContext = levelSession.createGlobalContext();
 		visualExactContext = new VisualExactContext(
 			mc,
 			cameraPos,
@@ -91,7 +96,7 @@ public class VidLibWorldRenderState {
 		var ctx = new VidLibExtractContext(mc, this, event);
 		boolean hasState = false;
 
-		props = mc.level.getProps().extractAll(ctx);
+		props = levelSession.props.extractAll(ctx);
 
 		if (props != null) {
 			hasState = true;
@@ -112,8 +117,6 @@ public class VidLibWorldRenderState {
 			}
 		}
 
-		var session = mc.player.vl$sessionData();
-
 		if (session.fluidPlane != null) {
 			fluidPlane = new FluidPlaneRenderState();
 			fluidPlane.zoneFluid = session.fluidPlane.fluid();
@@ -123,7 +126,7 @@ public class VidLibWorldRenderState {
 
 		var tempBlockPos = new BlockPos.MutableBlockPos();
 
-		if (!session.serverDataMap.get(InternalServerData.HIDE_PLUMBOBS)) {
+		if (!session.dataMap.get(InternalServerData.HIDE_PLUMBOBS)) {
 			for (var player : mc.level.players()) {
 				if (player.isInvisibleTo(mc.player)) {
 					continue;

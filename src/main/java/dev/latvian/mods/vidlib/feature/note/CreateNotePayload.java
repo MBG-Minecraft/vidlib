@@ -16,6 +16,6 @@ public record CreateNotePayload(Note note) implements SimplePayload {
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$sessionData().createNote(note);
+		ctx.worldSessionData().createNote(note);
 	}
 }

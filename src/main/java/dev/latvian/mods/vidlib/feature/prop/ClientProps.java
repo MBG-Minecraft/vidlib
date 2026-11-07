@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.render.SubmitContext;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.client.VidLibExtractContext;
+import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -50,8 +51,8 @@ public class ClientProps extends Props<ClientLevel> {
 
 	public final List<PropWithState<?, ?>> all;
 
-	public ClientProps(ClientLevel level) {
-		super(level);
+	public ClientProps(ClientLevelSessionData levelData, ClientLevel level) {
+		super(levelData, level);
 		this.all = new LinkedList<>();
 	}
 

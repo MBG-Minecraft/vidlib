@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.registry.CustomRegistry;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStep;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -44,8 +45,8 @@ public record Cutscene(
 	public static final DataType<Ref<Cutscene>> DATA_TYPE = REGISTRY.dataType();
 
 	public static class Loader extends JsonRegistryReloadListener<Cutscene> {
-		public Loader() {
-			super("vidlib/cutscene", REGISTRY);
+		public Loader(RefType refType) {
+			super("vidlib/cutscene", REGISTRY, refType);
 		}
 	}
 

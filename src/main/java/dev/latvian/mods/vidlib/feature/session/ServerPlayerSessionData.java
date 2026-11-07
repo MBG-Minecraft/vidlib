@@ -19,6 +19,10 @@ import java.util.Set;
 import java.util.UUID;
 
 public class ServerPlayerSessionData extends PlayerSessionData {
+	public static ServerPlayerSessionData of(ServerPlayer player) {
+		return (ServerPlayerSessionData) PlayerSessionData.of(player);
+	}
+
 	public final MinecraftServer server;
 	public final Path dataMapPath;
 	private Set<String> currentTags;
@@ -26,7 +30,7 @@ public class ServerPlayerSessionData extends PlayerSessionData {
 	public Map<String, PlatformModInfo> clientMods;
 
 	public ServerPlayerSessionData(ServerWorldSessionData worldData, MinecraftServer server, UUID uuid) {
-		super(worldData, uuid, server);
+		super(worldData, uuid);
 		this.server = server;
 		this.dataMapPath = VLPlatformHelper.INSTANCE.getPlayerDataDirectory(server).resolve(uuid + ".nbt");
 		this.currentTags = Set.of();

@@ -17,7 +17,7 @@ public record ClientFeaturesPayload(FeatureSet featureSet) implements SimplePayl
 
 	@Override
 	public void handle(Context ctx) {
-		if (ctx.sessionData() instanceof ServerPlayerSessionData sessionData) {
+		if (ctx.playerSessionData() instanceof ServerPlayerSessionData sessionData) {
 			sessionData.clientFeatureSet = featureSet;
 		}
 

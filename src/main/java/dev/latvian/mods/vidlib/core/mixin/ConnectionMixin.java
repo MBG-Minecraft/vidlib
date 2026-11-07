@@ -1,10 +1,11 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 @Mixin(Connection.class)
 public class ConnectionMixin {
@@ -26,6 +28,9 @@ public class ConnectionMixin {
 	@Shadow
 	@Nullable
 	private volatile PacketListener packetListener;
+
+	@Shadow
+	private volatile boolean sendLoginDisconnect;
 
 	@Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V", at = @At("HEAD"))
 	private void vl$send(Packet<?> packet, io.netty.channel.ChannelFutureListener listener, boolean flush, CallbackInfo ci) {
@@ -38,12 +43,18 @@ public class ConnectionMixin {
 		}
 	}
 
-	private static void capture(net.minecraft.server.MinecraftServer server, java.util.UUID player, Packet<?> packet, boolean config) {
-		if (server == null || VLPlatformHelper.INSTANCE.isReplayLevel(server.overworld())) {
+	private static void capture(MinecraftServer server, UUID player, Packet<?> packet, boolean config) {
+		if (server == null) {
 			return;
 		}
 
-		var packetCapture = server.vl$getPacketCapture(true);
+		var session = ServerWorldSessionData.of(server);
+
+		if (session.isReplay) {
+			return;
+		}
+
+		var packetCapture = session.startPacketCapture();
 
 		if (packetCapture != null) {
 			packetCapture.getSession(player).capture(packet, config);

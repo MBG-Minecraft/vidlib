@@ -164,8 +164,7 @@ public interface PropCommands {
 	static int remove(CommandSourceStack source, Predicate<Prop> predicate) {
 		var level = PlatformHelper.INSTANCE.getLevel(source);
 		var props = VLPlatformHelper.INSTANCE.getProps(level);
-		var list = props.propLists.get(PropListType.LEVEL);
-		int killed = list.removeAll(PropRemoveType.COMMAND, predicate);
+		int killed = props.levelProps.removeAll(PropRemoveType.COMMAND, predicate);
 		source.broadcast("Removed " + killed + " props");
 		return killed;
 	}

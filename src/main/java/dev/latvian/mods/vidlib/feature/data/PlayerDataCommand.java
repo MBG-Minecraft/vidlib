@@ -25,7 +25,7 @@ public interface PlayerDataCommand {
 
 		command.then(Commands.literal("preload-all")
 			.executes(ctx -> {
-				ctx.getSource().getServer().vl$preloadAllSessions();
+				ServerWorldSessionData.of(ctx.getSource().getServer()).preloadAllSessions();
 				return 1;
 			})
 		);

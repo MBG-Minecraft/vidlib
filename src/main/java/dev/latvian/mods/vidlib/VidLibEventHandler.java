@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.data.DataTypeRegistryEvent;
 import dev.latvian.mods.klib.entity.filter.EntityFilterTypeRegistryEvent;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
+import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.visual.VisualTypeRegistryEvent;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
@@ -18,9 +19,9 @@ import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
-import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
+import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
-import dev.latvian.mods.vidlib.feature.zone.ZoneServerLoader;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.mrbeastgaming.mods.hub.api.HubServerSession;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import io.netty.util.NettyRuntime;
@@ -116,9 +117,9 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddServerReloadListenersEvent event) {
-		event.addListener(ID.vidlib("zone"), new ZoneServerLoader());
-		event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.SERVER));
-		event.addListener(ID.vidlib("cutscene"), new Cutscene.Loader());
+		event.addListener(ID.vidlib("zone"), new Zone.Loader(RefType.SERVER));
+		// event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.SERVER));
+		event.addListener(ID.vidlib("cutscene"), new Cutscene.Loader(RefType.SERVER));
 	}
 
 	@SubscribeEvent
@@ -176,12 +177,10 @@ public class VidLibEventHandler {
 			var packets = new S2CPacketBundleBuilder();
 			var props = VLPlatformHelper.INSTANCE.getProps(level);
 
-			for (var list : props.propLists.values()) {
-				packets.s2c(new RemoveAllPropsPayload(list.type, PropRemoveType.DIMENSION_CHANGE));
+			packets.s2c(new RemoveAllPropsPayload(PropRemoveType.DIMENSION_CHANGE));
 
-				for (var prop : list) {
-					packets.s2c(prop.createAddPacket());
-				}
+			for (var prop : props.levelProps) {
+				packets.s2c(prop.createAddPacket());
 			}
 
 			packets.send(player);
@@ -211,32 +210,30 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void serverStopped(ServerStoppedEvent event) {
-		var packetCapture = event.getServer().vl$getPacketCapture(false);
-
-		if (packetCapture != null) {
-			packetCapture.finish();
-		}
+		var session = ServerWorldSessionData.of(event.getServer());
+		session.stopped();
 
 		AutoInit.Type.SAVE_GAME.invoke();
 		AutoInit.Type.DATA_CLOSED.invoke();
-		HubServerGateway.stopGateway();
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void serverPreTick(ServerTickEvent.Pre event) {
-		event.getServer().vl$preTick(event.getServer().getPauseType());
+		var session = ServerWorldSessionData.of(event.getServer());
+		session.preTick(session.getPauseType());
 	}
 
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public static void serverPostTick(ServerTickEvent.Post event) {
-		event.getServer().vl$postTick(event.getServer().getPauseType());
-		HubServerGateway.tickGateway();
+		var session = ServerWorldSessionData.of(event.getServer());
+		session.postTick(session.getPauseType());
 	}
 
 	@SubscribeEvent
 	public static void levelSaved(LevelEvent.Save event) {
 		if (event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD) {
-			level.getServer().vl$save();
+			var session = ServerWorldSessionData.of(level.getServer());
+			session.save();
 			AutoInit.Type.SAVE_GAME.invoke();
 		}
 	}

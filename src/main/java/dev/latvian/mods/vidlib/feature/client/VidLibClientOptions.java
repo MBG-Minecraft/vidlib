@@ -37,11 +37,6 @@ public interface VidLibClientOptions {
 		OptionInstance.noTooltip(),
 		BlockFilter.ANY,
 		callback -> {
-			var mc = Minecraft.getInstance();
-
-			if (mc.player != null) {
-				mc.player.vl$sessionData().refreshBlockZones();
-			}
 		}
 	);
 
@@ -53,11 +48,6 @@ public interface VidLibClientOptions {
 		OptionInstance.noTooltip(),
 		PhysicsParticleData.DEFAULT,
 		callback -> {
-			var mc = Minecraft.getInstance();
-
-			if (mc.player != null) {
-				mc.player.vl$sessionData().refreshBlockZones();
-			}
 		}
 	);
 

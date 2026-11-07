@@ -45,7 +45,7 @@ public record Atmosphere(
 		)
 	);
 
-	public static final CustomRegistry<RegistryFriendlyByteBuf, Atmosphere> REGISTRY = CustomRegistry.createNoValueSync("atmosphere", TYPE);
+	public static final CustomRegistry<RegistryFriendlyByteBuf, Atmosphere> REGISTRY = CustomRegistry.create("atmosphere", TYPE);
 
 	public static final Codec<Ref<Atmosphere>> CODEC = REGISTRY.codec();
 	public static final StreamCodec<RegistryFriendlyByteBuf, Ref<Atmosphere>> STREAM_CODEC = REGISTRY.streamCodec();

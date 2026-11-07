@@ -31,6 +31,7 @@
 		"FallingBlockMixin",
 		"FillCommandMixin",
 		"FireworkRocketEntityMixin",
+		"FluidStateMixin",
 		"FoodDataMixin",
 		"IceBlockMixin",
 		"IdDispatchCodecMixin",

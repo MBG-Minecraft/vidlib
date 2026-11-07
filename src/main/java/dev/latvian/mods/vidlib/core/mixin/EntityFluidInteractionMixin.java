@@ -23,9 +23,4 @@ public abstract class EntityFluidInteractionMixin {
 	private FluidState vl$getFluidState(BlockGetter blockGetter, BlockPos pos) {
 		return blockGetter instanceof Level level ? CommonGameEngine.INSTANCE.overrideFluidState(level, pos) : blockGetter.getFluidState(pos);
 	}
-
-	@Redirect(method = "update(Lnet/minecraft/world/entity/Entity;Ljava/util/function/Predicate;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/material/FluidState;getHeight(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F"))
-	private float vl$getFluidHeight(FluidState state, BlockGetter blockGetter, BlockPos pos) {
-		return blockGetter instanceof Level level ? CommonGameEngine.INSTANCE.overrideFluidHeight(level, state, pos) : state.getHeight(blockGetter, pos);
-	}
 }

@@ -1,13 +1,12 @@
 package dev.latvian.mods.vidlib;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.latvian.mods.betteradvancedtooltips.BATIcons;
+import dev.latvian.mods.klib.math.HitBuilder;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
-import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
@@ -52,8 +51,7 @@ import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVPropRenderState;
-import dev.latvian.mods.vidlib.feature.structure.StructureCapture;
-import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
+import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
@@ -75,7 +73,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ClipContext;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -229,13 +226,15 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level != null && mc.player != null) {
+			var session = ClientWorldSessionData.of(mc);
+
 			if (VidLibClient.levelTick == Integer.MAX_VALUE) {
 				VidLibClient.levelTick = 0;
 			} else {
 				VidLibClient.levelTick++;
 			}
 
-			ScreenText.CLIENT_TICK.ops = mc.jsonOps();
+			ScreenText.CLIENT_TICK.ops = session.jsonOps;
 
 			var tool = VidLibTool.of(mc.player);
 
@@ -243,7 +242,7 @@ public class VidLibClientEventHandler {
 				tool.getSecond().debugText(mc.player, tool.getFirst(), mc.hitResult, ScreenText.CLIENT_TICK);
 			}
 
-			mc.vl$preTick(mc.getPauseType());
+			session.preTick(session.getPauseType());
 		}
 
 		VidLibKeys.handle(mc);
@@ -252,27 +251,8 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void clientPostTick(ClientTickEvent.Post event) {
 		var mc = Minecraft.getInstance();
-		mc.vl$postTick(mc.getPauseType());
-		NeoForge.EVENT_BUS.post(new DebugTextEvent.ClientTick(ScreenText.CLIENT_TICK));
-
-		int b = StructureCapture.CURRENT.getValue().blocks.size();
-
-		if (b > 0) {
-			ScreenText.CLIENT_TICK.topLeft.add("Ghost Structure Capture: %,d blocks".formatted(b));
-		}
-
-		if (!MiscClientUtils.CLIENT_CLOSEABLE.isEmpty()) {
-			for (var c : MiscClientUtils.CLIENT_CLOSEABLE) {
-				try {
-					c.close();
-				} catch (Exception ignored) {
-				}
-			}
-
-			MiscClientUtils.CLIENT_CLOSEABLE.clear();
-		}
-
-		HubClientGateway.tickGateway();
+		var session = ClientWorldSessionData.of(mc);
+		session.postTick(session.getPauseType());
 	}
 
 	@SubscribeEvent
@@ -288,14 +268,12 @@ public class VidLibClientEventHandler {
 			return;
 		}
 
-		var session = player.vl$sessionData();
+		var session = ClientWorldSessionData.of(mc);
 		session.projectedCoordinates = ProjectedCoordinates.of(mc, event.getCameraState());
 
-		var rayLine = mc.gameRenderer.mainCamera().klib$ray(512D);
-		var ray = new ClipContext(rayLine.start(), rayLine.end(), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player);
-
 		if (mc.options.getCameraType() == CameraType.FIRST_PERSON && VidLibClientOptions.getShowZones()) {
-			session.zoneHit = session.filteredZones.clip(ray);
+			var rayLine = mc.gameRenderer.mainCamera().klib$ray(512D);
+			session.zoneHit = session.level.zones.hit(new HitBuilder(rayLine.start(), rayLine.end()));
 		} else {
 			session.zoneHit = null;
 		}
@@ -339,12 +317,14 @@ public class VidLibClientEventHandler {
 	}
 
 	public static void renderHUD0(Minecraft mc, RenderGuiEvent.Post event) {
-		var session = mc.player.vl$sessionData();
+		var session = ClientWorldSessionData.of(mc.player.connection);
+		var playerSession = mc.player.vl$sessionData();
 		var graphics = event.getGuiGraphics();
 		var delta = event.getPartialTick().getGameTimeDeltaPartialTick(true);
 		int width = event.getGuiGraphics().guiWidth();
 		int height = event.getGuiGraphics().guiHeight();
 
+		/*
 		int renderingStructures = StructureRenderer.getRenderingAll();
 
 		if (renderingStructures != 0) {
@@ -361,6 +341,7 @@ public class VidLibClientEventHandler {
 				}
 			}
 		}
+		 */
 
 		boolean primitiveF3Open = mc.gui.hud.getDebugOverlay().showDebugScreen() && ClientGameEngine.INSTANCE.primitiveF3(mc);
 
@@ -389,7 +370,7 @@ public class VidLibClientEventHandler {
 
 		if (!ClientGameEngine.INSTANCE.hideGui(mc) && !mc.player.isReplayCamera()) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
-			ScreenText.RENDER.ops = mc.jsonOps();
+			ScreenText.RENDER.ops = session.jsonOps;
 
 			if (mc.gui.screen() == null || mc.gui.screen() instanceof ChatScreen) {
 				NeoForge.EVENT_BUS.post(new DebugTextEvent.Render(ScreenText.RENDER));
@@ -414,11 +395,11 @@ public class VidLibClientEventHandler {
 					}
 				}
 
-				if (!session.zoneTagsIn.isEmpty() && VidLibClientOptions.getShowZones()) {
+				if (!playerSession.zoneTagsIn.isEmpty() && VidLibClientOptions.getShowZones()) {
 					ScreenText.RENDER.topRight.add("Zones in:");
 
-					for (var tag : session.zoneTagsIn) {
-						ScreenText.RENDER.topRight.add(tag);
+					for (var tag : playerSession.zoneTagsIn) {
+						ScreenText.RENDER.topRight.add(tag.toString());
 					}
 				}
 
@@ -558,7 +539,7 @@ public class VidLibClientEventHandler {
 	public static void loggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
 		PlayerProfiles.cache(event.getPlayer().getGameProfile());
 
-		if (!event.getPlayer().vl$sessionData().clientModListSentDuringConfig) {
+		if (!ClientWorldSessionData.of(event.getPlayer().connection).clientModListSentDuringConfig) {
 			event.getPlayer().c2s(new ClientModListPayload(PlatformHelper.INSTANCE.getModList()));
 		}
 	}

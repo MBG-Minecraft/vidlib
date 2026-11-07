@@ -9,6 +9,7 @@ import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
+import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import imgui.type.ImFloat;
@@ -158,48 +159,46 @@ public interface VidLibHUD {
 
 		var props = VLPlatformHelper.INSTANCE.getProps(level);
 
-		for (var propList : props.propLists.values()) {
-			for (var prop : propList) {
-				boolean renderName = prop.shouldRenderDisplayName(self);
-				boolean renderHealth = prop.shouldRenderHealth(self);
+		for (var prop : props.levelProps) {
+			boolean renderName = prop.shouldRenderDisplayName(self);
+			boolean renderHealth = prop.shouldRenderHealth(self);
 
-				if (renderName || renderHealth) {
-					if (ClientProps.isPropHidden(prop)) {
-						continue;
+			if (renderName || renderHealth) {
+				if (ClientProps.isPropHidden(prop)) {
+					continue;
+				}
+
+				var pos = prop.getInfoPos(delta);
+				var distSq = cam.distanceToSqr(pos);
+
+				if (distSq > maxDist * maxDist) {
+					continue;
+				}
+
+				var dist = Math.sqrt(distSq);
+
+				var alpha = (int) Math.clamp(KMath.map(dist, midDist, maxDist, 255F, 0F), 0F, 255F);
+
+				if (alpha <= 3) {
+					continue;
+				}
+
+				if (projectedCoordinates.screen(pos, wpos)) {
+					var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F) * NAME_SCALE.get();
+
+					lines.clear();
+
+					if (renderName) {
+						lines.addAll(mc.font.split(prop.getDisplayName(), 1000));
 					}
 
-					var pos = prop.getInfoPos(delta);
-					var distSq = cam.distanceToSqr(pos);
+					float health = renderHealth ? prop.getDisplayHealth(delta) : -1F;
 
-					if (distSq > maxDist * maxDist) {
-						continue;
-					}
-
-					var dist = Math.sqrt(distSq);
-
-					var alpha = (int) Math.clamp(KMath.map(dist, midDist, maxDist, 255F, 0F), 0F, 255F);
-
-					if (alpha <= 3) {
-						continue;
-					}
-
-					if (projectedCoordinates.screen(pos, wpos)) {
-						var scale = (float) Math.clamp(KMath.map(dist, minDist, midDist, 1F, minSize), minSize, 1F) * NAME_SCALE.get();
-
-						lines.clear();
-
-						if (renderName) {
-							lines.addAll(mc.font.split(prop.getDisplayName(), 1000));
-						}
-
-						float health = renderHealth ? prop.getDisplayHealth(delta) : -1F;
-
-						graphics.pose().pushMatrix();
-						graphics.pose().translate(wpos.x(), wpos.y() - 2F);
-						graphics.pose().scale(scale, scale);
-						graphics.healthBarWithText(mc.font, -20, -3, 40, 6, lines, health, alpha);
-						graphics.pose().popMatrix();
-					}
+					graphics.pose().pushMatrix();
+					graphics.pose().translate(wpos.x(), wpos.y() - 2F);
+					graphics.pose().scale(scale, scale);
+					graphics.healthBarWithText(mc.font, -20, -3, 40, 6, lines, health, alpha);
+					graphics.pose().popMatrix();
 				}
 			}
 		}
@@ -238,7 +237,7 @@ public interface VidLibHUD {
 			} else {
 				Pins.draw(graphics, deltaTracker);
 
-				var session = mc.player.vl$sessionData();
+				var session = ClientWorldSessionData.of(mc);
 
 				if (session.screenFade != null) {
 					session.screenFade.draw(graphics, deltaTracker.getGameTimeDeltaPartialTick(true), width, height);

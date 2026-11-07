@@ -48,6 +48,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -82,6 +83,7 @@ public class Prop {
 	public static final PropData<Prop, Boolean> CAN_INTERACT = PropData.createBoolean(Prop.class, "can_interact", p -> p.canInteract, (p, v) -> p.canInteract = v);
 	public static final PropData<Prop, Boolean> PAUSED = PropData.createBoolean(Prop.class, "paused", p -> p.paused, (p, v) -> p.paused = v);
 
+	public final Props<?> props;
 	public final PropType<?> type;
 	public final PropSpawnType spawnType;
 	public final long createdTime;
@@ -107,11 +109,12 @@ public class Prop {
 	public boolean paused;
 
 	public Prop(PropContext<?> ctx) {
+		this.props = ctx.props();
 		this.type = ctx.type();
 		this.spawnType = ctx.spawnType();
 		this.createdTime = ctx.createdTime();
 		this.sync = new ReferenceArraySet<>();
-		this.level = ctx.props().level;
+		this.level = props.level;
 		this.id = 0;
 		this.removed = PropRemoveType.NONE;
 		this.tick = 0;
@@ -152,9 +155,7 @@ public class Prop {
 
 		snap();
 
-		boolean replay = VLPlatformHelper.INSTANCE.isReplayLevel(level);
-
-		if (replay) {
+		if (props.levelData.worldData.isReplay) {
 			tick = Math.max(0, (int) (time - createdTime));
 		}
 
@@ -168,7 +169,7 @@ public class Prop {
 			return true;
 		}
 
-		if (!paused && !replay) {
+		if (!paused && !props.levelData.worldData.isReplay) {
 			tick++;
 		}
 
@@ -341,8 +342,8 @@ public class Prop {
 		return lifespan > 0 ? getTick(delta) / (float) lifespan : def;
 	}
 
-	public KNumberContext createWorldNumberContext() {
-		var ctx = level.getGlobalContext();
+	public KNumberContext createNumberContext() {
+		var ctx = props.levelData.createGlobalContext();
 		ctx.sourcePos = new Vec3(pos.x, pos.y, pos.z);
 		return ctx;
 	}
@@ -548,10 +549,10 @@ public class Prop {
 			return false;
 		}
 
-		level.c2s(new PropInteractionPayload(spawnType.listType, id, button, at, side));
+		level.c2s(new PropInteractionPayload(id, button, at, side));
 
 		if (button == 0) {
-			player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		}
 
 		return true;
@@ -559,7 +560,7 @@ public class Prop {
 
 	public void onServerInteraction(ServerPlayer player, int button, Vec3 at, Direction side) {
 		if (button == 0) {
-			player.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
 		}
 	}
 
@@ -838,7 +839,7 @@ public class Prop {
 
 		setData(data, value);
 
-		if (sync && !VLPlatformHelper.INSTANCE.isReplayLevel(level)) {
+		if (sync && !props.levelData.worldData.isReplay) {
 			var payload = UpdatePropRequestPayload.of(this, List.of(data));
 
 			if (payload != null) {
@@ -895,7 +896,7 @@ public class Prop {
 			this.paused = paused;
 
 			if (!level.isClientSide()) {
-				level.s2c(new PausePropPayload(spawnType.listType, id, paused));
+				level.s2c(new PausePropPayload(id, paused));
 			}
 		}
 	}

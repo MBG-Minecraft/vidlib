@@ -16,6 +16,7 @@ import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
+import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
@@ -59,7 +60,7 @@ public class VidLib {
 	}
 
 	public static void sync(ServerPlayer player, int syncType) {
-		if (VLPlatformHelper.INSTANCE.isReplayLevel(player.level())) {
+		if (ServerPlayerSessionData.of(player).worldData.isReplay) {
 			return;
 		}
 

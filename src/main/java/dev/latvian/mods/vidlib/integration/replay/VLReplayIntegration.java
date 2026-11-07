@@ -46,8 +46,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.prop.ReplayProp;
-import dev.latvian.mods.vidlib.feature.session.LocalClientPlayerSessionData;
-import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
+import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import imgui.ImGui;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
@@ -246,8 +245,8 @@ public class VLReplayIntegration {
 		VidLib.LOGGER.info("Replay Game snapshot");
 		var packets = event.getPackets();
 		var player = event.getSession().getPlayer();
-		var session = (LocalClientPlayerSessionData) player.vl$sessionData();
-		session.sync(packets, player, 1);
+		var session = ClientWorldSessionData.of(Minecraft.getInstance());
+		session.localPlayer.sync(packets, player, 1);
 
 		if (!session.markers.isEmpty()) {
 			for (var data : session.markers) {
@@ -285,7 +284,7 @@ public class VLReplayIntegration {
 				ImGui.checkbox("Show Status Bar###show-bottom-info-bar", BuiltInImGui.SHOW_BOTTOM_INFO_BAR);
 				ImGui.checkbox("Props###props", ClientProps.VISIBLE);
 				ImGui.checkbox("Physics Particles###physics-particles", PhysicsParticleManager.VISIBLE);
-				ImGui.checkbox("Ghost Structures###ghost-structures", GhostStructure.VISIBLE_CONFIG);
+				// ImGui.checkbox("Ghost Structures###ghost-structures", GhostStructure.VISIBLE_CONFIG);
 				ImGui.sliderFloat("Name Scale###name-scale", VidLibHUD.NAME_SCALE.getData(), 0F, 4F);
 				event.endSection();
 			}
@@ -344,8 +343,7 @@ public class VLReplayIntegration {
 		if (mc.level != null && event.getHitResult() instanceof PropHitResult propResult) {
 			var data = event.getSession().getData(SelectedPropReplaySessionData.TYPE);
 			data.selectedProp = propResult.prop.id;
-			data.selectedPropData = propResult.prop.encode(mc.level.nbtOps());
-			data.selectedPropList = propResult.prop.spawnType.listType;
+			data.selectedPropData = propResult.prop.encode(propResult.prop.props.levelData.worldData.nbtOps);
 			data.openSelectedPropPopup = true;
 			event.setCanceled(true);
 		}
@@ -354,8 +352,9 @@ public class VLReplayIntegration {
 	@SubscribeEvent
 	public static void popups(ReplayPopupEvent event) {
 		var mc = Minecraft.getInstance();
+		var session = ClientWorldSessionData.of(mc);
 
-		if (VidLibClientEventHandler.clientLoaded && mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
+		if (VidLibClientEventHandler.clientLoaded && mc.level != null && session.isReplay) {
 			BuiltInImGui.handle(event.getGraphics());
 		}
 
@@ -372,7 +371,7 @@ public class VLReplayIntegration {
 
 		if (data.selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup")) {
 			var props = VLPlatformHelper.INSTANCE.getProps(mc.level);
-			var propList = props.propLists.get(data.selectedPropList);
+			var propList = props.levelProps;
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 
 			if (prop != null) {
@@ -386,7 +385,7 @@ public class VLReplayIntegration {
 
 		if (!ImGui.isPopupOpen("###vidlib-prop-popup")) {
 			var props = VLPlatformHelper.INSTANCE.getProps(mc.level);
-			var propList = props.propLists.get(data.selectedPropList);
+			var propList = props.levelProps;
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 
 			if (prop != null) {

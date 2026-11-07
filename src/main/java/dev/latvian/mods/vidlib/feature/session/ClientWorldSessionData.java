@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.session;
 
-import com.mojang.brigadier.StringReader;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
@@ -22,22 +21,26 @@ import dev.latvian.mods.vidlib.feature.atmosphere.ClientAtmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
+import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
 import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
-import dev.latvian.mods.vidlib.feature.environment.FluidPlane;
 import dev.latvian.mods.vidlib.feature.environment.WorldBorderOverride;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
+import dev.latvian.mods.vidlib.feature.misc.DebugTextEvent;
+import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
+import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.zone.ZoneHit;
+import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
@@ -46,17 +49,16 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.commands.arguments.ParticleArgument;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ClientCommonPacketListener;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector2dc;
@@ -71,6 +73,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ClientWorldSessionData extends WorldSessionData {
+	public static ClientWorldSessionData of(Minecraft mc) {
+		return of(mc.player);
+	}
+
+	public static ClientWorldSessionData of(LocalPlayer player) {
+		return of(player.connection);
+	}
+
 	public static ClientWorldSessionData of(ClientCommonPacketListener listener) {
 		return ((VLClientCommonPacketListener) listener).vl$getWorldData();
 	}
@@ -95,16 +105,14 @@ public class ClientWorldSessionData extends WorldSessionData {
 	public final List<ScreenEffectInstance> screenEffects;
 	public Component topInfoBarOverride;
 	public Component bottomInfoBarOverride;
-	public FluidPlane fluidPlane;
+
 	public Map<UUID, Color> glowColors;
 	public WorldBorderOverride worldBorderOverrideStart;
 	public WorldBorderOverride worldBorderOverrideEnd;
 	public boolean clientModListSentDuringConfig;
 	public List<ReplayMarkerData> markers;
-	public boolean hardcoreHearts;
 	public Map<UUID, Note> notes;
 	public final Int2IntMap entityBrightnessOverrides;
-	public final Map<String, ParticleOptions> particleCache;
 
 	public ClientWorldSessionData(Minecraft mc, UUID localPlayerUUID) {
 		super(MiscUtils.STATIC_REGISTRY_ACCESS);
@@ -121,11 +129,9 @@ public class ClientWorldSessionData extends WorldSessionData {
 		this.glowColors = new Object2ObjectOpenHashMap<>();
 		this.clientModListSentDuringConfig = false;
 		this.markers = new ArrayList<>();
-		this.hardcoreHearts = false;
 		this.notes = new Object2ObjectLinkedOpenHashMap<>();
 		this.entityBrightnessOverrides = new Int2IntOpenHashMap();
 		this.entityBrightnessOverrides.defaultReturnValue(-1);
-		this.particleCache = new Object2ObjectOpenHashMap<>();
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 	}
@@ -136,8 +142,8 @@ public class ClientWorldSessionData extends WorldSessionData {
 	}
 
 	@Override
-	protected LevelSessionData createLevelData(ResourceKey<Level> level) {
-		return new ClientLevelSessionData(this, level);
+	protected ClientLevelSessionData createLevelData(Level level) {
+		return new ClientLevelSessionData(this, level.dimension());
 	}
 
 	@Override
@@ -159,9 +165,19 @@ public class ClientWorldSessionData extends WorldSessionData {
 	public void preTick(PauseType pauseType) {
 		super.preTick(pauseType);
 
+		if (DataMapOverrides.INSTANCE != null) {
+			dataMap.overrides = DataMapOverrides.INSTANCE.serverData;
+
+			for (var session : playerMap.values()) {
+				session.dataMap.overrides = DataMapOverrides.INSTANCE.getPlayerMap(session.uuid);
+			}
+		}
+
 		if (mc.level != null) {
 			getLevel(mc.level.dimension()).tick(mc.level, pauseType);
 		}
+
+		localPlayer.preTick(mc.level, mc.player);
 	}
 
 	@Override
@@ -216,6 +232,29 @@ public class ClientWorldSessionData extends WorldSessionData {
 		if (mc.level != null && pauseType.tick()) {
 			PhysicsParticleManager.tickAll(mc.level, mc.level.getGameTime());
 		}
+
+		NeoForge.EVENT_BUS.post(new DebugTextEvent.ClientTick(ScreenText.CLIENT_TICK));
+
+		/*
+		int b = StructureCapture.CURRENT.getValue().blocks.size();
+
+		if (b > 0) {
+			ScreenText.CLIENT_TICK.topLeft.add("Ghost Structure Capture: %,d blocks".formatted(b));
+		}
+		 */
+
+		if (!MiscClientUtils.CLIENT_CLOSEABLE.isEmpty()) {
+			for (var c : MiscClientUtils.CLIENT_CLOSEABLE) {
+				try {
+					c.close();
+				} catch (Exception ignored) {
+				}
+			}
+
+			MiscClientUtils.CLIENT_CLOSEABLE.clear();
+		}
+
+		HubClientGateway.tickGateway();
 	}
 
 	@Override
@@ -252,10 +291,6 @@ public class ClientWorldSessionData extends WorldSessionData {
 		} else {
 			getPlayer(player).dataMap.update(self.level().getPlayerByUUID(player), update);
 		}
-	}
-
-	@Override
-	public void refreshBlockZones() {
 	}
 
 	@Override
@@ -326,18 +361,6 @@ public class ClientWorldSessionData extends WorldSessionData {
 		} else {
 			entityBrightnessOverrides.put(entityId, override);
 		}
-	}
-
-	@Override
-	public ParticleOptions getParticleOptions(String string) {
-		return particleCache.computeIfAbsent(string, str -> {
-			try {
-				return ParticleArgument.readParticle(new StringReader(string), mc.level.registryAccess());
-			} catch (Exception ex) {
-				VidLib.LOGGER.error("Failed to parse particle from '" + str + "'", ex);
-				return DustParticleOptions.REDSTONE;
-			}
-		});
 	}
 
 	public ClientAtmosphere getAtmosphere(Ref<Atmosphere> ref) {
@@ -415,5 +438,8 @@ public class ClientWorldSessionData extends WorldSessionData {
 		}
 
 		mc.level.addParticle(new ActorParticleOptions(name, false, 0, Optional.empty()), true, true, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0D, 0D, 0D);
+	}
+
+	public void respawned(ClientLevel level, boolean login) {
 	}
 }

@@ -18,6 +18,9 @@ import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRegistryEvent;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
 import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneEvent;
@@ -28,9 +31,9 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
@@ -121,16 +124,6 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	}
 
 	@Override
-	public boolean isReplayLevel(Level level) {
-		return level.vl$isReplayLevel();
-	}
-
-	@Override
-	public boolean isReplayServer(MinecraftServer server) {
-		return server.vl$isReplayServer();
-	}
-
-	@Override
 	public Props<?> getProps(Level level) {
 		return level.getProps();
 	}
@@ -164,7 +157,22 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	}
 
 	@Override
-	public void playerClickedOnZone(ServerPlayer player, ZoneHit hit) {
+	public void playerClickedOnZone(Player player, ZoneHit hit) {
 		NeoForge.EVENT_BUS.post(new ZoneEvent.ClickedOn(player, hit));
+	}
+
+	@Override
+	public ServerWorldSessionData getServerWorldData(MinecraftServer server) {
+		return server.vl$getWorldData();
+	}
+
+	@Override
+	public LevelSessionData getLevelData(Level level) {
+		return level.vl$getLevelData();
+	}
+
+	@Override
+	public PlayerSessionData getPlayerData(Player player) {
+		return player.vl$sessionData();
 	}
 }
