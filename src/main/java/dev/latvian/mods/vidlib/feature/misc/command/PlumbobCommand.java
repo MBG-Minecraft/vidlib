@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.icon.ItemIcon;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
@@ -41,7 +42,7 @@ public interface PlumbobCommand {
 
 	private static int plumbob(Collection<ServerPlayer> players, Optional<Ref<Icon>> icon) {
 		for (var player : players) {
-			player.setPlumbob(icon.orElse(Icon.EMPTY));
+			PlayerSessionData.of(player).setPlumbob(icon.orElse(Icon.EMPTY));
 		}
 
 		return 1;

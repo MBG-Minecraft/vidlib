@@ -16,11 +16,6 @@ import java.util.List;
 
 public class NeoForgeCommonGameEngine extends CommonGameEngine {
 	@Override
-	public boolean hasImprovedPlayerTags() {
-		return true;
-	}
-
-	@Override
 	public void getUsedPorts(MinecraftServer server, List<HubUsedPort> list) {
 		super.getUsedPorts(server, list);
 		NeoForge.EVENT_BUS.post(new UsedPortsEvent(server, list));

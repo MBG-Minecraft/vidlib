@@ -2,25 +2,24 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLServerLevel;
-import dev.latvian.mods.vidlib.core.VLServerPacketListener;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,31 +32,27 @@ import java.util.List;
 public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	@Shadow
 	@Final
-	@Mutable
-	private ServerChunkCache chunkSource;
-
-	@Shadow
-	@Final
 	private MinecraftServer server;
+
+	@Unique
+	private LevelSessionData<?> vl$levelData;
 
 	protected ServerLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
 		super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
 	}
 
 	@Override
-	public void createFireworks(double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, List<FireworkExplosion> explosions, boolean playSound) {
-		s2c(new CreateFireworksPayload(x, y, z, xSpeed, ySpeed, zSpeed, explosions));
-	}
-
-	// Other mods like Motion Capture mod create fake players, so this avoids a null pointer.
-	@Inject(method = "addPlayer", at = @At("HEAD"))
-	private void vl$addPlayer(ServerPlayer player, CallbackInfo ci) {
-		if (player.vl$sessionData() != null) {
-			return;
+	public LevelSessionData<?> vl$getLevelData() {
+		if (vl$levelData == null) {
+			vl$levelData = ServerSessionData.of(server).getLevel(vl$level().dimension());
 		}
 
-		var newPlayerSession = server.vl$getOrLoadServerSession(player.getUUID());
-		((VLServerPacketListener) player.connection).vl$sessionData(newPlayerSession);
+		return vl$levelData;
+	}
+
+	@Override
+	public void createFireworks(double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, List<FireworkExplosion> explosions, boolean playSound) {
+		s2c(new CreateFireworksPayload(x, y, z, xSpeed, ySpeed, zSpeed, explosions));
 	}
 
 	@Inject(method = "announceSleepStatus", at = @At("HEAD"), cancellable = true)

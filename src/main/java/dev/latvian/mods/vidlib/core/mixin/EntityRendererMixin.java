@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.VLEntityRenderer;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -31,7 +32,8 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 				return; // not assigned to a level yet - can't have a brightness override
 			}
 
-			var override = mc.player.vl$sessionData().entityBrightnessOverrides.get(id);
+			var session = ClientSessionData.of(mc);
+			var override = session.entityBrightnessOverrides.get(id);
 
 			if (override != -1) {
 				cir.setReturnValue(override);

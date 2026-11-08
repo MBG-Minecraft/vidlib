@@ -21,7 +21,6 @@ import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
@@ -33,7 +32,9 @@ import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.PacketDebuggerPanel;
 import dev.latvian.mods.vidlib.feature.particle.ChancedParticle;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
-import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.feature.skin.PlayerSkinOverrides;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
@@ -51,6 +52,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
+import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.gui.components.toasts.AdvancementToast;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.Toast;
@@ -64,7 +66,7 @@ import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
-import net.minecraft.client.renderer.state.level.BlockOutlineRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.client.renderer.state.level.WorldBorderRenderState;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
@@ -119,46 +121,53 @@ public class ClientGameEngine {
 		}
 
 		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);
-		map.put(Feature.SMALL_GRASS_HITBOX, 1);
-		map.put(Feature.SOFT_BARRIERS, 1);
 		map.put(Feature.SERVER_DATA, 1);
 		map.put(Feature.PLAYER_DATA, 1);
-		map.put(Feature.SKYBOX, 1);
+	}
+
+	public List<PlayerInfo> getPlayerInfos(Minecraft mc) {
+		if (mc.player == null) {
+			return List.of();
+		}
+
+		var stream = mc.player.connection.getListedOnlinePlayers().stream();
+
+		if (!canSeeAllPlayersInList(mc.player)) {
+			stream = stream.filter(info -> canSeePlayerInList(mc, mc.player, info));
+		}
+
+		return stream.sorted(PlayerTabOverlay.PLAYER_COMPARATOR).limit(80L).toList();
 	}
 
 	public boolean canSeeAllPlayersInList(LocalPlayer self) {
-		return self.isStaff();
+		return PlayerSessionData.of(self).isStaff();
 	}
 
-	public boolean canSeePlayerInList(LocalPlayer self, PlayerInfo playerInfo) {
+	public boolean canSeePlayerInList(Minecraft mc, LocalPlayer self, PlayerInfo playerInfo) {
 		if (CommonGameEngine.INSTANCE.privacyMode()) {
 			return playerInfo.getProfile().id().equals(self.getGameProfile().id());
 		}
 
-		var sessionData = ClientWorldSessionData.of(self).getPlayer(playerInfo.getProfile().id());
-		return !CommonGameEngine.INSTANCE.isPlayerStaff(sessionData.dataMap.get(InternalPlayerData.PLAYER_TAGS), playerInfo.getGameMode());
+		return !ClientSessionData.of(mc).getPlayer(playerInfo.getProfile().id()).isStaff();
 	}
 
 	public Component getPlayerListName(Minecraft mc, PlayerInfo playerInfo, Component fallback) {
-		var nickname = ClientWorldSessionData.of(mc).getPlayer(playerInfo.getProfile().id()).dataMap.get(InternalPlayerData.NICKNAME);
+		var nickname = ClientSessionData.of(mc).getPlayer(playerInfo.getProfile().id()).getNickname();
 		return Empty.isEmpty(nickname) ? fallback : nickname;
-	}
-
-	public boolean isGlowing(Minecraft mc, Entity entity) {
-		if (entity instanceof Player player && player.getOptional(InternalPlayerData.GLOW_COLOR) != null) {
-			return true;
-		}
-
-		return mc.player != null && ClientWorldSessionData.of(mc).glowColors.get(entity.getUUID()) != null;
 	}
 
 	@Nullable
 	public Color getTeamColor(Minecraft mc, Entity entity) {
-		return mc.player != null ? ClientWorldSessionData.of(mc).glowColors.get(entity.getUUID()) : null;
+		var override = ClientSessionData.of(mc).glowColors.get(entity.getUUID());
+		return override != null ? override : entity instanceof Player player ? PlayerSessionData.of(player).getGlowColor() : null;
+	}
+
+	public boolean isGlowing(Minecraft mc, Entity entity) {
+		return entity instanceof Player && VidLibKeys.playerGlowKeyMapping.isDown() && PlayerSessionData.of(mc.player).isStaffOrTalent();
 	}
 
 	public Component getPlayerWorldName(Player player, Component fallback) {
-		var nickname = player.get(InternalPlayerData.NICKNAME);
+		var nickname = PlayerSessionData.of(player).getNickname();
 		return Empty.isEmpty(nickname) ? fallback : nickname;
 	}
 
@@ -186,21 +195,21 @@ public class ClientGameEngine {
 	}
 
 	public Ref<Icon> getPlumbob(Player player) {
-		return player.get(InternalPlayerData.PLUMBOB);
+		return PlayerSessionData.of(player).getPlumbob();
 	}
 
 	public PlayerClothing getClothing(AbstractClientPlayer player) {
-		return player.get(InternalPlayerData.CLOTHING);
+		return PlayerSessionData.of(player).getClothing();
 	}
 
 	@Nullable
 	public SkinTexture overrideSkin(AbstractClientPlayer player) {
-		return player.getOptional(InternalPlayerData.SKIN_OVERRIDE);
+		return PlayerSessionData.of(player).getSkinOverride();
 	}
 
 	@Nullable
 	public ClientAsset overrideCape(Player player) {
-		return player.getOptional(InternalPlayerData.CAPE_OVERRIDE);
+		return PlayerSessionData.of(player).getCapeOverride();
 	}
 
 	public boolean disableCape(Player player) {
@@ -209,7 +218,7 @@ public class ClientGameEngine {
 
 	@Nullable
 	public ClientAsset overrideElytra(Player player) {
-		return player.getOptional(InternalPlayerData.ELYTRA_OVERRIDE);
+		return PlayerSessionData.of(player).getElytraOverride();
 	}
 
 	public PlayerSkin overridePlayerSkin(AbstractClientPlayer player, PlayerSkin original) {
@@ -270,7 +279,7 @@ public class ClientGameEngine {
 
 	@Nullable
 	public Ref<Atmosphere> getAtmosphere(Minecraft mc) {
-		return mc.getAtmosphere();
+		return LevelSessionData.of(mc.level).getAtmosphere();
 	}
 
 	public boolean disableFog() {
@@ -565,7 +574,13 @@ public class ClientGameEngine {
 		return null;
 	}
 
-	public boolean cancelBlockHighlight(BlockOutlineRenderState state) {
+	public boolean cancelBlockHighlight(LevelRenderState levelState) {
+		var state = levelState.blockOutlineRenderState;
+
+		if (state == null) {
+			return false;
+		}
+
 		var mc = Minecraft.getInstance();
 
 		if (mc.player == null || mc.level == null) {
@@ -581,13 +596,12 @@ public class ClientGameEngine {
 		var tool = VidLibTool.of(mc.player);
 
 		if (tool != null) {
-			tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
+			var tempVisuals = new Visuals();
+			tool.getSecond().visuals(mc.player, tool.getFirst(), tempVisuals, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 
-			if (Visuals.TEMP.contains(blockPos)) {
+			if (tempVisuals.contains(blockPos)) {
 				return true;
 			}
-
-			Visuals.TEMP.clear();
 		}
 
 		return false;
@@ -630,7 +644,7 @@ public class ClientGameEngine {
 			return false;
 		}
 
-		var session = ClientWorldSessionData.of(mc);
+		var session = ClientSessionData.of(mc);
 		return session.cameraOverride != null && session.cameraOverride.hideGui();
 	}
 
@@ -639,8 +653,8 @@ public class ClientGameEngine {
 			return true;
 		}
 
-		var session = ClientWorldSessionData.of(Minecraft.getInstance());
-		return session.localPlayer.dataMap.get(InternalPlayerData.HARDCORE_HEARTS);
+		var session = ClientSessionData.of(Minecraft.getInstance());
+		return session.localPlayer.getHardcoreHearts();
 	}
 
 	public boolean hideCrosshair(Minecraft mc) {
@@ -662,7 +676,7 @@ public class ClientGameEngine {
 	}
 
 	public void renderOverlays(Minecraft mc, Gui gui, GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
-		if (getRenderSuspendedOverlay() && mc.player.vl$sessionData().suspended) {
+		if (getRenderSuspendedOverlay() && CommonGameEngine.INSTANCE.isSuspended(mc.player)) {
 			renderSuspendedOverlay(mc, graphics);
 		}
 	}
@@ -818,11 +832,11 @@ public class ClientGameEngine {
 		return VidLibKeys.handleDebugKeys(mc, key);
 	}
 
-	public void tickPlayerInput(LocalPlayer player, KeyboardInput in) {
-		if (player != null && ClientWorldSessionData.of(player).cameraOverride instanceof ControlledCameraOverride c && c.move(in)) {
+	public void tickPlayerInput(Minecraft mc, LocalPlayer player, KeyboardInput in) {
+		if (ClientSessionData.of(mc).cameraOverride instanceof ControlledCameraOverride c && c.move(in)) {
 			in.keyPresses = Input.EMPTY;
 			in.moveVector = Vec2.ZERO;
-		} else if (player != null && player.vl$sessionData().suspended) {
+		} else if (CommonGameEngine.INSTANCE.isSuspended(player)) {
 			in.keyPresses = in.keyPresses.shift() ? new Input(
 				false,
 				false,
@@ -894,7 +908,7 @@ public class ClientGameEngine {
 		if (mc.gui.screen() != null && mc.gui.screen().overrideCamera()) {
 			return mc.gui.screen();
 		} else if (mc.player != null) {
-			var session = ClientWorldSessionData.of(mc);
+			var session = ClientSessionData.of(mc);
 
 			if (session.cameraOverride != null) {
 				return session.cameraOverride;
@@ -915,7 +929,7 @@ public class ClientGameEngine {
 	}
 
 	public List<Waypoint> getWaypoints(Minecraft mc) {
-		return mc.getWaypoints();
+		return LevelSessionData.of(mc.level).getWaypoints();
 	}
 
 	public boolean hideDebugCharts() {
@@ -945,7 +959,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean canViewOnlinePlayerNames(LocalPlayer player) {
-		return player.isStaffOrTalent();
+		return PlayerSessionData.of(player).isStaffOrTalent();
 	}
 
 	public boolean enableSinglePlayerMainMenuButton() {
@@ -1046,7 +1060,7 @@ public class ClientGameEngine {
 
 		if (server != null) {
 			return "Server - " + server.name;
-		} else if (mc.level != null && ClientWorldSessionData.of(mc).isReplay) {
+		} else if (mc.level != null && ClientSessionData.of(mc).isReplay) {
 			return "Replay Editor";
 		} else if (mc.level != null) {
 			return "Singleplayer";
@@ -1057,5 +1071,33 @@ public class ClientGameEngine {
 
 	public boolean shouldRenderDarkDisc(float partialTick, ClientLevel level, boolean original) {
 		return false;
+	}
+
+	public void handleIncreaseKey(Minecraft mc) {
+		mc.options.renderDistance().values().validateValue(mc.options.renderDistance().get() + 1).ifPresent(v -> {
+			mc.options.renderDistance().set(v);
+			mc.status(String.valueOf(v));
+		});
+	}
+
+	public void handleDecreaseKey(Minecraft mc) {
+		mc.options.renderDistance().values().validateValue(mc.options.renderDistance().get() - 1).ifPresent(v -> {
+			mc.options.renderDistance().set(v);
+			mc.status(String.valueOf(v));
+		});
+	}
+
+	public float getAmbientLight(float fallback) {
+		var player = Minecraft.getInstance().player;
+
+		if (player != null) {
+			float value = PlayerSessionData.of(player).getBrightnessOverride();
+
+			if (value > 0F) {
+				return value;
+			}
+		}
+
+		return fallback;
 	}
 }

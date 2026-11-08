@@ -28,6 +28,8 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.chromaticaberration.ChromaticAberrationPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
@@ -108,8 +110,12 @@ public class BuiltInImGui {
 	public static final MenuItem CONFIG = MenuItem.menu(ImIcons.SETTINGS, "Config", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.WRENCH, "Server Data", ServerDataConfigPanel.INSTANCE).enabled(graphics.isAdmin));
 
+		if (graphics.mc.level != null) {
+			list.add(MenuItem.item(ImIcons.WRENCH, "Level Data (" + graphics.mc.level.dimension().identifier() + ")", g1 -> new LevelDataConfigPanel(graphics.mc.level.dimension(), LevelSessionData.of(graphics.mc.level).dataMap).open()).enabled(graphics.isAdmin));
+		}
+
 		if (graphics.player != null) {
-			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(new NameAndId(graphics.player.getGameProfile()), graphics.player.vl$sessionData().dataMap).open()).enabled(graphics.isAdmin));
+			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(new NameAndId(graphics.player.getGameProfile()), PlayerSessionData.of(graphics.player).dataMap).open()).enabled(graphics.isAdmin));
 		}
 
 		// list.add(ClientAtmosphere.MENU_ITEM.enabled(graphics.isAdmin));

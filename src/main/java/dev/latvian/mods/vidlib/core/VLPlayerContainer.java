@@ -18,7 +18,6 @@ import dev.latvian.mods.vidlib.feature.cutscene.PlayCutscenePayload;
 import dev.latvian.mods.vidlib.feature.cutscene.StopCutscenePayload;
 import dev.latvian.mods.vidlib.feature.hud.ToastDisplayPayload;
 import dev.latvian.mods.vidlib.feature.misc.CloseScreenPayload;
-import dev.latvian.mods.vidlib.feature.misc.HardcoreHeartsPayload;
 import dev.latvian.mods.vidlib.feature.misc.InfoBarOverridePayload;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.SetPostEffectPayload;
@@ -70,7 +69,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 
 	@Override
 	default void tell(Component message) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().tell(message);
 		} else {
 			for (var player : vl$getS2CPlayers()) {
@@ -81,7 +80,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 
 	@Override
 	default void status(Component message) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().status(message);
 		} else {
 			for (var player : vl$getS2CPlayers()) {
@@ -91,7 +90,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void toast(String uniqueId, long displayTime, Component title, Component description) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().toast(uniqueId, displayTime, title, description);
 		} else {
 			s2c(new ToastDisplayPayload(uniqueId, displayTime, title, description));
@@ -103,7 +102,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void playCutscene(Ref<Cutscene> cutscene, KNumberVariables variables) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().playCutscene(cutscene, variables);
 		} else if (!cutscene.value().steps().isEmpty()) {
 			s2c(new PlayCutscenePayload(cutscene, variables));
@@ -111,7 +110,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void stopCutscene() {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().stopCutscene();
 		} else {
 			s2c(StopCutscenePayload.INSTANCE);
@@ -119,7 +118,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void screenShake(ScreenShake shake) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().screenShake(shake);
 		} else if (!shake.skip()) {
 			s2c(new ScreenShakePayload(shake));
@@ -127,7 +126,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void screenShake(ScreenShake shake, Vec3 source, double maxDistance) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().screenShake(shake, source, maxDistance);
 		} else {
 			s2c(new ScreenShakeAtPositionPayload(shake, source, maxDistance));
@@ -135,7 +134,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void stopScreenShake() {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().stopScreenShake();
 		} else {
 			s2c(StopScreenShakePayload.INSTANCE);
@@ -143,7 +142,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void setCameraMode(int mode) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().setCameraMode(mode);
 		} else {
 			s2c(new SetCameraModePayload(mode));
@@ -151,7 +150,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void setPostEffect(Identifier id) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().setPostEffect(id);
 		} else {
 			s2c(new SetPostEffectPayload(id));
@@ -159,7 +158,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void vl$closeScreen() {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().vl$closeScreen();
 		} else {
 			s2c(CloseScreenPayload.INSTANCE);
@@ -167,7 +166,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel, boolean closeOnVote) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel, closeOnVote);
 		} else {
 			s2c(new StartYesNoVotingPayload(extraData, title, subtitle, yesLabel, noLabel, closeOnVote));
@@ -175,7 +174,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable, boolean closeOnVote) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().openNumberVotingScreen(extraData, title, subtitle, max, unavailable, closeOnVote);
 		} else {
 			s2c(new StartNumberVotingPayload(extraData, title, subtitle, max, unavailable, closeOnVote));
@@ -183,7 +182,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void removeAllParticles() {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().removeAllParticles();
 		} else {
 			s2c(RemoveAllParticlesPayload.INSTANCE);
@@ -191,7 +190,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void redrawSections(LongList sections, boolean mainThread) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().redrawSections(sections, mainThread);
 		} else {
 			s2c(new RedrawChunkSectionsPayload(sections, mainThread));
@@ -199,7 +198,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void playGlobalSound(PositionedSoundData data, KNumberVariables variables) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().playGlobalSound(data, variables);
 		} else {
 			s2c(new SoundPayload(data, variables));
@@ -215,7 +214,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void physicsParticles(PhysicsParticlesDisplayData data, long spawnTime) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().physicsParticles(data, spawnTime);
 		} else {
 			s2c(new PhysicsParticlesPayload(data, spawnTime));
@@ -233,7 +232,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void cubeParticles(Map<ShapeParticleOptions, List<BlockPos>> map) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().cubeParticles(map);
 		} else {
 			s2c(new SpawnCubeParticlesPayload(map));
@@ -245,7 +244,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void setScreenFade(Fade fade) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().setScreenFade(fade);
 		} else {
 			s2c(new ScreenFadePayload(fade));
@@ -253,7 +252,7 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void marker(ReplayMarkerData data) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().marker(data);
 		} else {
 			s2c(new ReplayMarkerPayload(data));
@@ -261,18 +260,10 @@ public interface VLPlayerContainer extends VLLevelContainer, VLS2CPacketConsumer
 	}
 
 	default void setInfoBarText(int bar, Component text) {
-		if (isClient()) {
+		if (isClientEnvironment()) {
 			getEnvironment().setInfoBarText(bar, text);
 		} else {
 			s2c(new InfoBarOverridePayload(bar, text));
-		}
-	}
-
-	default void setHardcoreHearts(boolean hardcore) {
-		if (isClient()) {
-			getEnvironment().setHardcoreHearts(hardcore);
-		} else {
-			s2c(new HardcoreHeartsPayload(hardcore));
 		}
 	}
 }

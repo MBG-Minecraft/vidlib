@@ -68,7 +68,7 @@ public record Zone(
 		CompositeStreamCodec.of(
 			KLibStreamCodecs.INT8, Zone::priority,
 			ByteBufCodecs.BOOL, Zone::generated,
-			KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Zone::dimension,
+			MCStreamCodecs.DIMENSION, Zone::dimension,
 			Volume.STREAM_CODEC, Zone::volume,
 			EntityFilter.STREAM_CODEC, Zone::entityFilter,
 			MCStreamCodecs.COMPOUND_TAG, Zone::data,
@@ -216,7 +216,7 @@ public record Zone(
 		@Override
 		public void generate(BiConsumer<String, Zone> callback) {
 			super.generate(callback);
-			VLPlatformHelper.INSTANCE.generateZones(callback);
+			VLPlatformHelper.INSTANCE.generateZones(callback, refType);
 		}
 	}
 

@@ -4,10 +4,10 @@ import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.util.LevelOfDetailValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -41,7 +41,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 public interface VidLibEntityRenderStates {
-	ContextKey<VidLibWorldRenderState> WORLD_KEY = new ContextKey<>(ID.vidlib("world"));
+	ContextKey<VLWorldRenderState> WORLD_KEY = new ContextKey<>(ID.vidlib("world"));
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(ID.vidlib("creative"));
 	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(ID.vidlib("sprite_key"));
 	ContextKey<UV> UV = new ContextKey<>(ID.vidlib("uv"));
@@ -76,7 +76,7 @@ public interface VidLibEntityRenderStates {
 	}
 
 	static void lod(Minecraft mc, EntityRenderState state, Vec3 camPos) {
-		var replay = mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level);
+		var replay = mc.player != null && ClientSessionData.of(mc).isReplay;
 		boolean hideDetails = !(replay || LevelOfDetailValue.ENTITY_DETAILS.isVisible(camPos, state.x, state.y, state.z));
 		boolean hideArmor = !(replay || (state instanceof AvatarRenderState ? LevelOfDetailValue.PLAYER_ARMOR : LevelOfDetailValue.ENTITY_ARMOR).isVisible(camPos, state.x, state.y, state.z));
 		boolean hideHandItems = !(replay || LevelOfDetailValue.HELD_ITEM.isVisible(camPos, state.x, state.y, state.z));
@@ -240,7 +240,7 @@ public interface VidLibEntityRenderStates {
 
 	static void extractPlayer(Minecraft mc, Vec3 camPos, AbstractClientPlayer player, AvatarRenderState state) {
 		state.setRenderData(CREATIVE, player.isCreative() ? Boolean.TRUE : null);
-		state.setRenderData(TRANSLUCENT, player.get(InternalPlayerData.TRANSLUCENT) ? Boolean.TRUE : null);
+		state.setRenderData(TRANSLUCENT, PlayerSessionData.of(player).isTranslucent() ? Boolean.TRUE : null);
 
 		if (state.nameTag != null) {
 			state.nameTag = ClientGameEngine.INSTANCE.getFullPlayerWorldName(player, state.nameTag);

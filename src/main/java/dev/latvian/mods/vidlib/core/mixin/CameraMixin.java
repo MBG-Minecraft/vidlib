@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -59,7 +60,7 @@ public abstract class CameraMixin {
 			setPosition(pos);
 			var rot = override.getCameraRotation(delta, pos);
 			setRotation(rot.yawDeg(), rot.pitchDeg(), rot.rollDeg());
-			mc.vl$applyCameraShake((Camera) (Object) this, delta);
+			ClientSessionData.of(mc).applyCameraShake((Camera) (Object) this, delta);
 			ci.cancel();
 		}
 	}
@@ -69,7 +70,7 @@ public abstract class CameraMixin {
 		var mc = Minecraft.getInstance();
 
 		if (mc.gui.screen() == null || !mc.gui.screen().overrideCamera()) {
-			mc.vl$applyCameraShake((Camera) (Object) this, deltaTracker.getGameTimeDeltaPartialTick(false));
+			ClientSessionData.of(mc).applyCameraShake((Camera) (Object) this, deltaTracker.getGameTimeDeltaPartialTick(false));
 		}
 	}
 

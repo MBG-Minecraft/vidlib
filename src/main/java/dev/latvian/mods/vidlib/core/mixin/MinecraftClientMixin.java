@@ -11,6 +11,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.progressqueue.BlockExitScreen;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -44,6 +45,20 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 	@Unique
 	private int vl$reloadCount = 0;
+
+	@Nullable
+	@Unique
+	private ClientSessionData vl$globalData;
+
+	@Override
+	public ClientSessionData vl$getGlobalData() {
+		return vl$globalData;
+	}
+
+	@Override
+	public void vl$setGlobalData(@Nullable ClientSessionData data) {
+		vl$globalData = data;
+	}
 
 	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"))
 	private void vl$swap(ClientPacketListener instance, Packet packet) {

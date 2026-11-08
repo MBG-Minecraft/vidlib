@@ -10,9 +10,9 @@ public class ClientLevelSessionData extends LevelSessionData<ClientProps> {
 		return (ClientLevelSessionData) LevelSessionData.of(level);
 	}
 
-	public final ClientWorldSessionData worldData;
+	public final ClientSessionData worldData;
 
-	public ClientLevelSessionData(ClientWorldSessionData worldData, ResourceKey<Level> dimension) {
+	public ClientLevelSessionData(ClientSessionData worldData, ResourceKey<Level> dimension) {
 		super(worldData, dimension);
 		this.worldData = worldData;
 	}

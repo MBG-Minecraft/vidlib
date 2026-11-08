@@ -21,10 +21,6 @@ public class Feature {
 	public static final Feature SERVER_DATA = create(ID.vidlib("server_data"));
 	public static final Feature PLAYER_DATA = create(ID.vidlib("player_data"));
 
-	public static final Feature SMALL_GRASS_HITBOX = create(ID.vidlib("small_grass_hitbox"));
-	public static final Feature SOFT_BARRIERS = create(ID.vidlib("soft_barriers"));
-	public static final Feature SKYBOX = create(ID.vidlib("skybox"));
-
 	public final Identifier id;
 
 	private Feature(Identifier id) {

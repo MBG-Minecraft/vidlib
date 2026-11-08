@@ -36,7 +36,7 @@ public class VidLibSoundInstance extends AbstractTickableSoundInstance {
 
 	@Override
 	public void tick() {
-		volume = LevelSessionData.of(level).worldData.getPauseType().tick() ? targetVolume : 0F;
+		volume = LevelSessionData.of(level).globalData.getPauseType().tick() ? targetVolume : 0F;
 
 		var pos = position == null ? null : position.value().get(numberContext);
 

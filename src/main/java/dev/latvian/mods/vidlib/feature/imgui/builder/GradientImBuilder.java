@@ -5,7 +5,6 @@ import dev.latvian.mods.klib.color.PositionedColor;
 import dev.latvian.mods.klib.gradient.CompoundGradient;
 import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -14,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
 import imgui.flag.ImGuiColorEditFlags;
 import imgui.type.ImString;
-import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,25 +21,12 @@ public class GradientImBuilder implements ImBuilder<Ref<Gradient>> {
 	public static final ImBuilderType<Ref<Gradient>> TYPE = GradientImBuilder::new;
 	public static final ImString SEARCH = ImGuiUtils.resizableString();
 
-	public static boolean isClientReference(Ref<Gradient> ref) {
-		if (ref == null) {
-			return false;
-		}
-
-		var key = ref.optionalKey();
-		return !key.isEmpty() && Gradient.CLIENT_REGISTRY.get(key) == ref;
-	}
-
-	public static java.util.List<Identifier> clientReferences() {
-		return Gradient.CLIENT_REGISTRY.keys().stream().map(ID::vidlib).sorted(Identifier::compareNamespaced).toList();
-	}
-
 	public final List<PositionedColorImBuilder> colors;
-	public final Identifier[] reference;
+	public final Ref<Gradient>[] reference;
 
 	public GradientImBuilder() {
 		this.colors = new ArrayList<>();
-		this.reference = new Identifier[1];
+		this.reference = new Ref[1];
 	}
 
 	public GradientImBuilder(List<PositionedColor> colors) {
@@ -54,7 +39,7 @@ public class GradientImBuilder implements ImBuilder<Ref<Gradient>> {
 			this.colors.add(builder);
 		}
 
-		this.reference = new Identifier[1];
+		this.reference = new Ref[1];
 	}
 
 	@Override
@@ -62,9 +47,9 @@ public class GradientImBuilder implements ImBuilder<Ref<Gradient>> {
 		colors.clear();
 		reference[0] = null;
 
-		if (isClientReference(value)) {
-			reference[0] = ID.vidlib(value.key());
-		} else if (value != null) {
+		if (value == null || !value.optionalKey().isEmpty()) {
+			reference[0] = value;
+		} else {
 			var positionedColors = value.value().getPositionedColors();
 
 			for (int i = 0; i < positionedColors.size(); i++) {
@@ -78,7 +63,7 @@ public class GradientImBuilder implements ImBuilder<Ref<Gradient>> {
 
 	@Override
 	public ImUpdate imgui(ImGraphics graphics) {
-		var update = graphics.combo("###reference", reference, "Custom", clientReferences(), ID::idToString, SEARCH);
+		var update = graphics.combo("###reference", reference, "Custom", Gradient.REGISTRY.keys(), null, SEARCH);
 
 		if (reference[0] != null) {
 			return update;
@@ -173,7 +158,7 @@ public class GradientImBuilder implements ImBuilder<Ref<Gradient>> {
 	@Override
 	public Ref<Gradient> build() {
 		if (reference[0] != null) {
-			return Gradient.CLIENT_REGISTRY.ref(reference[0].getPath());
+			return reference[0];
 		}
 
 		var list = new ArrayList<PositionedColor>();

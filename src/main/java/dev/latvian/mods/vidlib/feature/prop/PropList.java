@@ -84,7 +84,7 @@ public class PropList implements Iterable<Prop> {
 
 	public void tick(@Nullable S2CPacketConsumer updates, boolean tick) {
 		if (!tick) {
-			if (!map.isEmpty() && props.levelData.worldData.isReplay) {
+			if (!map.isEmpty() && props.levelData.globalData.isReplay) {
 				var time = props.level.getGameTime();
 
 				for (var prop : map.values()) {

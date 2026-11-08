@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.clothing;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
@@ -37,7 +38,7 @@ public interface ClothingCommand {
 
 	private static int setClothing(Collection<ServerPlayer> players, @Nullable PlayerClothing clothing) {
 		for (var player : players) {
-			player.setClothing(clothing == null ? PlayerClothing.NONE : clothing);
+			PlayerSessionData.of(player).setClothing(clothing == null ? PlayerClothing.NONE : clothing);
 		}
 
 		return 1;
@@ -45,7 +46,7 @@ public interface ClothingCommand {
 
 	private static int removeClothing(Collection<ServerPlayer> players) {
 		for (var player : players) {
-			player.setClothing(PlayerClothing.NONE);
+			PlayerSessionData.of(player).setClothing(PlayerClothing.NONE);
 		}
 
 		return 1;

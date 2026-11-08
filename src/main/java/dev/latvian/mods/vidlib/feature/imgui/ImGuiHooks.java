@@ -9,7 +9,7 @@ import dev.latvian.mods.vidlib.feature.client.SDL3Compat;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import imgui.ImFontConfig;
 import imgui.ImFontGlyphRangesBuilder;
 import imgui.ImGui;
@@ -218,7 +218,7 @@ public class ImGuiHooks {
 		var centralNodePos = centralDockNode.getPos();
 		var centralNodeSize = centralDockNode.getSize();
 
-		float h = ClientGameEngine.DISABLE_IMGUI ? 0F : (mc.level != null && VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
+		float h = ClientGameEngine.DISABLE_IMGUI ? 0F : (mc.level != null && ClientSessionData.of(mc).isReplay) || !ClientGameEngine.INSTANCE.hasBottomInfoBar(mc) ? 0F : ImGuiHooks.mainMenuBarHeight;
 
 		var prevWidth = window.getWidth();
 		var prevHeight = window.getHeight();
@@ -245,7 +245,7 @@ public class ImGuiHooks {
 		}
 
 		if (ready && VidLibClientEventHandler.clientLoaded && !ImGuiAPI.getHide()) {
-			if (mc.level == null || !VLPlatformHelper.INSTANCE.isReplayLevel(mc.level)) {
+			if (mc.level == null || !ClientSessionData.of(mc).isReplay) {
 				var old = context.push();
 				var graphics = new ImGraphics(mc);
 				graphics.pushRootStack();

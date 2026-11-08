@@ -22,7 +22,7 @@ public record SyncPlayerInputToServer(PlayerInput input) implements SimplePayloa
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$sessionData().input = input;
+		ctx.playerSessionData().input = input;
 
 		var v = ctx.player().getVehicle();
 

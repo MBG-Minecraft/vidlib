@@ -27,7 +27,7 @@ public record Note(UUID id, NameAndId from, String text, ResourceKey<Level> dime
 		KLibStreamCodecs.UUID, Note::id,
 		MCStreamCodecs.NAME_AND_ID, Note::from,
 		ByteBufCodecs.STRING_UTF8, Note::text,
-		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Note::dimension,
+		MCStreamCodecs.DIMENSION, Note::dimension,
 		ByteBufCodecs.optional(MCStreamCodecs.VEC3), Note::position,
 		Timestamp.STREAM_CODEC, Note::timestamp,
 		NoteVisibility.STREAM_CODEC, Note::visibility,

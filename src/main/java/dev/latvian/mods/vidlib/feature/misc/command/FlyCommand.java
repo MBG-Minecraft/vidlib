@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc.command;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,7 +19,8 @@ public interface FlyCommand {
 	);
 
 	private static int fly(ServerPlayer player) {
-		player.set(InternalPlayerData.CAN_FLY, !player.get(InternalPlayerData.CAN_FLY));
+		var session = PlayerSessionData.of(player);
+		session.setCanFly(!session.getCanFly());
 		return 1;
 	}
 }

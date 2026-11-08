@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
-import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -70,12 +70,12 @@ public class ChallengeCommonGameEngine extends NeoForgeCommonGameEngine {
 
 	@Override
 	public boolean disableIceMelting(Level level, BlockPos pos, BlockState state) {
-		return !level.get(InternalServerData.ICE_MELTS);
+		return !LevelSessionData.of(level).getIceMelts();
 	}
 
 	@Override
 	public boolean disableBlockGravity(Level level, BlockPos pos, BlockState state) {
-		return !level.get(InternalServerData.BLOCK_GRAVITY);
+		return !LevelSessionData.of(level).getBlockGravity();
 	}
 
 	@Override

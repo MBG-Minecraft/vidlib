@@ -4,8 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
-import dev.latvian.mods.klib.codec.MCCodecs;
-import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.entity.filter.EntityFilter;
 import dev.latvian.mods.klib.icon.Icon;
@@ -19,15 +17,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
 
 import java.util.List;
 
 public record Waypoint(
 	String id,
 	Ref<EntityFilter> visible,
-	ResourceKey<Level> dimension,
 	Ref<KVector> position,
 	Ref<Icon> icon,
 	float alpha,
@@ -45,7 +40,6 @@ public record Waypoint(
 	public static final Codec<Waypoint> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Codec.STRING.optionalFieldOf("id", "").forGetter(Waypoint::id),
 		EntityFilter.CODEC.optionalFieldOf("visible", EntityFilter.ANY).forGetter(Waypoint::visible),
-		MCCodecs.DIMENSION.optionalFieldOf("dimension", Level.OVERWORLD).forGetter(Waypoint::dimension),
 		KVector.CODEC.fieldOf("position").forGetter(Waypoint::position),
 		Icon.CODEC.optionalFieldOf("icon", DEFAULT_ICON).forGetter(Waypoint::icon),
 		Codec.FLOAT.optionalFieldOf("alpha", 255F).forGetter(Waypoint::alpha),
@@ -62,7 +56,6 @@ public record Waypoint(
 		ByteBufCodecs.STRING_UTF8, Waypoint::id,
 		ByteBufCodecs.VAR_INT, Waypoint::getFlags,
 		KLibStreamCodecs.optional(EntityFilter.STREAM_CODEC, EntityFilter.ANY), Waypoint::visible,
-		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), Waypoint::dimension,
 		KVector.STREAM_CODEC, Waypoint::position,
 		KLibStreamCodecs.optional(Icon.STREAM_CODEC, DEFAULT_ICON), Waypoint::icon,
 		ByteBufCodecs.FLOAT, Waypoint::alpha,
@@ -79,7 +72,6 @@ public record Waypoint(
 	public static class Builder {
 		private String id = "";
 		private Ref<EntityFilter> visible = EntityFilter.ANY;
-		private ResourceKey<Level> dimension = Level.OVERWORLD;
 		private Ref<KVector> position = KVector.ZERO;
 		private Ref<Icon> icon = DEFAULT_ICON;
 		private float alpha = 255F;
@@ -95,7 +87,6 @@ public record Waypoint(
 			return new Waypoint(
 				id,
 				visible,
-				dimension,
 				position,
 				icon,
 				alpha,
@@ -116,11 +107,6 @@ public record Waypoint(
 
 		public Builder visible(Ref<EntityFilter> value) {
 			visible = value;
-			return this;
-		}
-
-		public Builder dimension(ResourceKey<Level> value) {
-			dimension = value;
 			return this;
 		}
 
@@ -175,7 +161,6 @@ public record Waypoint(
 		String id,
 		int flags,
 		Ref<EntityFilter> filter,
-		ResourceKey<Level> dimension,
 		Ref<KVector> position,
 		Ref<Icon> icon,
 		float alpha,
@@ -187,7 +172,6 @@ public record Waypoint(
 		this(
 			id,
 			filter,
-			dimension,
 			position,
 			icon,
 			alpha,

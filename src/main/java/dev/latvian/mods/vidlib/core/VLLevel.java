@@ -6,7 +6,6 @@ import dev.latvian.mods.klib.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationHolder;
-import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.world.level.Level;
 
@@ -19,17 +18,8 @@ public interface VLLevel extends VLPlayerContainer, VLMinecraftEnvironmentDataHo
 		return (Level) this;
 	}
 
-	default LevelSessionData vl$getLevelData() {
+	default LevelSessionData<?> vl$getLevelData() {
 		throw new NoMixinException(this);
-	}
-
-	default void vl$setLevelData(LevelSessionData levelData) {
-		throw new NoMixinException(this);
-	}
-
-	@Override
-	default DataMap getDataMap() {
-		return getEnvironment().getDataMap();
 	}
 
 	default int bulkModify(boolean undoable, Ref<BulkLevelModification> modification) {

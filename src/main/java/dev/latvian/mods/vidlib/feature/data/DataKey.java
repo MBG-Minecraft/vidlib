@@ -1,38 +1,25 @@
 package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.klib.data.DataType;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
-import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
+import dev.latvian.mods.vidlib.feature.session.GlobalSessionData;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 
-public record DataKey<T>(
-	DataKeyStorage storage,
-	int index,
-	String id,
-	T defaultValue,
-	DataType<T> type,
-	boolean save,
-	boolean sync,
-	List<UpdateCallback<T>> onReceived,
-	boolean allowClientUpdates,
-	boolean skipLogging,
-	@Nullable ImBuilderType<T> imBuilder
-) {
+public class DataKey<K, T> {
 	@FunctionalInterface
-	public interface UpdateCallback<T> extends BiConsumer<@Nullable Player, T> {
-		@Override
-		void accept(@Nullable Player player, T value);
+	public interface UpdateCallback<K, T> {
+		void onUpdate(GlobalSessionData worldData, K key, T value);
 	}
 
-	public static final DataKeyStorage SERVER = new DataKeyStorage("server");
-	public static final DataKeyStorage PLAYER = new DataKeyStorage("player");
+	public static final DataKeyStorage<GlobalSessionData> GLOBAL = new DataKeyStorage<>("global");
+	public static final DataKeyStorage<LevelSessionData<?>> LEVEL = new DataKeyStorage<>("level");
+	public static final DataKeyStorage<PlayerSessionData> PLAYER = new DataKeyStorage<>("player");
 
-	public static class Builder<T> {
-		private final DataKeyStorage storage;
+	public static class Builder<K, T> {
+		private final DataKeyStorage<K> storage;
 		private final String id;
 		private final DataType<T> type;
 		private final T defaultValue;
@@ -40,9 +27,8 @@ public record DataKey<T>(
 		private boolean sync;
 		private boolean allowClientUpdates;
 		private boolean skipLogging;
-		private ImBuilderType<T> imBuilder;
 
-		Builder(DataKeyStorage storage, String id, DataType<T> type, T defaultValue) {
+		Builder(DataKeyStorage<K> storage, String id, DataType<T> type, T defaultValue) {
 			this.storage = storage;
 			this.id = id;
 			this.type = type;
@@ -53,32 +39,27 @@ public record DataKey<T>(
 			this.skipLogging = false;
 		}
 
-		public Builder<T> save() {
+		public Builder<K, T> save() {
 			this.save = true;
 			return this;
 		}
 
-		public Builder<T> sync() {
+		public Builder<K, T> sync() {
 			this.sync = true;
 			return this;
 		}
 
-		public Builder<T> allowClientUpdates() {
+		public Builder<K, T> allowClientUpdates() {
 			this.allowClientUpdates = true;
 			return this;
 		}
 
-		public Builder<T> skipLogging() {
+		public Builder<K, T> skipLogging() {
 			this.skipLogging = true;
 			return this;
 		}
 
-		public Builder<T> imBuilder(ImBuilderType<T> imBuilder) {
-			this.imBuilder = imBuilder;
-			return this;
-		}
-
-		public DataKey<T> build() {
+		public DataKey<K, T> build() {
 			var dataType = new DataKey<>(
 				storage,
 				storage.all.size(),
@@ -89,8 +70,7 @@ public record DataKey<T>(
 				sync,
 				new ArrayList<>(0),
 				allowClientUpdates,
-				skipLogging,
-				imBuilder
+				skipLogging
 			);
 
 			storage.all.put(id, dataType);
@@ -107,12 +87,47 @@ public record DataKey<T>(
 		}
 	}
 
+	public final DataKeyStorage<K> storage;
+	public final int index;
+	public final String id;
+	public final T defaultValue;
+	public final DataType<T> type;
+	public final boolean save;
+	public final boolean sync;
+	public final List<UpdateCallback<K, T>> onReceived;
+	public final boolean allowClientUpdates;
+	public final boolean skipLogging;
+
+	private DataKey(
+		DataKeyStorage<K> storage,
+		int index,
+		String id,
+		T defaultValue,
+		DataType<T> type,
+		boolean save,
+		boolean sync,
+		List<UpdateCallback<K, T>> onReceived,
+		boolean allowClientUpdates,
+		boolean skipLogging
+	) {
+		this.storage = storage;
+		this.index = index;
+		this.id = id;
+		this.defaultValue = defaultValue;
+		this.type = type;
+		this.save = save;
+		this.sync = sync;
+		this.onReceived = onReceived;
+		this.allowClientUpdates = allowClientUpdates;
+		this.skipLogging = skipLogging;
+	}
+
 	@Override
 	public String toString() {
 		return storage + "/" + id;
 	}
 
-	public void addUpdateListener(UpdateCallback<T> onReceived) {
+	public void addUpdateListener(UpdateCallback<K, T> onReceived) {
 		this.onReceived.add(onReceived);
 	}
 }

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc.command;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -24,7 +25,7 @@ public interface NicknameCommand {
 
 	private static int nickname(Collection<ServerPlayer> players, Component name) {
 		for (var player : players) {
-			player.setNickname(name.copy());
+			PlayerSessionData.of(player).setNickname(name.copy());
 		}
 
 		return 1;

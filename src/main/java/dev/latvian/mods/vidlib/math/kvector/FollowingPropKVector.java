@@ -7,7 +7,7 @@ import dev.latvian.mods.klib.entity.PositionType;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.registry.DynamicType;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
@@ -35,7 +35,7 @@ public record FollowingPropKVector(int prop, PositionType positionType) implemen
 	@Override
 	@Nullable
 	public Vec3 get(KNumberContext ctx) {
-		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level);
+		var props = LevelSessionData.of(ctx.level).props;
 		var p = props.levelProps.get(prop);
 		return p == null ? null : p.getPos(positionType);
 	}

@@ -13,6 +13,7 @@ import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberra
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorOverlayEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.FocusedChromaticAberrationEffect;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import imgui.ImGui;
 
 import java.util.function.Supplier;
@@ -36,7 +37,7 @@ public class ScreenEffectPanel extends Panel {
 				var inst = effect.get();
 				inst.duration = duration[0];
 				inst.name = tooltip;
-				var ctx = graphics.mc.level.getGlobalContext().fork(inst.variables);
+				var ctx = LevelSessionData.of(graphics.mc.level).createGlobalContext().fork(inst.variables);
 				ctx.progress = 0D;
 				inst.update(ctx);
 				inst.snap();

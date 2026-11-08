@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.klib.util.CollectionUtils;
-import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
@@ -21,11 +19,6 @@ public interface VLServerPlayer extends VLPlayer {
 	@Override
 	default List<? extends Player> vl$getS2CPlayers() {
 		return List.of(vl$self());
-	}
-
-	@Override
-	default ServerPlayerSessionData vl$sessionData() {
-		throw new NoMixinException(this);
 	}
 
 	@Override

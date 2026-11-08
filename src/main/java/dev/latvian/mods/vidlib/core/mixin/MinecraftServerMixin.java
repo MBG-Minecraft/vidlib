@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import dev.latvian.mods.vidlib.core.VLMinecraftServer;
-import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -28,7 +28,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	private ServerLevel vl$overworld;
 
 	@Unique
-	private ServerWorldSessionData vl$worldData;
+	private ServerSessionData vl$worldData;
 
 	@Inject(method = "createLevels", at = @At("RETURN"))
 	private void vl$createLevels(CallbackInfo ci) {
@@ -46,12 +46,12 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 
 	@Override
 	@Nullable
-	public ServerWorldSessionData vl$getWorldData() {
+	public ServerSessionData vl$getWorldData() {
 		return vl$worldData;
 	}
 
 	@Override
-	public void vl$setWorldData(@Nullable ServerWorldSessionData data) {
+	public void vl$setWorldData(@Nullable ServerSessionData data) {
 		vl$worldData = data;
 	}
 }

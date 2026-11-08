@@ -1,8 +1,9 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.util.StringUtils;
-import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import imgui.ImGui;
 
 public class GlobalStopwatchPanel extends Panel {
@@ -20,8 +21,9 @@ public class GlobalStopwatchPanel extends Panel {
 			return;
 		}
 
-		long stopwatch = graphics.mc.get(InternalServerData.GLOBAL_STOPWATCH);
-		long stopwatchStart = graphics.mc.get(InternalServerData.GLOBAL_STOPWATCH_START);
+		var session = ClientSessionData.of(graphics.mc);
+		long stopwatch = session.dataMap.get(InternalGlobalData.GLOBAL_STOPWATCH);
+		long stopwatchStart = session.dataMap.get(InternalGlobalData.GLOBAL_STOPWATCH_START);
 		boolean update = false;
 
 		long now = graphics.mc.getLevelGameTime();
@@ -62,10 +64,10 @@ public class GlobalStopwatchPanel extends Panel {
 		ImGui.text(StringUtils.timer(sw * 50L));
 
 		if (update && graphics.isAdmin) {
-			graphics.mc.set(InternalServerData.GLOBAL_STOPWATCH, stopwatch);
-			graphics.mc.updateServerDataValue(InternalServerData.GLOBAL_STOPWATCH, stopwatch);
-			graphics.mc.set(InternalServerData.GLOBAL_STOPWATCH_START, stopwatchStart);
-			graphics.mc.updateServerDataValue(InternalServerData.GLOBAL_STOPWATCH_START, stopwatchStart);
+			session.dataMap.set(InternalGlobalData.GLOBAL_STOPWATCH, stopwatch);
+			graphics.mc.updateServerDataValue(InternalGlobalData.GLOBAL_STOPWATCH, stopwatch);
+			session.dataMap.set(InternalGlobalData.GLOBAL_STOPWATCH_START, stopwatchStart);
+			graphics.mc.updateServerDataValue(InternalGlobalData.GLOBAL_STOPWATCH_START, stopwatchStart);
 		}
 	}
 }

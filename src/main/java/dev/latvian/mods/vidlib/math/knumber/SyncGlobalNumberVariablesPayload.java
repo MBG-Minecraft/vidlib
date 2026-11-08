@@ -17,6 +17,6 @@ public record SyncGlobalNumberVariablesPayload(KNumberVariables variables) imple
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().getEnvironment().globalVariables().replace(variables);
+		ctx.globalSessionData().globalVariables.replace(variables);
 	}
 }

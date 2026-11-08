@@ -13,13 +13,14 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
-import dev.latvian.mods.vidlib.feature.entity.filter.VidLibEntityFilters;
+import dev.latvian.mods.vidlib.feature.entity.filter.VLEntityFilters;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
-import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.mrbeastgaming.mods.hub.api.HubServerSession;
@@ -129,12 +130,12 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void dataTypeRegistry(DataTypeRegistryEvent event) {
-		VidLibDataTypes.register(event.getCollector());
+		VLDataTypes.register(event.getCollector());
 	}
 
 	@SubscribeEvent
 	public static void entityFilterTypeRegistry(EntityFilterTypeRegistryEvent event) {
-		VidLibEntityFilters.register(event.getCollector());
+		VLEntityFilters.register(event.getCollector());
 	}
 
 	@SubscribeEvent
@@ -157,7 +158,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.level().getServer().vl$playerJoined(player);
+			ServerSessionData.of(player.level().getServer()).playerJoined(player);
 			HubServerGateway.playerLoggedIn(player);
 		}
 	}
@@ -165,7 +166,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.level().getServer().vl$playerLeft(player);
+			ServerSessionData.of(player.level().getServer()).playerLeft(player);
 			HubServerGateway.playerLoggedOut(player, true);
 		}
 	}
@@ -175,7 +176,7 @@ public class VidLibEventHandler {
 		if (event.getEntity() instanceof ServerPlayer player) {
 			var level = event.getEntity().level();
 			var packets = new S2CPacketBundleBuilder();
-			var props = VLPlatformHelper.INSTANCE.getProps(level);
+			var props = LevelSessionData.of(level).props;
 
 			packets.s2c(new RemoveAllPropsPayload(PropRemoveType.DIMENSION_CHANGE));
 
@@ -191,7 +192,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void playerSaved(PlayerEvent.SaveToFile event) {
 		if (event.getEntity() instanceof ServerPlayer player) {
-			player.vl$sessionData().save();
+			ServerPlayerSessionData.of(player).save();
 		}
 	}
 
@@ -210,7 +211,7 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void serverStopped(ServerStoppedEvent event) {
-		var session = ServerWorldSessionData.of(event.getServer());
+		var session = ServerSessionData.of(event.getServer());
 		session.stopped();
 
 		AutoInit.Type.SAVE_GAME.invoke();
@@ -219,20 +220,20 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void serverPreTick(ServerTickEvent.Pre event) {
-		var session = ServerWorldSessionData.of(event.getServer());
+		var session = ServerSessionData.of(event.getServer());
 		session.preTick(session.getPauseType());
 	}
 
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public static void serverPostTick(ServerTickEvent.Post event) {
-		var session = ServerWorldSessionData.of(event.getServer());
+		var session = ServerSessionData.of(event.getServer());
 		session.postTick(session.getPauseType());
 	}
 
 	@SubscribeEvent
 	public static void levelSaved(LevelEvent.Save event) {
 		if (event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD) {
-			var session = ServerWorldSessionData.of(level.getServer());
+			var session = ServerSessionData.of(level.getServer());
 			session.save();
 			AutoInit.Type.SAVE_GAME.invoke();
 		}
@@ -241,7 +242,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public static void preUseItemOnBlock(UseItemOnBlockEvent event) {
 		if (event.getPlayer() != null) {
-			if (event.getPlayer().vl$isSuspended()) {
+			if (CommonGameEngine.INSTANCE.isSuspended(event.getPlayer())) {
 				event.cancelWithResult(InteractionResult.FAIL);
 				return;
 			}
@@ -257,7 +258,7 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public static void preBlockLeftClick(PlayerInteractEvent.LeftClickBlock event) {
-		if (event.getEntity().vl$isSuspended()) {
+		if (CommonGameEngine.INSTANCE.isSuspended(event.getEntity())) {
 			event.setUseBlock(TriState.FALSE);
 			event.setUseItem(TriState.FALSE);
 			event.setCanceled(true);
@@ -266,21 +267,21 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public static void preBreakBlock(BreakBlockEvent event) {
-		if (event.getPlayer().vl$isSuspended()) {
+		if (CommonGameEngine.INSTANCE.isSuspended(event.getPlayer())) {
 			event.setCanceled(true);
 		}
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public static void prePlaceBlock(BlockEvent.EntityPlaceEvent event) {
-		if (event.getEntity() != null && event.getEntity().vl$isSuspended()) {
+		if (event.getEntity() != null && CommonGameEngine.INSTANCE.isSuspended(event.getEntity())) {
 			event.setCanceled(true);
 		}
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public static void preUseItemInAir(PlayerInteractEvent.RightClickItem event) {
-		if (event.getEntity().vl$isSuspended()) {
+		if (CommonGameEngine.INSTANCE.isSuspended(event.getEntity())) {
 			event.setCancellationResult(InteractionResult.FAIL);
 			event.setCanceled(true);
 			return;

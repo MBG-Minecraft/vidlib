@@ -3,13 +3,12 @@ package dev.latvian.mods.vidlib.feature.client;
 import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.replay.api.ReplayAPI;
-import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
 import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
-import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import imgui.type.ImFloat;
@@ -42,13 +41,15 @@ public interface VidLibHUD {
 			return;
 		}
 
-		var nameDrawType = mc.getNameDrawType();
+		var session = ClientSessionData.of(mc);
+
+		var nameDrawType = session.getNameDrawType();
 
 		if (nameDrawType == NameDrawType.VANILLA) {
 			return;
 		}
 
-		var projectedCoordinates = mc.getProjectedCoordinates();
+		var projectedCoordinates = session.projectedCoordinates;
 
 		if (projectedCoordinates == null) {
 			return;
@@ -61,11 +62,11 @@ public interface VidLibHUD {
 		}
 
 		var cam = mc.gameRenderer.mainCamera().position();
-		double minDist = mc.get(InternalServerData.NAME_DRAW_MIN_DIST);
-		double midDist = mc.get(InternalServerData.NAME_DRAW_MID_DIST);
-		double maxDist = mc.get(InternalServerData.NAME_DRAW_MAX_DIST);
-		float minSize = mc.get(InternalServerData.NAME_DRAW_MIN_SIZE);
-		boolean mustSee = mc.get(InternalServerData.NAME_MUST_SEE);
+		double minDist = session.dataMap.get(InternalGlobalData.NAME_DRAW_MIN_DIST);
+		double midDist = session.dataMap.get(InternalGlobalData.NAME_DRAW_MID_DIST);
+		double maxDist = session.dataMap.get(InternalGlobalData.NAME_DRAW_MAX_DIST);
+		float minSize = session.dataMap.get(InternalGlobalData.NAME_DRAW_MIN_SIZE);
+		boolean mustSee = session.dataMap.get(InternalGlobalData.NAME_MUST_SEE);
 
 		var lines = new ArrayList<FormattedCharSequence>(1);
 		var delta = deltaTracker.getGameTimeDeltaPartialTick(false);
@@ -157,7 +158,7 @@ public interface VidLibHUD {
 			}
 		}
 
-		var props = VLPlatformHelper.INSTANCE.getProps(level);
+		var props = session.level.props;
 
 		for (var prop : props.levelProps) {
 			boolean renderName = prop.shouldRenderDisplayName(self);
@@ -237,7 +238,7 @@ public interface VidLibHUD {
 			} else {
 				Pins.draw(graphics, deltaTracker);
 
-				var session = ClientWorldSessionData.of(mc);
+				var session = ClientSessionData.of(mc);
 
 				if (session.screenFade != null) {
 					session.screenFade.draw(graphics, deltaTracker.getGameTimeDeltaPartialTick(true), width, height);

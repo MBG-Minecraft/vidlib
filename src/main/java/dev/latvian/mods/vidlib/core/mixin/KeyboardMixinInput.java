@@ -12,10 +12,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class KeyboardMixinInput {
 	@Inject(method = "tick", at = @At("RETURN"))
 	private void vl$tick(CallbackInfo ci) {
-		var player = Minecraft.getInstance().player;
+		var mc = Minecraft.getInstance();
+		var player = mc.player;
 
 		if (player != null) {
-			ClientGameEngine.INSTANCE.tickPlayerInput(player, (KeyboardInput) (Object) this);
+			ClientGameEngine.INSTANCE.tickPlayerInput(mc, player, (KeyboardInput) (Object) this);
 		}
 	}
 }

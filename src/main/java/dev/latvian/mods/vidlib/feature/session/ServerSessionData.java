@@ -3,20 +3,23 @@ package dev.latvian.mods.vidlib.feature.session;
 import com.mojang.util.UndashedUuid;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.klib.util.PauseType;
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
-import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
+import dev.latvian.mods.vidlib.feature.data.SyncLevelDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
+import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -27,8 +30,8 @@ import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
 
-public class ServerWorldSessionData extends WorldSessionData {
-	public static ServerWorldSessionData of(MinecraftServer server) {
+public class ServerSessionData extends GlobalSessionData {
+	public static ServerSessionData of(MinecraftServer server) {
 		return VLPlatformHelper.INSTANCE.getServerWorldData(server);
 	}
 
@@ -38,7 +41,7 @@ public class ServerWorldSessionData extends WorldSessionData {
 	public final Map<UUID, ServerPlayerSessionData> serverSessionData;
 	public PacketCapture packetCapture;
 
-	public ServerWorldSessionData(MinecraftServer server) {
+	public ServerSessionData(MinecraftServer server) {
 		super(server.registryAccess());
 		this.server = server;
 		this.random = RandomSource.create();
@@ -58,18 +61,6 @@ public class ServerWorldSessionData extends WorldSessionData {
 	}
 
 	@Override
-	protected ServerLevelSessionData createLevelData(Level level) {
-		return new ServerLevelSessionData(this, (ServerLevel) level);
-	}
-
-	@Override
-	protected PlayerSessionData createPlayerData(UUID uuid) {
-		var session = new ServerPlayerSessionData(this, server, uuid);
-		session.load();
-		return session;
-	}
-
-	@Override
 	public PauseType getPauseType() {
 		return server.isPaused() ? PauseType.GAME : server.tickRateManager().runsNormally() ? PauseType.NONE : PauseType.TICK;
 	}
@@ -80,15 +71,37 @@ public class ServerWorldSessionData extends WorldSessionData {
 	}
 
 	@Override
+	public ServerLevelSessionData getLevel(ResourceKey<Level> dimension) {
+		return (ServerLevelSessionData) super.getLevel(dimension);
+	}
+
+	@Override
+	protected ServerLevelSessionData createLevelData(ResourceKey<Level> dimension) {
+		return new ServerLevelSessionData(this, dimension, server.getLevel(dimension));
+	}
+
+	@Override
+	public ServerPlayerSessionData getPlayer(UUID uuid) {
+		return (ServerPlayerSessionData) super.getPlayer(uuid);
+	}
+
+	@Override
+	protected ServerPlayerSessionData createPlayerData(UUID uuid) {
+		var session = new ServerPlayerSessionData(this, server, uuid);
+		session.load();
+		return session;
+	}
+
+	@Override
 	public void preTick(PauseType pauseType) {
 		super.preTick(pauseType);
 
 		for (var player : server.getPlayerList().getPlayers()) {
-			player.vl$sessionData().preTick(player);
+			ServerPlayerSessionData.of(player).preTick(player);
 		}
 
 		for (var level : server.getAllLevels()) {
-			getLevel(level.dimension()).tick(level, pauseType);
+			ServerLevelSessionData.of(level).tick(level, pauseType);
 		}
 	}
 
@@ -96,28 +109,30 @@ public class ServerWorldSessionData extends WorldSessionData {
 	public void postTick(PauseType pauseType) {
 		super.postTick(pauseType);
 
-		if (VLPlatformHelper.INSTANCE.isReplayLevel(server.overworld())) {
+		if (isReplay) {
 			return;
 		}
 
 		var packetsToEveryone = new S2CPacketBundleBuilder();
 
-		if (!isReplay) {
-			dataMap.sync(packetsToEveryone, (playerId, update) -> new SyncServerDataPayload(update));
+		dataMap.sync(packetsToEveryone, SyncServerDataPayload::new);
 
-			for (var session : server.vl$getAllSessionData()) {
-				session.dataMap.sync(packetsToEveryone, SyncPlayerDataPayload::new);
-			}
+		for (var level : levelMap.values()) {
+			level.dataMap.sync(packetsToEveryone, SyncLevelDataPayload::new);
+		}
+
+		for (var session : playerMap.values()) {
+			session.dataMap.sync(packetsToEveryone, SyncPlayerDataPayload::new);
 		}
 
 		for (var player : server.getPlayerList().getPlayers()) {
-			player.vl$sessionData().syncPlayer(player, packetsToEveryone);
+			ServerPlayerSessionData.of(player).syncPlayer(player, packetsToEveryone);
 		}
 
 		packetsToEveryone.send(server);
 
-		int minFakeLag0 = dataMap.get(InternalServerData.MIN_FAKE_LAG);
-		int maxFakeLag0 = dataMap.get(InternalServerData.MAX_FAKE_LAG);
+		int minFakeLag0 = dataMap.get(InternalGlobalData.MIN_FAKE_LAG);
+		int maxFakeLag0 = dataMap.get(InternalGlobalData.MAX_FAKE_LAG);
 		int minFakeLag = Math.min(minFakeLag0, maxFakeLag0);
 		int maxFakeLag = Math.max(minFakeLag0, maxFakeLag0);
 
@@ -142,7 +157,7 @@ public class ServerWorldSessionData extends WorldSessionData {
 			var data = serverSessionData.remove(uuid);
 
 			if (data != null) {
-				data.dataMap.set(InternalPlayerData.ONLINE, false);
+				data.setOnline(false);
 				server.s2c(new RemovePlayerDataPayload(uuid));
 
 				try {
@@ -208,5 +223,18 @@ public class ServerWorldSessionData extends WorldSessionData {
 		}
 
 		HubServerGateway.stopGateway();
+	}
+
+	public void playerJoined(ServerPlayer player) {
+		PlayerProfiles.cache(player.getGameProfile());
+		var session = PlayerSessionData.of(player);
+		session.setOnline(true);
+		session.setName(player.getScoreboardName());
+		VidLib.sync(player, 2);
+	}
+
+	public void playerLeft(ServerPlayer player) {
+		var session = PlayerSessionData.of(player);
+		session.setOnline(false);
 	}
 }

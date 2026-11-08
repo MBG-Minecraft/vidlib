@@ -2,16 +2,14 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
-import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
-import dev.latvian.mods.vidlib.core.VLServerPlayPacketListener;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpList;
@@ -31,16 +29,6 @@ public abstract class PlayerListMixin {
 	@Final
 	private MinecraftServer server;
 
-	@Shadow
-	public abstract void op(NameAndId profile);
-
-	@Inject(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;setupInboundProtocol(Lnet/minecraft/network/ProtocolInfo;Lnet/minecraft/network/PacketListener;)V"))
-	private void vl$placeNewPlayerHead(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci, @Local ServerGamePacketListenerImpl packetListener) {
-		if (connection.getPacketListener() instanceof VLServerConfigPacketListener config && packetListener instanceof VLServerPlayPacketListener play) {
-			config.vl$transfer(play, packetListener);
-		}
-	}
-
 	@Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getDisplayName()Lnet/minecraft/network/chat/Component;"))
 	private Component vl$getName(ServerPlayer instance) {
 		return Component.literal(instance.getScoreboardName());
@@ -48,18 +36,18 @@ public abstract class PlayerListMixin {
 
 	@Inject(method = "placeNewPlayer", at = @At("RETURN"))
 	private void vl$placeNewPlayerReturn(Connection connection, ServerPlayer player, CommonListenerCookie cookie, CallbackInfo ci) {
-		player.vl$sessionData().respawned(player.level(), true);
+		PlayerSessionData.of(player).respawned(player.level(), true);
 	}
 
 	@Inject(method = "respawn", at = @At("RETURN"))
 	private void vl$respawn(ServerPlayer player, boolean keepInventory, Entity.RemovalReason reason, CallbackInfoReturnable<ServerPlayer> cir) {
 		var newPlayer = cir.getReturnValue();
-		newPlayer.vl$sessionData().respawned(newPlayer.level(), false);
+		PlayerSessionData.of(newPlayer).respawned(newPlayer.level(), false);
 	}
 
 	@Inject(method = "remove", at = @At("RETURN"))
 	private void vl$remove(ServerPlayer player, CallbackInfo ci) {
-		var packetCapture = server.vl$getPacketCapture(false);
+		var packetCapture = ServerSessionData.of(server).packetCapture;
 
 		if (packetCapture != null) {
 			packetCapture.disconnect(player.getUUID());

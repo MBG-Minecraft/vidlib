@@ -6,7 +6,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,7 +28,7 @@ public record PropInteractionPayload(int id, int button, Vec3 pos, Direction sid
 
 	@Override
 	public void handle(Context ctx) {
-		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level());
+		var props = ctx.levelSessionData().props;
 		var prop = props.levelProps.get(id);
 
 		if (prop != null) {

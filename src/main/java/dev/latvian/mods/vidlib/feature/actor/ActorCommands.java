@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -32,14 +33,15 @@ public interface ActorCommands {
 			.then(Commands.argument("username", StringArgumentType.word())
 				.executes(ctx -> {
 					var mc = Minecraft.getInstance();
+					var session = ClientSessionData.of(mc);
 					var profile = new NameAndId(mc.services().profileResolver().fetchByName(StringArgumentType.getString(ctx, "username")).orElseThrow());
 
 					mc.status(Component.literal("3..."));
-					mc.schedule(20, () -> mc.status(Component.literal("2...")));
-					mc.schedule(40, () -> mc.status(Component.literal("1...")));
-					mc.schedule(60, () -> {
+					session.schedule(20, () -> mc.status(Component.literal("2...")));
+					session.schedule(40, () -> mc.status(Component.literal("1...")));
+					session.schedule(60, () -> {
 						mc.status(Component.literal("Go!"));
-						mc.player.vl$sessionData().startNPCRecording(mc, profile);
+						session.startActorRecording(profile);
 					});
 
 					return 1;
@@ -50,7 +52,8 @@ public interface ActorCommands {
 		command.then(Commands.literal("stop-recording")
 			.executes(ctx -> {
 				var mc = Minecraft.getInstance();
-				mc.player.vl$sessionData().stopNPCRecording(mc);
+				var session = ClientSessionData.of(mc);
+				session.stopActorRecording();
 				return 1;
 			})
 		);
@@ -60,13 +63,15 @@ public interface ActorCommands {
 				.suggests(SUGGESTION_PROVIDER)
 				.executes(ctx -> {
 					var mc = Minecraft.getInstance();
-					mc.player.vl$sessionData().replayActorRecording(mc, StringArgumentType.getString(ctx, "recording"));
+					var session = ClientSessionData.of(mc);
+					session.replayActorRecording(StringArgumentType.getString(ctx, "recording"));
 					return 1;
 				})
 			)
 			.executes(ctx -> {
 				var mc = Minecraft.getInstance();
-				mc.player.vl$sessionData().replayActorRecording(mc);
+				var session = ClientSessionData.of(mc);
+				session.replayActorRecording();
 				return 1;
 			})
 		);

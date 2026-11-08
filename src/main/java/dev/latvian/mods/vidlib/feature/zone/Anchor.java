@@ -6,58 +6,40 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.klib.math.LevelVolume;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.core.VLServerLevel;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
+import dev.latvian.mods.vidlib.feature.session.ServerLevelSessionData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.world.chunk.TicketController;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public record Anchor(List<LevelVolume> volumes, Map<ResourceKey<Level>, List<AAIBB>> volumeMap) {
-	public static final Anchor NONE = new Anchor(List.of(), Map.of());
-	public static Anchor client = NONE;
+public record Anchor(List<AAIBB> volumes) {
+	public static final Anchor NONE = new Anchor(List.of());
 
-	public static Anchor create(List<LevelVolume> volumes) {
-		var map = new Reference2ObjectArrayMap<ResourceKey<Level>, List<AAIBB>>(1);
-
-		for (var area : volumes) {
-			map.computeIfAbsent(area.dimension(), k -> new ArrayList<>()).add(area.volume());
-		}
-
-		return new Anchor(List.copyOf(volumes), map);
+	public static Anchor create(List<AAIBB> volumes) {
+		return volumes.isEmpty() ? NONE : new Anchor(volumes);
 	}
 
-	public static Anchor create(ResourceKey<Level> dimension, BlockPos start, BlockPos end) {
-		return create(List.of(new LevelVolume(dimension, start, end)));
+	public static Anchor create(BlockPos start, BlockPos end) {
+		return create(List.of(new AAIBB(start, end)));
 	}
 
 	public static final Codec<Anchor> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-		LevelVolume.CODEC.listOf().optionalFieldOf("volumes", List.of()).forGetter(Anchor::volumes)
-	).apply(instance, list -> list.isEmpty() ? NONE : create(list)));
+		AAIBB.CODEC.listOf().optionalFieldOf("volumes", List.of()).forGetter(Anchor::volumes)
+	).apply(instance, Anchor::create));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, Anchor> STREAM_CODEC = CompositeStreamCodec.of(
-		KLibStreamCodecs.listOf(LevelVolume.STREAM_CODEC), Anchor::volumes,
-		list -> list.isEmpty() ? NONE : create(list)
+		KLibStreamCodecs.listOf(AAIBB.STREAM_CODEC), Anchor::volumes,
+		Anchor::create
 	);
 
 	public static final DataType<Anchor> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
-	public static final TicketController TICKET_CONTROLLER = new TicketController(ID.vidlib("anchor"), (serverLevel, ticketHelper) -> {
-		// Bukkit
-		if (serverLevel instanceof VLServerLevel vlServerLevel) {
-			vlServerLevel.vl$validateLoadedChunks(ticketHelper);
-		}
-	});
+	public static final TicketController TICKET_CONTROLLER = new TicketController(ID.vidlib("anchor"), (serverLevel, ticketHelper) -> ServerLevelSessionData.of(serverLevel).validateLoadedChunks(ticketHelper));
 
 	public static final TicketController BLOCK_TICKET_CONTROLLER = new TicketController(ID.vidlib("anchor_blocks"), (level, ticketHelper) -> {
 		for (var pos : ticketHelper.getBlockTickets().keySet()) {

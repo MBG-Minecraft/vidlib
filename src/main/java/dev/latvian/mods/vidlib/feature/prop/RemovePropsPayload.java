@@ -6,7 +6,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import it.unimi.dsi.fastutil.ints.IntList;
 
 public record RemovePropsPayload(IntList ids, PropRemoveType removeType) implements SimplePayload {
@@ -28,7 +27,7 @@ public record RemovePropsPayload(IntList ids, PropRemoveType removeType) impleme
 			return;
 		}
 
-		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level());
+		var props = ctx.levelSessionData().props;
 
 		for (var id : ids) {
 			var prop = props.levelProps.get(id);

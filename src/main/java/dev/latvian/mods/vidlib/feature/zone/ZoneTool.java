@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.zone;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -43,11 +43,11 @@ public enum ZoneTool implements VidLibTool {
 	}
 
 	private void clickedOnZone(Player player) {
-		var hit = ClientWorldSessionData.of(Minecraft.getInstance()).zoneHit;
+		var hit = ClientSessionData.of(Minecraft.getInstance()).zoneHit;
 
 		if (hit != null) {
 			NeoForge.EVENT_BUS.post(new ZoneEvent.ClickedOn(player, hit));
-			player.c2s(new ZoneClickedPayload(hit.resolvedZone().ref, hit.pos(), hit.distanceSq(), Optional.ofNullable(hit.direction())));
+			player.c2s(new ZoneClickedPayload(hit.zone(), hit.pos(), hit.distanceSq(), Optional.ofNullable(hit.direction())));
 		}
 	}
 }

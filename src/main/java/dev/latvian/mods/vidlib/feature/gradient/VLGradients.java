@@ -3,9 +3,9 @@ package dev.latvian.mods.vidlib.feature.gradient;
 import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.registry.Ref;
 
-public interface ClientGradients {
+public interface VLGradients {
 	static Ref<Gradient> ref(String key) {
-		return Gradient.CLIENT_REGISTRY.ref(key);
+		return Gradient.REGISTRY.ref(key);
 	}
 
 	Ref<Gradient> TRAIL = ref("trail");

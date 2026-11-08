@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.note;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
-import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 
@@ -17,7 +17,7 @@ public interface PrivateNoteCommand {
 
 	static int note(String text) {
 		var mc = Minecraft.getInstance();
-		ClientWorldSessionData.of(mc).createNote(new Note(mc.player, text, NoteVisibility.PRIVATE));
+		ClientSessionData.of(mc).createNote(new Note(mc.player, text, NoteVisibility.PRIVATE));
 		return 1;
 	}
 }

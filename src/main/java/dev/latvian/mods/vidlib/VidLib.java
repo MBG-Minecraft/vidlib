@@ -16,7 +16,7 @@ import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
-import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
@@ -60,13 +60,15 @@ public class VidLib {
 	}
 
 	public static void sync(ServerPlayer player, int syncType) {
-		if (ServerPlayerSessionData.of(player).worldData.isReplay) {
+		var session = PlayerSessionData.of(player);
+
+		if (session.worldData.isReplay) {
 			return;
 		}
 
 		var packets = new S2CPacketBundleBuilder();
 		packets.s2c(new ReplayMarkerPayload(ReplayMarkerData.builder().group(ReplayMarkerGroup.DATA_SYNC).build()));
-		player.vl$sessionData().sync(packets, player, syncType);
+		session.sync(packets, player, syncType);
 		packets.send(player);
 	}
 

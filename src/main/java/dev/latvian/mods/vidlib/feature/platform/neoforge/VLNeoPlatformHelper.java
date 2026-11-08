@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.latvian.mods.klib.platform.PlatformType;
 import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeTypeRegistryEvent;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
@@ -15,12 +16,11 @@ import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.font.TTFFileRegistryEvent;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
-import dev.latvian.mods.vidlib.feature.prop.Props;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRegistryEvent;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
-import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneEvent;
@@ -108,24 +108,9 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	}
 
 	@Override
-	public boolean isStaff(Entity entity) {
-		return entity.isStaff();
-	}
-
-	@Override
-	public boolean isStaffOrTalent(Entity entity) {
-		return entity.isStaffOrTalent();
-	}
-
-	@Override
 	public void collectServerGatewayEventHandlers(HubGatewayEventRegistry<MinecraftServer> registry) {
 		super.collectServerGatewayEventHandlers(registry);
 		NeoForge.EVENT_BUS.post(new HubServerGatewayEventRegistryEvent(registry));
-	}
-
-	@Override
-	public Props<?> getProps(Level level) {
-		return level.getProps();
 	}
 
 	@Override
@@ -142,8 +127,8 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	}
 
 	@Override
-	public void generateZones(BiConsumer<String, Zone> callback) {
-		NeoForge.EVENT_BUS.post(new ZoneEvent.Generate(callback));
+	public void generateZones(BiConsumer<String, Zone> callback, RefType refType) {
+		NeoForge.EVENT_BUS.post(new ZoneEvent.Generate(callback, refType));
 	}
 
 	@Override
@@ -162,17 +147,17 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	}
 
 	@Override
-	public ServerWorldSessionData getServerWorldData(MinecraftServer server) {
+	public ServerSessionData getServerWorldData(MinecraftServer server) {
 		return server.vl$getWorldData();
 	}
 
 	@Override
-	public LevelSessionData getLevelData(Level level) {
+	public LevelSessionData<?> getLevelData(Level level) {
 		return level.vl$getLevelData();
 	}
 
 	@Override
 	public PlayerSessionData getPlayerData(Player player) {
-		return player.vl$sessionData();
+		return player.vl$getPlayerData();
 	}
 }

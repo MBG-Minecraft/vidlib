@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.feature.pin;
 
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import net.minecraft.world.entity.player.Player;
@@ -124,7 +124,7 @@ public class PinsPanel extends Panel {
 				}
 
 				if (entity instanceof Player player) {
-					var nickname = player.get(InternalPlayerData.NICKNAME);
+					var nickname = PlayerSessionData.of(player).getNickname();
 					if (nickname != null && nickname.getStyle().getColor() != null) {
 						return nickname.getStyle().getColor().getValue();
 					}

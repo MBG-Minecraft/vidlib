@@ -39,9 +39,7 @@ public abstract class LevelRendererMixin {
 
 	@Inject(method = "submitBlockOutline", at = @At("HEAD"), cancellable = true)
 	private void vl$submitBlockOutline(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, LevelRenderState levelRenderState, CallbackInfo ci) {
-		var state = levelRenderState.blockOutlineRenderState;
-
-		if (state != null && ClientGameEngine.INSTANCE.cancelBlockHighlight(state)) {
+		if (ClientGameEngine.INSTANCE.cancelBlockHighlight(levelRenderState)) {
 			ci.cancel();
 		}
 	}

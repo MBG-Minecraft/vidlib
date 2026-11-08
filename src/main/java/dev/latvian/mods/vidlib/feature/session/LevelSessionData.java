@@ -5,12 +5,20 @@ import dev.latvian.mods.klib.bulk.BulkLevelModification;
 import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.math.HitBuilder;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.PauseType;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationHolder;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModification;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
+import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.data.DataMap;
+import dev.latvian.mods.vidlib.feature.data.InternalLevelData;
+import dev.latvian.mods.vidlib.feature.environment.FluidPlane;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.Props;
+import dev.latvian.mods.vidlib.feature.waypoint.Waypoint;
+import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.LevelZones;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
@@ -25,6 +33,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class LevelSessionData<P extends Props<?>> {
@@ -32,22 +41,24 @@ public class LevelSessionData<P extends Props<?>> {
 		return VLPlatformHelper.INSTANCE.getLevelData(level);
 	}
 
-	public final WorldSessionData worldData;
+	public final GlobalSessionData globalData;
 	public final ResourceKey<Level> dimension;
+	public final DataMap<LevelSessionData<?>> dataMap;
 	public LevelZones zones;
 	public P props;
 	public final List<UndoableModificationHolder> undoable;
 
-	public LevelSessionData(WorldSessionData worldData, ResourceKey<Level> dimension) {
-		this.worldData = worldData;
+	public LevelSessionData(GlobalSessionData globalData, ResourceKey<Level> dimension) {
+		this.globalData = globalData;
 		this.dimension = dimension;
+		this.dataMap = new DataMap<>(globalData, this, DataKey.LEVEL);
 		this.zones = null;
 		this.props = null;
 		this.undoable = new ArrayList<>();
 	}
 
 	public KNumberContext createGlobalContext() {
-		return new KNumberContext(worldData.globalVariables);
+		return new KNumberContext(globalData.globalVariables);
 	}
 
 	public void tick(Level level, PauseType pauseType) {
@@ -176,5 +187,89 @@ public class LevelSessionData<P extends Props<?>> {
 		}
 
 		return new BulkLevelModificationHolder().apply(level, result.value(), false, true);
+	}
+
+	@Nullable
+	public Ref<Atmosphere> getAtmosphere() {
+		return dataMap.getOptional(InternalLevelData.ATMOSPHERE);
+	}
+
+	public void setAtmosphere(@Nullable Ref<Atmosphere> value) {
+		dataMap.set(InternalLevelData.ATMOSPHERE, value);
+	}
+
+	public Anchor getAnchor() {
+		return dataMap.get(InternalLevelData.ANCHOR);
+	}
+
+	public void setAnchor(Anchor value) {
+		dataMap.set(InternalLevelData.ANCHOR, value);
+	}
+
+	public List<Waypoint> getWaypoints() {
+		return dataMap.get(InternalLevelData.WAYPOINTS);
+	}
+
+	public void setWaypoints(List<Waypoint> value) {
+		dataMap.set(InternalLevelData.WAYPOINTS, List.copyOf(value));
+	}
+
+	public void addWaypoints(List<Waypoint> waypoints) {
+		var list = new ArrayList<>(getWaypoints());
+		list.addAll(waypoints);
+		setWaypoints(list);
+	}
+
+	public void removeWaypoints(Collection<String> ids) {
+		var list = new ArrayList<Waypoint>();
+
+		for (var waypoint : getWaypoints()) {
+			if (!ids.contains(waypoint.id())) {
+				list.add(waypoint);
+			}
+		}
+
+		setWaypoints(list);
+	}
+
+	@Nullable
+	public FluidPlane getFluidPlane() {
+		return dataMap.getOptional(InternalLevelData.FLUID_PLANE);
+	}
+
+	public void setFluidPlane(@Nullable FluidPlane value) {
+		dataMap.set(InternalLevelData.FLUID_PLANE, value);
+	}
+
+	public boolean getIceMelts() {
+		return dataMap.get(InternalLevelData.ICE_MELTS);
+	}
+
+	public void setIceMelts(boolean value) {
+		dataMap.set(InternalLevelData.ICE_MELTS, value);
+	}
+
+	public boolean getBlockGravity() {
+		return dataMap.get(InternalLevelData.BLOCK_GRAVITY);
+	}
+
+	public void setBlockGravity(boolean value) {
+		dataMap.set(InternalLevelData.BLOCK_GRAVITY, value);
+	}
+
+	public boolean getSmallGrassHitbox() {
+		return dataMap.get(InternalLevelData.SMALL_GRASS_HITBOX);
+	}
+
+	public void setSmallGrassHitbox(boolean value) {
+		dataMap.set(InternalLevelData.SMALL_GRASS_HITBOX, value);
+	}
+
+	public boolean getSoftBarriers() {
+		return dataMap.get(InternalLevelData.SOFT_BARRIERS);
+	}
+
+	public void setSoftBarriers(boolean value) {
+		dataMap.set(InternalLevelData.SOFT_BARRIERS, value);
 	}
 }

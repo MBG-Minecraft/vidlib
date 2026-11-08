@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -56,7 +57,7 @@ public class VidLibKeys {
 		}
 
 		while (freezeTickKeyMapping.consumeClick()) {
-			if (!mc.player.isReplayCamera()) {
+			if (!ClientSessionData.of(mc).isReplay) {
 				if (mc.level.tickRateManager().isFrozen()) {
 					mc.runClientCommand("tick unfreeze");
 				} else {
@@ -90,17 +91,11 @@ public class VidLibKeys {
 		}
 
 		while (KLibKeys.increaseKeyMapping.consumeClick()) {
-			mc.options.renderDistance().values().validateValue(mc.options.renderDistance().get() + 1).ifPresent(v -> {
-				mc.options.renderDistance().set(v);
-				mc.status(String.valueOf(v));
-			});
+			ClientGameEngine.INSTANCE.handleIncreaseKey(mc);
 		}
 
 		while (KLibKeys.decreaseKeyMapping.consumeClick()) {
-			mc.options.renderDistance().values().validateValue(mc.options.renderDistance().get() - 1).ifPresent(v -> {
-				mc.options.renderDistance().set(v);
-				mc.status(String.valueOf(v));
-			});
+			ClientGameEngine.INSTANCE.handleDecreaseKey(mc);
 		}
 	}
 

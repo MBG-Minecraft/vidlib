@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
@@ -31,12 +31,10 @@ public class PropExplorerPanel extends Panel {
 		var allProps = new ArrayList<Prop>();
 		var clientProps = new ArrayList<Prop>();
 
-		var props = VLPlatformHelper.INSTANCE.getProps(graphics.mc.level);
+		var props = LevelSessionData.of(graphics.mc.level).props;
 
-		for (var propList : props.propLists.values()) {
-			for (var prop : propList) {
-				(prop.isClientSideOnly() ? clientProps : allProps).add(prop);
-			}
+		for (var prop : props.levelProps) {
+			(prop.isClientSideOnly() ? clientProps : allProps).add(prop);
 		}
 
 		var delta = graphics.mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);

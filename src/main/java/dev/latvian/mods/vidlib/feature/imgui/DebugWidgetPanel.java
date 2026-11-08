@@ -31,6 +31,7 @@ import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.HubProjectReplaysResponse;
 import dev.mrbeastgaming.mods.hub.api.data.HubCountry;
@@ -139,7 +140,7 @@ public class DebugWidgetPanel extends Panel {
 	@Override
 	public void content(ImGraphics graphics) {
 		var mc = Minecraft.getInstance();
-		var ctx = mc.level == null ? new KNumberContext() : mc.level.getGlobalContext().fork(null);
+		var ctx = mc.level == null ? new KNumberContext() : LevelSessionData.of(mc.level).createGlobalContext();
 		ctx.progress = 0.5D;
 
 		ImGui.pushItemWidth(-1F);

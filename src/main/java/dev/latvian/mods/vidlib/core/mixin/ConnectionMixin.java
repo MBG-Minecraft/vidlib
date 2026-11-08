@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
@@ -48,7 +48,7 @@ public class ConnectionMixin {
 			return;
 		}
 
-		var session = ServerWorldSessionData.of(server);
+		var session = ServerSessionData.of(server);
 
 		if (session.isReplay) {
 			return;

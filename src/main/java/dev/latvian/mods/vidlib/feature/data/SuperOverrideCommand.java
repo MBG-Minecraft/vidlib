@@ -2,6 +2,8 @@ package dev.latvian.mods.vidlib.feature.data;
 
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -19,22 +21,22 @@ public interface SuperOverrideCommand {
 			var set = Commands.literal("set");
 			var reset = Commands.literal("reset");
 
-			for (var key : DataKey.SERVER.all.values()) {
-				set.then(Commands.literal(key.id())
-					.then(Commands.argument("value", key.type().argument(buildContext))
+			for (var key : DataKey.GLOBAL.all.values()) {
+				set.then(Commands.literal(key.id)
+					.then(Commands.argument("value", key.type.argument(buildContext))
 						.executes(ctx -> {
-							var session = Minecraft.getInstance().player.vl$sessionData();
-							var value = key.type().get(ctx, "value");
-							session.serverDataMap.setSuperOverride(key, value);
+							var session = ClientSessionData.of(Minecraft.getInstance());
+							var value = key.type.get(ctx, "value");
+							session.dataMap.setSuperOverride(key, value);
 							return 1;
 						})
 					)
 				);
 
-				reset.then(Commands.literal(key.id())
+				reset.then(Commands.literal(key.id)
 					.executes(ctx -> {
-						var session = Minecraft.getInstance().player.vl$sessionData();
-						session.serverDataMap.removeSuperOverride(key);
+						var session = ClientSessionData.of(Minecraft.getInstance());
+						session.dataMap.removeSuperOverride(key);
 						return 1;
 					})
 				);
@@ -52,15 +54,14 @@ public interface SuperOverrideCommand {
 			var reset = Commands.argument("player", EntityArgument.players());
 
 			for (var key : DataKey.PLAYER.all.values()) {
-				set.then(Commands.literal(key.id())
-					.then(Commands.argument("value", key.type().argument(buildContext))
+				set.then(Commands.literal(key.id)
+					.then(Commands.argument("value", key.type.argument(buildContext))
 						.executes(ctx -> {
-							var session = Minecraft.getInstance().player.vl$sessionData();
-							var value = key.type().get(ctx, "value");
+							var value = key.type.get(ctx, "value");
 							var selector = EntityArgument.getPlayers(ctx, "player");
 
 							for (var player : selector) {
-								var psession = session.getClientSessionData(player.getUUID());
+								var psession = PlayerSessionData.of(player);
 								psession.dataMap.setSuperOverride(key, value);
 							}
 
@@ -69,13 +70,12 @@ public interface SuperOverrideCommand {
 					)
 				);
 
-				reset.then(Commands.literal(key.id())
+				reset.then(Commands.literal(key.id)
 					.executes(ctx -> {
-						var session = Minecraft.getInstance().player.vl$sessionData();
 						var selector = EntityArgument.getPlayers(ctx, "player");
 
 						for (var player : selector) {
-							var psession = session.getClientSessionData(player.getUUID());
+							var psession = PlayerSessionData.of(player);
 							psession.dataMap.removeSuperOverride(key);
 						}
 

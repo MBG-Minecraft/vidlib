@@ -4,16 +4,18 @@ import dev.latvian.mods.klib.entity.filter.EntityFilter;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.GlobalSessionData;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
-public record ServerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter {
+public record ServerDataEntityFilter(DataKey<GlobalSessionData, ?> dataKey) implements EntityFilter {
 	public static final DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = DynamicType.create(
 		"server_data",
 		"key",
-		DataKey.SERVER.dataKeyCodec,
-		DataKey.SERVER.dataKeyStreamCodec,
+		DataKey.GLOBAL.dataKeyCodec,
+		DataKey.GLOBAL.dataKeyStreamCodec,
 		ServerDataEntityFilter::new,
 		ServerDataEntityFilter::dataKey
 	);
@@ -25,7 +27,7 @@ public record ServerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter
 
 	@Override
 	public boolean test(Entity entity) {
-		var data = entity.level().getOptional(dataKey);
+		var data = LevelSessionData.of(entity.level()).globalData.dataMap.getOptional(dataKey);
 
 		if (data == null) {
 			return false;
@@ -33,7 +35,7 @@ public record ServerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter
 			return b;
 		}
 
-		var num = dataKey.type().toNumber(Cast.to(data));
+		var num = dataKey.type.toNumber(Cast.to(data));
 		return (num == null ? 0D : num instanceof Double d ? d : num.doubleValue()) != 0D;
 	}
 
@@ -45,6 +47,6 @@ public record ServerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter
 	@Override
 	@NotNull
 	public String toString() {
-		return "$" + dataKey.id();
+		return "server_data:" + dataKey.id;
 	}
 }

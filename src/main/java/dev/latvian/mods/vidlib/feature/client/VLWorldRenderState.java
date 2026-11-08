@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
+import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.icon.Icon;
@@ -13,17 +14,20 @@ import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.visual.Visual;
 import dev.latvian.mods.klib.visual.renderer.VisualExactContext;
 import dev.latvian.mods.klib.visual.renderer.VisualRenderer;
-import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderState;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleRenderState;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderState;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
-import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
@@ -36,7 +40,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class VidLibWorldRenderState {
+public class VLWorldRenderState {
+	public static VLWorldRenderState of(LevelRenderState state) {
+		return state.getRenderData(VidLibEntityRenderStates.WORLD_KEY);
+	}
+
 	public float worldDelta;
 	public float playerDelta;
 	public Frustum frustum;
@@ -47,14 +55,15 @@ public class VidLibWorldRenderState {
 	public VisualExactContext visualExactContext;
 	public Visuals visuals = new Visuals();
 
-	public List<Submittable> submittable = null;
-	public List<Decal> decals = null;
-	public List<PropRenderState<?>> props = null;
-	public List<AAIBB> anchorAreas = null;
+	public List<Submittable> submittable = List.of();
+	public List<Decal> decals = List.of();
+	public List<PropRenderState<?>> props = List.of();
+	public List<AAIBB> anchorAreas = List.of();
 	public FluidPlaneRenderState fluidPlane = null;
+	public List<Pair<PhysicsParticleManager, List<PhysicsParticleRenderState>>> physicsParticles = List.of();
 
 	public void add(Submittable s) {
-		if (submittable == null) {
+		if (submittable.isEmpty()) {
 			submittable = new LinkedList<>();
 		}
 
@@ -69,14 +78,14 @@ public class VidLibWorldRenderState {
 		}
 	}
 
-	public boolean extract(ExtractLevelRenderStateEvent event) {
+	public void extract(ExtractLevelRenderStateEvent event) {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level == null || mc.player == null) {
-			return false;
+			return;
 		}
 
-		var session = ClientWorldSessionData.of(mc);
+		var session = ClientSessionData.of(mc);
 		var levelSession = ClientLevelSessionData.of(mc.level);
 
 		worldDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
@@ -94,39 +103,39 @@ public class VidLibWorldRenderState {
 		);
 
 		var ctx = new VidLibExtractContext(mc, this, event);
-		boolean hasState = false;
 
+		submittable = List.of();
+		decals = List.of();
 		props = levelSession.props.extractAll(ctx);
-
-		if (props != null) {
-			hasState = true;
-		}
+		anchorAreas = List.of();
 
 		if (VidLibClientOptions.getShowAnchor()) {
-			var anchored = mc.getAnchor().volumeMap().get(mc.level.dimension());
+			var anchored = levelSession.getAnchor().volumes();
 
-			if (anchored != null && !anchored.isEmpty()) {
+			if (!anchored.isEmpty()) {
 				anchorAreas = new ArrayList<>(anchored.size());
 
 				for (var area : anchored) {
 					if (event.getFrustum().isVisible(area.aabb())) {
 						anchorAreas.add(area);
-						hasState = true;
 					}
 				}
 			}
 		}
 
-		if (session.fluidPlane != null) {
+		fluidPlane = null;
+
+		var fluidPlaneData = levelSession.getFluidPlane();
+
+		if (fluidPlaneData != null) {
 			fluidPlane = new FluidPlaneRenderState();
-			fluidPlane.zoneFluid = session.fluidPlane.fluid();
-			fluidPlane.y = session.fluidPlane.y();
-			hasState = true;
+			fluidPlane.zoneFluid = fluidPlaneData.fluid();
+			fluidPlane.y = fluidPlaneData.y();
 		}
 
 		var tempBlockPos = new BlockPos.MutableBlockPos();
 
-		if (!session.dataMap.get(InternalServerData.HIDE_PLUMBOBS)) {
+		if (!session.dataMap.get(InternalGlobalData.HIDE_PLUMBOBS)) {
 			for (var player : mc.level.players()) {
 				if (player.isInvisibleTo(mc.player)) {
 					continue;
@@ -166,18 +175,13 @@ public class VidLibWorldRenderState {
 					iconState.light = BlockUtils.getPackedLight(mc.level, tempBlockPos);
 
 					add(iconState);
-					hasState = true;
 				}
 			}
 		}
 
+		physicsParticles = PhysicsParticleManager.extractAll(mc, frustum, cameraPos, 0F);
+
 		NeoForge.EVENT_BUS.post(new VidLibWorldRenderEvent(ctx));
-
-		if (submittable != null && !submittable.isEmpty()) {
-			hasState = true;
-		}
-
-		return hasState;
 	}
 
 	public void submit(SubmitCustomGeometryEvent event) {
@@ -189,13 +193,13 @@ public class VidLibWorldRenderState {
 
 		var ctx = new SubmitContext(mc, event);
 
-		if (submittable != null) {
+		if (!submittable.isEmpty()) {
 			for (var s : submittable) {
 				s.submit(ctx);
 			}
 		}
 
-		if (props != null && !props.isEmpty()) {
+		if (!props.isEmpty()) {
 			for (var state : props) {
 				ctx.push(state.x, state.y, state.z);
 				state.submit(ctx);
@@ -203,7 +207,7 @@ public class VidLibWorldRenderState {
 			}
 		}
 
-		if (anchorAreas != null && !anchorAreas.isEmpty()) {
+		if (!anchorAreas.isEmpty()) {
 			for (var a : anchorAreas) {
 				ctx.push(a.minX(), a.minY(), a.minZ());
 
@@ -244,6 +248,12 @@ public class VidLibWorldRenderState {
 			decals.clear();
 		}
 		 */
+
+		if (!physicsParticles.isEmpty()) {
+			for (var pair : physicsParticles) {
+				pair.getFirst().submit(ctx, pair.getSecond());
+			}
+		}
 	}
 
 	/*

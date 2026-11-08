@@ -5,7 +5,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.network.codec.ByteBufCodecs;
 
 public record PropS2CPayload(int prop, int packet, byte[] data) implements SimplePayload {
@@ -24,7 +23,7 @@ public record PropS2CPayload(int prop, int packet, byte[] data) implements Simpl
 
 	@Override
 	public void handle(Context ctx) {
-		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level());
+		var props = ctx.levelSessionData().props;
 		var prop = props.levelProps.get(prop());
 
 		if (prop != null) {

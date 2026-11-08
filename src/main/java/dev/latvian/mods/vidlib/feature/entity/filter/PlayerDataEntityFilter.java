@@ -4,19 +4,20 @@ import dev.latvian.mods.klib.entity.filter.EntityFilter;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record PlayerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter {
+public record PlayerDataEntityFilter(DataKey<PlayerSessionData, ?> dataKey) implements EntityFilter {
 	public static final DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = DynamicType.create(
 		"player_data",
 		"key",
 		DataKey.PLAYER.dataKeyCodec,
 		DataKey.PLAYER.dataKeyStreamCodec,
-		ServerDataEntityFilter::new,
-		ServerDataEntityFilter::dataKey
+		PlayerDataEntityFilter::new,
+		PlayerDataEntityFilter::dataKey
 	);
 
 	@Override
@@ -26,7 +27,7 @@ public record PlayerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter
 
 	@Override
 	public boolean test(Entity entity) {
-		var data = entity instanceof Player player ? player.getOptional(dataKey) : null;
+		var data = entity instanceof Player player ? PlayerSessionData.of(player).dataMap.getOptional(dataKey) : null;
 
 		if (data == null) {
 			return false;
@@ -34,7 +35,7 @@ public record PlayerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter
 			return b;
 		}
 
-		var num = dataKey.type().toNumber(Cast.to(data));
+		var num = dataKey.type.toNumber(Cast.to(data));
 		return (num == null ? 0D : num instanceof Double d ? d : num.doubleValue()) != 0D;
 	}
 
@@ -46,6 +47,6 @@ public record PlayerDataEntityFilter(DataKey<?> dataKey) implements EntityFilter
 	@Override
 	@NotNull
 	public String toString() {
-		return "$$" + dataKey.id();
+		return "player_data:" + dataKey.id;
 	}
 }

@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderType;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilderWrapper;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import imgui.ImGui;
 import imgui.type.ImString;
 import net.minecraft.client.Minecraft;
@@ -55,9 +56,9 @@ public interface ParticleOptionsImBuilder<T extends ParticleOptions> extends ImB
 		public boolean isValid() {
 			try {
 				var mc = Minecraft.getInstance();
-				var parser = mc.level.nbtParser();
-				var tag = parser.parseFully(nbtString.get());
-				return codec.decode(mc.level.nbtOps(), tag).isSuccess();
+				var session = ClientSessionData.of(mc);
+				var tag = session.nbtParser.parseFully(nbtString.get());
+				return codec.decode(session.nbtOps, tag).isSuccess();
 			} catch (Exception ex) {
 				return false;
 			}
@@ -67,9 +68,9 @@ public interface ParticleOptionsImBuilder<T extends ParticleOptions> extends ImB
 		public ParticleOptions build() {
 			try {
 				var mc = Minecraft.getInstance();
-				var parser = mc.level.nbtParser();
-				var tag = parser.parseFully(nbtString.get());
-				return codec.decode(mc.level.nbtOps(), tag).getOrThrow().getFirst();
+				var session = ClientSessionData.of(mc);
+				var tag = session.nbtParser.parseFully(nbtString.get());
+				return codec.decode(session.nbtOps, tag).getOrThrow().getFirst();
 			} catch (Exception ex) {
 				return null;
 			}

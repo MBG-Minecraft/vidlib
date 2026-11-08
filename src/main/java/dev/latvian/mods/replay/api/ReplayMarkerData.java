@@ -43,7 +43,7 @@ public record ReplayMarkerData(
 	public static final StreamCodec<ByteBuf, ReplayMarkerData> STREAM_CODEC = CompositeStreamCodec.of(
 		KLibStreamCodecs.optional(ReplayMarkerGroup.STREAM_CODEC, ReplayMarkerGroup.DEFAULT), ReplayMarkerData::group,
 		ByteBufCodecs.optional(Color.SOLID_STREAM_CODEC), ReplayMarkerData::color,
-		KLibStreamCodecs.optional(MCStreamCodecs.DIMENSION, Level.OVERWORLD), ReplayMarkerData::dimension,
+		MCStreamCodecs.DIMENSION, ReplayMarkerData::dimension,
 		ByteBufCodecs.optional(MCStreamCodecs.VEC3), ReplayMarkerData::position,
 		ByteBufCodecs.STRING_UTF8, ReplayMarkerData::description,
 		ByteBufCodecs.optional(ByteBufCodecs.TAG), ReplayMarkerData::customData,

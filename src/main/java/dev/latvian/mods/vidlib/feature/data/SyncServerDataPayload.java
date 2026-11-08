@@ -4,12 +4,17 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
+import dev.latvian.mods.vidlib.feature.session.GlobalSessionData;
 
 import java.util.List;
 
-public record SyncServerDataPayload(List<DataMapValue> update) implements SimplePayload {
+public record SyncServerDataPayload(List<DataMapValue<GlobalSessionData>> update) implements SimplePayload {
 	@AutoPacket
-	public static final SimplePayloadType<SyncServerDataPayload> TYPE = SimplePayloadType.vidlib("sync_server_data", DataKey.SERVER.valueListStreamCodec.map(SyncServerDataPayload::new, SyncServerDataPayload::update));
+	public static final SimplePayloadType<SyncServerDataPayload> TYPE = SimplePayloadType.vidlib("sync_server_data", DataKey.GLOBAL.valueListStreamCodec.map(SyncServerDataPayload::new, SyncServerDataPayload::update));
+
+	public SyncServerDataPayload(GlobalSessionData ignored, List<DataMapValue<GlobalSessionData>> update) {
+		this(update);
+	}
 
 	@Override
 	public SimplePayloadType<?> getType() {
@@ -19,7 +24,7 @@ public record SyncServerDataPayload(List<DataMapValue> update) implements Simple
 	@Override
 	public boolean allowDebugLogging() {
 		for (var u : update) {
-			if (u.key() != null && !u.key().skipLogging()) {
+			if (u.key() != null && !u.key().skipLogging) {
 				return true;
 			}
 		}
@@ -29,6 +34,7 @@ public record SyncServerDataPayload(List<DataMapValue> update) implements Simple
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.playerSessionData().worldData.updateServerData(ctx.player(), update);
+		var session = ctx.globalSessionData();
+		ctx.globalSessionData().dataMap.update(session, update);
 	}
 }

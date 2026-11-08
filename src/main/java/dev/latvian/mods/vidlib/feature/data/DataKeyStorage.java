@@ -18,15 +18,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public class DataKeyStorage {
+public class DataKeyStorage<K> {
 	public final String name;
-	public final Map<String, DataKey<?>> all;
-	public final Map<String, DataKey<?>> saved;
-	final Map<String, DataKey<?>> synced;
-	public final StreamCodec<RegistryFriendlyByteBuf, DataMapValue> valueStreamCodec;
-	public final StreamCodec<RegistryFriendlyByteBuf, List<DataMapValue>> valueListStreamCodec;
-	public final Codec<DataKey<?>> dataKeyCodec;
-	public final StreamCodec<ByteBuf, DataKey<?>> dataKeyStreamCodec;
+	public final Map<String, DataKey<K, ?>> all;
+	public final Map<String, DataKey<K, ?>> saved;
+	final Map<String, DataKey<K, ?>> synced;
+	public final StreamCodec<RegistryFriendlyByteBuf, DataMapValue<K>> valueStreamCodec;
+	public final StreamCodec<RegistryFriendlyByteBuf, List<DataMapValue<K>>> valueListStreamCodec;
+	public final Codec<DataKey<K, ?>> dataKeyCodec;
+	public final StreamCodec<ByteBuf, DataKey<K, ?>> dataKeyStreamCodec;
 
 	public DataKeyStorage(String name) {
 		this.name = name;
@@ -35,8 +35,10 @@ public class DataKeyStorage {
 		this.synced = new Object2ObjectOpenHashMap<>();
 
 		this.valueStreamCodec = new StreamCodec<>() {
+			private final DataMapValue<K> invalidValue = new DataMapValue<>(null, null);
+
 			@Override
-			public DataMapValue decode(RegistryFriendlyByteBuf buf) {
+			public DataMapValue<K> decode(RegistryFriendlyByteBuf buf) {
 				var id = buf.readUtf();
 				var key = synced.get(id);
 
@@ -44,22 +46,22 @@ public class DataKeyStorage {
 
 				if (key == null) {
 					VidLib.LOGGER.error("Data type with id " + id + " not found. Available types in '" + DataKeyStorage.this.name + "': " + synced.keySet());
-					return DataMapValue.INVALID;
+					return invalidValue;
 				}
 
 				var value = decoded.value();
 
 				if (decoded.bytes() != null) {
-					value = VLStreamCodecs.decodeValue(buf, key.type(), decoded.bytes());
+					value = VLStreamCodecs.decodeValue(buf, key.type, decoded.bytes());
 				}
 
-				return new DataMapValue(key, value);
+				return new DataMapValue<>(key, value);
 			}
 
 			@Override
-			public void encode(RegistryFriendlyByteBuf buf, DataMapValue dataMapValue) {
-				buf.writeUtf(dataMapValue.key().id());
-				VLStreamCodecs.encode(buf, dataMapValue.key().type(), dataMapValue.value());
+			public void encode(RegistryFriendlyByteBuf buf, DataMapValue<K> dataMapValue) {
+				buf.writeUtf(dataMapValue.key().id);
+				VLStreamCodecs.encode(buf, dataMapValue.key().type, dataMapValue.value());
 			}
 		};
 
@@ -73,7 +75,7 @@ public class DataKeyStorage {
 			} else {
 				return DataResult.error(() -> name + " data key '" + key + "' not found");
 			}
-		}, DataKey::id);
+		}, k -> k.id);
 
 		this.dataKeyStreamCodec = ByteBufCodecs.STRING_UTF8.map(s -> {
 			var dataKey = all.get(s);
@@ -83,54 +85,54 @@ public class DataKeyStorage {
 			} else {
 				throw new NullPointerException("Data key '" + s + "' not found");
 			}
-		}, DataKey::id);
+		}, k -> k.id);
 	}
 
-	public <T> DataKey.Builder<T> builder(String id, DataType<T> type, T defaultValue) {
+	public <T> DataKey.Builder<K, T> builder(String id, DataType<T> type, T defaultValue) {
 		return new DataKey.Builder<>(this, id, type, defaultValue);
 	}
 
-	public <T> DataKey.Builder<T> buildDefault(String id, DataType<T> type, @Nullable T defaultValue) {
+	public <T> DataKey.Builder<K, T> buildDefault(String id, DataType<T> type, @Nullable T defaultValue) {
 		return builder(id, type, defaultValue).save().sync();
 	}
 
-	public <T> DataKey<T> createDefault(String id, DataType<T> type, @Nullable T defaultValue) {
+	public <T> DataKey<K, T> createDefault(String id, DataType<T> type, @Nullable T defaultValue) {
 		return buildDefault(id, type, defaultValue).build();
 	}
 
-	public DataKey<Boolean> createBoolean(String id, boolean defaultValue) {
+	public DataKey<K, Boolean> createBoolean(String id, boolean defaultValue) {
 		return createDefault(id, DataTypes.BOOL, defaultValue);
 	}
 
-	public DataKey<Integer> createInt(String id, int defaultValue, int min, int max) {
+	public DataKey<K, Integer> createInt(String id, int defaultValue, int min, int max) {
 		return createDefault(id, DataTypes.INT, defaultValue);
 	}
 
-	public DataKey<Integer> createVarInt(String id, int defaultValue, int min, int max) {
+	public DataKey<K, Integer> createVarInt(String id, int defaultValue, int min, int max) {
 		return createDefault(id, DataTypes.VAR_INT, defaultValue);
 	}
 
-	public DataKey<Long> createLong(String id, long defaultValue, long min, long max) {
+	public DataKey<K, Long> createLong(String id, long defaultValue, long min, long max) {
 		return createDefault(id, DataTypes.LONG, defaultValue);
 	}
 
-	public DataKey<Long> createVarLong(String id, long defaultValue, long min, long max) {
+	public DataKey<K, Long> createVarLong(String id, long defaultValue, long min, long max) {
 		return createDefault(id, DataTypes.VAR_LONG, defaultValue);
 	}
 
-	public DataKey<Integer> createTicks(String id, int defaultValue, int min, int max) {
+	public DataKey<K, Integer> createTicks(String id, int defaultValue, int min, int max) {
 		return createDefault(id, DataTypes.TICKS, defaultValue);
 	}
 
-	public DataKey<Float> createFloat(String id, float defaultValue, float min, float max) {
+	public DataKey<K, Float> createFloat(String id, float defaultValue, float min, float max) {
 		return createDefault(id, DataTypes.FLOAT, defaultValue);
 	}
 
-	public DataKey<Double> createDouble(String id, double defaultValue, double min, double max) {
+	public DataKey<K, Double> createDouble(String id, double defaultValue, double min, double max) {
 		return createDefault(id, DataTypes.DOUBLE, defaultValue);
 	}
 
-	public <E> DataKey<E> createEnum(String id, DataType<E> type, E defaultValue, E[] values) {
+	public <E> DataKey<K, E> createEnum(String id, DataType<E> type, E defaultValue) {
 		return createDefault(id, type, defaultValue);
 	}
 

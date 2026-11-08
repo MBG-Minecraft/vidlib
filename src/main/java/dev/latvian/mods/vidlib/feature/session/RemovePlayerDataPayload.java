@@ -19,6 +19,6 @@ public record RemovePlayerDataPayload(UUID player) implements SimplePayload {
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.worldSessionData().removePlayer(player);
+		ctx.globalSessionData().removePlayer(player);
 	}
 }

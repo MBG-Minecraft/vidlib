@@ -5,7 +5,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 
 public record RemoveAllPropsPayload(PropRemoveType removeType) implements SimplePayload {
 	@AutoPacket
@@ -21,7 +20,7 @@ public record RemoveAllPropsPayload(PropRemoveType removeType) implements Simple
 
 	@Override
 	public void handle(Context ctx) {
-		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level());
+		var props = ctx.levelSessionData().props;
 		props.levelProps.removeAll(removeType);
 	}
 }

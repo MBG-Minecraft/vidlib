@@ -1,11 +1,9 @@
 package dev.latvian.mods.vidlib.feature.net;
 
-import dev.latvian.mods.vidlib.core.VLPacketListener;
 import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
+import dev.latvian.mods.vidlib.feature.session.GlobalSessionData;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
-import dev.latvian.mods.vidlib.feature.session.LoginData;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
-import dev.latvian.mods.vidlib.feature.session.WorldSessionData;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
@@ -31,8 +29,8 @@ public interface Context {
 		return player().level();
 	}
 
-	default WorldSessionData worldSessionData() {
-		return levelSessionData().worldData;
+	default GlobalSessionData globalSessionData() {
+		return levelSessionData().globalData;
 	}
 
 	default LevelSessionData levelSessionData() {
@@ -57,7 +55,7 @@ public interface Context {
 	}
 
 	default boolean isReplay() {
-		return worldSessionData().isReplay;
+		return globalSessionData().isReplay;
 	}
 
 	default void finishTask(ConfigurationTask.Type type) {
@@ -65,14 +63,6 @@ public interface Context {
 			listener.vl$finishTask(type);
 		} else {
 			throw new UnsupportedOperationException("Attempted to complete a configuration task outside of the configuration phase!");
-		}
-	}
-
-	default void addLoginData(LoginData data) {
-		if (listener() instanceof VLPacketListener listener) {
-			listener.vl$addLoginData(data);
-		} else {
-			throw new UnsupportedOperationException("Attempted to add login data outside of the configuration phase!");
 		}
 	}
 

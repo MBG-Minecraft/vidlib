@@ -13,13 +13,12 @@ import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
+import dev.latvian.mods.vidlib.feature.client.VLWorldRenderState;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
-import dev.latvian.mods.vidlib.feature.client.VidLibWorldRenderState;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresetLoader;
-import dev.latvian.mods.vidlib.feature.data.InternalServerData;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.item.RainbowItemTint;
@@ -34,6 +33,7 @@ import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderStateRegistryEvent;
@@ -51,9 +51,9 @@ import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVPropRenderState;
-import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientPlayerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
-import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
@@ -127,11 +127,6 @@ public class VidLibClientEventHandler {
 	}
 
 	public static void syncSetup() {
-		InternalServerData.ANCHOR.addUpdateListener(VidLibClientEventHandler::updateAnchor);
-	}
-
-	private static void updateAnchor(Player player, Anchor anchor) {
-		Anchor.client = anchor;
 	}
 
 	@SubscribeEvent
@@ -226,7 +221,7 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.level != null && mc.player != null) {
-			var session = ClientWorldSessionData.of(mc);
+			var session = ClientSessionData.of(mc);
 
 			if (VidLibClient.levelTick == Integer.MAX_VALUE) {
 				VidLibClient.levelTick = 0;
@@ -251,7 +246,7 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void clientPostTick(ClientTickEvent.Post event) {
 		var mc = Minecraft.getInstance();
-		var session = ClientWorldSessionData.of(mc);
+		var session = ClientSessionData.of(mc);
 		session.postTick(session.getPauseType());
 	}
 
@@ -268,7 +263,7 @@ public class VidLibClientEventHandler {
 			return;
 		}
 
-		var session = ClientWorldSessionData.of(mc);
+		var session = ClientSessionData.of(mc);
 		session.projectedCoordinates = ProjectedCoordinates.of(mc, event.getCameraState());
 
 		if (mc.options.getCameraType() == CameraType.FIRST_PERSON && VidLibClientOptions.getShowZones()) {
@@ -289,20 +284,15 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void extract(ExtractLevelRenderStateEvent event) {
-		var state = new VidLibWorldRenderState();
-
-		if (state.extract(event)) {
-			event.getRenderState().setRenderData(VidLibEntityRenderStates.WORLD_KEY, state);
-		}
+		var state = new VLWorldRenderState();
+		state.extract(event);
+		event.getRenderState().setRenderData(VidLibEntityRenderStates.WORLD_KEY, state);
 	}
 
 	@SubscribeEvent
 	public static void submit(SubmitCustomGeometryEvent event) {
-		var state = event.getLevelRenderState().getRenderData(VidLibEntityRenderStates.WORLD_KEY);
-
-		if (state != null) {
-			state.submit(event);
-		}
+		var state = VLWorldRenderState.of(event.getLevelRenderState());
+		state.submit(event);
 	}
 
 	@SubscribeEvent
@@ -317,8 +307,8 @@ public class VidLibClientEventHandler {
 	}
 
 	public static void renderHUD0(Minecraft mc, RenderGuiEvent.Post event) {
-		var session = ClientWorldSessionData.of(mc.player.connection);
-		var playerSession = mc.player.vl$sessionData();
+		var session = ClientSessionData.of(mc);
+		var playerSession = ClientPlayerSessionData.of(mc.player);
 		var graphics = event.getGuiGraphics();
 		var delta = event.getPartialTick().getGameTimeDeltaPartialTick(true);
 		int width = event.getGuiGraphics().guiWidth();
@@ -368,7 +358,7 @@ public class VidLibClientEventHandler {
 			ScreenText.RENDER.topLeft.add(comp);
 		}
 
-		if (!ClientGameEngine.INSTANCE.hideGui(mc) && !mc.player.isReplayCamera()) {
+		if (!ClientGameEngine.INSTANCE.hideGui(mc) && !session.isReplay) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
 			ScreenText.RENDER.ops = session.jsonOps;
 
@@ -378,9 +368,9 @@ public class VidLibClientEventHandler {
 				var zoneHit = session.zoneHit;
 
 				if (zoneHit != null) {
-					var component = Component.literal("Zone: ").append(Component.literal(zoneHit.resolvedZone().ref.key()).withStyle(ChatFormatting.AQUA));
+					var component = Component.literal("Zone: ").append(Component.literal(zoneHit.zone().key()).withStyle(ChatFormatting.AQUA));
 
-					if (zoneHit.resolvedZone().generated) {
+					if (zoneHit.zone().value().generated()) {
 						component.append(Component.literal("*").withStyle(ChatFormatting.LIGHT_PURPLE));
 					}
 
@@ -505,7 +495,7 @@ public class VidLibClientEventHandler {
 		var mc = Minecraft.getInstance();
 
 		if (mc.player != null && event.isAttack()) {
-			if (mc.player.vl$isSuspended()) {
+			if (CommonGameEngine.INSTANCE.isSuspended(mc.player)) {
 				event.setCanceled(true);
 				return;
 			}
@@ -539,7 +529,7 @@ public class VidLibClientEventHandler {
 	public static void loggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
 		PlayerProfiles.cache(event.getPlayer().getGameProfile());
 
-		if (!ClientWorldSessionData.of(event.getPlayer().connection).clientModListSentDuringConfig) {
+		if (!ClientSessionData.of(Minecraft.getInstance()).clientModListSentDuringConfig) {
 			event.getPlayer().c2s(new ClientModListPayload(PlatformHelper.INSTANCE.getModList()));
 		}
 	}
@@ -559,7 +549,7 @@ public class VidLibClientEventHandler {
 	public static void canRenderNameTag(RenderNameTagEvent.CanRender event) {
 		var mc = Minecraft.getInstance();
 
-		if (event.getEntity() instanceof Player && mc.getNameDrawType() != NameDrawType.VANILLA) {
+		if (event.getEntity() instanceof Player && ClientSessionData.of(mc).getNameDrawType() != NameDrawType.VANILLA) {
 			event.setCanRender(TriState.FALSE);
 		}
 	}

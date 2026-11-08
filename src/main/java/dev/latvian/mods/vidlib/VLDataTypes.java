@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.clothing.ClothingSet;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.EntitySnapshot;
+import dev.latvian.mods.vidlib.feature.environment.FluidPlane;
 import dev.latvian.mods.vidlib.feature.environment.FogOverride;
 import dev.latvian.mods.vidlib.feature.explosion.ExplosionData;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverrides;
@@ -21,7 +22,7 @@ import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import io.netty.buffer.ByteBuf;
 
-public interface VidLibDataTypes {
+public interface VLDataTypes {
 	static void register(CustomRegistryTypeCollector<ByteBuf, DataType<?>> registry) {
 		registry.register("clothing_set", ClothingSet.DATA_TYPE);
 		registry.register("player_clothing", PlayerClothing.DATA_TYPE);
@@ -43,5 +44,6 @@ public interface VidLibDataTypes {
 		registry.register("map_texture_overrides", MapTextureOverrides.DATA_TYPE);
 		registry.register("decal", Decal.DATA_TYPE);
 		registry.register("render_light_layer", RenderLightLayer.DATA_TYPE);
+		registry.register("fluid_plane", FluidPlane.DATA_TYPE);
 	}
 }

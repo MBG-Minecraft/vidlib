@@ -23,6 +23,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
+import dev.latvian.mods.vidlib.feature.data.SyncLevelDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
@@ -30,7 +31,6 @@ import dev.latvian.mods.vidlib.feature.imgui.EntityExplorerPanel;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.maptextureoverride.MapTextureOverridesReplaySessionData;
-import dev.latvian.mods.vidlib.feature.misc.EventMarkerPayload;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
 import dev.latvian.mods.vidlib.feature.note.CreateNotePayload;
 import dev.latvian.mods.vidlib.feature.note.DeleteNotePayload;
@@ -38,7 +38,6 @@ import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.AddPropPayload;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
@@ -46,7 +45,8 @@ import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.prop.ReplayProp;
-import dev.latvian.mods.vidlib.feature.session.ClientWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import imgui.ImGui;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
@@ -94,14 +94,21 @@ public class VLReplayIntegration {
 					case SyncServerDataPayload p -> {
 						for (var u : p.update()) {
 							if (u.key() != null) {
-								dataMapOverrideBuilder.set(now, null, u.key(), u.value());
+								dataMapOverrideBuilder.setServer(now, u.key(), u.value());
+							}
+						}
+					}
+					case SyncLevelDataPayload p -> {
+						for (var u : p.update()) {
+							if (u.key() != null) {
+								dataMapOverrideBuilder.setLevel(now, p.dimension(), u.key(), u.value());
 							}
 						}
 					}
 					case SyncPlayerDataPayload p -> {
 						for (var u : p.update()) {
 							if (u.key() != null) {
-								dataMapOverrideBuilder.set(now, p.player(), u.key(), u.value());
+								dataMapOverrideBuilder.setPlayer(now, p.player(), u.key(), u.value());
 							}
 						}
 					}
@@ -134,21 +141,6 @@ public class VLReplayIntegration {
 								prop.remove = now;
 								replayProps.add(prop);
 							}
-						}
-					}
-					// Legacy
-					//noinspection deprecation
-					case EventMarkerPayload p -> {
-						var builder = ReplayMarkerData.builder().description(p.event()).customData(p.tag().orElse(null));
-
-						if (p.event().equals("sync")) {
-							builder.group(ReplayMarkerGroup.DATA_SYNC);
-						}
-
-						var data = ClientGameEngine.INSTANCE.handleReplayMarker(builder.build());
-
-						if (data != null) {
-							event.addMarker((int) (now - startTick), ReplayMarkerType.SERVER_RECORDING, data);
 						}
 					}
 					case ReplayMarkerPayload p -> {
@@ -245,7 +237,7 @@ public class VLReplayIntegration {
 		VidLib.LOGGER.info("Replay Game snapshot");
 		var packets = event.getPackets();
 		var player = event.getSession().getPlayer();
-		var session = ClientWorldSessionData.of(Minecraft.getInstance());
+		var session = ClientSessionData.of(Minecraft.getInstance());
 		session.localPlayer.sync(packets, player, 1);
 
 		if (!session.markers.isEmpty()) {
@@ -332,7 +324,7 @@ public class VLReplayIntegration {
 	public static void clickTarget(ReplayGetClickTargetEvent event) {
 		var mc = Minecraft.getInstance();
 		var ctx = new ClipContext(event.getFrom(), event.getTo(), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, mc.player);
-		var props = VLPlatformHelper.INSTANCE.getProps(mc.level);
+		var props = LevelSessionData.of(mc.level).props;
 		event.setHitResult(props.clip(ctx, true));
 	}
 
@@ -343,7 +335,7 @@ public class VLReplayIntegration {
 		if (mc.level != null && event.getHitResult() instanceof PropHitResult propResult) {
 			var data = event.getSession().getData(SelectedPropReplaySessionData.TYPE);
 			data.selectedProp = propResult.prop.id;
-			data.selectedPropData = propResult.prop.encode(propResult.prop.props.levelData.worldData.nbtOps);
+			data.selectedPropData = propResult.prop.encode(propResult.prop.props.levelData.globalData.nbtOps);
 			data.openSelectedPropPopup = true;
 			event.setCanceled(true);
 		}
@@ -352,7 +344,7 @@ public class VLReplayIntegration {
 	@SubscribeEvent
 	public static void popups(ReplayPopupEvent event) {
 		var mc = Minecraft.getInstance();
-		var session = ClientWorldSessionData.of(mc);
+		var session = ClientSessionData.of(mc);
 
 		if (VidLibClientEventHandler.clientLoaded && mc.level != null && session.isReplay) {
 			BuiltInImGui.handle(event.getGraphics());
@@ -370,7 +362,7 @@ public class VLReplayIntegration {
 		}
 
 		if (data.selectedProp != 0 && ImGui.beginPopup("###vidlib-prop-popup")) {
-			var props = VLPlatformHelper.INSTANCE.getProps(mc.level);
+			var props = LevelSessionData.of(mc.level).props;
 			var propList = props.levelProps;
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 
@@ -384,7 +376,7 @@ public class VLReplayIntegration {
 		}
 
 		if (!ImGui.isPopupOpen("###vidlib-prop-popup")) {
-			var props = VLPlatformHelper.INSTANCE.getProps(mc.level);
+			var props = LevelSessionData.of(mc.level).props;
 			var propList = props.levelProps;
 			var prop = propList == null ? null : propList.get(data.selectedProp);
 

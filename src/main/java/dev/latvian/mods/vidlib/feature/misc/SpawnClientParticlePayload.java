@@ -50,7 +50,7 @@ public record SpawnClientParticlePayload(
 	public void handle(Context ctx) {
 		var level = ctx.level();
 		var random = level.getRandom();
-		var worldData = ctx.worldSessionData();
+		var worldData = ctx.globalSessionData();
 		var particleList = particles.stream().map(either -> either.map(Function.identity(), worldData::getParticleOptions)).toList();
 
 		var hasSpread = !spread.equals(Vec3.ZERO);

@@ -6,6 +6,7 @@ import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.NbtOps;
@@ -112,7 +113,7 @@ public enum ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 	@Override
 	public void onPlayerAction(ServerPlayer player, ItemStack item, InteractionHand hand, PlayerActionType action) {
 		if (action == PlayerActionType.RELOAD) {
-			player.status("Modified %,d blocks".formatted(player.level().undoLastModification()));
+			player.status("Modified %,d blocks".formatted(LevelSessionData.of(player.level()).undoLastModification(player.level())));
 		}
 	}
 }

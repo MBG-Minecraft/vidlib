@@ -18,6 +18,7 @@ import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -64,7 +65,7 @@ public interface Pins {
 			return;
 		}
 
-		var projectedCoordinates = mc.getProjectedCoordinates();
+		var projectedCoordinates = ClientSessionData.of(mc).projectedCoordinates;
 
 		if (projectedCoordinates == null) {
 			return;

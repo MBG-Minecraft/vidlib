@@ -3,8 +3,9 @@ package dev.latvian.mods.vidlib.feature.atmosphere;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.commands.Commands;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.Level;
 
 public interface AtmosphereCommand {
 	@AutoRegister
@@ -12,16 +13,16 @@ public interface AtmosphereCommand {
 		.requires(source -> Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(source))
 		.then(Commands.literal("set")
 			.then(Commands.argument("atmosphere", Atmosphere.DATA_TYPE.argument(buildContext))
-				.executes(ctx -> atmosphere(ctx.getSource().getServer(), Atmosphere.DATA_TYPE.get(ctx, "atmosphere")))
+				.executes(ctx -> atmosphere(ctx.getSource().getLevel(), Atmosphere.DATA_TYPE.get(ctx, "atmosphere")))
 			)
 		)
 		.then(Commands.literal("remove")
-			.executes(ctx -> atmosphere(ctx.getSource().getServer(), null))
+			.executes(ctx -> atmosphere(ctx.getSource().getLevel(), null))
 		)
 	);
 
-	private static int atmosphere(MinecraftServer server, Ref<Atmosphere> atmosphere) {
-		server.setAtmosphere(atmosphere);
+	private static int atmosphere(Level level, Ref<Atmosphere> atmosphere) {
+		LevelSessionData.of(level).setAtmosphere(atmosphere);
 		return 1;
 	}
 }

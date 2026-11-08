@@ -10,7 +10,6 @@ import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
@@ -34,6 +33,6 @@ public record ZoneClickedPayload(Ref<Zone> zone, Vec3 pos, double distanceSq, Op
 	public void handle(Context ctx) {
 		var vl = ctx.vl();
 		var hit = new ZoneHit(zone, vl.zones.getResolved(zone), pos, distanceSq, direction.orElse(null));
-		VLPlatformHelper.INSTANCE.playerClickedOnZone((ServerPlayer) ctx.player(), hit);
+		VLPlatformHelper.INSTANCE.playerClickedOnZone(ctx.player(), hit);
 	}
 }

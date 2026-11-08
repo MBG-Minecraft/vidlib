@@ -1,14 +1,9 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.core.NoMixinException;
-import net.minecraft.network.PacketListener;
 import net.minecraft.server.network.ConfigurationTask;
 
-public interface VLServerConfigPacketListener extends VLServerPacketListener {
-	default void vl$transfer(VLServerPlayPacketListener play, PacketListener packetListener) {
-		throw new NoMixinException(this);
-	}
-
+public interface VLServerConfigPacketListener {
 	default void vl$finishTask(ConfigurationTask.Type type) {
 		throw new NoMixinException(this);
 	}

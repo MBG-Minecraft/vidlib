@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.KLibCodecs;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -52,7 +52,7 @@ public record HubLogRequest(
 			type,
 			content,
 			0,
-			(VLPlatformHelper.INSTANCE.isReplayLevel(player.level()) ? "replay:" : "") + player.level().dimension().identifier().toString(),
+			(LevelSessionData.of(player.level()).globalData.isReplay ? "replay:" : "") + player.level().dimension().identifier().toString(),
 			Optional.of(player.position()),
 			player.level().getGameTime(),
 			Optional.empty()

@@ -23,7 +23,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
@@ -88,7 +87,7 @@ public class Prop {
 	public final PropSpawnType spawnType;
 	public final long createdTime;
 	final Set<PropDataEntry> sync;
-	public Level level;
+	public final Level level;
 	public int id;
 	PropRemoveType removed;
 	private List<Pair<PropData<?, ?>, ImBuilder<?>>> imguiBuilders;
@@ -155,7 +154,7 @@ public class Prop {
 
 		snap();
 
-		if (props.levelData.worldData.isReplay) {
+		if (props.levelData.globalData.isReplay) {
 			tick = Math.max(0, (int) (time - createdTime));
 		}
 
@@ -169,7 +168,7 @@ public class Prop {
 			return true;
 		}
 
-		if (!paused && !props.levelData.worldData.isReplay) {
+		if (!paused && !props.levelData.globalData.isReplay) {
 			tick++;
 		}
 
@@ -839,7 +838,7 @@ public class Prop {
 
 		setData(data, value);
 
-		if (sync && !props.levelData.worldData.isReplay) {
+		if (sync && !props.levelData.globalData.isReplay) {
 			var payload = UpdatePropRequestPayload.of(this, List.of(data));
 
 			if (payload != null) {
@@ -902,7 +901,6 @@ public class Prop {
 	}
 
 	public DataResult<Prop> copy() {
-		var props = VLPlatformHelper.INSTANCE.getProps(level);
 		var ctx = props.context(type, PropSpawnType.GAME, level.getGameTime());
 		var newProp = type.factory().create(ctx);
 

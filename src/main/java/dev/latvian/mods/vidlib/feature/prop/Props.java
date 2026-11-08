@@ -100,7 +100,7 @@ public abstract class Props<L extends Level> {
 
 		if (result.isSuccess()) {
 			var prop = result.getOrThrow();
-			levelData.worldData.schedule(delay, () -> add(prop));
+			levelData.globalData.schedule(delay, () -> add(prop));
 			return prop;
 		}
 

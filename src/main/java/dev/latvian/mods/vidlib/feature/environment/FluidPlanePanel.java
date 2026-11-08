@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.environment;
 
+import dev.latvian.mods.vidlib.feature.data.InternalLevelData;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
@@ -47,7 +48,7 @@ public class FluidPlanePanel extends Panel {
 		update = update.orItemEdit();
 
 		if (update.isAny()) {
-			graphics.session.fluidPlane = enabled.get() ? new FluidPlane(fluid[0], y.get()) : null;
+			graphics.mc.updateLevelDataValue(graphics.mc.level.dimension(), InternalLevelData.FLUID_PLANE, enabled.get() ? new FluidPlane(fluid[0], y.get()) : null);
 		}
 
 		ImGui.popItemWidth();

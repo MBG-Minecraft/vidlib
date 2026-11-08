@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.entity.PositionType;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
@@ -26,7 +25,6 @@ import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
@@ -208,26 +206,5 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	// WIP
 	default boolean overridePassengerClientRightClick(Player player) {
 		return false;
-	}
-
-	default boolean addTags(Collection<String> tags) {
-		return vl$self().entityTags().addAll(tags);
-	}
-
-	default boolean removeTags(Collection<String> tags) {
-		return vl$self().entityTags().removeAll(tags);
-	}
-
-	default void setTags(Collection<String> tags) {
-		vl$self().entityTags().clear();
-		vl$self().entityTags().addAll(tags);
-	}
-
-	default boolean isStaff() {
-		return CommonGameEngine.INSTANCE.isPlayerStaff(vl$self().entityTags(), EntityUtils.getGameMode(vl$self()));
-	}
-
-	default boolean isStaffOrTalent() {
-		return CommonGameEngine.INSTANCE.isPlayerStaffOrTalent(vl$self().entityTags(), EntityUtils.getGameMode(vl$self()));
 	}
 }

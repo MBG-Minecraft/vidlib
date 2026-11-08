@@ -5,13 +5,12 @@ import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.klib.util.LevelGameTimeProvider;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
-import dev.latvian.mods.vidlib.feature.session.WorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.GlobalSessionData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -19,58 +18,51 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.BiFunction;
 
-public class DataMap implements DataMapHolder {
+public class DataMap<K> {
 	public final LevelGameTimeProvider worldSession;
-	public final UUID owner;
-	public final DataKeyStorage storage;
-	private final TrackedDataMapValue[] map;
-	public DataMapOverrides.DataMap overrides;
+	public final K key;
+	public final DataKeyStorage<K> storage;
+	private final TrackedDataMapValue<K>[] map;
+	public DataMapOverrides.OverrideDataMap<K> overrides;
 	private Optional<Object>[] superOverrides;
 
-	public DataMap(WorldSessionData worldSession, UUID owner, DataKeyStorage storage) {
+	public DataMap(GlobalSessionData worldSession, K key, DataKeyStorage<K> storage) {
 		this.worldSession = worldSession;
-		this.owner = owner;
+		this.key = key;
 		this.storage = storage;
 		this.map = new TrackedDataMapValue[storage.all.size()];
 		this.overrides = null;
 		this.superOverrides = null;
 
 		for (var type : storage.all.values()) {
-			var value = new TrackedDataMapValue(type);
-			value.data = type.defaultValue();
-			this.map[type.index()] = value;
+			var value = new TrackedDataMapValue<>(type);
+			value.data = type.defaultValue;
+			this.map[type.index] = value;
 		}
 	}
 
-	TrackedDataMapValue init(DataKey<?> type) {
-		return map[type.index()];
+	TrackedDataMapValue<K> init(DataKey<K, ?> type) {
+		return map[type.index];
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T getActual(DataKey<T> type) {
+	public <T> T getActual(DataKey<K, T> type) {
 		return (T) init(type).data;
 	}
 
-	@Override
-	public DataMap getDataMap() {
-		return this;
-	}
-
-	private void checkKey(DataKey<?> type) {
-		if (storage != type.storage()) {
-			throw new IllegalArgumentException("Tried to use " + type.storage() + " key in " + storage + " DataMap");
+	private void checkKey(DataKey<K, ?> type) {
+		if (storage != type.storage) {
+			throw new IllegalArgumentException("Tried to use " + type.storage + " key in " + storage + " DataMap");
 		}
 	}
 
-	@Override
-	public <T> T getOptional(DataKey<T> type) {
+	public <T> T get(DataKey<K, T> type) {
 		checkKey(type);
 
 		if (superOverrides != null) {
-			var v = superOverrides[type.index()];
+			var v = superOverrides[type.index];
 
 			if (v != null) {
 				return Cast.to(v.orElse(null));
@@ -88,31 +80,12 @@ public class DataMap implements DataMapHolder {
 		return getActual(type);
 	}
 
-	@Override
-	public <T> T get(DataKey<T> type) {
-		checkKey(type);
-
-		if (superOverrides != null) {
-			var v = superOverrides[type.index()];
-
-			if (v != null) {
-				return Cast.to(v.orElse(null));
-			}
-		}
-
-		if (overrides != null) {
-			var v = overrides.getOverride(type, worldSession.getLevelGameTime());
-
-			if (v != null) {
-				return v;
-			}
-		}
-
-		return getActual(type);
+	@Nullable
+	public <T> T getOptional(DataKey<K, T> type) {
+		return get(type);
 	}
 
-	@Override
-	public <T> void set(DataKey<T> type, @Nullable T value) {
+	public <T> void set(DataKey<K, T> type, @Nullable T value) {
 		checkKey(type);
 
 		var v = init(type);
@@ -120,19 +93,23 @@ public class DataMap implements DataMapHolder {
 		v.setChanged();
 	}
 
-	public void setSuperOverride(DataKey<?> type, @Nullable Object value) {
+	public <T> void reset(DataKey<K, T> type) {
+		set(type, type.defaultValue);
+	}
+
+	public void setSuperOverride(DataKey<K, ?> type, @Nullable Object value) {
 		checkKey(type);
 
 		if (superOverrides == null) {
 			superOverrides = new Optional[map.length];
 		}
 
-		superOverrides[type.index()] = Optional.ofNullable(value);
+		superOverrides[type.index] = Optional.ofNullable(value);
 	}
 
-	public void removeSuperOverride(DataKey<?> type) {
-		if (superOverrides != null && storage == type.storage()) {
-			superOverrides[type.index()] = null;
+	public void removeSuperOverride(DataKey<K, ?> type) {
+		if (superOverrides != null && storage == type.storage) {
+			superOverrides[type.index] = null;
 
 			for (var value : superOverrides) {
 				if (value != null) {
@@ -144,13 +121,13 @@ public class DataMap implements DataMapHolder {
 		}
 	}
 
-	public boolean hasSuperOverride(DataKey<?> type) {
-		return superOverrides != null && storage == type.storage() && superOverrides[type.index()] != null;
+	public boolean hasSuperOverride(DataKey<K, ?> type) {
+		return superOverrides != null && storage == type.storage && superOverrides[type.index] != null;
 	}
 
 	public void load(MinecraftServer server, Path path) {
 		for (var v : map) {
-			v.data = v.key.defaultValue();
+			v.data = v.dataKey.defaultValue;
 		}
 
 		if (Files.exists(path)) {
@@ -159,11 +136,11 @@ public class DataMap implements DataMapHolder {
 				var ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 
 				for (var type : storage.saved.values()) {
-					var tag = data.get(type.id());
+					var tag = data.get(type.id);
 
 					if (tag != null) {
 						try {
-							var dataValue = type.type().codec().parse(ops, tag).getOrThrow();
+							var dataValue = type.type.codec().parse(ops, tag).getOrThrow();
 
 							if (dataValue != null) {
 								init(type).data = dataValue;
@@ -183,7 +160,7 @@ public class DataMap implements DataMapHolder {
 		boolean needsSave = false;
 
 		for (var v : map) {
-			if (v.save != v.changeCount && v.key.type() != null && v.key.save()) {
+			if (v.save != v.changeCount && v.dataKey.type != null && v.dataKey.save) {
 				needsSave = true;
 				break;
 			}
@@ -202,11 +179,11 @@ public class DataMap implements DataMapHolder {
 			var ops = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 
 			for (var v : map) {
-				if (v.key.type() != null && v.key.save() && v.data != null && !v.data.equals(v.key.defaultValue())) {
+				if (v.dataKey.type != null && v.dataKey.save && v.data != null && !v.data.equals(v.dataKey.defaultValue)) {
 					try {
-						data.put(v.key.id(), v.key.type().codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
+						data.put(v.dataKey.id, v.dataKey.type.codec().encodeStart(ops, Cast.to(v.data)).getOrThrow());
 					} catch (Exception ex) {
-						VidLib.LOGGER.error("Failed to save " + v.key + ": " + ex);
+						VidLib.LOGGER.error("Failed to save " + v.dataKey + ": " + ex);
 					}
 				}
 			}
@@ -223,45 +200,45 @@ public class DataMap implements DataMapHolder {
 		}
 	}
 
-	public void update(@Nullable Player player, List<DataMapValue> update) {
+	public void update(GlobalSessionData worldData, List<DataMapValue<K>> update) {
 		for (var data : update) {
 			if (data.key() != null) {
-				init(data.key()).update(player, data.value());
+				init(data.key()).update(worldData, key, data.value());
 			}
 		}
 	}
 
-	public void syncAll(S2CPacketConsumer target, BiFunction<UUID, List<DataMapValue>, SimplePayload> factory) {
-		var list = new ArrayList<DataMapValue>();
+	public void syncAll(S2CPacketConsumer target, BiFunction<K, List<DataMapValue<K>>, SimplePayload> factory) {
+		var list = new ArrayList<DataMapValue<K>>();
 
 		for (var v : map) {
-			if (v.key.type() != null && v.key.sync()) {
-				list.add(new DataMapValue(v.key, v.data));
+			if (v.dataKey.type != null && v.dataKey.sync) {
+				list.add(new DataMapValue<>(v.dataKey, v.data));
 			}
 		}
 
 		if (!list.isEmpty()) {
-			target.s2c(factory.apply(owner, list));
+			target.s2c(factory.apply(key, list));
 		}
 	}
 
-	public void sync(S2CPacketConsumer packetsToEveryone, BiFunction<UUID, List<DataMapValue>, SimplePayload> factory) {
-		List<DataMapValue> syncAll = null;
+	public void sync(S2CPacketConsumer packetsToEveryone, BiFunction<K, List<DataMapValue<K>>, SimplePayload> factory) {
+		List<DataMapValue<K>> syncAll = null;
 
 		for (var v : map) {
-			if (v.sync != v.changeCount && v.key.type() != null && v.key.sync()) {
+			if (v.sync != v.changeCount && v.dataKey.type != null && v.dataKey.sync) {
 				v.sync = v.changeCount;
 
 				if (syncAll == null) {
 					syncAll = new ArrayList<>();
 				}
 
-				syncAll.add(new DataMapValue(v.key, v.data));
+				syncAll.add(new DataMapValue<>(v.dataKey, v.data));
 			}
 		}
 
 		if (syncAll != null) {
-			packetsToEveryone.s2c(factory.apply(owner, syncAll));
+			packetsToEveryone.s2c(factory.apply(key, syncAll));
 		}
 	}
 }

@@ -19,6 +19,6 @@ public record DeleteNotePayload(UUID id) implements SimplePayload {
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.worldSessionData().deleteNote(id);
+		ctx.globalSessionData().deleteNote(id);
 	}
 }

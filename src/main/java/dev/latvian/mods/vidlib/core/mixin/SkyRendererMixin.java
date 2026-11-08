@@ -11,6 +11,7 @@ import com.mojang.math.Axis;
 import com.mojang.renderpearl.api.commands.RenderPass;
 import dev.latvian.mods.vidlib.feature.atmosphere.ClientAtmosphere;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.SkyRenderer;
@@ -29,8 +30,11 @@ public abstract class SkyRendererMixin {
 
 	@Inject(method = "renderSunMoonAndStars", at = @At("HEAD"))
 	private void vl$renderSunMoonAndStarsHead(RenderPass renderPass, PoseStack poseStack, float sunAngle, float moonAngle, float starAngle, MoonPhase moonPhase, float rainBrightness, float starBrightness, CallbackInfo ci, @Share("clientAtmosphereOverride") LocalRef<ClientAtmosphere> override) {
-		var player = Minecraft.getInstance().player;
-		override.set(player != null ? player.vl$sessionData().atmosphere : null);
+		var mc = Minecraft.getInstance();
+		var player = mc.player;
+		var session = ClientSessionData.of(mc);
+		var atmosphereRef = ClientGameEngine.INSTANCE.getAtmosphere(mc);
+		override.set(player != null && atmosphereRef != null ? session.getAtmosphere(atmosphereRef) : null);
 	}
 
 	@WrapOperation(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;rotate(Lcom/mojang/math/Axis;F)V", ordinal = 0))

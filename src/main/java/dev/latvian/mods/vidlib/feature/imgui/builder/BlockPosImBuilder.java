@@ -77,7 +77,7 @@ public class BlockPosImBuilder implements ImBuilder<BlockPos>, SelectedPosition.
 		data.setY(ImGuiUtils.INT.get());
 
 		if (ImGui.button(SelectedPosition.CURSOR.icon + "###cursor-pos")) {
-			var projectedCoordinates = graphics.mc.getProjectedCoordinates();
+			var projectedCoordinates = graphics.session.projectedCoordinates;
 			var pos = projectedCoordinates == null ? null : projectedCoordinates.clipOutline();
 
 			if (pos != null) {

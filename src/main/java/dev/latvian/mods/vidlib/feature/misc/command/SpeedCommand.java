@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.misc.command;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,7 +26,7 @@ public interface SpeedCommand {
 
 	private static int flightSpeed(Collection<ServerPlayer> players, float modifier) {
 		for (var player : players) {
-			player.setFlightSpeedMod(modifier);
+			PlayerSessionData.of(player).setFlightSpeedMod(modifier);
 		}
 
 		return 1;

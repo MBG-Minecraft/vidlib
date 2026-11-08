@@ -79,7 +79,7 @@ public class Vector3dImBuilder implements ImBuilder<Vector3d>, SelectedPosition.
 		data.y = ImGuiUtils.FLOAT.get();
 
 		if (ImGui.button(SelectedPosition.CURSOR.icon + "###cursor-pos")) {
-			var projectedCoordinates = graphics.mc.getProjectedCoordinates();
+			var projectedCoordinates = graphics.session.projectedCoordinates;
 			var pos = projectedCoordinates == null ? null : projectedCoordinates.clipOutline();
 
 			if (pos != null) {

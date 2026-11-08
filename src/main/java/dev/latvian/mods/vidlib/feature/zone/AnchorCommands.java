@@ -1,14 +1,12 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
-import dev.latvian.mods.klib.math.LevelVolume;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-
-import java.util.ArrayList;
 
 public interface AnchorCommands {
 	@AutoRegister
@@ -27,17 +25,14 @@ public interface AnchorCommands {
 	);
 
 	private static int set(CommandSourceStack source, BlockPos start, BlockPos end) {
-		var list = new ArrayList<>(source.getServer().getAnchor().volumes());
-		list.removeIf(levelVolume -> levelVolume.dimension() == source.getLevel().dimension());
-		list.add(new LevelVolume(source.getLevel().dimension(), start, end));
-		source.getServer().setAnchor(Anchor.create(list));
+		var session = LevelSessionData.of(source.getLevel());
+		session.setAnchor(Anchor.create(start, end));
 		return 1;
 	}
 
 	private static int remove(CommandSourceStack source) {
-		var list = new ArrayList<>(source.getServer().getAnchor().volumes());
-		list.removeIf(levelVolume -> levelVolume.dimension() == source.getLevel().dimension());
-		source.getServer().setAnchor(Anchor.create(list));
+		var session = LevelSessionData.of(source.getLevel());
+		session.setAnchor(Anchor.NONE);
 		return 1;
 	}
 }

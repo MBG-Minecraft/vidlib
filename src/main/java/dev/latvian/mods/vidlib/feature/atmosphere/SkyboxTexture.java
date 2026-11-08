@@ -67,14 +67,14 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 
 		try (var in = manager.getResource(atmosphere.skybox.assetId().texturePath()).orElseThrow().open()) {
 			var src = NativeImage.read(in);
-			var image = process(atmosphere.skybox.assetId().id(), src, src.getWidth(), src.getHeight());
+			var image = process(atmosphere.skybox.assetId().id().toString(), src, src.getWidth(), src.getHeight());
 			resolution = image.getHeight() / 2;
 			return new TextureContents(image, new TextureMetadataSection(false, false, MipmapStrategy.AUTO, 0F));
 		}
 	}
 
 	@SuppressWarnings({"ConstantValue", "PointlessArithmeticExpression"})
-	public static NativeImage process(Identifier id, NativeImage src, int srcW, int srcH) {
+	public static NativeImage process(String name, NativeImage src, int srcW, int srcH) {
 		if (srcW == srcH * 2) { // Pre-mapped 4x2
 			return src;
 		} else if (srcW == srcH || srcW * 3 == srcH * 4) { // Cube Map 4x4 or 4x3
@@ -154,7 +154,7 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 			return img;
 		}
 
-		VidLib.LOGGER.error("Invalid source skybox texture from " + id + " Must be either foldable 4x4, 4x3 or a vertical gradient");
+		VidLib.LOGGER.error("Invalid source skybox texture from " + name + " Must be either foldable 4x4, 4x3 or a vertical gradient");
 
 		var img = new NativeImage(16, 16, false);
 		img.fillRect(0, 0, 16, 16, 0xFF000000);

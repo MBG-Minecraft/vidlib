@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.environment;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.vidlib.feature.zone.ZoneFluid;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -19,4 +20,6 @@ public record FluidPlane(ZoneFluid fluid, float y) {
 		ByteBufCodecs.FLOAT, FluidPlane::y,
 		FluidPlane::new
 	);
+
+	public static final DataType<FluidPlane> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 }

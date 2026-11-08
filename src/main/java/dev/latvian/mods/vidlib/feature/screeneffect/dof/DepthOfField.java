@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import imgui.type.ImBoolean;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
@@ -64,7 +65,9 @@ public class DepthOfField {
 			return;
 		}
 
-		focusPosition = data.focus().value().get(mc.level.getGlobalContext());
+		var session = LevelSessionData.of(mc.level);
+
+		focusPosition = data.focus().value().get(session.createGlobalContext());
 
 		if (focusPosition == null) {
 			focusPosition = mc.gameRenderer.mainCamera().position();

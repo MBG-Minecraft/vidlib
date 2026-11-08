@@ -5,12 +5,13 @@ import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record PlayerDataKNumber(DataKey<?> dataKey) implements KNumber {
+public record PlayerDataKNumber(DataKey<PlayerSessionData, ?> dataKey) implements KNumber {
 	public static final DynamicType<RegistryFriendlyByteBuf, KNumber> TYPE = DynamicType.create(
 		"player_data",
 		"key",
@@ -32,13 +33,13 @@ public record PlayerDataKNumber(DataKey<?> dataKey) implements KNumber {
 			return null;
 		}
 
-		var data = player.getOptional(dataKey);
+		var data = PlayerSessionData.of(player).dataMap.getOptional(dataKey);
 
 		if (data == null) {
 			return null;
 		}
 
-		var num = dataKey.type().toNumber(Cast.to(data));
+		var num = dataKey.type.toNumber(Cast.to(data));
 		return num == null ? null : num instanceof Double d ? d : num.doubleValue();
 	}
 
@@ -50,6 +51,6 @@ public record PlayerDataKNumber(DataKey<?> dataKey) implements KNumber {
 	@Override
 	@NotNull
 	public String toString() {
-		return "$$" + dataKey.id();
+		return "$$" + dataKey.id;
 	}
 }

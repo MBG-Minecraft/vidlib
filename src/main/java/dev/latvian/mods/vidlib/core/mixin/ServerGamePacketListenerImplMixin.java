@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.latvian.mods.vidlib.core.VLServerPlayPacketListener;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -13,7 +12,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin implements VLServerPlayPacketListener {
+public abstract class ServerGamePacketListenerImplMixin {
 	/**
 	 * @author Lat
 	 * @reason Yeet

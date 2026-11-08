@@ -7,7 +7,7 @@ public interface VLEnvironmentContainer {
 		throw new NoMixinException(this);
 	}
 
-	default boolean isClient() {
-		return getEnvironment().isClient();
+	default boolean isClientEnvironment() {
+		return getEnvironment().isClientEnvironment();
 	}
 }

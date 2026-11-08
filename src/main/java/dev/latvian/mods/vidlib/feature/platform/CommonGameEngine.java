@@ -6,12 +6,12 @@ import dev.latvian.mods.klib.platform.PlatformModInfo;
 import dev.latvian.mods.klib.util.RuntimeDebugger;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
@@ -20,8 +20,6 @@ import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
@@ -48,7 +46,6 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.CollisionGetter;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
@@ -84,11 +81,8 @@ public class CommonGameEngine {
 
 	public void collectServerFeatures(Reference2IntMap<Feature> map) {
 		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);
-		map.put(Feature.SMALL_GRASS_HITBOX, 1);
-		map.put(Feature.SOFT_BARRIERS, 1);
 		map.put(Feature.SERVER_DATA, 1);
 		map.put(Feature.PLAYER_DATA, 1);
-		map.put(Feature.SKYBOX, 1);
 	}
 
 	public void setupServer(MinecraftServer server) {
@@ -128,14 +122,6 @@ public class CommonGameEngine {
 		if (privacyMode()) {
 			rules.set(GameRules.SHOW_DEATH_MESSAGES, false, server);
 		}
-	}
-
-	public boolean isPlayerStaff(Collection<String> tags, @Nullable GameType gameMode) {
-		return tags.contains("staff");
-	}
-
-	public boolean isPlayerStaffOrTalent(Collection<String> tags, GameType gameMode) {
-		return isPlayerStaff(tags, gameMode) || tags.contains("talent");
 	}
 
 	public boolean tickCoralBlocks(ScheduledTickAccess instance, BlockPos pos, Block block) {
@@ -203,7 +189,7 @@ public class CommonGameEngine {
 
 	@Nullable
 	public VoxelShape overrideBarrierShape(BlockState state, BlockGetter blockGetter, BlockPos pos, CollisionContext context) {
-		if (context instanceof EntityCollisionContext ctx && ctx.getEntity() != null && blockGetter instanceof Level level && LevelSessionData.of(level).worldData.getServerFeatures().has(Feature.SOFT_BARRIERS)) {
+		if (context instanceof EntityCollisionContext ctx && ctx.getEntity() != null && blockGetter instanceof Level level && LevelSessionData.of(level).getSoftBarriers()) {
 			if (ctx.getEntity() instanceof AbstractArrow) {
 				return Shapes.empty();
 			}
@@ -217,7 +203,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean isSmallTallGrassHitbox(BlockGetter blockGetter) {
-		return blockGetter instanceof Level level && LevelSessionData.of(level).worldData.getServerFeatures().has(Feature.SMALL_GRASS_HITBOX);
+		return blockGetter instanceof Level level && LevelSessionData.of(level).getSmallGrassHitbox();
 	}
 
 	public boolean disablePOI() {
@@ -298,15 +284,9 @@ public class CommonGameEngine {
 
 	public float getAmbientLight(float fallback) {
 		if (FMLLoader.getCurrent().getDist().isClient()) {
-			LocalPlayer player = Minecraft.getInstance().player;
-			if (player != null) {
-				float value = player.get(InternalPlayerData.BRIGHTNESS_OVERRIDE);
-
-				if (value > 0F) {
-					return value;
-				}
-			}
+			return ClientGameEngine.INSTANCE.getAmbientLight(fallback);
 		}
+
 		return fallback;
 	}
 
@@ -331,7 +311,7 @@ public class CommonGameEngine {
 			entity.resetFallDistance();
 		}
 
-		if (entity.vl$isSuspended()) {
+		if (CommonGameEngine.INSTANCE.isSuspended(entity)) {
 			entity.setDeltaMovement(Vec3.ZERO);
 		}
 	}
@@ -345,7 +325,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean isSuspended(Entity entity) {
-		return entity instanceof Player player && player.vl$sessionData().suspended;
+		return entity instanceof Player player && PlayerSessionData.of(player).isSuspended();
 	}
 
 	public double getGravityModifier(Entity entity) {
@@ -357,15 +337,15 @@ public class CommonGameEngine {
 	}
 
 	public float getFlightSpeedModifier(Player player) {
-		return player.get(InternalPlayerData.FLIGHT_SPEED);
+		return PlayerSessionData.of(player).getFlightSpeedMod();
 	}
 
 	public boolean allowPVP(Player from, Player to) {
-		return !from.vl$isSuspended() && !to.vl$isSuspended();
+		return !isSuspended(from) && !isSuspended(to);
 	}
 
 	public boolean canVoicechatBroadcast(Player player) {
-		return player.isStaff() || player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+		return PlayerSessionData.of(player).isStaff() || player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
 
 	public boolean isInvulnerable(Entity entity) {
@@ -481,12 +461,8 @@ public class CommonGameEngine {
 		return false;
 	}
 
-	public boolean hasImprovedPlayerTags() {
-		return false;
-	}
-
 	public boolean getReceiveCommandFeedback(MinecraftServer server, ServerPlayer player) {
-		return player.isStaff()/* || server.getPlayerList().isOp(player.getGameProfile())*/;
+		return PlayerSessionData.of(player).isStaff()/* || server.getPlayerList().isOp(player.getGameProfile())*/;
 	}
 
 	public String getBackupInfo(MinecraftServer server, Instant now) {
@@ -531,7 +507,7 @@ public class CommonGameEngine {
 	}
 
 	public boolean allowFlight(Player player) {
-		return PlayerSessionData.of(player).dataMap.get(InternalPlayerData.CAN_FLY);
+		return PlayerSessionData.of(player).getCanFly();
 	}
 
 	public String getServerGatewayName(MinecraftServer server) {
@@ -580,5 +556,10 @@ public class CommonGameEngine {
 			uploads.addDirectory(gameDir.resolve("crash-reports"), "-server.txt", HubFileType.SERVER_CRASH_REPORT);
 			uploads.addDirectory(gameDir.resolve("crash-reports"), "-fml.txt", HubFileType.MOD_LOADER_CRASH_REPORT);
 		}
+	}
+
+	public void tickPlayer(ServerPlayer player, ServerPlayerSessionData session) {
+		session.setStaff(player.entityTags().contains("staff") || player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
+		session.setTalent(player.entityTags().contains("talent"));
 	}
 }

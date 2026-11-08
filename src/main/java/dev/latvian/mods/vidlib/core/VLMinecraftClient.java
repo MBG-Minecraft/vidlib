@@ -2,10 +2,9 @@ package dev.latvian.mods.vidlib.core;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
-import dev.latvian.mods.klib.math.Identity;
-import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.texture.SpriteKey;
@@ -20,10 +19,10 @@ import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneScreen;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
-import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.DataMapValue;
+import dev.latvian.mods.vidlib.feature.data.UpdateGlobalDataValuePayload;
+import dev.latvian.mods.vidlib.feature.data.UpdateLevelDataValuePayload;
 import dev.latvian.mods.vidlib.feature.data.UpdatePlayerDataValuePayload;
-import dev.latvian.mods.vidlib.feature.data.UpdateServerDataValuePayload;
 import dev.latvian.mods.vidlib.feature.misc.MainMenuOpenedEvent;
 import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
@@ -32,15 +31,17 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesDisplayD
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
-import dev.latvian.mods.vidlib.feature.session.ClientPlayerSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.GlobalSessionData;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.VidLibSoundInstance;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
-import dev.latvian.mods.vidlib.util.ScheduledTask;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.GenericMessageScreen;
@@ -57,12 +58,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2d;
-import org.joml.Vector2dc;
-import org.joml.Vector4f;
 
 import java.util.List;
 import java.util.Map;
@@ -78,8 +78,16 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	}
 
 	@Override
-	default boolean isClient() {
+	default boolean isClientEnvironment() {
 		return true;
+	}
+
+	default ClientSessionData vl$getGlobalData() {
+		throw new NoMixinException(this);
+	}
+
+	default void vl$setGlobalData(@Nullable ClientSessionData data) {
+		throw new NoMixinException(this);
 	}
 
 	@Override
@@ -92,49 +100,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 	@Override
 	default ClientLevel vl$level() {
 		return vl$self().level;
-	}
-
-	@Override
-	default ScheduledTask.Handler vl$getScheduledTaskHandler() {
-		return vl$self().player.vl$sessionData().getScheduledTaskHandler();
-	}
-
-	@Override
-	default DataMap getDataMap() {
-		return vl$self().player.vl$sessionData().serverDataMap;
-	}
-
-	@Nullable
-	default ProjectedCoordinates getProjectedCoordinates() {
-		return vl$self().player.vl$sessionData().projectedCoordinates;
-	}
-
-	default Vector2dc vl$getCameraShakeOffset(float delta) {
-		var player = vl$self().player;
-
-		if (player != null) {
-			var s = player.vl$sessionData();
-			return s.prevCameraShake.lerp(s.cameraShake, delta, new Vector2d());
-		}
-
-		return Identity.DVEC_2;
-	}
-
-	default void vl$applyCameraShake(Camera camera, float delta) {
-		var shake = vl$getCameraShakeOffset(delta);
-
-		if (shake != Identity.DVEC_2) {
-			var vec = new Vector4f((float) shake.x(), (float) shake.y(), 0F, 1F).rotate(camera.rotation());
-			camera.klib$setPosition(camera.position().add(vec.x(), vec.y(), vec.z()));
-		}
-	}
-
-	default void updatePlayerData(List<DataMapValue> update) {
-		c2s(new UpdatePlayerDataValuePayload(vl$self().player.getUUID(), update));
-	}
-
-	default <T> void updatePlayerData(DataKey<T> type, T value) {
-		updatePlayerData(List.of(new DataMapValue(type, value)));
 	}
 
 	@Override
@@ -166,44 +131,50 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	@Override
 	default void playCutscene(Ref<Cutscene> cutscene, KNumberVariables variables) {
-		var player = vl$self().player;
+		var mc = vl$self();
+		var session = ClientSessionData.of(mc);
+		var player = mc.player;
 		var c = cutscene.value();
 
 		if (!c.steps().isEmpty() && player != null) {
-			var overrideCamera = !player.isReplayCamera();
-			var inst = new ClientCutscene(vl$self(), overrideCamera, c, variables, player::getEyePosition);
-			player.vl$sessionData().currentCutscene = inst;
-			player.vl$sessionData().cameraOverride = inst;
+			var overrideCamera = !session.isReplay;
+			var inst = new ClientCutscene(mc, overrideCamera, c, variables, mc.player::getEyePosition);
+			session.currentCutscene = inst;
+			session.cameraOverride = inst;
 
 			if (overrideCamera && !c.allowMovement()) {
-				vl$self().gui.setScreen(new CutsceneScreen(inst, vl$self().gui.screen()));
+				mc.gui.setScreen(new CutsceneScreen(inst, mc.gui.screen()));
 			}
 		}
 	}
 
 	@Override
 	default void stopCutscene() {
-		var data = vl$self().player.vl$sessionData();
+		var mc = vl$self();
+		var session = ClientSessionData.of(mc);
 
-		if (data.currentCutscene != null) {
-			data.currentCutscene.stopped();
+		if (session.currentCutscene != null) {
+			session.currentCutscene.stopped();
 		}
 
-		data.cameraOverride = null;
-		data.currentCutscene = null;
+		session.cameraOverride = null;
+		session.currentCutscene = null;
 
-		if (vl$self().gui.screen() instanceof CutsceneScreen screen) {
-			vl$self().gui.setScreen(screen.previousScreen);
+		if (mc.gui.screen() instanceof CutsceneScreen screen) {
+			mc.gui.setScreen(screen.previousScreen);
 		}
 	}
 
 	@Override
 	default void screenShake(ScreenShake shake) {
-		if (shake.skip() || vl$self().player.isReplayCamera()) {
+		var mc = vl$self();
+		var session = ClientSessionData.of(mc);
+
+		if (shake.skip() || session.isReplay) {
 			return;
 		}
 
-		vl$self().player.vl$sessionData().screenShakeInstances.add(new ScreenShakeInstance(shake));
+		session.screenShakeInstances.add(new ScreenShakeInstance(shake));
 
 		if (shake.motionBlur()) {
 			vl$self().player.setActivePostEffects(List.of(ScreenShake.MOTION_BLUR_EFFECT));
@@ -217,14 +188,15 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	@Override
 	default void stopScreenShake() {
-		vl$self().player.vl$sessionData().screenShakeInstances.clear();
+		var mc = vl$self();
+		var session = ClientSessionData.of(mc);
+		session.screenShakeInstances.clear();
 	}
 
 	@Override
 	default void setCameraMode(int mode) {
-		var player = vl$self().player;
-
-		var session = player.vl$sessionData();
+		var mc = vl$self();
+		var session = ClientSessionData.of(mc);
 
 		if (session.currentCutscene != null) {
 			stopCutscene();
@@ -253,14 +225,14 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 				if (session.cameraOverride instanceof FreeCamera c) {
 					session.cameraOverride = new DetachedCamera(c.position, c.rotation);
 				} else {
-					session.cameraOverride = new DetachedCamera(player.getEyePosition(), Rotation.of(player, 1F));
+					session.cameraOverride = new DetachedCamera(mc.player.getEyePosition(), Rotation.of(mc.player, 1F));
 				}
 			}
 			case 2 -> {
 				if (session.cameraOverride instanceof DetachedCamera(Vec3 position, Rotation rotation)) {
 					session.cameraOverride = new FreeCamera(position, rotation);
 				} else {
-					session.cameraOverride = new FreeCamera(player.getEyePosition(), Rotation.of(player, 1F));
+					session.cameraOverride = new FreeCamera(mc.player.getEyePosition(), Rotation.of(mc.player, 1F));
 				}
 			}
 			default -> stopCutscene();
@@ -325,7 +297,7 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		var mc = vl$self();
 
 		if (mc.level != null && data.position().isPresent()) {
-			var ctx = mc.level.getGlobalContext().fork(variables);
+			var ctx = ClientLevelSessionData.of(mc.level).createGlobalContext().fork(variables);
 			return new VidLibSoundInstance(mc.level, data, ctx);
 		} else {
 			return SimpleSoundInstance.forUI(data.data().sound().value(), data.data().pitch(), data.data().volume());
@@ -365,11 +337,12 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	@Override
 	default void setScreenFade(Fade fade) {
-		if (vl$self().player.isReplayCamera()) {
-			return;
-		}
+		var mc = vl$self();
+		var session = ClientSessionData.of(mc);
 
-		vl$self().player.vl$sessionData().screenFade = new ScreenFadeInstance(fade);
+		if (!session.isReplay) {
+			session.screenFade = new ScreenFadeInstance(fade);
+		}
 	}
 
 	@Override
@@ -377,30 +350,21 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		data = ClientGameEngine.INSTANCE.handleRuntimeMarker(data);
 
 		if (data != null) {
-			var session = vl$self().player.vl$sessionData();
+			var mc = vl$self();
+			var session = ClientSessionData.of(mc);
 			session.markers.add(data);
 		}
 	}
 
 	@Override
 	default void setInfoBarText(int bar, Component text) {
-		var session = vl$self().player.vl$sessionData();
+		var mc = vl$self();
+		var session = ClientSessionData.of(mc);
 
 		switch (bar) {
 			case 0 -> session.topInfoBarOverride = text;
 			case 1 -> session.bottomInfoBarOverride = text;
 		}
-	}
-
-	@Override
-	default void setHardcoreHearts(boolean hardcore) {
-		var session = vl$self().player.vl$sessionData();
-		session.hardcoreHearts = hardcore;
-	}
-
-	@Override
-	default KNumberVariables globalVariables() {
-		return vl$self().player.vl$sessionData().globalVariables;
 	}
 
 	default float linearizeDepth(float depth) {
@@ -417,21 +381,24 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 		return sprite.isSpecial() ? UV.FULL : getSprite(sprite).uv();
 	}
 
-	default <T> void updateServerDataValue(DataKey<T> key, T value) {
-		c2s(new UpdateServerDataValuePayload(List.of(new DataMapValue(key, value))));
+	default <T> void updateServerDataValue(DataKey<GlobalSessionData, T> key, T value) {
+		c2s(new UpdateGlobalDataValuePayload(List.of(new DataMapValue<>(key, value))));
 	}
 
-	default <T> void updatePlayerDataValue(UUID player, DataKey<T> key, T value) {
-		c2s(new UpdatePlayerDataValuePayload(player, List.of(new DataMapValue(key, value))));
+	default <T> void updateLevelDataValue(ResourceKey<Level> dimension, DataKey<LevelSessionData<?>, T> key, T value) {
+		c2s(new UpdateLevelDataValuePayload(dimension, List.of(new DataMapValue<>(key, value))));
+	}
+
+	default <T> void updatePlayerDataValue(UUID player, DataKey<PlayerSessionData, T> key, T value) {
+		c2s(new UpdatePlayerDataValuePayload(player, List.of(new DataMapValue<>(key, value))));
+	}
+
+	default <T> void updatePlayerDataValue(DataKey<PlayerSessionData, T> type, T value) {
+		updatePlayerDataValue(vl$self().player.getUUID(), type, value);
 	}
 
 	default void runClientCommand(String command) {
 		vl$self().player.connection.sendCommand(command.startsWith("/") ? command.substring(1) : command);
-	}
-
-	@Override
-	default List<ClientPlayerSessionData> vl$getAllSessionData() {
-		return vl$self().player.vl$sessionData().getAllClientSessionData();
 	}
 
 	@Override

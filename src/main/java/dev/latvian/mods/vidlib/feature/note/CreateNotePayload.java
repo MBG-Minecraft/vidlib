@@ -16,6 +16,6 @@ public record CreateNotePayload(Note note) implements SimplePayload {
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.worldSessionData().createNote(note);
+		ctx.globalSessionData().createNote(note);
 	}
 }

@@ -1,19 +1,23 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.platform.Transparency;
+import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.render.SubmitContext;
 import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import imgui.type.ImBoolean;
+import it.unimi.dsi.fastutil.longs.Long2IntFunction;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
@@ -21,12 +25,10 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.TripWireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -110,28 +112,34 @@ public class PhysicsParticleManager {
 		};
 	}
 
-	public static void extractAll() {
+	public static List<Pair<PhysicsParticleManager, List<PhysicsParticleRenderState>>> extractAll(Minecraft mc, FrustumCheck frustum, Vec3 cameraPos, float delta) {
+		var all = List.<Pair<PhysicsParticleManager, List<PhysicsParticleRenderState>>>of();
+		var list = new ArrayList<PhysicsParticleRenderState>();
+
 		for (var manager : ALL) {
 			manager.rendered = 0;
 
 			if (!manager.particles.isEmpty() && VISIBLE.get()) {
-				MultiBufferSource bufferSource = frame.buffers();
-				manager.render(frame.mc(), frame, bufferSource);
+				manager.extract(mc, frustum, cameraPos, delta, list);
+
+				if (!list.isEmpty()) {
+					if (all.isEmpty()) {
+						all = new ArrayList<>();
+					}
+
+					all.add(Pair.of(manager, List.copyOf(list)));
+					list.clear();
+				}
 			}
 		}
+
+		return all;
 	}
 
-	/**
-	 * 26.3 removed {@code ItemBlockRenderTypes#getChunkRenderType}; transparency is now a property
-	 * of the block's particle sprite, mirroring how {@code ChunkSectionLayer.byTransparency} is
-	 * reached from {@code BakedQuad.MaterialInfo}.
-	 */
-	private static com.mojang.blaze3d.platform.Transparency vl$transparency(BlockState state) {
+	private static Transparency vl$transparency(BlockState state) {
 		var mc = Minecraft.getInstance();
 		var sprite = mc.getModelManager().getBlockStateModelSet().get(state).particleMaterial().sprite();
-		return sprite == null
-			? com.mojang.blaze3d.platform.Transparency.NONE
-			: sprite.transparency();
+		return sprite == null ? Transparency.NONE : sprite.transparency();
 	}
 
 	public final List<PhysicsParticle> particles;
@@ -150,11 +158,11 @@ public class PhysicsParticleManager {
 		this.mipmaps = mipmaps;
 	}
 
-	@Nullable
-	public List<PhysicsParticleRenderState> extract(Minecraft mc, PoseStack poseStack, FrustumCheck frustum, Vec3 cameraPos, float delta) {
-		List<PhysicsParticleRenderState> states = null;
-
+	public void extract(Minecraft mc, FrustumCheck frustum, Vec3 cameraPos, float delta, List<PhysicsParticleRenderState> states) {
 		var mutablePos = new BlockPos.MutableBlockPos();
+
+		var lightValues = new Long2IntOpenHashMap();
+		Long2IntFunction lightComputeFunction = _ -> BlockUtils.getPackedLight(mc.level, mutablePos);
 
 		for (var p : particles) {
 			float dScale = KMath.lerp(delta, p.prevScale, p.scale);
@@ -179,36 +187,40 @@ public class PhysicsParticleManager {
 				continue;
 			}
 
-			var state = new PhysicsParticleRenderState();
+			var state = p.renderState;
+
+			if (state == null) {
+				state = new PhysicsParticleRenderState();
+				p.renderState = state;
+			}
+
 			state.x = x;
 			state.y = y;
 			state.z = z;
 			state.scale = dScale;
 
+			state.rotation.identity();
+
 			if (p.rotationAngle != 0F) {
-				poseStack.rotateY(p.rotationAngle);
+				state.rotation.rotateY(p.rotationAngle);
 			}
 
 			float dSpin = KMath.lerp(delta, p.prevSpin, p.spin);
 
 			if (dSpin != 0F) {
-				poseStack.rotateX(dSpin);
+				state.rotation.rotateX(dSpin);
 			}
 
 			if (p.rotationRoll != 0F) {
-				poseStack.rotateZ(p.rotationRoll);
+				state.rotation.rotateY(p.rotationRoll);
 			}
 
-			if (dScale != 1F) {
-				poseStack.scale(dScale, dScale, dScale);
-			}
-
-			int light = net.minecraft.util.LightCoordsUtil.FULL_BRIGHT;
+			int light = LightCoordsUtil.FULL_BRIGHT;
 
 			mutablePos.set(p.x, p.y, p.z);
 
 			if (mc.level != null) {
-				light = BlockUtils.getPackedLight(mc.level, mutablePos);
+				light = lightValues.computeIfAbsent(mutablePos.asLong(), lightComputeFunction);
 			}
 
 			state.shape = p.shape;
@@ -220,39 +232,42 @@ public class PhysicsParticleManager {
 			state.lightV = (light >> 16) & 0xFFFF;
 			rendered++;
 
-			if (states == null) {
-				states = new LinkedList<>();
-			}
-
 			states.add(state);
 		}
-
-		return states;
 	}
 
-	public void submit(Minecraft mc, SubmitNodeCollector collector, PoseStack poseStack, FrustumCheck frustum, List<PhysicsParticleRenderState> states) {
-		// 1.21.5 swapped in the vanilla chunk render type whenever an Iris shader pack was running.
-		// 26.3's terrain render types are ChunkSectionLayer pipelines with a different vertex format,
-		// so both paths use VidLib's own physics-particle render type.
-		var consumer = bufferSource.getBuffer(currentType);
-		float delta = frame.worldDelta();
-		double camX = frame.cameraX();
-		double camY = frame.cameraY();
-		double camZ = frame.cameraZ();
-
-		collector.submitCustomGeometry(poseStack, renderType, (pose, buffer) -> {
+	public void submit(SubmitContext ctx, List<PhysicsParticleRenderState> states) {
+		ctx.submit(renderType, (pose, buffer) -> {
 			var tempNormal = new Vector3f();
+			var original = pose.copy();
 
 			for (var state : states) {
-				pose.pushPose();
 				pose.translate(
-					(float) (state.x - camX),
-					(float) (state.y - camY),
-					(float) (state.z - camZ)
+					(float) (state.x - ctx.cameraPos().x),
+					(float) (state.y - ctx.cameraPos().y),
+					(float) (state.z - ctx.cameraPos().z)
 				);
 
-				state.shape.render(mc, consumer, pose, tempNormal, state.red, state.green, state.blue, state.alpha, state.lightU, state.lightV);
-				pose.popPose();
+				pose.rotate(state.rotation);
+
+				if (state.scale != 1F) {
+					pose.scale(state.scale, state.scale, state.scale);
+				}
+
+				state.shape.render(
+					ctx.mc(),
+					buffer,
+					pose,
+					tempNormal,
+					state.red,
+					state.green,
+					state.blue,
+					state.alpha,
+					state.lightU,
+					state.lightV
+				);
+
+				pose.set(original);
 			}
 		});
 	}

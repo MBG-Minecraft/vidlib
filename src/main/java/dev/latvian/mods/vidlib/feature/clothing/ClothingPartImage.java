@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.NativeImage;
 import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.client.ImageUtils;
-import dev.latvian.mods.vidlib.feature.imgui.builder.GradientImBuilder;
 import it.unimi.dsi.fastutil.ints.Int2FloatArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2FloatMap;
 import it.unimi.dsi.fastutil.ints.Int2FloatMaps;
@@ -13,7 +12,7 @@ import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.ARGB;
@@ -38,7 +37,7 @@ public class ClothingPartImage {
 	public final Int2ObjectMap<NativeImage> colorCache;
 
 	public ClothingPartImage(ResourceManager resourceManager, PlayerModelType model, Identifier asset) throws Exception {
-		this.gradientRefCache = new Object2ObjectOpenHashMap<>(4);
+		this.gradientRefCache = new Reference2ObjectOpenHashMap<>(4);
 		this.colorCache = new Int2ObjectOpenHashMap<>(0);
 
 		var modelResource = resourceManager.getResource(asset.withPath("textures/vidlib/clothing/" + asset.getPath() + "_" + model.getSerializedName() + ".png")).orElse(null);
@@ -105,7 +104,7 @@ public class ClothingPartImage {
 	public NativeImage withGradient(Ref<Gradient> gradient) {
 		if (gradient == Gradient.EMPTY && gradientValues.isEmpty()) {
 			return pixels;
-		} else if (GradientImBuilder.isClientReference(gradient)) {
+		} else if (!gradient.optionalKey().isEmpty()) {
 			return gradientRefCache.computeIfAbsent(gradient.key(), _ -> remap(gradient));
 		} else {
 			return remap(gradient);
@@ -118,6 +117,8 @@ public class ClothingPartImage {
 		for (var img : gradientRefCache.values()) {
 			img.close();
 		}
+
+		gradientRefCache.clear();
 
 		for (var img : colorCache.values()) {
 			img.close();

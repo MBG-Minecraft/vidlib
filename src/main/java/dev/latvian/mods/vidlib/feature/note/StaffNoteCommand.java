@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.note;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
@@ -20,7 +21,7 @@ public interface StaffNoteCommand {
 		var payload = new CreateNotePayload(new Note(player, text, NoteVisibility.STAFF));
 
 		for (var p : player.level().getServer().getPlayerList().getPlayers()) {
-			if (p == player || p.isStaffOrTalent()) {
+			if (p == player || PlayerSessionData.of(p).isStaffOrTalent()) {
 				p.s2c(payload);
 			}
 		}

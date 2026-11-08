@@ -4,8 +4,8 @@ import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.vidlib.core.VLWindow;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.BlockExitScreen;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -173,7 +173,9 @@ public class WindowMixin implements VLWindow {
 
 	@Inject(method = "calculateScale", at = @At("HEAD"), cancellable = true)
 	private void vl$calculateScale(int guiScale, boolean forceUnicode, CallbackInfoReturnable<Integer> cir) {
-		if (Minecraft.getInstance().level != null && VLPlatformHelper.INSTANCE.isReplayLevel(Minecraft.getInstance().level)) {
+		var mc = Minecraft.getInstance();
+
+		if (mc.level != null && ClientSessionData.of(mc).isReplay) {
 			return;
 		}
 

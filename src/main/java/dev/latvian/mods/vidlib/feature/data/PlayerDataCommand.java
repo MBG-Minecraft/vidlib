@@ -5,8 +5,9 @@ import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
-import dev.latvian.mods.vidlib.feature.session.ServerWorldSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -17,7 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.permissions.Permissions;
 
 public interface PlayerDataCommand {
-	SuggestionProvider<CommandSourceStack> SESSION_NAMES = (ctx, builder) -> SharedSuggestionProvider.suggest(PlatformHelper.INSTANCE.getLevel(ctx.getSource()).getEnvironment().vl$getAllSessionData().stream().map(PlayerSessionData::getName), builder);
+	SuggestionProvider<CommandSourceStack> SESSION_NAMES = (ctx, builder) -> SharedSuggestionProvider.suggest(LevelSessionData.of(PlatformHelper.INSTANCE.getLevel(ctx.getSource())).globalData.playerMap.values().stream().map(PlayerSessionData::getName), builder);
 
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("player-data", (command, buildContext) -> {
@@ -25,7 +26,7 @@ public interface PlayerDataCommand {
 
 		command.then(Commands.literal("preload-all")
 			.executes(ctx -> {
-				ServerWorldSessionData.of(ctx.getSource().getServer()).preloadAllSessions();
+				ServerSessionData.of(ctx.getSource().getServer()).preloadAllSessions();
 				return 1;
 			})
 		);
@@ -37,7 +38,7 @@ public interface PlayerDataCommand {
 
 		playerCmd.then(Commands.literal("erase")
 			.executes(ctx -> {
-				var vl = ServerWorldSessionData.of(ctx.getSource().getServer());
+				var vl = ServerSessionData.of(ctx.getSource().getServer());
 
 				for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
 					vl.eraseServerSession(player.id());
@@ -48,18 +49,18 @@ public interface PlayerDataCommand {
 		);
 
 		for (var key : DataKey.PLAYER.all.values()) {
-			var cmd = Commands.literal(key.id());
+			var cmd = Commands.literal(key.id);
 
 			cmd.then(Commands.literal("get")
 				.executes(ctx -> {
-					var vl = ServerWorldSessionData.of(ctx.getSource().getServer());
+					var vl = ServerSessionData.of(ctx.getSource().getServer());
 
 					for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
 						var playerData = vl.getPlayer(player.id());
 
 						ctx.getSource().sendSuccess(() -> {
 							var value = playerData.dataMap.get(key);
-							var nbt = key.type().codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
+							var nbt = key.type.codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
 							return Component.literal(player.name() + ": ").append(NbtUtils.toPrettyComponent(nbt));
 						}, false);
 					}
@@ -69,10 +70,10 @@ public interface PlayerDataCommand {
 			);
 
 			cmd.then(Commands.literal("set")
-				.then(Commands.argument("value", key.type().argument(buildContext))
+				.then(Commands.argument("value", key.type.argument(buildContext))
 					.executes(ctx -> {
-						var vl = ServerWorldSessionData.of(ctx.getSource().getServer());
-						var value = key.type().get(ctx, "value");
+						var vl = ServerSessionData.of(ctx.getSource().getServer());
+						var value = key.type.get(ctx, "value");
 
 						for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
 							var playerData = vl.getPlayer(player.id());
@@ -86,11 +87,11 @@ public interface PlayerDataCommand {
 
 			cmd.then(Commands.literal("reset")
 				.executes(ctx -> {
-					var vl = ServerWorldSessionData.of(ctx.getSource().getServer());
+					var vl = ServerSessionData.of(ctx.getSource().getServer());
 
 					for (var player : GameProfileArgument.getGameProfiles(ctx, "player")) {
 						var playerData = vl.getPlayer(player.id());
-						playerData.dataMap.set(key, Cast.to(key.defaultValue()));
+						playerData.dataMap.reset(key);
 					}
 
 					return 1;

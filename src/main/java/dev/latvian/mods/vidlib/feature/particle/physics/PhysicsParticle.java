@@ -41,6 +41,8 @@ public class PhysicsParticle implements Comparable<PhysicsParticle> {
 	public int prevBlockStateType = -1;
 	public int blockStateType = -1;
 
+	public PhysicsParticleRenderState renderState;
+
 	public boolean tick(Level level, long gameTime) {
 		prevX = x;
 		prevY = y;

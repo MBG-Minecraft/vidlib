@@ -10,13 +10,13 @@ import org.joml.FrustumIntersection;
 
 public record VidLibExtractContext(
 	Minecraft mc,
-	VidLibWorldRenderState vl,
+	VLWorldRenderState vl,
 	float delta,
 	Frustum frustum,
 	Vec3 cameraPos,
 	long gameTime
 ) implements FrustumCheck {
-	public VidLibExtractContext(Minecraft mc, VidLibWorldRenderState vl, ExtractLevelRenderStateEvent event) {
+	public VidLibExtractContext(Minecraft mc, VLWorldRenderState vl, ExtractLevelRenderStateEvent event) {
 		this(
 			mc,
 			vl,

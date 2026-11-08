@@ -5,7 +5,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.network.codec.ByteBufCodecs;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,8 +34,7 @@ public record UpdatePropPayload(int id, byte[] update) implements SimplePayload 
 
 	@Override
 	public void handle(Context ctx) {
-		var props = VLPlatformHelper.INSTANCE.getProps(ctx.level());
-		var prop = props.levelProps.get(id);
+		var prop = ctx.levelSessionData().props.levelProps.get(id);
 
 		if (prop != null) {
 			prop.update(ctx.level().registryAccess(), update, false);

@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.flag.ImGuiWindowFlags;
@@ -154,7 +155,7 @@ public class EntityExplorerPanel extends Panel {
 
 			if (entity instanceof Player player) {
 				if (ImGui.button("Edit Player Data###vidlib-edit-player-data", -1F, 0F)) {
-					new PlayerDataConfigPanel(new NameAndId(player.getGameProfile()), player.vl$sessionData().dataMap).open();
+					new PlayerDataConfigPanel(new NameAndId(player.getGameProfile()), PlayerSessionData.of(player).dataMap).open();
 				}
 			}
 
@@ -241,6 +242,7 @@ public class EntityExplorerPanel extends Panel {
 			}
 
 			var glowColor = graphics.session.glowColors.get(entity.getUUID());
+
 			if (ImGui.checkbox("Override Glow Color###override-glow-color", glowColor != null)) {
 				if (glowColor != null) {
 					graphics.session.glowColors.remove(entity.getUUID());

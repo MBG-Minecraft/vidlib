@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -47,6 +48,7 @@ public interface ClientWaypoints {
 		if (!VISIBLE.get() || mc.gui.hud.isHidden()) {
 			return;
 		}
+
 		var level = mc.level;
 
 		if (level == null || mc.player == null) {
@@ -59,20 +61,22 @@ public interface ClientWaypoints {
 			return;
 		}
 
-		var projectedCoordinates = mc.getProjectedCoordinates();
+		var levelSession = ClientLevelSessionData.of(level);
+
+		var projectedCoordinates = levelSession.worldData.projectedCoordinates;
 
 		if (projectedCoordinates == null) {
 			return;
 		}
 
-		var ctx = level.getGlobalContext();
+		var ctx = levelSession.createGlobalContext();
 
 		int wpSize = (int) (SIZE.get() * mc.getEffectScale());
 		var list = new ArrayList<ScreenWaypoint>(waypoints.size());
 		var cam = mc.gameRenderer.mainCamera().position();
 
 		for (var waypoint : waypoints) {
-			if (waypoint.dimension() == level.dimension() && (BYPASS_FILTERS.get() || waypoint.visible().value().test(mc.player))) {
+			if (BYPASS_FILTERS.get() || waypoint.visible().value().test(mc.player)) {
 				var pos = waypoint.position().value().get(ctx);
 
 				if (pos != null) {

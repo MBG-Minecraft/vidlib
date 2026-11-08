@@ -6,8 +6,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.core.VLPlayer;
-import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -18,37 +19,33 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.damagesource.IScalingFunction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 @Mixin(Player.class)
 public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
-	@Shadow
-	private Component displayname;
+	@Unique
+	private PlayerSessionData vl$playerData;
 
 	protected PlayerMixin(EntityType<? extends LivingEntity> type, Level level) {
 		super(type, level);
 	}
 
-	/**
-	 * @author Lat
-	 * @reason Optimization
-	 */
-	@Overwrite
-	public void refreshDisplayName() {
-		displayname = null;
+	@Override
+	public PlayerSessionData vl$getPlayerData() {
+		if (vl$playerData == null) {
+			vl$playerData = LevelSessionData.of(level()).globalData.getPlayer(uuid);
+		}
+
+		return vl$playerData;
 	}
 
 	@Inject(method = "getName", at = @At("HEAD"), cancellable = true)
 	public void vl$getName(CallbackInfoReturnable<Component> cir) {
-		var nickname = vl$sessionData() == null ? null : get(InternalPlayerData.NICKNAME);
+		var session = PlayerSessionData.of(vl$self());
+		var nickname = session.getNickname();
 
 		if (!Empty.isEmpty(nickname)) {
 			cir.setReturnValue(nickname.copy());
@@ -84,92 +81,6 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 
 		if (v != null && v.preventDismount(self)) {
 			cir.setReturnValue(false);
-		}
-	}
-
-	public Set<String> vl$getTagSet() {
-		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			return get(InternalPlayerData.PLAYER_TAGS);
-		} else {
-			return vl$self().entityTags();
-		}
-	}
-
-	public void setTags(Collection<String> tags) {
-		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var newSet = Set.copyOf(tags);
-
-			if (!newSet.equals(vl$getTagSet())) {
-				set(InternalPlayerData.PLAYER_TAGS, newSet);
-			}
-		} else {
-			var self = vl$self();
-			self.entityTags().clear();
-			self.entityTags().addAll(tags);
-		}
-	}
-
-	@Override
-	public boolean addTag(String tag) {
-		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(vl$getTagSet());
-
-			if (tags.add(tag)) {
-				setTags(tags);
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return super.addTag(tag);
-		}
-	}
-
-	@Override
-	public boolean removeTag(String tag) {
-		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(vl$getTagSet());
-
-			if (tags.remove(tag)) {
-				setTags(tags);
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return super.removeTag(tag);
-		}
-	}
-
-	public boolean addTags(Collection<String> t) {
-		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(vl$getTagSet());
-
-			if (tags.addAll(t)) {
-				setTags(tags);
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			var tags = vl$self().entityTags();
-			return tags.addAll(t);
-		}
-	}
-
-	public boolean removeTags(Collection<String> t) {
-		if (CommonGameEngine.INSTANCE.hasImprovedPlayerTags()) {
-			var tags = new HashSet<>(vl$getTagSet());
-
-			if (tags.removeAll(t)) {
-				setTags(tags);
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			var tags = vl$self().entityTags();
-			return tags.removeAll(t);
 		}
 	}
 }

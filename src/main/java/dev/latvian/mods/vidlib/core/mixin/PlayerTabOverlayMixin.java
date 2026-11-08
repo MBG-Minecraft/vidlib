@@ -30,7 +30,7 @@ public class PlayerTabOverlayMixin {
 	 */
 	@Overwrite
 	private List<PlayerInfo> getPlayerInfos() {
-		return minecraft.player.vl$sessionData().getListedPlayers();
+		return ClientGameEngine.INSTANCE.getPlayerInfos(minecraft);
 	}
 
 	@ModifyExpressionValue(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/PlayerTabOverlay;getNameForDisplay(Lnet/minecraft/client/multiplayer/PlayerInfo;)Lnet/minecraft/network/chat/Component;"))

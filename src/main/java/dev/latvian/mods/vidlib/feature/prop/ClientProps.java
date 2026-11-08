@@ -46,7 +46,7 @@ public class ClientProps extends Props<ClientLevel> {
 
 	@AutoInit(AutoInit.Type.CHUNKS_RELOADED)
 	public static void chunksRendered(ClientLevel level) {
-		level.getProps().reloadAll();
+		ClientLevelSessionData.of(level).props.reloadAll();
 	}
 
 	public final List<PropWithState<?, ?>> all;

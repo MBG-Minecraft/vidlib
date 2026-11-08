@@ -17,22 +17,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class DataMapConfigPanel extends Panel {
-	private record DataMapBuilderEntry<T>(DataKey<T> key, @Nullable ImBuilder<T> builder) {
+public abstract class DataMapConfigPanel<K> extends Panel {
+	private record DataMapBuilderEntry<K, T>(DataKey<K, T> key, @Nullable ImBuilder<T> builder) {
 	}
 
-	private final List<DataMapBuilderEntry<?>> entries;
+	private final List<DataMapBuilderEntry<K, ?>> entries;
 
 	public DataMapConfigPanel(String label) {
 		super("data-map-config", label);
 		this.entries = new ArrayList<>();
 	}
 
-	public abstract DataKeyStorage getDataKeyStorage();
+	public abstract DataKeyStorage<K> getDataKeyStorage();
 
-	public abstract DataMap getDataMap(Minecraft mc);
+	public abstract DataMap<K> getDataMap(Minecraft mc);
 
-	public abstract <T> void sendUpdate(Minecraft mc, DataKey<T> key, T value);
+	public abstract <T> void sendUpdate(Minecraft mc, DataKey<K, T> key, T value);
 
 	@Override
 	public void onOpened() {
@@ -40,10 +40,10 @@ public abstract class DataMapConfigPanel extends Panel {
 		entries.clear();
 
 		for (var key : getDataKeyStorage().all.values()) {
-			entries.add(new DataMapBuilderEntry<>(key, key.imBuilder() == null ? null : Cast.to(key.imBuilder().get())));
+			// entries.add(new DataMapBuilderEntry<>(key, key.imBuilder == null ? null : Cast.to(key.imBuilder.get())));
 		}
 
-		entries.sort((a, b) -> a.key.id().compareToIgnoreCase(b.key.id()));
+		entries.sort((a, b) -> a.key.id.compareToIgnoreCase(b.key.id));
 	}
 
 	@Override
@@ -57,8 +57,8 @@ public abstract class DataMapConfigPanel extends Panel {
 			var dataMap = getDataMap(graphics.mc);
 
 			for (var entry : entries) {
-				ImGui.pushID(entry.key.id());
-				var defaultValue = entry.key.defaultValue();
+				ImGui.pushID(entry.key.id);
+				var defaultValue = entry.key.defaultValue;
 				var currentValue = dataMap.get(entry.key);
 				boolean isDefault = graphics.isReplay ? !dataMap.hasSuperOverride(entry.key) : Objects.equals(defaultValue, currentValue);
 
@@ -104,7 +104,7 @@ public abstract class DataMapConfigPanel extends Panel {
 						graphics.tooltip("Reset to " + entry.builder.toString(graphics.nbtOps, Cast.to(defaultValue)));
 					} else {
 						try {
-							graphics.tooltip("Reset to " + entry.key.type().codec().encodeStart(graphics.nbtOps, Cast.to(defaultValue)).getOrThrow());
+							graphics.tooltip("Reset to " + entry.key.type.codec().encodeStart(graphics.nbtOps, Cast.to(defaultValue)).getOrThrow());
 						} catch (Exception ex) {
 							graphics.tooltip("Reset to the default value");
 						}
@@ -123,7 +123,7 @@ public abstract class DataMapConfigPanel extends Panel {
 					graphics.setWarningText();
 				}
 
-				ImGui.text(entry.key.id());
+				ImGui.text(entry.key.id);
 
 				if (!isDefault) {
 					graphics.popStack();
@@ -144,7 +144,7 @@ public abstract class DataMapConfigPanel extends Panel {
 						if (value == null) {
 							ImGui.text("null");
 						} else {
-							result = entry.key.type().codec().encodeStart(graphics.nbtOps, Cast.to(value));
+							result = entry.key.type.codec().encodeStart(graphics.nbtOps, Cast.to(value));
 							var string = result.getOrThrow().toString();
 
 							if (string.length() <= 50) {

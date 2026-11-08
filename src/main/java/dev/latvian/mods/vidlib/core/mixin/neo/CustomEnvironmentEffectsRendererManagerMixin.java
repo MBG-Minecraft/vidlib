@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.neo;
 
+import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -20,11 +21,12 @@ public class CustomEnvironmentEffectsRendererManagerMixin {
 
 	@Inject(method = "getCustomSkyboxRenderer(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/phys/Vec3;)Lnet/neoforged/neoforge/client/CustomSkyboxRenderer;", at = @At("HEAD"), cancellable = true)
 	private static void vl$getCustomSkyboxRenderer(Level level, Vec3 position, CallbackInfoReturnable<CustomSkyboxRenderer> cir) {
-		if (level instanceof ClientLevel l && l.minecraft.player != null) {
-			var skybox = l.minecraft.player.vl$sessionData().atmosphere;
+		if (level instanceof ClientLevel l) {
+			var session = ClientLevelSessionData.of(l);
+			var atmosphere = session.getAtmosphere();
 
-			if (skybox != null) {
-				cir.setReturnValue(skybox);
+			if (atmosphere != null && atmosphere.value().skybox().isPresent()) {
+				cir.setReturnValue(session.worldData.getAtmosphere(atmosphere));
 			}
 		}
 	}

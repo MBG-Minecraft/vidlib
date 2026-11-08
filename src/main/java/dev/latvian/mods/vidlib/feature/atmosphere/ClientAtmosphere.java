@@ -1,11 +1,16 @@
 package dev.latvian.mods.vidlib.feature.atmosphere;
 
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.ID;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
+import net.minecraft.client.renderer.state.level.SkyRenderState;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.neoforged.neoforge.client.CustomSkyboxRenderer;
+import org.joml.Matrix4fc;
 
 public class ClientAtmosphere implements CustomSkyboxRenderer {
 	public final String id;
@@ -45,16 +50,13 @@ public class ClientAtmosphere implements CustomSkyboxRenderer {
 		return skyboxTexture;
 	}
 
-	/*
 	@Override
-	public boolean renderSky(LevelRenderState levelRenderState, SkyRenderState skyRenderState, Matrix4fc modelViewMatrix, Runnable setupFog) {
-		var mc = Minecraft.getInstance();
-		// setupFog.run();
-		// return renderSky(mc, levelRenderState, modelViewMatrix);
-		skyRenderState.skyColor = ARGB.vector3fFromRGB24(0x3D91A9);
+	public boolean renderSky(LevelRenderState levelState, SkyRenderState skyState, Matrix4fc modelViewMatrix, GpuBufferSlice skyFog) {
+		skyState.skyColor = ARGB.vector3fFromRGB24(0x3D91A9); // FIXME
 		return false;
 	}
 
+	/*
 	public boolean renderSky(Minecraft mc, LevelRenderState levelRenderState, Matrix4fc modelViewMatrix) {
 		if (skybox == null) {
 			return false;

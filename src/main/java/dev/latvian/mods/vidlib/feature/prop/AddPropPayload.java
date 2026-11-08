@@ -5,7 +5,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.network.codec.ByteBufCodecs;
 
 public record AddPropPayload(PropType<?> propType, PropSpawnType spawnType, int id, long createdTime, byte[] update) implements SimplePayload {
@@ -35,7 +35,7 @@ public record AddPropPayload(PropType<?> propType, PropSpawnType spawnType, int 
 		}
 
 		var level = ctx.level();
-		var props = VLPlatformHelper.INSTANCE.getProps(level);
+		var props = LevelSessionData.of(level).props;
 
 		var prop = props.levelProps.get(id);
 

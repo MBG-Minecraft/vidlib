@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc.command;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,7 +29,7 @@ public interface SuspensionCommands {
 
 	private static int suspend(Collection<ServerPlayer> players, boolean suspend) {
 		for (var player : players) {
-			player.setSuspended(suspend);
+			PlayerSessionData.of(player).setSuspended(suspend);
 		}
 
 		return 1;

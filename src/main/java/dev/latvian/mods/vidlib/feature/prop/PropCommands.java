@@ -7,7 +7,7 @@ import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.CompoundTagArgument;
@@ -142,9 +142,9 @@ public interface PropCommands {
 		}
 
 		var level = PlatformHelper.INSTANCE.getLevel(source);
-		var props = VLPlatformHelper.INSTANCE.getProps(level);
+		var props = LevelSessionData.of(level).props;
 
-		var propResult = props.create(props.context(type, PropSpawnType.USER, level.getGameTime()), true, true, initialData == null ? null : level.nbtOps(), initialData, prop -> {
+		var propResult = props.create(props.context(type, PropSpawnType.USER, level.getGameTime()), true, true, initialData == null ? null : props.levelData.globalData.nbtOps, initialData, prop -> {
 			if (level.isClientSide()) {
 				prop.clientSideOnly = true;
 			}
@@ -163,7 +163,7 @@ public interface PropCommands {
 
 	static int remove(CommandSourceStack source, Predicate<Prop> predicate) {
 		var level = PlatformHelper.INSTANCE.getLevel(source);
-		var props = VLPlatformHelper.INSTANCE.getProps(level);
+		var props = LevelSessionData.of(level).props;
 		int killed = props.levelProps.removeAll(PropRemoveType.COMMAND, predicate);
 		source.broadcast("Removed " + killed + " props");
 		return killed;
@@ -171,7 +171,7 @@ public interface PropCommands {
 
 	static int move(CommandSourceStack source, int propId, Coordinates coordinates) {
 		var level = PlatformHelper.INSTANCE.getLevel(source);
-		var props = VLPlatformHelper.INSTANCE.getProps(level);
+		var props = LevelSessionData.of(level).props;
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -185,7 +185,7 @@ public interface PropCommands {
 
 	static int rotate(CommandSourceStack source, int propId, Coordinates coordinates) {
 		var level = PlatformHelper.INSTANCE.getLevel(source);
-		var props = VLPlatformHelper.INSTANCE.getProps(level);
+		var props = LevelSessionData.of(level).props;
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -200,7 +200,7 @@ public interface PropCommands {
 
 	static int clone(CommandSourceStack source, int propId) {
 		var level = PlatformHelper.INSTANCE.getLevel(source);
-		var props = VLPlatformHelper.INSTANCE.getProps(level);
+		var props = LevelSessionData.of(level).props;
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -212,7 +212,7 @@ public interface PropCommands {
 
 	static int pause(CommandSourceStack source, int propId, boolean paused) {
 		var level = PlatformHelper.INSTANCE.getLevel(source);
-		var props = VLPlatformHelper.INSTANCE.getProps(level);
+		var props = LevelSessionData.of(level).props;
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
@@ -231,11 +231,11 @@ public interface PropCommands {
 
 	static int merge(CommandSourceStack source, int propId, Tag data) {
 		var level = PlatformHelper.INSTANCE.getLevel(source);
-		var props = VLPlatformHelper.INSTANCE.getProps(level);
+		var props = LevelSessionData.of(level).props;
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
-			var result = prop.merge(source.getLevel().nbtOps(), data);
+			var result = prop.merge(props.levelData.globalData.nbtOps, data);
 
 			if (result.isError()) {
 				source.error(result.error().get().message());

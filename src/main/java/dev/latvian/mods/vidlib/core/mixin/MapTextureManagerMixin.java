@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.MapTextureManager;
 import net.minecraft.resources.Identifier;
@@ -14,14 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MapTextureManagerMixin {
 	@Inject(method = "prepareMapTexture", at = @At("HEAD"), cancellable = true)
 	private void vl$getTexture(MapId id, MapItemSavedData data, CallbackInfoReturnable<Identifier> cir) {
-		var player = Minecraft.getInstance().player;
+		var mc = Minecraft.getInstance();
+		var session = ClientSessionData.of(mc);
+		var override = session.getMapTextureOverride(id.id());
 
-		if (player != null) {
-			var override = player.vl$sessionData().getMapTextureOverride(id.id());
-
-			if (override != null) {
-				cir.setReturnValue(override.getTexture().id());
-			}
+		if (override != null) {
+			cir.setReturnValue(override.getTexture().id());
 		}
 	}
 }

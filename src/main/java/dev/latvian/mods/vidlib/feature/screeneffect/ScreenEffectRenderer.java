@@ -1,7 +1,5 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
-import net.minecraft.client.Minecraft;
-
 public class ScreenEffectRenderer {
 	private static int uCount = 0;
 
@@ -13,7 +11,6 @@ public class ScreenEffectRenderer {
 		builder.addUniform(CanvasUniform.int1("Count", () -> uCount));
 		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));
 	});
-	 */
 
 	private static void tick(Minecraft mc) {
 		if (!mc.getPauseType().tick()) {
@@ -52,4 +49,5 @@ public class ScreenEffectRenderer {
 			uCount = 0;
 		}
 	}
+	 */
 }

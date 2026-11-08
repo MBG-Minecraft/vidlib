@@ -22,6 +22,6 @@ public record EntityBrightnessOverridePayload(int entityId, int override) implem
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$sessionData().setEntityBrightnessOverride(entityId, override);
+		ctx.globalSessionData().setEntityBrightnessOverride(entityId, override);
 	}
 }

@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.environment;
 import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
-import dev.latvian.mods.vidlib.feature.data.InternalServerData;
+import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -42,7 +42,7 @@ public class MapTextureOverridePanel extends Panel {
 		if (replayData != null) {
 			map = replayData.overrides;
 		} else {
-			map = graphics.session.serverDataMap.get(InternalServerData.MAP_TEXTURE_OVERRIDES);
+			map = graphics.session.dataMap.get(InternalGlobalData.MAP_TEXTURE_OVERRIDES);
 		}
 
 		int remove = -1;
@@ -122,7 +122,7 @@ public class MapTextureOverridePanel extends Panel {
 			map.update();
 
 			if (replayData == null) {
-				graphics.mc.updateServerDataValue(InternalServerData.MAP_TEXTURE_OVERRIDES, map);
+				graphics.mc.updateServerDataValue(InternalGlobalData.MAP_TEXTURE_OVERRIDES, map);
 			}
 		}
 

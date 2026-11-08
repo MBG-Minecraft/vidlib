@@ -7,12 +7,13 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.server.permissions.Permissions;
 
 import java.util.List;
 import java.util.UUID;
 
-public record UpdatePlayerDataValuePayload(UUID uuid, List<DataMapValue> update) implements SimplePayload {
+public record UpdatePlayerDataValuePayload(UUID uuid, List<DataMapValue<PlayerSessionData>> update) implements SimplePayload {
 	@AutoPacket(to = AutoPacket.To.SERVER)
 	public static final SimplePayloadType<UpdatePlayerDataValuePayload> TYPE = SimplePayloadType.vidlib("update_player_data_value", CompositeStreamCodec.of(
 		KLibStreamCodecs.UUID, UpdatePlayerDataValuePayload::uuid,
@@ -27,10 +28,11 @@ public record UpdatePlayerDataValuePayload(UUID uuid, List<DataMapValue> update)
 
 	@Override
 	public void handle(Context ctx) {
+		var dataMap = ctx.globalSessionData().getPlayer(uuid).dataMap;
+
 		for (var u : update) {
-			if (u.key() != null && (u.key().allowClientUpdates() && ctx.player().getUUID().equals(uuid) || ctx.player().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))) {
-				var session = ctx.level().getServer().vl$getOrLoadServerSession(uuid);
-				session.dataMap.set(u.key(), Cast.to(u.value()));
+			if (u.key() != null && (u.key().allowClientUpdates && ctx.player().getUUID().equals(uuid) || ctx.player().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))) {
+				dataMap.set(u.key(), Cast.to(u.value()));
 			}
 		}
 	}
