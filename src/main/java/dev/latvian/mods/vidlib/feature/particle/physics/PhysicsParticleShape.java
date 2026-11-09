@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.math.SplitBox;
+import dev.latvian.mods.klib.texture.OverlayUV;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.ID;
 import net.minecraft.client.Minecraft;
@@ -41,9 +42,9 @@ public class PhysicsParticleShape {
 			consumer.addVertex(m, x, y, z)
 				.setColor(r, g, b, a)
 				.setUv(u, v)
+				.setUv1(OverlayUV.NORMAL.u(), OverlayUV.NORMAL.v())
 				.setUv2(lightU, lightV)
 				.setNormal(nx, ny, nz);
-			;
 		}
 	}
 

@@ -142,9 +142,9 @@ public class VidLibClientEventHandler {
 		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader(RefType.CLIENT));
 		event.addListener(ID.vidlib("atmosphere"), new Atmosphere.Loader(RefType.CLIENT));
 
-		event.addDependency(ID.vidlib("gradient"), ID.vidlib("clothing_preset"));
-		event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
-		event.addDependency(ID.vidlib("clock_font"), ID.vidlib("clock"));
+		event.addDependency(ID.klib("gradient"), ID.vidlib("clothing_preset"));
+		// event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
+		// event.addDependency(ID.vidlib("clock_font"), ID.vidlib("clock"));
 	}
 
 	@SubscribeEvent
@@ -246,8 +246,11 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void clientPostTick(ClientTickEvent.Post event) {
 		var mc = Minecraft.getInstance();
-		var session = ClientSessionData.of(mc);
-		session.postTick(session.getPauseType());
+
+		if (mc.player != null) {
+			var session = ClientSessionData.of(mc);
+			session.postTick(session.getPauseType());
+		}
 	}
 
 	@SubscribeEvent

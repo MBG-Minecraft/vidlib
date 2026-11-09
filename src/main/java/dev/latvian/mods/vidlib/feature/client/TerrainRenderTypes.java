@@ -10,7 +10,7 @@ public interface TerrainRenderTypes {
 		.useLightmap()
 		.createRenderSetup());
 
-	TexturedRenderType SOLID_NO_CULL = TexturedRenderType.internal("terrain/solid_no_cull", VidLibRenderPipelines.SOLID_TERRAIN_NO_CULL, texture -> RenderSetup.builder(VidLibRenderPipelines.SOLID_TERRAIN_NO_CULL)
+	TexturedRenderType SOLID_NO_CULL = TexturedRenderType.internal("terrain/solid_no_cull", VLRenderPipelines.SOLID_TERRAIN_NO_CULL, texture -> RenderSetup.builder(VLRenderPipelines.SOLID_TERRAIN_NO_CULL)
 		.withTexture("Sampler0", texture)
 		.useLightmap()
 		.createRenderSetup());
@@ -20,7 +20,7 @@ public interface TerrainRenderTypes {
 		.withTexture("Sampler0", texture)
 		.createRenderSetup());
 
-	TexturedRenderType CUTOUT_MIPPED_NO_CULL = TexturedRenderType.internal("terrain/cutout_mipped_no_cull", VidLibRenderPipelines.CUTOUT_MIPPED_TERRAIN_NO_CULL, texture -> RenderSetup.builder(VidLibRenderPipelines.CUTOUT_MIPPED_TERRAIN_NO_CULL)
+	TexturedRenderType CUTOUT_MIPPED_NO_CULL = TexturedRenderType.internal("terrain/cutout_mipped_no_cull", VLRenderPipelines.CUTOUT_MIPPED_TERRAIN_NO_CULL, texture -> RenderSetup.builder(VLRenderPipelines.CUTOUT_MIPPED_TERRAIN_NO_CULL)
 		.useLightmap()
 		.withTexture("Sampler0", texture)
 		.createRenderSetup());
@@ -30,7 +30,7 @@ public interface TerrainRenderTypes {
 		.withTexture("Sampler0", texture)
 		.createRenderSetup());
 
-	TexturedRenderType CUTOUT_NO_CULL = TexturedRenderType.internal("terrain/cutout_no_cull", VidLibRenderPipelines.CUTOUT_TERRAIN_NO_CULL, texture -> RenderSetup.builder(VidLibRenderPipelines.CUTOUT_TERRAIN_NO_CULL)
+	TexturedRenderType CUTOUT_NO_CULL = TexturedRenderType.internal("terrain/cutout_no_cull", VLRenderPipelines.CUTOUT_TERRAIN_NO_CULL, texture -> RenderSetup.builder(VLRenderPipelines.CUTOUT_TERRAIN_NO_CULL)
 		.useLightmap()
 		.withTexture("Sampler0", texture)
 		.createRenderSetup());
@@ -41,7 +41,7 @@ public interface TerrainRenderTypes {
 
 		.createRenderSetup());
 
-	TexturedRenderType TRANSLUCENT_NO_CULL = TexturedRenderType.internal("terrain/translucent_no_cull", VidLibRenderPipelines.TRANSLUCENT_TERRAIN_NO_CULL, texture -> RenderSetup.builder(VidLibRenderPipelines.TRANSLUCENT_TERRAIN_NO_CULL)
+	TexturedRenderType TRANSLUCENT_NO_CULL = TexturedRenderType.internal("terrain/translucent_no_cull", VLRenderPipelines.TRANSLUCENT_TERRAIN_NO_CULL, texture -> RenderSetup.builder(VLRenderPipelines.TRANSLUCENT_TERRAIN_NO_CULL)
 		.withTexture("Sampler0", texture)
 		.useLightmap()
 

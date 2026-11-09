@@ -25,11 +25,7 @@ public interface VLMinecraftServer extends VLMinecraftEnvironment {
 	}
 
 	@Nullable
-	default ServerSessionData vl$getWorldData() {
-		throw new NoMixinException(this);
-	}
-
-	default void vl$setWorldData(@Nullable ServerSessionData data) {
+	default ServerSessionData vl$getGlobalData() {
 		throw new NoMixinException(this);
 	}
 

@@ -1,21 +1,12 @@
 [
 	{
-		"vidlib:tracksuit/shirt": {
-			"type": "client",
-			"gradient": "{namespace}:{path}"
-		}
+		"vidlib:tracksuit/shirt": "{path}"
 	},
 	{
-		"vidlib:tracksuit/top": {
-			"type": "client",
-			"gradient": "{namespace}:{path}"
-		}
+		"vidlib:tracksuit/top": "{path}"
 	},
 	{
-		"vidlib:tracksuit/bottoms": {
-			"type": "client",
-			"gradient": "{namespace}:{path}"
-		}
+		"vidlib:tracksuit/bottoms": "{path}"
 	},
 	"vidlib:sneakers"
 ]

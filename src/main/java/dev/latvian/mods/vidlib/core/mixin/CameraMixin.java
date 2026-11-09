@@ -7,7 +7,6 @@ import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
@@ -25,12 +24,6 @@ public abstract class CameraMixin {
 	private boolean initialized;
 
 	@Shadow
-	private Level level;
-
-	@Shadow
-	private Entity entity;
-
-	@Shadow
 	private boolean detached;
 
 	@Shadow
@@ -42,15 +35,10 @@ public abstract class CameraMixin {
 	@Shadow
 	public abstract Vec3 position();
 
-	/**
-	 * 1.21.5 hooked {@code setup(BlockGetter, Entity, boolean, boolean, float)}. 26.3 split the
-	 * level/entity/detached inputs into their own fields and condensed it to
-	 * {@code update(DeltaTracker)}, with the partial tick coming from the delta tracker.
-	 */
 	@Inject(method = "update", at = @At("HEAD"), cancellable = true)
 	private void vl$setupHead(net.minecraft.client.DeltaTracker deltaTracker, CallbackInfo ci) {
 		var mc = Minecraft.getInstance();
-		var override = ClientGameEngine.INSTANCE.overrideCamera(mc);
+		var override = mc.player == null ? null : ClientGameEngine.INSTANCE.overrideCamera(mc);
 
 		if (override != null && override.overrideCamera()) {
 			this.initialized = true;
@@ -69,7 +57,7 @@ public abstract class CameraMixin {
 	private void vl$setupReturn(net.minecraft.client.DeltaTracker deltaTracker, CallbackInfo ci) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.gui.screen() == null || !mc.gui.screen().overrideCamera()) {
+		if (mc.player != null && (mc.gui.screen() == null || !mc.gui.screen().overrideCamera())) {
 			ClientSessionData.of(mc).applyCameraShake((Camera) (Object) this, deltaTracker.getGameTimeDeltaPartialTick(false));
 		}
 	}

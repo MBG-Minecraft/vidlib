@@ -46,18 +46,16 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 	@Unique
 	private int vl$reloadCount = 0;
 
-	@Nullable
 	@Unique
 	private ClientSessionData vl$globalData;
 
 	@Override
 	public ClientSessionData vl$getGlobalData() {
-		return vl$globalData;
-	}
+		if (vl$globalData == null) {
+			vl$globalData = ClientSessionData.of(vl$self());
+		}
 
-	@Override
-	public void vl$setGlobalData(@Nullable ClientSessionData data) {
-		vl$globalData = data;
+		return vl$globalData;
 	}
 
 	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"))

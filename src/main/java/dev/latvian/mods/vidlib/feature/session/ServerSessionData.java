@@ -51,7 +51,9 @@ public class ServerSessionData extends GlobalSessionData {
 		if (server.getClass().getName().contains("ReplayServer")) {
 			isReplay = true;
 		}
+	}
 
+	public void load() {
 		dataMap.load(server, server.getWorldPath(LevelResource.ROOT).resolve("vidlib.nbt"));
 	}
 

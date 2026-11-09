@@ -1,7 +1,9 @@
 #version 330
 #extension GL_ARB_separate_shader_objects : require
 
-#include < minecraft:dynamictransforms.glsl >
+//@formatter:off
+#include <minecraft:dynamictransforms.glsl>
+//@formatter:on
 
 uniform sampler2D Sampler0;
 uniform sampler2D Sampler1;

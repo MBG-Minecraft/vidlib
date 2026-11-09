@@ -8,7 +8,6 @@ import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.SubmitContext;
 import dev.latvian.mods.vidlib.core.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
-import dev.latvian.mods.vidlib.feature.particle.VidLibClientParticles;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.longs.Long2IntFunction;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -22,7 +21,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.TripWireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2d;
@@ -34,10 +32,8 @@ import java.util.function.Consumer;
 
 @AutoInit(AutoInit.Type.CLIENT_LOADED)
 public class PhysicsParticleManager {
-	public static final PhysicsParticleManager CUTOUT_MIPPED = new PhysicsParticleManager("Cutout Mipped", VidLibClientParticles.Physics.CUTOUT_MIPPED, true);
-	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", VidLibClientParticles.Physics.TRANSLUCENT, true);
-	public static final PhysicsParticleManager TRIPWIRE = new PhysicsParticleManager("Tripwire", VidLibClientParticles.Physics.TRIPWIRE, true);
-	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", VidLibClientParticles.Physics.CUTOUT, false);
+	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", RenderTypes.translucentMovingBlock(), true);
+	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", RenderTypes.cutoutMovingBlock(), false);
 	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("Solid", RenderTypes.solidMovingBlock(), true);
 
 	public static final ImBoolean VISIBLE = new ImBoolean(true);
@@ -50,9 +46,7 @@ public class PhysicsParticleManager {
 	}
 
 	static {
-		register(CUTOUT_MIPPED);
 		register(TRANSLUCENT);
-		register(TRIPWIRE);
 		register(CUTOUT);
 		register(SOLID);
 	}
@@ -94,13 +88,11 @@ public class PhysicsParticleManager {
 
 	public static PhysicsParticleManager of(BlockState state) {
 		if (state.getBlock() instanceof GrassBlock) {
-			return CUTOUT_MIPPED;
+			return SOLID;
 		} else if (state.getBlock() == Blocks.WATER) {
 			return TRANSLUCENT;
 		} else if (state.getBlock() instanceof LeavesBlock) {
-			return CUTOUT_MIPPED;
-		} else if (state.getBlock() instanceof TripWireBlock) {
-			return TRIPWIRE;
+			return CUTOUT;
 		}
 
 		ChunkSectionLayer layer = ChunkSectionLayer.byTransparency(vl$transparency(state));

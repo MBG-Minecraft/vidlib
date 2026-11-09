@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.KLibCodecs;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.client.VidLibRenderPipelines;
+import dev.latvian.mods.vidlib.feature.client.VLRenderPipelines;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
@@ -41,7 +41,7 @@ public enum PinShape implements StringRepresentable {
 		this.overlayTexture = overlayTexture;
 		this.maskTexture = maskTexture;
 		this.iconTexture = iconTexture;
-		this.maskedRenderType = VidLibRenderPipelines.MASKED_GUI;
+		this.maskedRenderType = VLRenderPipelines.MASKED_GUI;
 		this.x = x;
 		this.y = y;
 		this.size = size;

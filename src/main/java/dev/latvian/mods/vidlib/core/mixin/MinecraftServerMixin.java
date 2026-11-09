@@ -28,7 +28,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	private ServerLevel vl$overworld;
 
 	@Unique
-	private ServerSessionData vl$worldData;
+	private ServerSessionData vl$globalData;
 
 	@Inject(method = "createLevels", at = @At("RETURN"))
 	private void vl$createLevels(CallbackInfo ci) {
@@ -46,12 +46,12 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 
 	@Override
 	@Nullable
-	public ServerSessionData vl$getWorldData() {
-		return vl$worldData;
-	}
+	public ServerSessionData vl$getGlobalData() {
+		if (vl$globalData == null) {
+			vl$globalData = new ServerSessionData(vl$self());
+			vl$globalData.load();
+		}
 
-	@Override
-	public void vl$setWorldData(@Nullable ServerSessionData data) {
-		vl$worldData = data;
+		return vl$globalData;
 	}
 }

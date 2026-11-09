@@ -11,8 +11,8 @@ import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesRenderTypes;
 import net.minecraft.client.renderer.BindGroupLayouts;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.util.Util;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
-public interface VidLibRenderPipelines {
+public interface VLRenderPipelines {
 	private static String blendName(BlendFunction b) {
 		BlendEquation c = b.color();
 		BlendEquation a = b.alpha();
@@ -58,38 +58,6 @@ public interface VidLibRenderPipelines {
 		.withCull(false)
 		.withVertexShader("core/position_tex_color")
 		.withFragmentShader(ID.vidlib("core/masked_gui"))
-		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
-		.withPrimitiveTopology(PrimitiveTopology.QUADS)
-		.build();
-
-	RenderPipeline MSDF = RenderPipeline.builder()
-		.withLocation(ID.vidlib("pipeline/msdf"))
-		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
-		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
-		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
-		.withBindGroupLayout(BindGroupLayouts.FOG)
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
-		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-		.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, true))
-		.withCull(true)
-		.withVertexShader(ID.vidlib("core/msdf"))
-		.withFragmentShader(ID.vidlib("core/msdf"))
-		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
-		.withPrimitiveTopology(PrimitiveTopology.QUADS)
-		.build();
-
-	RenderPipeline MSDF_SEE_THROUGH = RenderPipeline.builder()
-		.withLocation(ID.vidlib("pipeline/msdf_see_through"))
-		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
-		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
-		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
-		.withBindGroupLayout(BindGroupLayouts.FOG)
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
-		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-		.withDepthStencilState(java.util.Optional.empty())
-		.withCull(true)
-		.withVertexShader(ID.vidlib("core/msdf"))
-		.withFragmentShader(ID.vidlib("core/msdf"))
 		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
 		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
@@ -231,48 +199,20 @@ public interface VidLibRenderPipelines {
 		.build()
 	);
 
-	RenderPipeline.Snippet OUTLINE_SNIPPET = RenderPipeline.builder()
-		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
-		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
-		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
-		.withBindGroupLayout(BindGroupLayouts.FOG)
-		.withVertexShader("core/rendertype_outline")
-		.withFragmentShader("core/rendertype_outline")
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
-		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-		.withDepthStencilState(DepthStencilState.DEFAULT)
-		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
-		.withPrimitiveTopology(PrimitiveTopology.QUADS)
-		.buildSnippet();
-
-	RenderPipeline OUTLINE_CULL = RenderPipeline.builder(OUTLINE_SNIPPET).withLocation("pipeline/outline_cull").build();
-	RenderPipeline OUTLINE_NO_CULL = RenderPipeline.builder(OUTLINE_SNIPPET).withLocation("pipeline/outline_no_cull").withCull(false).build();
-
-	RenderPipeline STONE_ENTITY_NO_CULL = RenderPipeline.builder()
-		.withLocation(ID.vidlib("pipeline/canvas/no_cull/stone_entity"))
-		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
-		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
-		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
-		.withBindGroupLayout(BindGroupLayouts.LIGHTING)
-		.withBindGroupLayout(BindGroupLayouts.FOG)
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER1)
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
-		.withColorTargetState(ColorTargetState.DEFAULT)
-		.withDepthStencilState(DepthStencilState.DEFAULT)
-		.withCull(false)
-		.withVertexShader("core/entity")
+	RenderPipeline STONE_ENTITY_CUTOUT = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
+		.withLocation(ID.vidlib("pipeline/stone_entity_cutout"))
 		.withFragmentShader(ID.vidlib("core/stone_entity"))
-		.withVertexBinding(0, DefaultVertexFormat.ENTITY)
-		.withPrimitiveTopology(PrimitiveTopology.QUADS)
+		.withShaderDefine("ALPHA_CUTOUT", 0.1F)
+		.withShaderDefine("PER_FACE_LIGHTING")
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER1)
+		.withCull(false)
+		.withColorTargetState(ColorTargetState.DEFAULT)
 		.build();
 
 	@SubscribeEvent
 	static void registerRenderPipelines(RegisterRenderPipelinesEvent event) {
 		event.registerPipeline(GUI_DEPTH);
 		event.registerPipeline(MASKED_GUI);
-		event.registerPipeline(MSDF);
-		event.registerPipeline(MSDF_SEE_THROUGH);
 		event.registerPipeline(SKYBOX);
 		event.registerPipeline(SOLID_TERRAIN_NO_CULL);
 		event.registerPipeline(CUTOUT_MIPPED_TERRAIN_NO_CULL);
@@ -280,19 +220,6 @@ public interface VidLibRenderPipelines {
 		event.registerPipeline(TRANSLUCENT_TERRAIN_NO_CULL);
 		event.registerPipeline(ADDITIVE_PARTICLE);
 		event.registerPipeline(ADDITIVE_PARTICLE_ONLY_DEPTH);
-		event.registerPipeline(PhysicsParticlesRenderTypes.SOLID_PIPELINE);
-		event.registerPipeline(PhysicsParticlesRenderTypes.CUTOUT_PIPELINE);
-		event.registerPipeline(PhysicsParticlesRenderTypes.TRANSLUCENT_PIPELINE);
-		event.registerPipeline(STONE_ENTITY_NO_CULL);
-	}
-
-	static RenderPipeline wrap(RenderPipeline original) {
-		if (OUTLINE_CULL.getLocation().equals(original.getLocation())) {
-			return OUTLINE_CULL;
-		} else if (OUTLINE_NO_CULL.getLocation().equals(original.getLocation())) {
-			return OUTLINE_NO_CULL;
-		} else {
-			return original;
-		}
+		event.registerPipeline(STONE_ENTITY_CUTOUT);
 	}
 }
