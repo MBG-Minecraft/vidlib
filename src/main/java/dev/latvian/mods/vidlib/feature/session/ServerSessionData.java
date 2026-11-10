@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import com.mojang.util.UndashedUuid;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.vidlib.VidLib;
@@ -11,7 +12,6 @@ import dev.latvian.mods.vidlib.feature.data.SyncLevelDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
-import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
@@ -65,11 +65,6 @@ public class ServerSessionData extends GlobalSessionData {
 	@Override
 	public PauseType getPauseType() {
 		return server.isPaused() ? PauseType.GAME : server.tickRateManager().runsNormally() ? PauseType.NONE : PauseType.TICK;
-	}
-
-	@Override
-	public FeatureSet getServerFeatures() {
-		return FeatureSet.SERVER_FEATURES.get();
 	}
 
 	@Override
@@ -131,7 +126,7 @@ public class ServerSessionData extends GlobalSessionData {
 			ServerPlayerSessionData.of(player).syncPlayer(player, packetsToEveryone);
 		}
 
-		packetsToEveryone.send(server);
+		packetsToEveryone.send(PlayerTarget.of(server));
 
 		int minFakeLag0 = dataMap.get(InternalGlobalData.MIN_FAKE_LAG);
 		int maxFakeLag0 = dataMap.get(InternalGlobalData.MAX_FAKE_LAG);
@@ -160,7 +155,7 @@ public class ServerSessionData extends GlobalSessionData {
 
 			if (data != null) {
 				data.setOnline(false);
-				server.s2c(new RemovePlayerDataPayload(uuid));
+				PlayerTarget.of(server).s2c(new RemovePlayerDataPayload(uuid));
 
 				try {
 					Files.deleteIfExists(data.dataMapPath);

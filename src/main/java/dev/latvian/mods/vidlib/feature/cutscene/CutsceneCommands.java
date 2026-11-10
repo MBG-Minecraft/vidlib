@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.cutscene;
 
 import dev.latvian.mods.klib.knumber.KNumberVariables;
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
@@ -18,7 +19,7 @@ public interface CutsceneCommands {
 						var cutscene = Cutscene.DATA_TYPE.get(ctx, "cutscene");
 
 						for (var player : EntityArgument.getPlayers(ctx, "player")) {
-							player.playCutscene(cutscene, KNumberVariables.EMPTY);
+							VLFeatures.of(player).playCutscene(cutscene, KNumberVariables.EMPTY);
 						}
 
 						return 1;
@@ -30,7 +31,7 @@ public interface CutsceneCommands {
 			.then(Commands.argument("player", EntityArgument.players())
 				.executes(ctx -> {
 					for (var player : EntityArgument.getPlayers(ctx, "player")) {
-						player.stopCutscene();
+						VLFeatures.of(player).stopCutscene();
 					}
 
 					return 1;

@@ -74,7 +74,7 @@ public interface BackupCommand {
 	static int testCompression(CommandSourceStack source) {
 		var server = source.getServer();
 		VLPlatformHelper.INSTANCE.pauseSaving(server);
-		source.tell("Calculating...");
+		source.sendSuccess(() -> Component.literal("Calculating..."), false);
 
 		Thread.startVirtualThread(() -> {
 			var now = Instant.now();
@@ -130,15 +130,15 @@ public interface BackupCommand {
 
 			server.execute(() -> {
 				VLPlatformHelper.INSTANCE.resumeSaving(server);
-				source.tell("Done! Results:");
+				source.sendSuccess(() -> Component.literal("Done! Results:"), false);
 
 				for (var method : methods) {
-					source.tell("# " + method.name);
+					source.sendSuccess(() -> Component.literal("# " + method.name), false);
 					var time = totalTime[method.ordinal()].toMillis();
 					var size = totalSize[method.ordinal()];
 
-					source.tell("- Time: " + StringUtils.timer(time));
-					source.tell("- Size: " + StringUtils.siByteSize(size));
+					source.sendSuccess(() -> Component.literal("- Time: " + StringUtils.timer(time)), false);
+					source.sendSuccess(() -> Component.literal("- Size: " + StringUtils.siByteSize(size)), false);
 				}
 			});
 		});
@@ -148,7 +148,7 @@ public interface BackupCommand {
 
 	static int backup(CommandSourceStack source, String customName) {
 		var now = Instant.now();
-		source.broadcast("Creating a world backup...");
+		source.sendSuccess(() -> Component.literal("Creating a world backup..."), true);
 		backup(source.getServer(), source.getServer().getWorldPath(LevelResource.ROOT), now, customName).thenAccept(name -> source.sendSuccess(() -> Component.literal("Saved a backup of '%s' (%.01f s)".formatted(name, Duration.between(now, Instant.now()).toMillis() / 1000F)), true));
 		return 1;
 	}

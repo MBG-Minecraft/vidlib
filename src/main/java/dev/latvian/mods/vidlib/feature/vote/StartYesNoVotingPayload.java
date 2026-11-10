@@ -34,6 +34,6 @@ public record StartYesNoVotingPayload(CompoundTag extraData, Component title, Co
 			return;
 		}
 
-		ctx.player().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel, closeOnVote);
+		ctx.features().openYesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel, closeOnVote);
 	}
 }

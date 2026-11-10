@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.command.CustomRegistryRegistryEvent;
 import dev.latvian.mods.klib.data.DataTypeRegistryEvent;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.entity.filter.EntityFilterTypeRegistryEvent;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
@@ -184,7 +185,7 @@ public class VidLibEventHandler {
 				packets.s2c(prop.createAddPacket());
 			}
 
-			packets.send(player);
+			packets.send(PlayerTarget.of(player));
 			HubServerGateway.playerChangedDimension(player, event.getFrom(), event.getTo());
 		}
 	}

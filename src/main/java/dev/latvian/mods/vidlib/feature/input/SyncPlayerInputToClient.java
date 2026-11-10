@@ -30,6 +30,6 @@ public record SyncPlayerInputToClient(UUID player, PlayerInput input) implements
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.globalSessionData().updateInput(ctx.level(), player, input);
+		ctx.features().updateInput(ctx.level(), player, input);
 	}
 }

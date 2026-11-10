@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.net;
 
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
 import dev.latvian.mods.vidlib.feature.session.GlobalSessionData;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
@@ -29,11 +30,15 @@ public interface Context {
 		return player().level();
 	}
 
+	default VLFeatures features() {
+		return (VLFeatures) globalSessionData();
+	}
+
 	default GlobalSessionData globalSessionData() {
 		return levelSessionData().globalData;
 	}
 
-	default LevelSessionData levelSessionData() {
+	default LevelSessionData<?> levelSessionData() {
 		return LevelSessionData.of(level());
 	}
 

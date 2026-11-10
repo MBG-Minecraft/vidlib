@@ -16,6 +16,6 @@ public record ScreenShakePayload(ScreenShake shake) implements SimplePayload {
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().screenShake(shake);
+		ctx.features().screenShake(shake);
 	}
 }

@@ -2,12 +2,13 @@ package dev.latvian.mods.vidlib.feature.camera;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
-import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.gradient.Gradient;
+import dev.latvian.mods.klib.particle.ShapeParticleOptions;
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
-import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.phys.Vec3;
@@ -32,11 +33,13 @@ public record TestScreenShakePayload(ScreenShake shake, Optional<Vec3> position,
 	@Override
 	public void handle(Context ctx) {
 		if (ctx.isAdmin()) {
+			var features = VLFeatures.of(ctx.level());
+
 			if (position.isPresent()) {
-				ctx.level().screenShake(shake, position.get(), maxDistance);
-				ctx.level().cubeParticles(new ShapeParticleOptions(ScreenShake.DEFAULT.duration(), Color.CYAN.toGradient().ref(), Color.WHITE.toGradient().ref()), List.of(BlockPos.containing(position.get())));
+				features.screenShake(shake, position.get(), maxDistance);
+				features.shapeParticles(new ShapeParticleOptions(ScreenShake.DEFAULT.duration(), Gradient.CYAN, Gradient.WHITE), List.of(BlockPos.containing(position.get())));
 			} else {
-				ctx.level().screenShake(shake);
+				features.screenShake(shake);
 			}
 		}
 	}

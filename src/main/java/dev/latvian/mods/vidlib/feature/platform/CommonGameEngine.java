@@ -7,7 +7,6 @@ import dev.latvian.mods.klib.util.RuntimeDebugger;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
-import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
@@ -17,7 +16,6 @@ import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
 import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.commands.CommandSourceStack;
@@ -77,12 +75,6 @@ public class CommonGameEngine {
 
 	public boolean privacyMode() {
 		return false;
-	}
-
-	public void collectServerFeatures(Reference2IntMap<Feature> map) {
-		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);
-		map.put(Feature.SERVER_DATA, 1);
-		map.put(Feature.PLAYER_DATA, 1);
 	}
 
 	public void setupServer(MinecraftServer server) {

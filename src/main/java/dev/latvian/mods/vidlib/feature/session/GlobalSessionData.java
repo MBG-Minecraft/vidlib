@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.mojang.brigadier.StringReader;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
-import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.klib.util.LevelGameTimeProvider;
@@ -14,8 +13,6 @@ import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
 import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
 import dev.latvian.mods.vidlib.feature.data.SyncServerDataPayload;
-import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
-import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.latvian.mods.vidlib.util.RepeatingTask;
 import dev.latvian.mods.vidlib.util.ScheduledTask;
@@ -59,8 +56,6 @@ public abstract class GlobalSessionData implements LevelGameTimeProvider {
 	}
 
 	public abstract PauseType getPauseType();
-
-	public abstract FeatureSet getServerFeatures();
 
 	public LevelSessionData<?> getLevel(ResourceKey<Level> dimension) {
 		var data = levelMap.get(dimension);
@@ -109,22 +104,7 @@ public abstract class GlobalSessionData implements LevelGameTimeProvider {
 		playerMap.remove(uuid);
 	}
 
-	public void updateInput(Level level, UUID player, PlayerInput input) {
-	}
-
-	public void updateAtmospheres() {
-	}
-
 	public void setClientModListSentDuringConfig() {
-	}
-
-	public void createNote(Note note) {
-	}
-
-	public void deleteNote(UUID id) {
-	}
-
-	public void setEntityBrightnessOverride(int entityId, int override) {
 	}
 
 	public ParticleOptions getParticleOptions(String string) {

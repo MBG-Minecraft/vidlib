@@ -153,10 +153,7 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 	@WrapOperation(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;stop()V"))
 	private void vl$stop(Minecraft mc, Operation<Void> original, @Local(argsOnly = true) boolean advanceGameTime) {
-		if (BlockExitScreen.preventExit(mc, advanceGameTime)) {
-			// 26.3 removed the SDL window-close helper; Window#shouldClose is a latched flag, so
-			// simply not stopping here keeps the close request alive until we can actually exit.
-		} else {
+		if (!BlockExitScreen.preventExit(mc, advanceGameTime)) {
 			original.call(mc);
 		}
 	}

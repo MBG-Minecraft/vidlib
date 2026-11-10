@@ -18,6 +18,7 @@ import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.phys.Vec3;
@@ -137,7 +138,7 @@ public interface PropCommands {
 		var type = PropType.ALL.get().get(typeId);
 
 		if (type == null) {
-			source.error("Prop type '" + typeId + "' not found!");
+			source.sendFailure(Component.literal("Prop type '" + typeId + "' not found!"));
 			return 0;
 		}
 
@@ -154,7 +155,7 @@ public interface PropCommands {
 		});
 
 		if (propResult.error().isPresent()) {
-			source.error("Unable to create prop of type '" + typeId + "': " + propResult.error().get().message());
+			source.sendFailure(Component.literal("Unable to create prop of type '" + typeId + "': " + propResult.error().get().message()));
 			return 0;
 		}
 
@@ -165,7 +166,7 @@ public interface PropCommands {
 		var level = PlatformHelper.INSTANCE.getLevel(source);
 		var props = LevelSessionData.of(level).props;
 		int killed = props.levelProps.removeAll(PropRemoveType.COMMAND, predicate);
-		source.broadcast("Removed " + killed + " props");
+		source.sendFailure(Component.literal("Removed " + killed + " props"));
 		return killed;
 	}
 
@@ -238,7 +239,7 @@ public interface PropCommands {
 			var result = prop.merge(props.levelData.globalData.nbtOps, data);
 
 			if (result.isError()) {
-				source.error(result.error().get().message());
+				source.sendFailure(Component.literal(result.error().get().message()));
 			} else {
 				return 1;
 			}

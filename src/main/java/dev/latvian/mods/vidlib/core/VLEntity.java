@@ -1,27 +1,19 @@
 package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.entity.PlayerInput;
-import dev.latvian.mods.klib.entity.PositionType;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
-import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.net.S2CPacketConsumer;
-import dev.latvian.mods.vidlib.feature.entity.C2SEntityEventPayload;
-import dev.latvian.mods.vidlib.feature.entity.EntityData;
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
-import dev.latvian.mods.vidlib.feature.entity.S2CEntityEventPayload;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,40 +29,12 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 		return vl$self().level();
 	}
 
-	default boolean vl$isSuspended() {
-		return CommonGameEngine.INSTANCE.isSuspended(vl$self());
-	}
-
-	default void teleport(ServerLevel to, Vec3 pos) {
-		var entity = vl$self();
-		entity.teleport(new TeleportTransition(
-			to,
-			pos,
-			entity.getDeltaMovement(),
-			entity.getYRot(),
-			entity.getXRot(),
-			TeleportTransition.DO_NOTHING
-		));
-	}
-
-	default void teleport(Vec3 pos) {
-		teleport((ServerLevel) vl$level(), pos);
-	}
-
-	default void teleport(ServerLevel to, BlockPos pos) {
-		teleport(to, new Vec3(pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D));
-	}
-
-	default void teleport(BlockPos pos) {
-		teleport(new Vec3(pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D));
-	}
-
 	default void forceSetVelocity(Vec3 velocity) {
 		var e = vl$self();
 		e.setDeltaMovement(velocity);
 
 		if (!e.level().isClientSide()) {
-			e.level().s2c(new ForceEntityVelocityPayload(e.getId(), velocity));
+			PlayerTarget.of(e.level()).s2c(new ForceEntityVelocityPayload(e.getId(), velocity));
 		}
 	}
 
@@ -84,7 +48,7 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default void playSound(SoundData data, boolean looping, boolean stopImmediately) {
 		var e = vl$self();
-		e.level().playGlobalSound(new PositionedSoundData(data, e, looping, stopImmediately), KNumberVariables.EMPTY);
+		VLFeatures.of(e.level()).playGlobalSound(new PositionedSoundData(data, e, looping, stopImmediately), KNumberVariables.EMPTY);
 	}
 
 	default void playSound(SoundData data) {
@@ -93,58 +57,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 
 	default Vec3 getSoundSource(float delta) {
 		return vl$self().getEyePosition(delta);
-	}
-
-	default void s2c(EntityData data) {
-		vl$level().s2c(new S2CEntityEventPayload(data));
-	}
-
-	default void s2cReceived(EntityData event, Player clientPlayer) {
-	}
-
-	default void c2s(EntityData data) {
-		vl$level().c2s(new C2SEntityEventPayload(data));
-	}
-
-	default void c2sReceived(EntityData event, ServerPlayer from) {
-	}
-
-	default Vec3 getLookTarget(float delta) {
-		var e = vl$self();
-
-		if (delta == 1F) {
-			return e.position().add(e.getViewVector(1F));
-		} else {
-			return e.getPosition(delta).add(e.getViewVector(delta));
-		}
-	}
-
-	default Vec3 getPosition(PositionType type) {
-		var e = vl$self();
-
-		return switch (type) {
-			case CENTER -> new Vec3(e.getX(), e.getY() + e.getBbHeight() / 2D, e.getZ());
-			case TOP -> new Vec3(e.getX(), e.getY() + e.getBbHeight(), e.getZ());
-			case EYES -> e.getEyePosition();
-			case LEASH -> e.position().add(e instanceof net.minecraft.world.entity.Leashable l ? l.getLeashOffset(1F) : Vec3.ZERO);
-			case SOUND_SOURCE -> getSoundSource(1F);
-			case LOOK_TARGET -> getLookTarget(1F);
-			default -> e.position();
-		};
-	}
-
-	default Vec3 getPosition(PositionType type, float delta) {
-		var e = vl$self();
-
-		return switch (type) {
-			case CENTER -> e.getPosition(delta).add(0D, e.getBbHeight() / 2D, 0D);
-			case TOP -> e.getPosition(delta).add(0D, e.getBbHeight(), 0D);
-			case EYES -> e.getEyePosition(delta);
-			case LEASH -> e.getPosition(delta).add(e instanceof net.minecraft.world.entity.Leashable l ? l.getLeashOffset(delta) : Vec3.ZERO);
-			case SOUND_SOURCE -> getSoundSource(delta);
-			case LOOK_TARGET -> getLookTarget(delta);
-			default -> delta == 1F ? e.position() : e.getPosition(delta);
-		};
 	}
 
 	default boolean preventDismount(Player passenger) {
@@ -168,16 +80,6 @@ public interface VLEntity extends VLLevelContainer, PlayerActionHandler {
 	}
 
 	default void sortPassengers(List<Entity> passengers) {
-	}
-
-	default Rotation rotation(float delta) {
-		var e = vl$self();
-		return Rotation.deg(e.getYRot(delta), e.getXRot(delta));
-	}
-
-	default Rotation viewRotation(float delta) {
-		var e = vl$self();
-		return Rotation.deg(e.getViewYRot(delta), e.getViewXRot(delta));
 	}
 
 	default void replaySnapshot(S2CPacketConsumer packets) {

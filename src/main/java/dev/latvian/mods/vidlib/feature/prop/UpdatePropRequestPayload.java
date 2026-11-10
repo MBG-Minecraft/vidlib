@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
@@ -52,7 +53,7 @@ public record UpdatePropRequestPayload(int id, byte[] update) implements SimpleP
 
 			if (prop != null) {
 				prop.update(ctx.level().registryAccess(), update, false);
-				ctx.level().s2c(new UpdatePropPayload(id, update));
+				PlayerTarget.of(ctx.level()).s2c(new UpdatePropPayload(id, update));
 			}
 		}
 	}

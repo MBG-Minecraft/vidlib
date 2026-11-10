@@ -168,7 +168,7 @@ public class BuiltInImGui {
 			var gameDir = PlatformHelper.INSTANCE.getGameDirectory().toAbsolutePath();
 			var textures = TextureUtil.getDebugTexturePath(gameDir);
 			g.mc.getTextureManager().dumpAllSheets(textures);
-			g.mc.tell(Component.translatableEscape("debug.dump_dynamic_textures", Component.literal(gameDir.relativize(textures).toString())
+			g.mc.player.sendSystemMessage(Component.translatableEscape("debug.dump_dynamic_textures", Component.literal(gameDir.relativize(textures).toString())
 				.withStyle(ChatFormatting.UNDERLINE)
 				.withStyle(s -> s.withClickEvent(new ClickEvent.OpenFile(textures)))
 			));

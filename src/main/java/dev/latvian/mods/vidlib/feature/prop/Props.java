@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
@@ -12,11 +13,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 
 public abstract class Props<L extends Level> {
-	public final LevelSessionData levelData;
+	public final LevelSessionData<?> levelData;
 	public final L level;
 	public final PropList levelProps;
 
-	public Props(LevelSessionData levelData, L level) {
+	public Props(LevelSessionData<?> levelData, L level) {
 		this.levelData = levelData;
 		this.level = level;
 		levelProps = new PropList(this);
@@ -51,7 +52,7 @@ public abstract class Props<L extends Level> {
 			} else {
 				var builder = new S2CPacketBundleBuilder();
 				levelProps.add(prop, builder);
-				builder.send(level);
+				builder.send(PlayerTarget.of(level));
 			}
 		}
 	}

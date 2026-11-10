@@ -25,6 +25,6 @@ public record ScreenShakeAtPositionPayload(ScreenShake shake, Vec3 position, dou
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().screenShake(shake, position, maxDistance);
+		ctx.features().screenShake(shake, position, maxDistance);
 	}
 }

@@ -17,7 +17,7 @@ public record TestPhysicsParticlesPayload(PhysicsParticlesDisplayData data) impl
 	@Override
 	public void handle(Context ctx) {
 		if (ctx.isAdmin()) {
-			ctx.level().physicsParticles(data, ctx.level().getGameTime());
+			ctx.features().physicsParticles(data, ctx.level().getGameTime());
 		}
 	}
 }

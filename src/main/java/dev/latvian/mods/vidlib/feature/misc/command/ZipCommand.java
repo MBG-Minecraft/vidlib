@@ -92,7 +92,7 @@ public interface ZipCommand {
 
 	static int zip(CommandSourceStack source, String customName) {
 		var now = Instant.now();
-		source.broadcast("Creating a world backup...");
+		source.sendSuccess(() -> Component.literal("Creating a world backup..."), true);
 		zip(source.getServer(), now, customName).thenAccept(name -> source.sendSuccess(() -> Component.literal("Saved a backup of '%s' (%.01f s)".formatted(name, Duration.between(now, Instant.now()).toMillis() / 1000F)), true));
 		return 1;
 	}

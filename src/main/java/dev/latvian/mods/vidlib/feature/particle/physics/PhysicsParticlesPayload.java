@@ -22,6 +22,6 @@ public record PhysicsParticlesPayload(PhysicsParticlesDisplayData data, long spa
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().physicsParticles(data, spawnTime);
+		ctx.features().physicsParticles(data, spawnTime);
 	}
 }

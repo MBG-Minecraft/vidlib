@@ -22,6 +22,6 @@ public record SoundPayload(PositionedSoundData data, KNumberVariables variables)
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().playGlobalSound(data, variables);
+		ctx.features().playGlobalSound(data, variables);
 	}
 }

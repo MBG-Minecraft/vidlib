@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.zone;
 
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
@@ -47,7 +48,7 @@ public enum ZoneTool implements VidLibTool {
 
 		if (hit != null) {
 			NeoForge.EVENT_BUS.post(new ZoneEvent.ClickedOn(player, hit));
-			player.c2s(new ZoneClickedPayload(hit.zone(), hit.pos(), hit.distanceSq(), Optional.ofNullable(hit.direction())));
+			PlayerTarget.of(player).c2s(new ZoneClickedPayload(hit.zone(), hit.pos(), hit.distanceSq(), Optional.ofNullable(hit.direction())));
 		}
 	}
 }

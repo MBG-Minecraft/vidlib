@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.renderpearl.api.pipeline.BlendEquation;
 import com.mojang.renderpearl.api.pipeline.BlendFunction;
 import com.mojang.renderpearl.api.pipeline.ColorTargetState;
@@ -20,7 +19,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.Function;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
@@ -151,38 +149,6 @@ public interface VLRenderPipelines {
 		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline ADDITIVE_PARTICLE = RenderPipeline.builder()
-		.withLocation(ID.vidlib("pipeline/particle/additive"))
-		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
-		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
-		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
-		.withBindGroupLayout(BindGroupLayouts.FOG)
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
-		.withColorTargetState(new ColorTargetState(BlendFunction.ADDITIVE))
-		.withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
-		.withVertexShader("core/particle")
-		.withFragmentShader("core/particle")
-		.withVertexBinding(0, DefaultVertexFormat.PARTICLE)
-		.withPrimitiveTopology(PrimitiveTopology.QUADS)
-		.build();
-
-	RenderPipeline ADDITIVE_PARTICLE_ONLY_DEPTH = RenderPipeline.builder()
-		.withLocation(ID.vidlib("pipeline/particle/additive_only_depth"))
-		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
-		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
-		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
-		.withBindGroupLayout(BindGroupLayouts.FOG)
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER2)
-		.withColorTargetState(new ColorTargetState(Optional.of(BlendFunction.ADDITIVE), GpuFormat.RGBA8_UNORM, ColorTargetState.WRITE_NONE))
-		.withDepthStencilState(DepthStencilState.DEFAULT)
-		.withVertexShader("core/particle")
-		.withFragmentShader("core/particle")
-		.withVertexBinding(0, DefaultVertexFormat.PARTICLE)
-		.withPrimitiveTopology(PrimitiveTopology.QUADS)
-		.build();
-
 	Function<BlendFunction, RenderPipeline> CANVAS_PIPELINES = Util.memoize(blendFunction -> RenderPipeline.builder()
 		.withLocation(ID.vidlib("pipeline/canvas/" + blendName(blendFunction)))
 		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
@@ -218,8 +184,6 @@ public interface VLRenderPipelines {
 		event.registerPipeline(CUTOUT_MIPPED_TERRAIN_NO_CULL);
 		event.registerPipeline(CUTOUT_TERRAIN_NO_CULL);
 		event.registerPipeline(TRANSLUCENT_TERRAIN_NO_CULL);
-		event.registerPipeline(ADDITIVE_PARTICLE);
-		event.registerPipeline(ADDITIVE_PARTICLE_ONLY_DEPTH);
 		event.registerPipeline(STONE_ENTITY_CUTOUT);
 	}
 }

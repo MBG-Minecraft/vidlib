@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 import com.mojang.datafixers.util.Either;
 import dev.latvian.mods.klib.block.PositionedBlock;
 import dev.latvian.mods.klib.block.collection.PositionedBlockCollection;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
@@ -67,7 +68,7 @@ public enum PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 			}
 		}
 
-		player.c2s(new TestPhysicsParticlesPayload(new PhysicsParticlesDisplayData(
+		PlayerTarget.of(player).c2s(new TestPhysicsParticlesPayload(new PhysicsParticlesDisplayData(
 			VidLibClientOptions.TEST_PHYSICS_PARTICLE_DATA.get(),
 			0L,
 			new PositionedBlockCollection(blocks).ref()
@@ -97,7 +98,7 @@ public enum PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 	@Override
 	public void onPlayerAction(ServerPlayer player, ItemStack item, InteractionHand hand, PlayerActionType action) {
 		if (action == PlayerActionType.RELOAD) {
-			player.s2c(new SpawnClientParticlePayload(
+			PlayerTarget.of(player).s2c(new SpawnClientParticlePayload(
 				List.of(
 					Either.right("vidlib:shape{color:cyan,outline_color:transparent,shape:{type:cube,size:0.2}}"),
 					Either.right("vidlib:shape{color:magenta,outline_color:transparent,shape:{type:cube,size:0.2}}"),

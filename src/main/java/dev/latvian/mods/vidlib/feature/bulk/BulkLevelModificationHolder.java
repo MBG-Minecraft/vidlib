@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.bulk.BlockModificationConsumer;
 import dev.latvian.mods.klib.bulk.BlockPalette;
 import dev.latvian.mods.klib.bulk.BulkLevelModification;
 import dev.latvian.mods.klib.bulk.SectionData;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
@@ -226,7 +227,7 @@ public class BulkLevelModificationHolder implements BlockModificationConsumer {
 
 		if (server) {
 			packets.s2c(new RedrawChunkSectionsPayload(new LongArrayList(rerender), false));
-			packets.send(level);
+			packets.send(PlayerTarget.of(level));
 		}
 
 		if (collectUndoable) {

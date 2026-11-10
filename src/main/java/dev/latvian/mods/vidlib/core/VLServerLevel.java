@@ -5,9 +5,6 @@ import dev.latvian.mods.klib.bulk.BulkLevelModification;
 import dev.latvian.mods.klib.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.klib.registry.Ref;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.player.Player;
-
-import java.util.List;
 
 public interface VLServerLevel extends VLLevel {
 	@Override
@@ -18,11 +15,6 @@ public interface VLServerLevel extends VLLevel {
 	@Override
 	default ServerLevel vl$level() {
 		return (ServerLevel) this;
-	}
-
-	@Override
-	default List<? extends Player> vl$getS2CPlayers() {
-		return this.vl$level().players();
 	}
 
 	@Override

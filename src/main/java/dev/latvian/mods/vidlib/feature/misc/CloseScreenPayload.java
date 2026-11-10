@@ -19,6 +19,6 @@ public enum CloseScreenPayload implements SimplePayload {
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().vl$closeScreen();
+		ctx.features().closeScreen();
 	}
 }

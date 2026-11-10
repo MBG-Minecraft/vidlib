@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.sound.StopSoundTask;
@@ -38,7 +39,7 @@ public class SoundCutsceneStep extends CutsceneStep {
 	@Override
 	public void tick(CutsceneState state, KNumberContext ctx) {
 		var mc = Minecraft.getInstance();
-		var instance = mc.createGlobalSound(sound, ctx);
+		var instance = ClientSessionData.of(mc).createSoundInstance(sound, ctx);
 
 		if (sound.stopImmediately()) {
 			state.exitTasks.add(new StopSoundTask(this, instance));

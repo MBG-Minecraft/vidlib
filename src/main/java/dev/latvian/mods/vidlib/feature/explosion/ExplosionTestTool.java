@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.explosion;
 
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
@@ -65,10 +66,10 @@ public enum ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 			var instance = getData(item, false).instance(level, hit.getBlockPos());
 
 			if (instance.data.destroy > 0F) {
-				player.status("Modified %,d blocks".formatted(instance.create()));
+				player.sendOverlayMessage(Component.literal("Modified %,d blocks".formatted(instance.create())));
 			} else {
-				player.status("Displaying Entity Damage");
-				level.removeAllParticles();
+				player.sendOverlayMessage(Component.literal("Displaying Entity Damage"));
+				VLFeatures.of(level).removeAllParticles();
 				instance.displayEntityDamage(120);
 			}
 		}
@@ -113,7 +114,7 @@ public enum ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 	@Override
 	public void onPlayerAction(ServerPlayer player, ItemStack item, InteractionHand hand, PlayerActionType action) {
 		if (action == PlayerActionType.RELOAD) {
-			player.status("Modified %,d blocks".formatted(LevelSessionData.of(player.level()).undoLastModification(player.level())));
+			player.sendOverlayMessage(Component.literal("Modified %,d blocks".formatted(LevelSessionData.of(player.level()).undoLastModification(player.level()))));
 		}
 	}
 }

@@ -24,6 +24,6 @@ public record RedrawChunkSectionsPayload(LongList sections, boolean mainThread) 
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().redrawSections(sections, mainThread);
+		ctx.features().redrawSections(sections, mainThread);
 	}
 }

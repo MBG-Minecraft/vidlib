@@ -21,7 +21,6 @@ import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
-import dev.latvian.mods.vidlib.feature.feature.Feature;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -42,7 +41,6 @@ import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import imgui.ImGui;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.DeltaTracker;
@@ -98,7 +96,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
@@ -114,16 +111,6 @@ public class ClientGameEngine {
 	public static ClientGameEngine INSTANCE = new ClientGameEngine();
 
 	public static final boolean DISABLE_IMGUI = "true".equals(System.getenv("DISABLE_IMGUI"));
-
-	public void collectClientFeatures(Reference2IntMap<Feature> map) {
-		for (var mod : ModList.get().getMods()) {
-			map.put(Feature.create(Identifier.fromNamespaceAndPath("mod", mod.getModId())), 1);
-		}
-
-		map.put(Feature.INFINITE_CHUNK_RENDERING, 1);
-		map.put(Feature.SERVER_DATA, 1);
-		map.put(Feature.PLAYER_DATA, 1);
-	}
 
 	public List<PlayerInfo> getPlayerInfos(Minecraft mc) {
 		if (mc.player == null) {
@@ -1076,14 +1063,14 @@ public class ClientGameEngine {
 	public void handleIncreaseKey(Minecraft mc) {
 		mc.options.renderDistance().values().validateValue(mc.options.renderDistance().get() + 1).ifPresent(v -> {
 			mc.options.renderDistance().set(v);
-			mc.status(String.valueOf(v));
+			mc.player.sendOverlayMessage(Component.literal(String.valueOf(v)));
 		});
 	}
 
 	public void handleDecreaseKey(Minecraft mc) {
 		mc.options.renderDistance().values().validateValue(mc.options.renderDistance().get() - 1).ifPresent(v -> {
 			mc.options.renderDistance().set(v);
-			mc.status(String.valueOf(v));
+			mc.player.sendOverlayMessage(Component.literal(String.valueOf(v)));
 		});
 	}
 

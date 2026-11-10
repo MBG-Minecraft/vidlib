@@ -17,6 +17,6 @@ public record ReplayMarkerPayload(ReplayMarkerData data) implements SimplePayloa
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().marker(data);
+		ctx.features().marker(data);
 	}
 }

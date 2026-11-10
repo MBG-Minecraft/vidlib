@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.actor;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.CommandSourceStack;
@@ -53,7 +54,7 @@ public interface ActorServerCommands {
 	});
 
 	private static int summon(CommandSourceStack source, String npc, boolean relativePosition, Vec3 pos) {
-		source.getLevel().s2c(new SummonActorPayload(new ActorParticleOptions(npc, relativePosition, 0, Optional.empty()), pos));
+		PlayerTarget.of(source.getLevel()).s2c(new SummonActorPayload(new ActorParticleOptions(npc, relativePosition, 0, Optional.empty()), pos));
 		return 1;
 	}
 
@@ -65,7 +66,7 @@ public interface ActorServerCommands {
 		}
 
 		profile = new NameAndId(source.getServer().services().sessionService().fetchProfile(profile.id(), true).profile());
-		source.getLevel().s2c(new SummonActorPayload(new ActorParticleOptions(npc, relativePosition, 0, Optional.of(profile)), pos));
+		PlayerTarget.of(source.getLevel()).s2c(new SummonActorPayload(new ActorParticleOptions(npc, relativePosition, 0, Optional.of(profile)), pos));
 		return 1;
 	}
 }

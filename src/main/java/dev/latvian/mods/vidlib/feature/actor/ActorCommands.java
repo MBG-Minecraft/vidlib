@@ -36,11 +36,11 @@ public interface ActorCommands {
 					var session = ClientSessionData.of(mc);
 					var profile = new NameAndId(mc.services().profileResolver().fetchByName(StringArgumentType.getString(ctx, "username")).orElseThrow());
 
-					mc.status(Component.literal("3..."));
-					session.schedule(20, () -> mc.status(Component.literal("2...")));
-					session.schedule(40, () -> mc.status(Component.literal("1...")));
+					mc.player.sendOverlayMessage(Component.literal("3..."));
+					session.schedule(20, () -> mc.player.sendOverlayMessage(Component.literal("2...")));
+					session.schedule(40, () -> mc.player.sendOverlayMessage(Component.literal("1...")));
 					session.schedule(60, () -> {
-						mc.status(Component.literal("Go!"));
+						mc.player.sendOverlayMessage(Component.literal("Go!"));
 						session.startActorRecording(profile);
 					});
 

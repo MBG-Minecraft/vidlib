@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.note;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
@@ -22,7 +23,7 @@ public interface StaffNoteCommand {
 
 		for (var p : player.level().getServer().getPlayerList().getPlayers()) {
 			if (p == player || PlayerSessionData.of(p).isStaffOrTalent()) {
-				p.s2c(payload);
+				PlayerTarget.of(p).s2c(payload);
 			}
 		}
 

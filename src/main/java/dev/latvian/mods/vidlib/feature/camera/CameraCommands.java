@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.camera;
 
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
@@ -76,7 +77,7 @@ public interface CameraCommands {
 
 	static int addBasic(Collection<ServerPlayer> players, ScreenShake data) {
 		for (var player : players) {
-			player.screenShake(data);
+			VLFeatures.of(player).screenShake(data);
 		}
 
 		return 1;
@@ -84,7 +85,7 @@ public interface CameraCommands {
 
 	static int addAt(Collection<ServerPlayer> players, Vec3 at, double maxDistance, ScreenShake data) {
 		for (var player : players) {
-			player.screenShake(data, at, maxDistance);
+			VLFeatures.of(player).screenShake(data, at, maxDistance);
 		}
 
 		return 1;
@@ -92,7 +93,7 @@ public interface CameraCommands {
 
 	static int clear(Collection<ServerPlayer> players) {
 		for (var player : players) {
-			player.stopScreenShake();
+			VLFeatures.of(player).stopScreenShake();
 		}
 
 		return 1;
@@ -100,7 +101,7 @@ public interface CameraCommands {
 
 	static int mode(Collection<ServerPlayer> players, int mode) {
 		for (var player : players) {
-			player.setCameraMode(mode);
+			VLFeatures.of(player).setCameraMode(mode);
 		}
 
 		return 1;

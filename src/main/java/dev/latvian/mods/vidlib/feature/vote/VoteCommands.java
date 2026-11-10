@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -127,7 +128,7 @@ public class VoteCommands {
 		var self = source.getPlayerOrException();
 
 		if (NeoForge.EVENT_BUS.post(new PlayerVotedEvent(self, extraData, option)).isCanceled()) {
-			self.vl$closeScreen();
+			VLFeatures.of(self).closeScreen();
 			return 1;
 		}
 
@@ -136,7 +137,7 @@ public class VoteCommands {
 
 	public static int yesNoScreen(Collection<ServerPlayer> players, CompoundTag data, Component title, Component subtitle, Component yesLabel, Component noLabel, boolean closeOnVote) {
 		for (var player : players) {
-			player.openYesNoVotingScreen(data, title, subtitle, yesLabel, noLabel, closeOnVote);
+			VLFeatures.of(player).openYesNoVotingScreen(data, title, subtitle, yesLabel, noLabel, closeOnVote);
 		}
 
 		return 1;
@@ -144,7 +145,7 @@ public class VoteCommands {
 
 	public static int numberScreen(Collection<ServerPlayer> players, CompoundTag data, Component title, Component subtitle, boolean closeOnVote) {
 		for (var player : players) {
-			player.openNumberVotingScreen(data, title, subtitle, 10, IntList.of(1, 7, 9), closeOnVote);
+			VLFeatures.of(player).openNumberVotingScreen(data, title, subtitle, 10, IntList.of(1, 7, 9), closeOnVote);
 		}
 
 		return 1;

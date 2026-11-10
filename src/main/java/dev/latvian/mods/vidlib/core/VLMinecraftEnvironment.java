@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.core;
 
 import org.jetbrains.annotations.Nullable;
 
-public interface VLMinecraftEnvironment extends VLPlayerContainer, VLMinecraftEnvironmentDataHolder {
+public interface VLMinecraftEnvironment extends VLMinecraftEnvironmentDataHolder {
 	@Override
 	default VLMinecraftEnvironment getEnvironment() {
 		return this;

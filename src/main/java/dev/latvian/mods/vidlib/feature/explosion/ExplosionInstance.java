@@ -6,8 +6,9 @@ import dev.latvian.mods.klib.bulk.BlockModificationConsumer;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.particle.ShapeParticleOptions;
 import dev.latvian.mods.klib.util.DebugColorBlocks;
-import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -266,7 +267,7 @@ public class ExplosionInstance {
 		}
 		 */
 
-		level.cubeParticles(map);
+		VLFeatures.of(level).shapeParticles(map);
 	}
 
 	@Override

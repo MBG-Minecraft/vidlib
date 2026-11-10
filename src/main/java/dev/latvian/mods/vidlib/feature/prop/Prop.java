@@ -5,6 +5,7 @@ import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.data.JOMLDataTypes;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.entity.PositionType;
 import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.knumber.KNumberContext;
@@ -16,6 +17,7 @@ import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.replay.api.ReplayAPI;
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -470,7 +472,7 @@ public class Prop {
 			var packet = type.createPayload(this, payload);
 
 			if (packet != null) {
-				level.s2c(packet);
+				PlayerTarget.of(level).s2c(packet);
 			}
 		}
 	}
@@ -484,7 +486,7 @@ public class Prop {
 			var packet = type.createPayload(this, payload);
 
 			if (packet != null) {
-				level.c2s(packet);
+				PlayerTarget.of(level).c2s(packet);
 			}
 		}
 	}
@@ -548,7 +550,7 @@ public class Prop {
 			return false;
 		}
 
-		level.c2s(new PropInteractionPayload(id, button, at, side));
+		PlayerTarget.of(level).c2s(new PropInteractionPayload(id, button, at, side));
 
 		if (button == 0) {
 			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
@@ -815,8 +817,12 @@ public class Prop {
 		}
 	}
 
+	public void playSound(PositionedSoundData data, KNumberVariables variables) {
+		VLFeatures.of(level).playGlobalSound(data, variables);
+	}
+
 	public void playSound(SoundData data, boolean looping, boolean stopImmediately) {
-		level.playGlobalSound(new PositionedSoundData(data, this, looping, stopImmediately), KNumberVariables.EMPTY);
+		playSound(new PositionedSoundData(data, this, looping, stopImmediately), KNumberVariables.EMPTY);
 	}
 
 	public final void playSound(SoundData data) {
@@ -842,7 +848,7 @@ public class Prop {
 			var payload = UpdatePropRequestPayload.of(this, List.of(data));
 
 			if (payload != null) {
-				level.c2s(payload);
+				PlayerTarget.of(level).c2s(payload);
 			}
 		}
 	}
@@ -895,7 +901,7 @@ public class Prop {
 			this.paused = paused;
 
 			if (!level.isClientSide()) {
-				level.s2c(new PausePropPayload(id, paused));
+				PlayerTarget.of(level).s2c(new PausePropPayload(id, paused));
 			}
 		}
 	}

@@ -32,10 +32,11 @@ public interface CountEntitiesCommand {
 		}
 
 		for (var entry : count.entrySet().stream().sorted((o1, o2) -> Integer.compare(o2.getValue().intValue(), o1.getValue().intValue())).toList()) {
-			source.tell(Component.empty().append(entry.getKey().getDescription()).append(": %,d".formatted(entry.getValue().intValue())));
+			source.sendSuccess(() -> Component.empty().append(entry.getKey().getDescription()).append(": %,d".formatted(entry.getValue().intValue())), false);
 		}
 
-		source.tell("Total: " + totalCount);
+		int tc = totalCount;
+		source.sendSuccess(() -> Component.literal("Total: " + tc), false);
 		return totalCount;
 	}
 }

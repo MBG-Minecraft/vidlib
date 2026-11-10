@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.core.VLServerLevel;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
@@ -52,7 +53,7 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 
 	@Override
 	public void createFireworks(double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, List<FireworkExplosion> explosions, boolean playSound) {
-		s2c(new CreateFireworksPayload(x, y, z, xSpeed, ySpeed, zSpeed, explosions));
+		PlayerTarget.of(vl$level()).s2c(new CreateFireworksPayload(x, y, z, xSpeed, ySpeed, zSpeed, explosions));
 	}
 
 	@Inject(method = "announceSleepStatus", at = @At("HEAD"), cancellable = true)

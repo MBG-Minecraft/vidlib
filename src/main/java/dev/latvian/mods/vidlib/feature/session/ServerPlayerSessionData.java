@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.klib.platform.PlatformModInfo;
-import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChangedEvent;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
@@ -22,14 +21,13 @@ public class ServerPlayerSessionData extends PlayerSessionData {
 
 	public final MinecraftServer server;
 	public final Path dataMapPath;
-	public FeatureSet clientFeatureSet;
 	public Map<String, PlatformModInfo> clientMods;
+	public ServerPlayer player;
 
 	public ServerPlayerSessionData(ServerSessionData worldData, MinecraftServer server, UUID uuid) {
 		super(worldData, uuid);
 		this.server = server;
 		this.dataMapPath = VLPlatformHelper.INSTANCE.getPlayerDataDirectory(server).resolve(uuid + ".nbt");
-		this.clientFeatureSet = FeatureSet.EMPTY;
 		this.clientMods = Map.of();
 	}
 

@@ -25,7 +25,7 @@ public record PreviewCutscenePayload(Ref<Cutscene> cutscene, KNumberVariables va
 	@Override
 	public void handle(Context ctx) {
 		if (ctx.player().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
-			ctx.level().playCutscene(cutscene, variables);
+			ctx.features().playCutscene(cutscene, variables);
 		}
 	}
 }

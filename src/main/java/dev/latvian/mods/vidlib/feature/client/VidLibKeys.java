@@ -67,7 +67,7 @@ public class VidLibKeys {
 		}
 
 		while (clearParticlesKeyMapping.consumeClick()) {
-			mc.level.removeAllParticles();
+			ClientSessionData.of(mc).removeAllParticles();
 		}
 
 		while (reloadKeyMapping.consumeClick()) {

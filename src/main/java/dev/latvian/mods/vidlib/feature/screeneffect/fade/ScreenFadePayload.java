@@ -16,6 +16,6 @@ public record ScreenFadePayload(Fade fade) implements SimplePayload {
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().setScreenFade(fade);
+		ctx.features().setScreenFade(fade);
 	}
 }

@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.prop;
 
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.session.ServerLevelSessionData;
@@ -18,7 +19,7 @@ public class ServerProps extends Props<ServerLevel> {
 		levelProps.tick(updates, tick);
 
 		if (updates != null) {
-			updates.send(level);
+			updates.send(PlayerTarget.of(level));
 		}
 	}
 

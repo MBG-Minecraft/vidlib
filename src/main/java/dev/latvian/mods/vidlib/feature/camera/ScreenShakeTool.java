@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.camera;
 
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
@@ -44,6 +45,6 @@ public enum ScreenShakeTool implements VidLibTool {
 	private void clientRightClick(Player player, BlockHitResult hit) {
 		var maxDistance = VidLibClientOptions.TEST_SCREEN_SHAKE_MAX_DISTANCE.get();
 		var pos = hit.getBlockPos().relative(hit.getDirection());
-		player.c2s(new TestScreenShakePayload(ScreenShake.DEFAULT, Optional.of(Vec3.atCenterOf(pos)), maxDistance));
+		PlayerTarget.of(player).c2s(new TestScreenShakePayload(ScreenShake.DEFAULT, Optional.of(Vec3.atCenterOf(pos)), maxDistance));
 	}
 }

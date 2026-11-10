@@ -7,6 +7,7 @@ import dev.latvian.apps.tinyhttp.http.response.error.client.BadRequestError;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClient;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
@@ -59,7 +60,7 @@ public class HubLocalServer {
 					mc.gui.popScreenLayer();
 				}
 
-				mc.toast(Component.literal("Logged In"), Component.literal(name));
+				ClientSessionData.of(mc).toast(Component.literal("Logged In"), Component.literal(name));
 				SDLVideo.SDL_RaiseWindow(mc.getWindow().handle());
 
 				if (HubUserCapabilities.get().autoUploadFiles()) {

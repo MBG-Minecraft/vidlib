@@ -1,11 +1,14 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.core.KLibLocalPlayer;
+import dev.latvian.mods.klib.core.api.client.KLibLocalPlayer;
 import dev.latvian.mods.klib.entity.PlayerInput;
+import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
+import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.particle.ShapeParticleOptions;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.util.MiscUtils;
@@ -14,20 +17,26 @@ import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
+import dev.latvian.mods.vidlib.core.VLMinecraftClient;
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.actor.ActorParticleOptions;
 import dev.latvian.mods.vidlib.feature.actor.ActorRecording;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.atmosphere.ClientAtmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
+import dev.latvian.mods.vidlib.feature.camera.DetachedCamera;
+import dev.latvian.mods.vidlib.feature.camera.FreeCamera;
+import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeInstance;
 import dev.latvian.mods.vidlib.feature.cutscene.ClientCutscene;
+import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
+import dev.latvian.mods.vidlib.feature.cutscene.CutsceneScreen;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.environment.WorldBorderOverride;
-import dev.latvian.mods.vidlib.feature.feature.FeatureSet;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.input.PlayerInputChangedEvent;
@@ -39,26 +48,44 @@ import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.note.Note;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticles;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesDisplayData;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
+import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
+import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
+import dev.latvian.mods.vidlib.feature.sound.VidLibSoundInstance;
+import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
+import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
 import dev.latvian.mods.vidlib.feature.zone.ZoneHit;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -74,7 +101,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ClientSessionData extends GlobalSessionData {
+public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 	public static ClientSessionData of(Minecraft mc) {
 		return mc.vl$getGlobalData();
 	}
@@ -153,11 +180,6 @@ public class ClientSessionData extends GlobalSessionData {
 	}
 
 	@Override
-	public FeatureSet getServerFeatures() {
-		return FeatureSet.REMOTE_SERVER_FEATURES;
-	}
-
-	@Override
 	public void preTick(PauseType pauseType) {
 		super.preTick(pauseType);
 
@@ -183,7 +205,7 @@ public class ClientSessionData extends GlobalSessionData {
 			if (!localPlayer.prevInput.equals(localPlayer.input)) {
 				NeoForge.EVENT_BUS.post(new PlayerInputChangedEvent(mc.player, localPlayer.prevInput, localPlayer.input));
 				localPlayer.prevInput = localPlayer.input;
-				mc.c2s(new SyncPlayerInputToServer(localPlayer.input));
+				mc.player.c2s(new SyncPlayerInputToServer(localPlayer.input));
 			}
 
 			if (mc.options.keyJump.isDown() && PlayerActionHandler.handle(mc.player, PlayerActionType.JUMP, true)) {
@@ -208,7 +230,7 @@ public class ClientSessionData extends GlobalSessionData {
 		super.postTick(pauseType);
 
 		if (currentCutscene != null && currentCutscene.tick()) {
-			mc.stopCutscene();
+			stopCutscene();
 		}
 
 		if (cameraOverride instanceof ControlledCameraOverride c && c.tick()) {
@@ -290,25 +312,6 @@ public class ClientSessionData extends GlobalSessionData {
 	}
 
 	@Override
-	public void updateInput(Level level, UUID player, PlayerInput input) {
-		var data = getPlayer(player);
-		data.prevInput = data.input = input;
-
-		if (level.getEntity(player) instanceof Player entity) {
-			var vehicle = entity.getVehicle();
-
-			if (vehicle != null) {
-				vehicle.setPilotInput(entity, input);
-			}
-		}
-	}
-
-	@Override
-	public void updateAtmospheres() {
-		atmosphereCache.clear();
-	}
-
-	@Override
 	public void setClientModListSentDuringConfig() {
 		clientModListSentDuringConfig = true;
 	}
@@ -329,25 +332,6 @@ public class ClientSessionData extends GlobalSessionData {
 		return overrides == null ? null : overrides.get(id);
 	}
 
-	@Override
-	public void createNote(Note note) {
-		notes.put(note.id(), note);
-	}
-
-	@Override
-	public void deleteNote(UUID id) {
-		notes.remove(id);
-	}
-
-	@Override
-	public void setEntityBrightnessOverride(int entityId, int override) {
-		if (override == -1) {
-			entityBrightnessOverrides.remove(entityId);
-		} else {
-			entityBrightnessOverrides.put(entityId, override);
-		}
-	}
-
 	public ClientAtmosphere getAtmosphere(Ref<Atmosphere> ref) {
 		var atmosphere = atmosphereCache.get(ref.key());
 
@@ -364,7 +348,7 @@ public class ClientSessionData extends GlobalSessionData {
 			actorRecording = new ActorRecording(profile);
 			actorRecording.record(actorRecording.start, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true), mc.player);
 		} else {
-			mc.tell(Component.literal("Already recording Actor '" + profile.name() + "'!"));
+			mc.player.sendSystemMessage(Component.literal("Already recording Actor '" + profile.name() + "'!"));
 		}
 	}
 
@@ -392,7 +376,7 @@ public class ClientSessionData extends GlobalSessionData {
 
 			actorRecording = null;
 			ActorRecording.REPLAY = null;
-			mc.tell(Component.literal("Actor recording '" + path.getFileName() + "' saved!"));
+			mc.player.sendSystemMessage(Component.literal("Actor recording '" + path.getFileName() + "' saved!"));
 		}
 	}
 
@@ -404,7 +388,7 @@ public class ClientSessionData extends GlobalSessionData {
 		var map = ActorRecording.getReplay(mc.level.registryAccess());
 
 		if (!map.containsKey(name)) {
-			mc.tell(Component.literal("Actor recording '" + name + "' not found!"));
+			mc.player.sendSystemMessage(Component.literal("Actor recording '" + name + "' not found!"));
 			return;
 		}
 
@@ -425,6 +409,269 @@ public class ClientSessionData extends GlobalSessionData {
 		if (shake != Identity.DVEC_2) {
 			var vec = new Vector4f((float) shake.x(), (float) shake.y(), 0F, 1F).rotate(camera.rotation());
 			camera.klib$setPosition(camera.position().add(vec.x(), vec.y(), vec.z()));
+		}
+	}
+
+	// Packet Handlers
+
+	@Override
+	public void updateInput(Level level, UUID player, PlayerInput input) {
+		var data = getPlayer(player);
+		data.prevInput = data.input = input;
+
+		if (level.getEntity(player) instanceof Player entity) {
+			var vehicle = entity.getVehicle();
+
+			if (vehicle != null) {
+				vehicle.setPilotInput(entity, input);
+			}
+		}
+	}
+
+	@Override
+	public void updateAtmospheres() {
+		atmosphereCache.clear();
+	}
+
+	@Override
+	public void createNote(Note note) {
+		notes.put(note.id(), note);
+	}
+
+	@Override
+	public void deleteNote(UUID id) {
+		notes.remove(id);
+	}
+
+	@Override
+	public void setEntityBrightnessOverride(int entityId, int override) {
+		if (override == -1) {
+			entityBrightnessOverrides.remove(entityId);
+		} else {
+			entityBrightnessOverrides.put(entityId, override);
+		}
+	}
+
+	@Override
+	public void toast(String uniqueId, long displayTime, Component title, Component description) {
+		SystemToast.SystemToastId id;
+
+		if (uniqueId.isEmpty()) {
+			id = new SystemToast.SystemToastId(displayTime);
+		} else {
+			try {
+				id = VLMinecraftClient.SYSTEM_TOAST_IDS.get(uniqueId, () -> new SystemToast.SystemToastId(displayTime));
+			} catch (Exception e) {
+				id = new SystemToast.SystemToastId(displayTime);
+			}
+		}
+
+		SystemToast.addOrUpdate(mc.gui.toastManager(), id, title, description);
+	}
+
+	@Override
+	public void playCutscene(Ref<Cutscene> cutscene, KNumberVariables variables) {
+		var player = mc.player;
+		var c = cutscene.value();
+
+		if (!c.steps().isEmpty() && player != null) {
+			var overrideCamera = !isReplay;
+			var inst = new ClientCutscene(mc, overrideCamera, c, variables, mc.player::getEyePosition);
+			currentCutscene = inst;
+			cameraOverride = inst;
+
+			if (overrideCamera && !c.allowMovement()) {
+				mc.gui.setScreen(new CutsceneScreen(inst, mc.gui.screen()));
+			}
+		}
+	}
+
+	@Override
+	public void stopCutscene() {
+		if (currentCutscene != null) {
+			currentCutscene.stopped();
+		}
+
+		cameraOverride = null;
+		currentCutscene = null;
+
+		if (mc.gui.screen() instanceof CutsceneScreen screen) {
+			mc.gui.setScreen(screen.previousScreen);
+		}
+	}
+
+	@Override
+	public void screenShake(ScreenShake shake) {
+		if (shake.skip() || isReplay) {
+			return;
+		}
+
+		screenShakeInstances.add(new ScreenShakeInstance(shake));
+
+		if (shake.motionBlur()) {
+			mc.player.setActivePostEffects(List.of(ScreenShake.MOTION_BLUR_EFFECT));
+		}
+	}
+
+	@Override
+	public void screenShake(ScreenShake shake, Vec3 source, double maxDistance) {
+		screenShake(shake.atDistance(mc.gameRenderer.mainCamera().position(), source, maxDistance));
+	}
+
+	@Override
+	public void stopScreenShake() {
+		screenShakeInstances.clear();
+	}
+
+	@Override
+	public void setCameraMode(int mode) {
+		var session = ClientSessionData.of(mc);
+
+		if (session.currentCutscene != null) {
+			stopCutscene();
+		}
+
+		if (mode == 3) {
+			int currentMode = 0;
+
+			if (session.cameraOverride instanceof DetachedCamera) {
+				currentMode = 1;
+			} else if (session.cameraOverride instanceof FreeCamera) {
+				currentMode = 2;
+			}
+
+			if (currentMode == 1) {
+				mode = 2;
+			} else if (currentMode == 2) {
+				mode = 1;
+			} else {
+				mode = 2;
+			}
+		}
+
+		switch (mode) {
+			case 1 -> {
+				if (session.cameraOverride instanceof FreeCamera c) {
+					session.cameraOverride = new DetachedCamera(c.position, c.rotation);
+				} else {
+					session.cameraOverride = new DetachedCamera(mc.player.getEyePosition(), Rotation.of(mc.player, 1F));
+				}
+			}
+			case 2 -> {
+				if (session.cameraOverride instanceof DetachedCamera(Vec3 position, Rotation rotation)) {
+					session.cameraOverride = new FreeCamera(position, rotation);
+				} else {
+					session.cameraOverride = new FreeCamera(mc.player.getEyePosition(), Rotation.of(mc.player, 1F));
+				}
+			}
+			default -> stopCutscene();
+		}
+	}
+
+	@Override
+	public void setPostEffect(Identifier id) {
+		if (id.equals(Identifier.withDefaultNamespace("empty"))) {
+			mc.player.setActivePostEffects(List.of());
+		} else {
+			mc.player.setActivePostEffects(List.of(id));
+		}
+	}
+
+	@Override
+	public void closeScreen() {
+		mc.gui.setScreen(null);
+	}
+
+	@Override
+	public void openYesNoVotingScreen(CompoundTag extraData, Component title, Component subtitle, Component yesLabel, Component noLabel, boolean closeOnVote) {
+		mc.gui.setScreen(new YesNoVotingScreen(extraData, title, subtitle, yesLabel, noLabel, closeOnVote));
+	}
+
+	@Override
+	public void openNumberVotingScreen(CompoundTag extraData, Component title, Component subtitle, int max, IntList unavailable, boolean closeOnVote) {
+		mc.gui.setScreen(new NumberVotingScreen(extraData, title, subtitle, max, unavailable, closeOnVote));
+	}
+
+	@Override
+	public void removeAllParticles() {
+		mc.particleEngine.setLevel(mc.level);
+		PhysicsParticleManager.clearAllParticles();
+	}
+
+	@Override
+	public void redrawSections(LongList sections, boolean mainThread) {
+		var levelExtractor = mc.levelExtractor;
+
+		for (long section : sections) {
+			levelExtractor.setSectionDirty(SectionPos.x(section), SectionPos.y(section), SectionPos.z(section));
+		}
+	}
+
+	public SoundInstance createSoundInstance(PositionedSoundData data, KNumberContext ctx) {
+		if (mc.level != null && data.position().isPresent()) {
+			return new VidLibSoundInstance(mc.level, data, ctx);
+		} else {
+			return SimpleSoundInstance.forUI(data.data().sound().value(), data.data().pitch(), data.data().volume());
+		}
+	}
+
+	@Override
+	public void playGlobalSound(PositionedSoundData data, KNumberVariables variables) {
+		mc.getSoundManager().play(createSoundInstance(data, ClientLevelSessionData.of(mc.level).createGlobalContext().fork(variables)));
+	}
+
+	@Override
+	public void physicsParticles(PhysicsParticlesDisplayData displayData, long spawnTime) {
+		var level = mc.level;
+		var data = displayData.data().value();
+		var realTime = level.getGameTime();
+
+		if (spawnTime < realTime - 60L || spawnTime > realTime + 60L + (long) data.lifespan().max()) {
+			VidLib.LOGGER.info("Discarded physics particles packet @ " + realTime + " from " + spawnTime);
+			return;
+		}
+
+		var particles = new PhysicsParticles(data, level, spawnTime, displayData.seed() == 0L ? level.getRandom().nextLong() : displayData.seed());
+
+		displayData.blocks().value().forEach((pos, state) -> {
+			particles.at = pos.immutable();
+			particles.state = state;
+			particles.spawn();
+		}, level.getRandom());
+	}
+
+	@Override
+	public void shapeParticles(Map<ShapeParticleOptions, List<BlockPos>> map) {
+		var particles = mc.particleEngine;
+
+		for (var entry : map.entrySet()) {
+			for (var pos : entry.getValue()) {
+				particles.createParticle(entry.getKey(), pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, 0D, 0D, 0D);
+			}
+		}
+	}
+
+	@Override
+	public void setScreenFade(Fade fade) {
+		if (!isReplay) {
+			screenFade = new ScreenFadeInstance(fade);
+		}
+	}
+
+	@Override
+	public void marker(ReplayMarkerData data) {
+		data = ClientGameEngine.INSTANCE.handleRuntimeMarker(data);
+
+		if (data != null) {
+			markers.add(data);
+		}
+	}
+
+	@Override
+	public void setInfoBarText(int bar, Component text) {
+		switch (bar) {
+			case 0 -> topInfoBarOverride = text;
+			case 1 -> bottomInfoBarOverride = text;
 		}
 	}
 }

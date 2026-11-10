@@ -47,10 +47,6 @@
 	"net/minecraft/world/level/block/state/BlockState": [
 		"dev/latvian/mods/vidlib/core/VLBlockState"
 	],
-	"net/minecraft/network/chat/Style": [
-		"dev/latvian/mods/vidlib/core/VLStyle",
-		"dev/latvian/mods/klib/core/KLibStyle"
-	],
 	"net/minecraft/network/chat/Component": [
 		"dev/latvian/mods/vidlib/core/VLComponent"
 	],

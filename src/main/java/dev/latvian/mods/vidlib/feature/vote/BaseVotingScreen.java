@@ -35,14 +35,14 @@ public abstract class BaseVotingScreen extends Screen {
 			waiting = true;
 
 			if (postEvent()) {
-				minecraft.player.vl$closeScreen();
+				minecraft.gui.setScreen(null);
 			} else {
 				sendPayload();
 				button.setMessage(Component.literal("Submitted!"));
 			}
 
 			if (closeOnVote) {
-				minecraft.player.vl$closeScreen();
+				minecraft.gui.setScreen(null);
 			}
 		}).bounds((width - 150) / 2, height - 40, 150, 20).build());
 

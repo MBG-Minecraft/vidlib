@@ -1,41 +1,10 @@
 package dev.latvian.mods.vidlib.core;
 
-import dev.latvian.mods.klib.util.CollectionUtils;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public interface VLServerPlayer extends VLPlayer {
 	@Override
 	default ServerPlayer vl$self() {
 		return (ServerPlayer) this;
-	}
-
-	@Override
-	default List<? extends Player> vl$getS2CPlayers() {
-		return List.of(vl$self());
-	}
-
-	@Override
-	default void s2c(@Nullable Packet<? super ClientGamePacketListener> packet) {
-		if (packet instanceof ClientboundBundlePacket bundle) {
-			var collection = CollectionUtils.toSequencedCollection(bundle.subPackets());
-
-			if (collection.isEmpty()) {
-				return;
-			} else if (collection.size() == 1) {
-				vl$self().connection.send(collection.getFirst());
-				return;
-			}
-		}
-
-		if (packet != null) {
-			vl$self().connection.send(packet);
-		}
 	}
 }

@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.particle.ShapeParticleOptions;
 import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CubeShape;
 import dev.latvian.mods.klib.shape.SphereShape;
@@ -12,7 +13,6 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.misc.ScreenText;
-import dev.latvian.mods.vidlib.feature.particle.ShapeParticleOptions;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -99,7 +99,7 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 
 			lastClick = clientPos;
 
-			player.tell(Component.empty()
+			player.sendSystemMessage(Component.empty()
 				.append(Component.empty()
 					.withStyle(Style.EMPTY.withCopyString(strBlock))
 					.append(BATIcons.COPY)
@@ -132,7 +132,7 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 	public boolean useOnEntity(Player player, ItemStack item, Entity target) {
 		if (player.level().isClientSide()) {
 			var str = KMath.format(target.position());
-			player.tell(Component.empty().append(target.getName()).append(": " + str).withStyle(Style.EMPTY.withCopyString(str)));
+			player.sendSystemMessage(Component.empty().append(target.getName()).append(": " + str).withStyle(Style.EMPTY.withCopyString(str)));
 		}
 
 		return true;

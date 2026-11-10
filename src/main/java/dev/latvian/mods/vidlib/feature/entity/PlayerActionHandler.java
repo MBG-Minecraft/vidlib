@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.entity;
 
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,7 +37,7 @@ public interface PlayerActionHandler {
 				if (player instanceof ServerPlayer serverPlayer) {
 					onPlayerAction(serverPlayer, item, hand, action);
 				} else if (!onClientPlayerAction(player, item, hand, action)) {
-					player.level().c2s(new PlayerActionRequestPayload(action, hand));
+					PlayerTarget.of(player.level()).c2s(new PlayerActionRequestPayload(action, hand));
 				}
 			}
 

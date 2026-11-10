@@ -23,6 +23,6 @@ public record PlayCutscenePayload(Ref<Cutscene> cutscene, KNumberVariables varia
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().playCutscene(cutscene, variables);
+		ctx.features().playCutscene(cutscene, variables);
 	}
 }

@@ -119,7 +119,7 @@ public class SoundEventImBuilder implements ImBuilder<Holder<SoundEvent>> {
 					}
 
 					if (ImGui.smallButton(ImIcons.PLAY + "###preview" + i)) {
-						graphics.mc.playGlobalSound(new SoundData(option, SoundSource.MASTER, PREVIEW_VOLUME.get(), PREVIEW_PITCH.get()));
+						graphics.session.playGlobalSound(new SoundData(option, SoundSource.MASTER, PREVIEW_VOLUME.get(), PREVIEW_PITCH.get()));
 					}
 
 					ImGui.sameLine();

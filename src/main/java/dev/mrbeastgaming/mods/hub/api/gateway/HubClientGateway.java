@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItem;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressItemNameFunction;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.mrbeastgaming.mods.hub.api.Auth;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
@@ -101,7 +102,7 @@ public class HubClientGateway extends HubCommonGateway<Minecraft> {
 		var params = event.paramsObject();
 		var title = params.get("title").getAsString();
 		var subtitle = params.has("subtitle") ? params.get("subtitle").getAsString() : "";
-		mc.toast(Component.literal(title), subtitle.isEmpty() ? Component.empty() : Component.literal(subtitle));
+		ClientSessionData.of(mc).toast(Component.literal(title), subtitle.isEmpty() ? Component.empty() : Component.literal(subtitle));
 	}
 
 	private static void flagsUpdated(Minecraft mc, HubGatewayEvent event) {

@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.note;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import net.minecraft.commands.Commands;
@@ -17,7 +18,7 @@ public interface PublicNoteCommand {
 	);
 
 	static int note(ServerPlayer player, String text) {
-		player.level().getServer().s2c(new CreateNotePayload(new Note(player, text, NoteVisibility.PUBLIC)));
+		PlayerTarget.of(player.level().getServer()).s2c(new CreateNotePayload(new Note(player, text, NoteVisibility.PUBLIC)));
 		return 1;
 	}
 }

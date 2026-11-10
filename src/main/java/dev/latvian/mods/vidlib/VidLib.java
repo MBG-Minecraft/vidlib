@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib;
 
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.registry.CustomRegistryCollector;
@@ -69,7 +70,7 @@ public class VidLib {
 		var packets = new S2CPacketBundleBuilder();
 		packets.s2c(new ReplayMarkerPayload(ReplayMarkerData.builder().group(ReplayMarkerGroup.DATA_SYNC).build()));
 		session.sync(packets, player, syncType);
-		packets.send(player);
+		packets.send(PlayerTarget.of(player));
 	}
 
 	public static void errorToHub(String message, Throwable ex) {

@@ -19,6 +19,6 @@ public enum StopCutscenePayload implements SimplePayload {
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().stopCutscene();
+		ctx.features().stopCutscene();
 	}
 }

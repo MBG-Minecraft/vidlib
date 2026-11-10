@@ -17,6 +17,6 @@ public record SetCameraModePayload(int mode) implements SimplePayload {
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().setCameraMode(mode);
+		ctx.features().setCameraMode(mode);
 	}
 }

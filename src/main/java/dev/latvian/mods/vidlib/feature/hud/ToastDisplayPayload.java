@@ -30,6 +30,6 @@ public record ToastDisplayPayload(String uniqueId, long displayTime, Component t
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.player().toast(uniqueId, displayTime, title, description);
+		ctx.features().toast(uniqueId, displayTime, title, description);
 	}
 }

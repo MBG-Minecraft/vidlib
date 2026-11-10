@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.tv;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
@@ -68,6 +69,6 @@ public interface TVCommands {
 	);
 
 	private static void broadcast(CommandContext<CommandSourceStack> ctx, SimplePayload packet) {
-		ctx.getSource().getServer().s2c(packet);
+		PlayerTarget.of(ctx.getSource().getServer()).s2c(packet);
 	}
 }

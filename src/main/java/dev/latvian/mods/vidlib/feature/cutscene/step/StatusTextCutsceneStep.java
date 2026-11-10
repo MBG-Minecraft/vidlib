@@ -38,7 +38,7 @@ public class StatusTextCutsceneStep extends CutsceneStep {
 		var mc = Minecraft.getInstance();
 
 		if (mc.player != null) {
-			mc.player.status(text);
+			mc.player.sendOverlayMessage(text);
 		}
 	}
 
@@ -48,7 +48,7 @@ public class StatusTextCutsceneStep extends CutsceneStep {
 			var mc = Minecraft.getInstance();
 
 			if (mc.player != null) {
-				mc.player.status(Component.empty());
+				mc.player.sendOverlayMessage(Component.empty());
 			}
 		}
 	}
