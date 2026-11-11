@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.core.mixin;
 
-import dev.latvian.mods.vidlib.core.VLCommandSourceStack;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSource;
@@ -14,7 +13,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(CommandSourceStack.class)
-public abstract class CommandSourceStackMixin implements VLCommandSourceStack {
+public abstract class CommandSourceStackMixin {
 	@Shadow
 	@Final
 	private MinecraftServer server;

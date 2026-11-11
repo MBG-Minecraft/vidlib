@@ -2,36 +2,11 @@ package dev.latvian.mods.vidlib.core;
 
 import dev.latvian.mods.klib.core.NoMixinException;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
 
-public interface VLMinecraftServer extends VLMinecraftEnvironment {
-	default MinecraftServer vl$self() {
-		return (MinecraftServer) this;
-	}
-
-	@Override
-	default boolean isClientEnvironment() {
-		return false;
-	}
-
-	@Override
-	default ServerLevel vl$level() {
-		return vl$self().overworld();
-	}
-
+public interface VLMinecraftServer {
 	@Nullable
 	default ServerSessionData vl$getGlobalData() {
 		throw new NoMixinException(this);
-	}
-
-	@Override
-	default String getServerBrand() {
-		return "neoforge";
-	}
-
-	default void runServerCommand(String command) {
-		vl$self().getCommands().performPrefixedCommand(vl$self().createCommandSourceStack(), command);
 	}
 }

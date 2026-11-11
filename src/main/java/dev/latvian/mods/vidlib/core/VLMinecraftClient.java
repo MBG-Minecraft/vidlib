@@ -19,7 +19,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.network.chat.Component;
@@ -33,16 +32,11 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("resource")
-public interface VLMinecraftClient extends VLMinecraftEnvironment {
+public interface VLMinecraftClient {
 	Cache<String, SystemToast.SystemToastId> SYSTEM_TOAST_IDS = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 
 	default Minecraft vl$self() {
 		return (Minecraft) this;
-	}
-
-	@Override
-	default boolean isClientEnvironment() {
-		return true;
 	}
 
 	default ClientSessionData vl$getGlobalData() {
@@ -51,11 +45,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default void vl$setGlobalData(@Nullable ClientSessionData data) {
 		throw new NoMixinException(this);
-	}
-
-	@Override
-	default ClientLevel vl$level() {
-		return vl$self().level;
 	}
 
 	default float linearizeDepth(float depth) {
@@ -90,13 +79,6 @@ public interface VLMinecraftClient extends VLMinecraftEnvironment {
 
 	default void runClientCommand(String command) {
 		vl$self().player.connection.sendCommand(command.startsWith("/") ? command.substring(1) : command);
-	}
-
-	@Override
-	@Nullable
-	default String getServerBrand() {
-		var p = vl$self().player;
-		return p == null ? null : p.connection.serverBrand();
 	}
 
 	default float getEffectScale() {

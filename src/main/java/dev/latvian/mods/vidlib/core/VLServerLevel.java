@@ -8,12 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 
 public interface VLServerLevel extends VLLevel {
 	@Override
-	default VLMinecraftEnvironment getEnvironment() {
-		return this.vl$level().getServer();
-	}
-
-	@Override
-	default ServerLevel vl$level() {
+	default ServerLevel vl$self() {
 		return (ServerLevel) this;
 	}
 

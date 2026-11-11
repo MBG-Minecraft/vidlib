@@ -45,7 +45,7 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	@Override
 	public ServerLevelSessionData vl$getLevelData() {
 		if (vl$levelData == null) {
-			vl$levelData = ServerSessionData.of(server).getLevel(vl$level().dimension());
+			vl$levelData = ServerSessionData.of(server).getLevel(vl$self().dimension());
 		}
 
 		return vl$levelData;
@@ -53,19 +53,19 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 
 	@Override
 	public void createFireworks(double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, List<FireworkExplosion> explosions, boolean playSound) {
-		PlayerTarget.of(vl$level()).s2c(new CreateFireworksPayload(x, y, z, xSpeed, ySpeed, zSpeed, explosions));
+		PlayerTarget.of(vl$self()).s2c(new CreateFireworksPayload(x, y, z, xSpeed, ySpeed, zSpeed, explosions));
 	}
 
 	@Inject(method = "announceSleepStatus", at = @At("HEAD"), cancellable = true)
 	private void vl$announceSleepStatus(CallbackInfo ci) {
-		if (CommonGameEngine.INSTANCE.disableSleepStatusAnnouncement(vl$level())) {
+		if (CommonGameEngine.INSTANCE.disableSleepStatusAnnouncement(vl$self())) {
 			ci.cancel();
 		}
 	}
 
 	@Inject(method = "tickPrecipitation", at = @At("RETURN"))
 	private void vl$tickPrecipitation(BlockPos blockPos, CallbackInfo ci, @Local(ordinal = 1) BlockPos motionBlockedPos, @Local(ordinal = 2) BlockPos belowMotionBlockedPos) {
-		CommonGameEngine.INSTANCE.tickPrecipitation(vl$level(), blockPos, motionBlockedPos, belowMotionBlockedPos);
+		CommonGameEngine.INSTANCE.tickPrecipitation(vl$self(), blockPos, motionBlockedPos, belowMotionBlockedPos);
 	}
 
 	@ModifyConstant(method = {"runBlockEvents", "levelEvent"}, constant = @Constant(doubleValue = 64D))

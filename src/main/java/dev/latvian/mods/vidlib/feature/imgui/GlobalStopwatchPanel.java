@@ -26,7 +26,7 @@ public class GlobalStopwatchPanel extends Panel {
 		long stopwatchStart = session.dataMap.get(InternalGlobalData.GLOBAL_STOPWATCH_START);
 		boolean update = false;
 
-		long now = graphics.mc.getLevelGameTime();
+		long now = graphics.mc.level.getGameTime();
 		long sw = stopwatch;
 
 		if (stopwatchStart != 0L) {

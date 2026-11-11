@@ -33,7 +33,7 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 	@Override
 	public ClientLevelSessionData vl$getLevelData() {
 		if (vl$levelData == null) {
-			vl$levelData = ClientSessionData.of(minecraft).getLevel(vl$level().dimension());
+			vl$levelData = ClientSessionData.of(minecraft).getLevel(vl$self().dimension());
 		}
 
 		return vl$levelData;
@@ -41,7 +41,7 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 
 	@Inject(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;animateTick(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"))
 	private void vl$doAnimateTick(int posX, int posY, int posZ, int range, RandomSource random, Block block, BlockPos.MutableBlockPos blockPos, CallbackInfo ci) {
-		ClientGameEngine.INSTANCE.handleEnvironmentalEffects(minecraft, vl$level(), blockPos);
+		ClientGameEngine.INSTANCE.handleEnvironmentalEffects(minecraft, vl$self(), blockPos);
 	}
 
 	@Redirect(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))

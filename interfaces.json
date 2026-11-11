@@ -41,14 +41,8 @@
 	"net/minecraft/client/renderer/GameRenderer": [
 		"dev/latvian/mods/vidlib/core/VLGameRenderer"
 	],
-	"net/minecraft/world/item/Item": [
-		"dev/latvian/mods/vidlib/core/VLItem"
-	],
 	"net/minecraft/world/level/block/state/BlockState": [
 		"dev/latvian/mods/vidlib/core/VLBlockState"
-	],
-	"net/minecraft/network/chat/Component": [
-		"dev/latvian/mods/vidlib/core/VLComponent"
 	],
 	"net/minecraft/client/renderer/rendertype/RenderType": [
 		"dev/latvian/mods/vidlib/core/VLRenderType"
@@ -65,9 +59,6 @@
 	"net/minecraft/client/particle/ParticleEngine": [
 		"dev/latvian/mods/vidlib/core/VLParticleEngine"
 	],
-	"net/minecraft/commands/CommandSourceStack": [
-		"dev/latvian/mods/vidlib/core/VLCommandSourceStack"
-	],
 	"com/mojang/blaze3d/platform/Window": [
 		"dev/latvian/mods/vidlib/core/VLWindow"
 	],
@@ -76,8 +67,5 @@
 	],
 	"net/minecraft/client/renderer/texture/TextureAtlasSprite": [
 		"dev/latvian/mods/vidlib/core/VLTextureAtlasSprite"
-	],
-	"net/minecraft/world/food/FoodData": [
-		"dev/latvian/mods/vidlib/core/VLFoodData"
 	]
 }

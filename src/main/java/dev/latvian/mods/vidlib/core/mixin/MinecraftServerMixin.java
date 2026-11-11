@@ -16,7 +16,7 @@ public abstract class MinecraftServerMixin implements VLMinecraftServer {
 	@Nullable
 	public ServerSessionData vl$getGlobalData() {
 		if (vl$globalData == null) {
-			vl$globalData = new ServerSessionData(vl$self());
+			vl$globalData = new ServerSessionData((MinecraftServer) (Object) this);
 			vl$globalData.load();
 		}
 

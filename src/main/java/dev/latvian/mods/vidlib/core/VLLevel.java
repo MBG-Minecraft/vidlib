@@ -12,9 +12,8 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-public interface VLLevel extends VLMinecraftEnvironmentDataHolder {
-	@Override
-	default Level vl$level() {
+public interface VLLevel {
+	default Level vl$self() {
 		return (Level) this;
 	}
 

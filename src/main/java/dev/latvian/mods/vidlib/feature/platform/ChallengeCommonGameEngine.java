@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
+import dev.latvian.mods.klib.core.api.common.KLibFoodData;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
@@ -48,8 +49,12 @@ public class ChallengeCommonGameEngine extends NeoForgeCommonGameEngine {
 	public boolean replaceFoodTick(ServerPlayer player, FoodData foodData) {
 		foodData.setFoodLevel(20);
 		foodData.setSaturation(20F);
-		foodData.vl$setExhaustionLevel(0F);
-		foodData.vl$setTickTimer(0);
+
+		if (foodData instanceof KLibFoodData klib) {
+			klib.klib$setExhaustionLevel(0F);
+			klib.klib$setTickTimer(0);
+		}
+
 		return true;
 	}
 
