@@ -116,7 +116,7 @@ public class ClientCutscene implements CameraOverride {
 	}
 
 	@Override
-	public double getFOVModifier(double delta) {
+	public float getFOVModifier(float delta) {
 		return KMath.lerp(delta, state.prevFovMod, state.fovMod);
 	}
 

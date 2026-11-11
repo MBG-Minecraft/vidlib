@@ -92,7 +92,7 @@ public class CutsceneScreen extends Screen {
 	}
 
 	@Override
-	public double getFOVModifier(double delta) {
+	public float getFOVModifier(float delta) {
 		return clientCutscene.getFOVModifier(delta);
 	}
 

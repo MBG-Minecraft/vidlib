@@ -9,7 +9,7 @@ import java.util.List;
 public class CutsceneState {
 	public Vec3 prevOrigin, origin;
 	public Vec3 prevTarget, target;
-	public double prevFovMod, fovMod;
+	public float prevFovMod, fovMod;
 	public float prevBarVisibility, barVisibility;
 	public final List<Component> topBar;
 	public final List<Component> bottomBar;
@@ -18,7 +18,7 @@ public class CutsceneState {
 	public CutsceneState() {
 		this.origin = null;
 		this.target = null;
-		this.fovMod = 1D;
+		this.fovMod = 1F;
 		this.barVisibility = 0F;
 		this.topBar = new ArrayList<>();
 		this.bottomBar = new ArrayList<>();

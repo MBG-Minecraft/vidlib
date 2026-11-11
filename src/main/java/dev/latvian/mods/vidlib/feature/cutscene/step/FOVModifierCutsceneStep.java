@@ -46,7 +46,7 @@ public class FOVModifierCutsceneStep extends CutsceneStep {
 		var v = fov.value().getOrNaN(ctx);
 
 		if (!Double.isNaN(v)) {
-			state.fovMod = v;
+			state.fovMod = (float) v;
 		}
 	}
 }

@@ -6,8 +6,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public interface CameraOverride {
-	default double getFOVModifier(double delta) {
-		return 1D;
+	default float getFOVModifier(float delta) {
+		return 1F;
 	}
 
 	default boolean renderPlayer() {

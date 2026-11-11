@@ -400,7 +400,6 @@ public class VidLibClientEventHandler {
 					}
 				}
 
-				;
 				graphics.pose().translate(0F, 0F);
 
 				if (mc.gui.screen() instanceof ChatScreen) {
@@ -408,8 +407,6 @@ public class VidLibClientEventHandler {
 				} else {
 					ScreenTextRenderer.render(graphics, ScreenText.RENDER, mc.font, 0, 0, width, height, 0xA0000000, 0xFFFFFFFF);
 				}
-
-				;
 			}
 		}
 	}
@@ -420,7 +417,7 @@ public class VidLibClientEventHandler {
 		var override = ClientGameEngine.INSTANCE.overrideCamera(mc);
 
 		if (override != null) {
-			event.setFOV((float) (event.getFOV() * override.getFOVModifier(event.getPartialTick())));
+			event.setFOV(event.getFOV() * override.getFOVModifier(event.getPartialTick()));
 		}
 
 		/*
