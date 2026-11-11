@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui.icon;
 
-import dev.latvian.mods.vidlib.core.VLGpuTexture;
+import dev.latvian.mods.vidlib.core.api.client.VLGpuTexture;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import imgui.ImGui;
 

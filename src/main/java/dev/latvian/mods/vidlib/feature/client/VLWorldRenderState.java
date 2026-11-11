@@ -17,6 +17,7 @@ import dev.latvian.mods.klib.visual.renderer.VisualRenderer;
 import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderState;
+import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleRenderState;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
@@ -103,6 +104,7 @@ public class VLWorldRenderState {
 		);
 
 		var ctx = new VidLibExtractContext(mc, this, event);
+		var tempVisuals = new Visuals();
 
 		submittable = List.of();
 		decals = List.of();
@@ -180,6 +182,20 @@ public class VLWorldRenderState {
 		}
 
 		physicsParticles = PhysicsParticleManager.extractAll(mc, frustum, cameraPos, 0F);
+
+		var tool = VidLibTool.of(mc.player);
+
+		if (tool != null) {
+			tool.getSecond().visuals(mc.player, tool.getFirst(), tempVisuals, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
+
+			for (var visual : tempVisuals.visuals()) {
+				var state = VisualRenderer.extract(visual, visualExactContext);
+
+				if (state != null) {
+					add(state);
+				}
+			}
+		}
 
 		NeoForge.EVENT_BUS.post(new VidLibWorldRenderEvent(ctx));
 	}

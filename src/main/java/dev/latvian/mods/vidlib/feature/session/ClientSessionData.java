@@ -17,7 +17,7 @@ import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
-import dev.latvian.mods.vidlib.core.VLMinecraftClient;
+import dev.latvian.mods.vidlib.core.api.client.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.actor.ActorParticleOptions;
 import dev.latvian.mods.vidlib.feature.actor.ActorRecording;

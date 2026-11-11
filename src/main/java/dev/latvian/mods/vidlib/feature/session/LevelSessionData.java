@@ -116,7 +116,7 @@ public abstract class LevelSessionData<P extends Props<?>> {
 	}
 
 	public BlockHitResult clip(BlockHitResult result, ClipContext ctx) {
-		var propClip = props.clip(ctx, false);
+		var propClip = props == null ? null : props.clip(ctx, false);
 
 		if (propClip != null) {
 			if (result == null || propClip.getLocation().distanceToSqr(ctx.getFrom()) < result.getLocation().distanceToSqr(ctx.getFrom())) {

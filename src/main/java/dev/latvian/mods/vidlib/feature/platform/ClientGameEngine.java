@@ -598,10 +598,6 @@ public class ClientGameEngine {
 		return original;
 	}
 
-	public float getFarDepth(float renderDistance) {
-		return 8192F;
-	}
-
 	public int calculateScale(int w, int h) {
 		if (VidLibClientOptions.LOCK_GUI_SCALE.get()) {
 			int i = 1;

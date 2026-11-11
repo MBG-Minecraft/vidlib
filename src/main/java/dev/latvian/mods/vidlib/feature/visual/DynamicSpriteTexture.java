@@ -6,7 +6,7 @@ import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.renderpearl.api.textures.AddressMode;
 import com.mojang.renderpearl.api.textures.FilterMode;
 import dev.latvian.mods.klib.texture.SpriteKey;
-import dev.latvian.mods.vidlib.core.VLSpriteContents;
+import dev.latvian.mods.vidlib.core.api.client.VLSpriteContents;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
 import net.minecraft.client.Minecraft;

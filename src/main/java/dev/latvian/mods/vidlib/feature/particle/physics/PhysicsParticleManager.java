@@ -6,35 +6,41 @@ import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.SubmitContext;
-import dev.latvian.mods.vidlib.core.VLBlockState;
+import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.core.api.common.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.longs.Long2IntFunction;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.debug.DebugScreenDisplayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2d;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 @AutoInit(AutoInit.Type.CLIENT_LOADED)
 public class PhysicsParticleManager {
-	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("Translucent", RenderTypes.translucentMovingBlock(), true);
-	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("Cutout", RenderTypes.cutoutMovingBlock(), false);
-	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("Solid", RenderTypes.solidMovingBlock(), true);
+	public static final Identifier GROUP_TOTAL = ID.vidlib("physics_particles/total");
+
+	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("translucent", "Translucent", RenderTypes.translucentMovingBlock(), true);
+	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("cutout", "Cutout", RenderTypes.cutoutMovingBlock(), false);
+	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("solid", "Solid", RenderTypes.solidMovingBlock(), true);
 
 	public static final ImBoolean VISIBLE = new ImBoolean(true);
 	public static final double SQRT_2 = Math.sqrt(2);
@@ -51,7 +57,7 @@ public class PhysicsParticleManager {
 		register(SOLID);
 	}
 
-	public static void debugInfo(Consumer<String> left, Consumer<String> right) {
+	public static void debugInfo(DebugScreenDisplayer displayer, @Nullable Level serverOrClientLevel, @Nullable LevelChunk clientChunk, @Nullable LevelChunk serverChunk) {
 		if (Minecraft.getInstance().showOnlyReducedInfo()) {
 			return;
 		}
@@ -62,10 +68,10 @@ public class PhysicsParticleManager {
 		for (var manager : ALL) {
 			total += manager.particles.size();
 			totalRendered += manager.rendered;
-			left.accept("%,d/%,d %s".formatted(manager.rendered, manager.particles.size(), manager.displayName));
+			displayer.addToGroup(manager.id, "%,d/%,d %s".formatted(manager.rendered, manager.particles.size(), manager.displayName));
 		}
 
-		right.accept("%,d/%,d Total".formatted(totalRendered, total));
+		displayer.addToGroup(GROUP_TOTAL, "%,d/%,d Total".formatted(totalRendered, total));
 	}
 
 	public static void tickAll(Level level, long gameTime) {
@@ -134,6 +140,7 @@ public class PhysicsParticleManager {
 		return sprite == null ? Transparency.NONE : sprite.transparency();
 	}
 
+	public final Identifier id;
 	public final List<PhysicsParticle> particles;
 	public final List<PhysicsParticle> queue;
 	private final RenderType renderType;
@@ -141,7 +148,8 @@ public class PhysicsParticleManager {
 	public final boolean mipmaps;
 	public int rendered;
 
-	public PhysicsParticleManager(String displayName, RenderType renderType, boolean mipmaps) {
+	public PhysicsParticleManager(String id, String displayName, RenderType renderType, boolean mipmaps) {
+		this.id = ID.vidlib("physics_particles/" + id);
 		this.particles = new ArrayList<>();
 		this.queue = new ArrayList<>();
 

@@ -1,0 +1,24 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.latvian.mods.vidlib.core.mixin.neo",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"CustomEnvironmentEffectsRendererManagerMixin",
+		"IBlockExtensionMixin",
+		"IEntityExtensionMixin",
+		"IPlayerExtensionMixin",
+		"ItemStackHandlerMixin",
+		"NeoPlayerMixin",
+		"ReloadableResourceManagerMixin",
+		"TicketOwnerMixin",
+		"TicketTrackerMixin"
+	],
+	"client": [
+		"ClientCommandSourceStackMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1,
+		"maxShiftBy": 2
+	}
+}

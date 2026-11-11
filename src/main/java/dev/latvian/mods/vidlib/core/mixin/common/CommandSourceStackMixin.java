@@ -1,0 +1,48 @@
+package dev.latvian.mods.vidlib.core.mixin.common;
+
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.gamerules.GameRules;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+
+@Mixin(CommandSourceStack.class)
+public abstract class CommandSourceStackMixin {
+	@Shadow
+	@Final
+	private MinecraftServer server;
+
+	@Shadow
+	@Final
+	public CommandSource source;
+
+	@Shadow
+	public abstract Component getDisplayName();
+
+	/**
+	 * @author Lat
+	 * @reason MBG
+	 */
+	@Overwrite
+	private void broadcastToAdmins(Component message) {
+		var component = Component.translatable("chat.type.admin", getDisplayName(), message).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+
+		if (server.getGameRules().get(GameRules.SEND_COMMAND_FEEDBACK)) {
+			for (var player : server.getPlayerList().getPlayers()) {
+				if (player.commandSource() != source && CommonGameEngine.INSTANCE.getReceiveCommandFeedback(server, player)) {
+					player.sendSystemMessage(component);
+				}
+			}
+		}
+
+		if (source != server && server.getGameRules().get(GameRules.LOG_ADMIN_COMMANDS)) {
+			server.sendSystemMessage(component);
+		}
+	}
+}

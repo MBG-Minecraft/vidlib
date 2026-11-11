@@ -163,7 +163,7 @@ public class Panel {
 		boolean shouldClose = !ImGuiUtils.BOOLEAN.get();
 
 		if (!(this instanceof FullscreenPanel) && graphics.wasEscapePressed() && !rememberOpen) {
-			shouldClose = true;
+			// shouldClose = true;
 		}
 
 		postSetup(graphics, menuOpen);

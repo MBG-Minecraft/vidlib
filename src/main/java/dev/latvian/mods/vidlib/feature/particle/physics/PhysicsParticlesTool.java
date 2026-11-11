@@ -9,7 +9,6 @@ import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.misc.SpawnClientParticlePayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -19,7 +18,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,11 +71,6 @@ public enum PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 			0L,
 			new PositionedBlockCollection(blocks).ref()
 		)));
-	}
-
-	@Override
-	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
-		PhysicsParticleManager.debugInfo(screenText.topLeft::add, screenText.topRight::add);
 	}
 
 	@Override

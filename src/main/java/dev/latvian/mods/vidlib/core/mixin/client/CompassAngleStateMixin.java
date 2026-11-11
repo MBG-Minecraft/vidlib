@@ -1,0 +1,30 @@
+package dev.latvian.mods.vidlib.core.mixin.client;
+
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
+import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.ItemOwner;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+
+/**
+ * 26.3 moved {@code Entity} to {@code ItemOwner} for item-property lookups, so both the
+ * redirect target and the captured local use {@link ItemOwner}.
+ */
+@Mixin(CompassAngleState.class)
+public class CompassAngleStateMixin {
+	@Shadow
+	@Final
+	private CompassAngleState.CompassTarget compassTarget;
+
+	@ModifyExpressionValue(method = "getRotationTowardsCompassTarget", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/properties/numeric/CompassAngleState;getAngleFromEntityToPos(Lnet/minecraft/world/entity/ItemOwner;Lnet/minecraft/core/BlockPos;)D"))
+	private double vl$calculate(double original, @Local(argsOnly = true) ItemOwner entity, @Local(argsOnly = true) BlockPos target) {
+		var livingEntity = entity.asLivingEntity();
+		var angle = livingEntity == null ? Double.NaN : ClientGameEngine.INSTANCE.overrideCompassAngle(compassTarget, livingEntity, target);
+		return Double.isNaN(angle) ? original : angle;
+	}
+}

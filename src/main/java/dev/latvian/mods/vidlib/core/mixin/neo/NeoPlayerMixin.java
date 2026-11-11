@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.neo;
 
-import dev.latvian.mods.vidlib.core.VLPlayer;
+import dev.latvian.mods.vidlib.core.api.common.VLPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;

@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.neo;
 
-import dev.latvian.mods.vidlib.core.VLEntity;
+import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;

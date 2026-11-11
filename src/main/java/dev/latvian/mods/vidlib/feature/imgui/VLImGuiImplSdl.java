@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
-import dev.latvian.mods.vidlib.core.VLWindow;
+import dev.latvian.mods.vidlib.core.api.client.VLWindow;
 import dev.latvian.mods.vidlib.feature.client.SDL3Compat;
 import imgui.ImGui;
 import imgui.ImGuiIO;

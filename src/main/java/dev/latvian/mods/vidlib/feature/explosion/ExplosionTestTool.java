@@ -1,12 +1,10 @@
 package dev.latvian.mods.vidlib.feature.explosion;
 
-import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
-import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -19,8 +17,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
@@ -77,6 +73,7 @@ public enum ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 		return true;
 	}
 
+	/*
 	@Override
 	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 		var data = getData(item, false);
@@ -95,6 +92,7 @@ public enum ExplosionTestTool implements VidLibTool, PlayerActionHandler {
 			}
 		}
 	}
+	 */
 
 	@Override
 	public Set<PlayerActionType> getHandledPlayerActions() {

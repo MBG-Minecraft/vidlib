@@ -90,6 +90,7 @@ import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterDebugEntriesEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleGroupsEvent;
@@ -106,21 +107,10 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.GameShuttingDownEvent;
 
 import java.nio.file.Files;
-import java.util.List;
 
 @EventBusSubscriber(modid = VidLib.ID, value = Dist.CLIENT)
 public class VidLibClientEventHandler {
 	public static boolean clientLoaded = false;
-
-	private static final List<String> REMOVE_RIGHT = List.of(
-		"CPU: ",
-		"Display: ",
-		"Sodium Renderer ",
-		"Geometry Pool: ",
-		"Transfer Queue: ",
-		"Chunk Builder: ",
-		"Chunk Queues: "
-	);
 
 	@SubscribeEvent
 	public static void clientSetup(FMLClientSetupEvent event) {
@@ -235,7 +225,7 @@ public class VidLibClientEventHandler {
 			var tool = VidLibTool.of(mc.player);
 
 			if (tool != null) {
-				tool.getSecond().debugText(mc.player, tool.getFirst(), mc.hitResult, ScreenText.CLIENT_TICK);
+				// tool.getSecond().debugText(mc.player, tool.getFirst(), mc.hitResult, ScreenText.CLIENT_TICK);
 			}
 
 			session.preTick(session.getPauseType());
@@ -427,31 +417,9 @@ public class VidLibClientEventHandler {
 		 */
 	}
 
-	/**
-	 * Replacement for NeoForge 1.21.5's {@code CustomizeGuiOverlayEvent.DebugText}, which no longer
-	 * exists in 26.3: the debug overlay is entry-driven and no longer exposes modifiable line lists,
-	 * so this hook is driven by {@code DebugScreenOverlayMixin} with the vanilla lists instead.
-	 */
-	public static void debugText(List<String> left, List<String> right) {
-		var mc = Minecraft.getInstance();
-
-		if (ClientGameEngine.INSTANCE.primitiveF3(mc)) {
-			left.clear();
-			right.clear();
-			return;
-		}
-
-		right.removeIf(s -> {
-			for (var r : REMOVE_RIGHT) {
-				if (ChatFormatting.stripFormatting(s).startsWith(r)) {
-					return true;
-				}
-			}
-
-			return false;
-		});
-
-		PhysicsParticleManager.debugInfo(left::add, right::add);
+	@SubscribeEvent
+	public static void RegisterDebugEntriesEvent(RegisterDebugEntriesEvent event) {
+		event.register(ID.vidlib("physics_particles"), PhysicsParticleManager::debugInfo);
 	}
 
 	@SubscribeEvent

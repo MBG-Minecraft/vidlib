@@ -1,0 +1,75 @@
+package dev.latvian.mods.vidlib.core.mixin.common;
+
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
+import dev.latvian.mods.vidlib.core.api.common.VLLivingEntity;
+import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.FluidState;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+@Mixin(LivingEntity.class)
+public abstract class LivingEntityMixin implements VLLivingEntity {
+	@Shadow
+	public abstract ItemStack getMainHandItem();
+
+	@Shadow
+	public abstract ItemStack getOffhandItem();
+
+	/**
+	 * @author Lat
+	 * @reason Optimization
+	 */
+	@Overwrite
+	public boolean isHolding(Item item) {
+		return getMainHandItem().is(item) || getOffhandItem().is(item);
+	}
+
+	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;aiStep()V"))
+	private void vl$tick(CallbackInfo ci) {
+		var entity = (LivingEntity) (Object) this;
+		CommonGameEngine.INSTANCE.livingTick(entity);
+	}
+
+	@ModifyReturnValue(method = "getSpeed", at = @At("RETURN"))
+	private float vl$getSpeed(float original) {
+		return original * CommonGameEngine.INSTANCE.getSpeedModifier(vl$self());
+	}
+
+	@Inject(method = "isPushable", at = @At("HEAD"), cancellable = true)
+	private void vl$isPushable(CallbackInfoReturnable<Boolean> cir) {
+		if (CommonGameEngine.INSTANCE.isUnpushable(vl$self())) {
+			cir.setReturnValue(false);
+		}
+	}
+
+	@Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
+	private FluidState vl$getFluidState(Level level, BlockPos pos) {
+		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
+	}
+
+	@Inject(method = "isBaby", at = @At("HEAD"), cancellable = true)
+	private void vl$isBaby(CallbackInfoReturnable<Boolean> cir) {
+		if (vl$self().entityTags().contains("baby")) {
+			cir.setReturnValue(true);
+		}
+	}
+
+	@ModifyExpressionValue(method = "causeFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;calculateFallDamage(DF)I"))
+	private int vl$ca(int original, @Local(argsOnly = true) double fallDistance, @Local(argsOnly = true) float damageMultiplier, @Local(argsOnly = true) DamageSource damageSource) {
+		return CommonGameEngine.INSTANCE.calculateFallDamage(vl$self(), fallDistance, damageMultiplier, damageSource, original);
+	}
+}

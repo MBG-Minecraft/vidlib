@@ -1,71 +1,71 @@
 {
-	"net/minecraft/client/Minecraft": [
-		"dev/latvian/mods/vidlib/core/VLMinecraftClient"
+	"net/minecraft/world/level/block/state/BlockState": [
+		"dev/latvian/mods/vidlib/core/api/common/VLBlockState"
 	],
 	"net/minecraft/server/MinecraftServer": [
-		"dev/latvian/mods/vidlib/core/VLMinecraftServer"
+		"dev/latvian/mods/vidlib/core/api/common/VLMinecraftServer"
 	],
 	"net/minecraft/world/level/Level": [
-		"dev/latvian/mods/vidlib/core/VLLevel"
-	],
-	"net/minecraft/client/multiplayer/ClientLevel": [
-		"dev/latvian/mods/vidlib/core/VLClientLevel"
+		"dev/latvian/mods/vidlib/core/api/common/VLLevel"
 	],
 	"net/minecraft/server/level/ServerLevel": [
-		"dev/latvian/mods/vidlib/core/VLServerLevel"
+		"dev/latvian/mods/vidlib/core/api/common/VLServerLevel"
 	],
 	"net/minecraft/world/entity/Entity": [
-		"dev/latvian/mods/vidlib/core/VLEntity"
+		"dev/latvian/mods/vidlib/core/api/common/VLEntity"
 	],
 	"net/minecraft/world/entity/LivingEntity": [
-		"dev/latvian/mods/vidlib/core/VLLivingEntity"
+		"dev/latvian/mods/vidlib/core/api/common/VLLivingEntity"
 	],
 	"net/minecraft/world/entity/player/Player": [
-		"dev/latvian/mods/vidlib/core/VLPlayer"
-	],
-	"net/minecraft/client/player/AbstractClientPlayer": [
-		"dev/latvian/mods/vidlib/core/VLClientPlayer"
-	],
-	"net/minecraft/client/player/LocalPlayer": [
-		"dev/latvian/mods/vidlib/core/VLLocalPlayer"
-	],
-	"net/minecraft/client/player/RemotePlayer": [
-		"dev/latvian/mods/vidlib/core/VLRemotePlayer"
+		"dev/latvian/mods/vidlib/core/api/common/VLPlayer"
 	],
 	"net/minecraft/server/level/ServerPlayer": [
-		"dev/latvian/mods/vidlib/core/VLServerPlayer"
+		"dev/latvian/mods/vidlib/core/api/common/VLServerPlayer"
+	],
+	"net/minecraft/client/Minecraft": [
+		"dev/latvian/mods/vidlib/core/api/client/VLMinecraftClient"
+	],
+	"net/minecraft/client/multiplayer/ClientLevel": [
+		"dev/latvian/mods/vidlib/core/api/client/VLClientLevel"
+	],
+	"net/minecraft/client/player/AbstractClientPlayer": [
+		"dev/latvian/mods/vidlib/core/api/client/VLClientPlayer"
+	],
+	"net/minecraft/client/player/LocalPlayer": [
+		"dev/latvian/mods/vidlib/core/api/client/VLLocalPlayer"
+	],
+	"net/minecraft/client/player/RemotePlayer": [
+		"dev/latvian/mods/vidlib/core/api/client/VLRemotePlayer"
 	],
 	"net/minecraft/client/gui/screens/Screen": [
-		"dev/latvian/mods/vidlib/core/VLScreen"
+		"dev/latvian/mods/vidlib/core/api/client/VLScreen"
 	],
 	"net/minecraft/client/renderer/GameRenderer": [
-		"dev/latvian/mods/vidlib/core/VLGameRenderer"
-	],
-	"net/minecraft/world/level/block/state/BlockState": [
-		"dev/latvian/mods/vidlib/core/VLBlockState"
+		"dev/latvian/mods/vidlib/core/api/client/VLGameRenderer"
 	],
 	"net/minecraft/client/renderer/rendertype/RenderType": [
-		"dev/latvian/mods/vidlib/core/VLRenderType"
+		"dev/latvian/mods/vidlib/core/api/client/VLRenderType"
 	],
 	"net/minecraft/client/renderer/entity/EntityRenderer": [
-		"dev/latvian/mods/vidlib/core/VLEntityRenderer"
+		"dev/latvian/mods/vidlib/core/api/client/VLEntityRenderer"
 	],
 	"com/mojang/renderpearl/api/textures/GpuTexture": [
-		"dev/latvian/mods/vidlib/core/VLGpuTexture"
+		"dev/latvian/mods/vidlib/core/api/client/VLGpuTexture"
 	],
 	"com/mojang/renderpearl/api/buffers/GpuBuffer": [
-		"dev/latvian/mods/vidlib/core/VLGpuBuffer"
+		"dev/latvian/mods/vidlib/core/api/client/VLGpuBuffer"
 	],
 	"net/minecraft/client/particle/ParticleEngine": [
-		"dev/latvian/mods/vidlib/core/VLParticleEngine"
+		"dev/latvian/mods/vidlib/core/api/client/VLParticleEngine"
 	],
 	"com/mojang/blaze3d/platform/Window": [
-		"dev/latvian/mods/vidlib/core/VLWindow"
+		"dev/latvian/mods/vidlib/core/api/client/VLWindow"
 	],
 	"net/minecraft/client/gui/GuiGraphicsExtractor": [
-		"dev/latvian/mods/vidlib/core/VLGuiGraphics"
+		"dev/latvian/mods/vidlib/core/api/client/VLGuiGraphics"
 	],
 	"net/minecraft/client/renderer/texture/TextureAtlasSprite": [
-		"dev/latvian/mods/vidlib/core/VLTextureAtlasSprite"
+		"dev/latvian/mods/vidlib/core/api/client/VLTextureAtlasSprite"
 	]
 }

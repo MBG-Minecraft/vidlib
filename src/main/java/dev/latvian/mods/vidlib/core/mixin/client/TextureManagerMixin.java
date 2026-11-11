@@ -1,0 +1,47 @@
+package dev.latvian.mods.vidlib.core.mixin.client;
+
+import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
+import dev.latvian.mods.vidlib.feature.visual.EphemeralTexture;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
+@Mixin(TextureManager.class)
+public abstract class TextureManagerMixin {
+	@Shadow
+	protected abstract void safeClose(Identifier path, AbstractTexture texture);
+
+	@Shadow
+	@Final
+	public Map<Identifier, AbstractTexture> byPath;
+
+	@Inject(method = "reload", at = @At("HEAD"))
+	public void vl$reload(PreparableReloadListener.SharedState sharedState, Executor backgroundExecutor, PreparableReloadListener.PreparationBarrier barrier, Executor gameExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+		var list = new ArrayList<Map.Entry<Identifier, AbstractTexture>>();
+
+		for (var entry : byPath.entrySet()) {
+			if (entry.getValue() instanceof EphemeralTexture) {
+				list.add(entry);
+			}
+		}
+
+		for (var entry : list) {
+			safeClose(entry.getKey(), entry.getValue());
+		}
+
+		AutoInit.Type.TEXTURES_RELOADED.invoke(new TextureReloadParams((TextureManager) (Object) this, backgroundExecutor, gameExecutor));
+	}
+}

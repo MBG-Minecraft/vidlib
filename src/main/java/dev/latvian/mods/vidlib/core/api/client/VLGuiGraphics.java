@@ -1,0 +1,110 @@
+package dev.latvian.mods.vidlib.core.api.client;
+
+import dev.latvian.mods.klib.color.Color;
+import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.util.ID;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+
+import java.util.List;
+
+public interface VLGuiGraphics {
+	Identifier HEART_BACKGROUND = ID.mc("hud/heart/container");
+	Identifier FULL_HEART = ID.mc("hud/heart/full");
+
+	default GuiGraphicsExtractor vl$self() {
+		return (GuiGraphicsExtractor) this;
+	}
+
+	default Minecraft vl$mc() {
+		return Minecraft.getInstance();
+	}
+
+	default void healthBar(int x, int y, int w, int h, float hp, int alpha) {
+		if (alpha <= 3) {
+			return;
+		}
+
+		var graphics = vl$self();
+		graphics.fill(x, y, x + w, y + h, 0xFFFFFF | (alpha << 24));
+		graphics.fill(x + 1, y + 1, x + w - 1, y + h - 1, (alpha << 24));
+		var barColor = Color.hsb(KMath.lerp(hp, 0F, 0.35F), 0.71F, 1F, alpha);
+		graphics.fill(x + 2, y + 2, x + Mth.ceil((w - 3F) * hp + 1F), y + h - 2, barColor.argb());
+	}
+
+	default void healthBarWithText(Font font, int x, int y, int w, int h, List<FormattedCharSequence> lines, float health, int alpha) {
+		var graphics = vl$self();
+		var nameY = y;
+
+		if (health >= 0F) {
+			healthBar(x, y, w, h, health, alpha);
+		} else {
+			nameY += 6;
+		}
+
+		if (lines.isEmpty()) {
+			return;
+		}
+
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x + w / 2F, nameY - 6F);
+
+		for (int i = 0; i < lines.size(); i++) {
+			var line = lines.get(i);
+			graphics.text(font, line, -font.width(line) / 2, -3 - (lines.size() - 1) * 9 + i * 9, 0xFFFFFF | (alpha << 24), true);
+		}
+
+		graphics.pose().popMatrix();
+	}
+
+	default void healthBarWithSideLabel(Font font, LivingEntity entity, int x, int y, int w, int h, boolean leftSide, boolean renderName, boolean renderHealth) {
+		var graphics = vl$self();
+		var health = entity.getHealth();
+		var maxHealth = entity.getMaxHealth();
+
+		if (entity instanceof Player) {
+			health /= 2F;
+			maxHealth /= 2F;
+		}
+
+		var hp = health / maxHealth;
+
+		if (renderHealth) {
+			healthBar(x, y, w, h, hp, 255);
+		}
+
+		if (!renderName) {
+			return;
+		}
+
+		var name = font.split(entity.getDisplayName(), 1000).getFirst();
+
+		var str = KMath.format(health) + " / " + KMath.format(maxHealth);
+		graphics.text(font, str, x + (w - font.width(str)) / 2, y + 3, 0xFFFFFFFF, true);
+
+		if (leftSide) {
+			graphics.text(font, name, x + w + 4, y + 3, 0xFFFFFFFF, true);
+		} else {
+			graphics.text(font, name, x - 4 - font.width(name), y + 3, 0xFFFFFFFF, true);
+		}
+	}
+
+	default void heart(int x, int y, float value) {
+		var graphics = vl$self();
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, HEART_BACKGROUND, 9, 9, 0, 0, x, y, 9, 9);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FULL_HEART, 9, 9, 0, 0, x, y, Mth.ceil(9F * value), 9);
+	}
+
+	default void vl$pushShift() {
+	}
+
+	default void vl$popShift() {
+	}
+}

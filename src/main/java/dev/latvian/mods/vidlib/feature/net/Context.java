@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.net;
 
-import dev.latvian.mods.vidlib.core.VLClientConfigPacketListener;
-import dev.latvian.mods.vidlib.core.VLServerConfigPacketListener;
+import dev.latvian.mods.vidlib.core.api.client.VLClientConfigPacketListener;
+import dev.latvian.mods.vidlib.core.api.common.VLServerConfigPacketListener;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.session.GlobalSessionData;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;

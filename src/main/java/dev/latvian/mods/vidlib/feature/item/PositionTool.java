@@ -12,7 +12,6 @@ import dev.latvian.mods.klib.shape.SphereShape;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
-import dev.latvian.mods.vidlib.feature.misc.ScreenText;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -148,6 +147,7 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 		clientPos = chit instanceof BlockHitResult blockHit ? clientMode.position(player, blockHit) : clientMode.position(player, null);
 	}
 
+	/*
 	@Override
 	public void debugText(Player player, ItemStack item, @Nullable HitResult hit, ScreenText screenText) {
 		var tag = item.get(DataComponents.CUSTOM_DATA).copyTag();
@@ -167,6 +167,7 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 			screenText.topRight.add(KMath.format(lastClick.distanceTo(clientPos)) + " m");
 		}
 	}
+	 */
 
 	@Override
 	public void visuals(Player player, ItemStack item, Visuals visuals, float delta) {
