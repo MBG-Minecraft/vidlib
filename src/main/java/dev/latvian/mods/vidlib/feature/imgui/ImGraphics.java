@@ -24,6 +24,7 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiDir;
 import imgui.flag.ImGuiHoveredFlags;
 import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiKey;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
@@ -37,7 +38,6 @@ import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.sdl.SDLScancode;
 
 import java.util.Arrays;
 import java.util.List;
@@ -88,7 +88,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		this.jsonOps = inGame ? session.jsonOps : JsonOps.INSTANCE;
 		this.nbtOps = inGame ? session.nbtOps : NbtOps.INSTANCE;
 		this.scroll = VidLibClientOptions.LOCK_IMGUI_SCROLL.get() ? Math.clamp(ImGui.getIO().getMouseWheel(), -1F, 1F) : ImGui.getIO().getMouseWheel();
-		this.escapePressed = ImGui.isKeyReleased(SDLScancode.SDL_SCANCODE_ESCAPE);
+		this.escapePressed = ImGui.isKeyReleased(ImGuiKey.Escape);
 	}
 
 	public void pushStack() {
@@ -373,7 +373,7 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		popStack();
 	}
 
-	public static int getTextureId(Identifier identifier) {
+	public static long getTextureId(Identifier identifier) {
 		return Minecraft.getInstance().getTextureManager().getTexture(identifier).getTexture().vl$getHandle();
 	}
 
@@ -566,34 +566,38 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		return iconButton(icon, (value.get() ? ImIcons.CHECK : ImIcons.CLOSE) + id, tooltip + (value.get() ? ": Enabled" : ": Disabled"), value.get() ? null : ImColorVariant.GRAY, value);
 	}
 
-	public boolean imageButton(@Nullable GpuTexture texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant, Color background, Color tint) {
-		if (variant != null) {
+	public boolean imageButton(String label, @Nullable GpuTexture texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant, Color background, Color tint) {
+		if (variant != null || padding != -1) {
 			pushStack();
-			setButton(variant);
+			setFramePadding(padding, padding);
+
+			if (variant != null) {
+				setButton(variant);
+			}
 		}
 
 		var clicked = ImGui.imageButton(
-			texture == null ? 0 : texture.vl$getHandle(),
+			label,
+			texture == null ? 0L : texture.vl$getHandle(),
 			w, h,
 			uv.u0(), uv.v0(), uv.u1(), uv.v1(),
-			padding,
 			background.redf(), background.greenf(), background.bluef(), background.alphaf(),
 			tint.redf(), tint.greenf(), tint.bluef(), tint.alphaf()
 		);
 
-		if (variant != null) {
+		if (variant != null || padding != -1) {
 			popStack();
 		}
 
 		return clicked;
 	}
 
-	public boolean imageButton(@Nullable GpuTexture texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
-		return imageButton(texture, w, h, uv, padding, variant, Color.TRANSPARENT, Color.WHITE);
+	public boolean imageButton(String label, @Nullable GpuTexture texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
+		return imageButton(label, texture, w, h, uv, padding, variant, Color.TRANSPARENT, Color.WHITE);
 	}
 
-	public boolean imageButton(@Nullable Identifier texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
-		return imageButton(texture == null ? null : mc.getTextureManager().getTexture(texture).getTexture(), w, h, uv, padding, variant);
+	public boolean imageButton(String label, @Nullable Identifier texture, float w, float h, UV uv, int padding, @Nullable ImColorVariant variant) {
+		return imageButton(label, texture == null ? null : mc.getTextureManager().getTexture(texture).getTexture(), w, h, uv, padding, variant);
 	}
 
 	public boolean beginTooltip() {

@@ -121,7 +121,7 @@ public class VLImGuiImplGl3 {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, drawData.getCmdListIdxBufferData(cmdListIdx), GL_STREAM_DRAW);
 
 			for (int cmdBufferIdx = 0; cmdBufferIdx < drawData.getCmdListCmdBufferSize(cmdListIdx); cmdBufferIdx++) {
-				drawData.getCmdListCmdBufferClipRect(cmdListIdx, cmdBufferIdx, this.clipRect);
+				drawData.getCmdListCmdBufferClipRect(this.clipRect, cmdListIdx, cmdBufferIdx);
 
 				final float clipMinX = (this.clipRect.x - clipOffX) * clipScaleX;
 				final float clipMinY = (this.clipRect.y - clipOffY) * clipScaleY;
@@ -136,13 +136,13 @@ public class VLImGuiImplGl3 {
 				glScissor((int) clipMinX, (int) (fbHeight - clipMaxY), (int) (clipMaxX - clipMinX), (int) (clipMaxY - clipMinY));
 
 				// Bind texture, Draw
-				final int textureId = drawData.getCmdListCmdBufferTextureId(cmdListIdx, cmdBufferIdx);
+				final long textureId = drawData.getCmdListCmdBufferTextureId(cmdListIdx, cmdBufferIdx);
 				final int elemCount = drawData.getCmdListCmdBufferElemCount(cmdListIdx, cmdBufferIdx);
 				final int idxBufferOffset = drawData.getCmdListCmdBufferIdxOffset(cmdListIdx, cmdBufferIdx);
 				final int vtxBufferOffset = drawData.getCmdListCmdBufferVtxOffset(cmdListIdx, cmdBufferIdx);
-				final int indices = idxBufferOffset * ImDrawData.SIZEOF_IM_DRAW_IDX;
+				final int indices = idxBufferOffset * ImDrawData.sizeOfImDrawIdx();
 
-				glBindTexture(GL_TEXTURE_2D, textureId);
+				glBindTexture(GL_TEXTURE_2D, (int) textureId);
 
 				if (this.glVersion >= 320) {
 					glDrawElementsBaseVertex(GL_TRIANGLES, elemCount, GL_UNSIGNED_SHORT, indices, vtxBufferOffset);
@@ -363,9 +363,9 @@ public class VLImGuiImplGl3 {
 		glEnableVertexAttribArray(this.gAttribLocationVtxPos);
 		glEnableVertexAttribArray(this.gAttribLocationVtxUV);
 		glEnableVertexAttribArray(this.gAttribLocationVtxColor);
-		glVertexAttribPointer(this.gAttribLocationVtxPos, 2, GL_FLOAT, false, ImDrawData.SIZEOF_IM_DRAW_VERT, 0);
-		glVertexAttribPointer(this.gAttribLocationVtxUV, 2, GL_FLOAT, false, ImDrawData.SIZEOF_IM_DRAW_VERT, 8);
-		glVertexAttribPointer(this.gAttribLocationVtxColor, 4, GL_UNSIGNED_BYTE, true, ImDrawData.SIZEOF_IM_DRAW_VERT, 16);
+		glVertexAttribPointer(this.gAttribLocationVtxPos, 2, GL_FLOAT, false, ImDrawData.sizeOfImDrawVert(), 0);
+		glVertexAttribPointer(this.gAttribLocationVtxUV, 2, GL_FLOAT, false, ImDrawData.sizeOfImDrawVert(), 8);
+		glVertexAttribPointer(this.gAttribLocationVtxColor, 4, GL_UNSIGNED_BYTE, true, ImDrawData.sizeOfImDrawVert(), 16);
 	}
 
 	private void unbind() {

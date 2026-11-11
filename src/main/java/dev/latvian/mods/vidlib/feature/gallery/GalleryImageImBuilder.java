@@ -21,8 +21,10 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 	public final Collection<Gallery<?>> galleries;
 	public GalleryImage<?> selected;
 	public boolean fullUpdate = false;
+
 	@Nullable
 	public UUID contextId = null;
+
 	@Nullable
 	public Entity contextEntity = null;
 
@@ -46,7 +48,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 				ImGui.openPopup("###gallery-popup");
 			}
 		} else {
-			if (graphics.imageButton(tex.getTexture(), ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
+			if (graphics.imageButton("###open-gallery-popup", tex.getTexture(), ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
 				ImGui.openPopup("###gallery-popup");
 			}
 
@@ -62,9 +64,8 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 
 			graphics.pushStack();
 			graphics.setItemSpacing(4F, 4F);
-			ImGui.pushID("###remove");
 
-			if (graphics.imageButton(VidLibTextures.TRASH.id(), 40F, 40F, UV.FULL, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
+			if (graphics.imageButton("###remove", VidLibTextures.TRASH.id(), 40F, 40F, UV.FULL, 2, selected == null ? ImColorVariant.GRAY : ImColorVariant.RED)) {
 				if (selected != null) {
 					set(null);
 					update = ImUpdate.FULL;
@@ -73,7 +74,6 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 			}
 
 			graphics.hoveredTooltip("Remove");
-			ImGui.popID();
 
 			ImGui.pushID("###uploaders");
 			int uploaderIndex = 0;
@@ -83,7 +83,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 				for (var uploader : gallery.uploaders) {
 					ImGui.sameLine();
 					ImGui.pushID(uploaderIndex++);
-					boolean clicked = graphics.imageButton(uploader.getIcon(), 40F, 40F, UV.FULL, 2, uploader.getColor());
+					boolean clicked = graphics.imageButton("###button", uploader.getIcon(), 40F, 40F, UV.FULL, 2, uploader.getColor());
 					uploader.render(Cast.to(gallery), this, graphics, clicked);
 					graphics.hoveredTooltip(uploader.getTooltip());
 					ImGui.popID();
@@ -95,7 +95,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 					if (contextId != null && !contextId.equals(Util.NIL_UUID)) {
 						ImGui.sameLine();
 						ImGui.pushID("###pin-player");
-						boolean playerClicked = graphics.imageButton(PlayerHeads.getTexture(graphics.mc, contextId).getTexture(), 40F, 40F, UV.FULL, 2, ImColorVariant.BLUE);
+						boolean playerClicked = graphics.imageButton("###button", PlayerHeads.getTexture(graphics.mc, contextId).getTexture(), 40F, 40F, UV.FULL, 2, ImColorVariant.BLUE);
 
 						if (playerClicked) {
 							var live = PlayerSkins.getLiveSkin(contextEntity);
@@ -144,7 +144,7 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 								var option = options[i];
 								var optionTex = option.load(graphics.mc, false);
 
-								if (graphics.imageButton(optionTex.getTexture(), 50F, 50F, UV.FULL, 2, null)) {
+								if (graphics.imageButton("###button", optionTex.getTexture(), 50F, 50F, UV.FULL, 2, null)) {
 									set(option);
 									update = ImUpdate.FULL;
 									close = true;
@@ -185,12 +185,15 @@ public class GalleryImageImBuilder implements ImBuilder<GalleryImage<?>> {
 
 			for (var image : list) {
 				var imageTex = image.load(graphics.mc, false);
+				ImGui.pushID(count);
 
-				if (graphics.imageButton(imageTex.getTexture(), 50F, 50F, UV.FULL, 2, null)) {
+				if (graphics.imageButton("###button", imageTex.getTexture(), 50F, 50F, UV.FULL, 2, null)) {
 					set(image);
 					update = ImUpdate.FULL;
 					close = true;
 				}
+
+				ImGui.popID();
 
 				graphics.hoveredTooltip(image.displayName());
 

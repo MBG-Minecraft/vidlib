@@ -19,12 +19,12 @@ import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiDockNodeFlags;
+import imgui.flag.ImGuiKey;
 import imgui.internal.ImGuiContext;
 import imgui.internal.ImGuiDockNode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
-import org.lwjgl.sdl.SDLScancode;
 
 /**
  * Internal hooks for ImGui lifecycle management.
@@ -182,8 +182,8 @@ public class ImGuiHooks {
 
 		var io = ImGui.getIO();
 
-		if (io.getKeysDown(SDLScancode.SDL_SCANCODE_LCTRL)) {
-			io.setKeysDown(SDLScancode.SDL_SCANCODE_TAB, false);
+		if (io.getKeyCtrl()) {
+			io.addKeyEvent(ImGuiKey.Tab, false);
 		}
 
 		imGuiSdl.newFrame();
@@ -207,7 +207,7 @@ public class ImGuiHooks {
 
 		var window = mc.getWindow();
 
-		dockId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), ImGuiDockNodeFlags.NoDockingInCentralNode | ImGuiDockNodeFlags.PassthruCentralNode);
+		dockId = ImGui.dockSpaceOverViewport(0, ImGui.getMainViewport(), ImGuiDockNodeFlags.NoDockingInCentralNode | ImGuiDockNodeFlags.PassthruCentralNode);
 		centralDockNode = imgui.internal.ImGui.dockBuilderGetCentralNode(dockId);
 
 		mainViewport = ImGui.getMainViewport();

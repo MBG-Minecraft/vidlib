@@ -372,7 +372,7 @@ public class BuiltInImGui {
 		NeoForge.EVENT_BUS.post(new ImGuiEvent(graphics));
 
 		if (SHOW_STACK_TOOL.get()) {
-			ImGui.showStackToolWindow();
+			ImGui.showIDStackToolWindow(SHOW_STACK_TOOL);
 		}
 
 		if (SHOW_STYLE_EDITOR_TOOL.get()) {

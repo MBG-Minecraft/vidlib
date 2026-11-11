@@ -68,8 +68,8 @@ public class BlockImBuilder implements ImBuilder<Block> {
 		var currentStack = new ItemStack(block[0].asItem());
 		var currentTex = ItemIcons.getTexture(graphics.mc, VisualItemKey.of(currentStack));
 
-		if (graphics.imageButton(currentTex.getTexture(), 16F, 16F, UV.FULL, 3, null)) {
-			ImGui.openPopup("###select-block");
+		if (graphics.imageButton("###select-block", currentTex.getTexture(), 16F, 16F, UV.FULL, 3, null)) {
+			ImGui.openPopup("###select-block-popup");
 			cachedBlocks = null;
 		}
 
@@ -78,7 +78,7 @@ public class BlockImBuilder implements ImBuilder<Block> {
 			graphics.endTooltip();
 		}
 
-		if (ImGui.beginPopup("###select-block", ImGuiWindowFlags.AlwaysAutoResize)) {
+		if (ImGui.beginPopup("###select-block-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
 			ImGui.setNextItemWidth(-1F);
 
 			if (ImGui.inputTextWithHint("###search", "Search...", SEARCH)) {
@@ -122,6 +122,7 @@ public class BlockImBuilder implements ImBuilder<Block> {
 						boolean isSelected = itemBlock == block[0];
 
 						if (graphics.imageButton(
+							"###button",
 							tex.getTexture(),
 							48F, 48F, UV.FULL, 2, null,
 							isSelected ? Color.GREEN.withAlpha(80) : Color.TRANSPARENT,
@@ -143,7 +144,7 @@ public class BlockImBuilder implements ImBuilder<Block> {
 							graphics.endTooltip();
 						}
 					} else {
-						graphics.imageButton((GpuTexture) null, 48F, 48F, UV.FULL, 2, null);
+						graphics.imageButton("###button", (GpuTexture) null, 48F, 48F, UV.FULL, 2, null);
 					}
 
 					ImGui.popID();

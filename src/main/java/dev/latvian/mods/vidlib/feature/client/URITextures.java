@@ -176,7 +176,7 @@ public class URITextures {
 		return get(mc, uri).asset.id();
 	}
 
-	public static int gl(Minecraft mc, @Nullable URI uri, Identifier fallback) {
+	public static long gl(Minecraft mc, @Nullable URI uri, Identifier fallback) {
 		if (uri != null) {
 			return URITextures.get(mc, uri).texture.getTexture().vl$getHandle();
 		} else {

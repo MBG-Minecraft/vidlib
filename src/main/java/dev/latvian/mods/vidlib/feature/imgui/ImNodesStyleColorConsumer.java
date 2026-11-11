@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.klib.color.Color;
-import imgui.extension.imnodes.flag.ImNodesColorStyle;
+import imgui.extension.imnodes.flag.ImNodesCol;
 
 public interface ImNodesStyleColorConsumer {
 	void setNodesStyleCol(int key, int r, int g, int b, int a);
@@ -19,13 +19,13 @@ public interface ImNodesStyleColorConsumer {
 	}
 
 	default void setNodesPin(ImColorVariant variant) {
-		setNodesStyleCol(ImNodesColorStyle.Pin, variant.color);
-		setNodesStyleCol(ImNodesColorStyle.PinHovered, variant.hoverColor);
+		setNodesStyleCol(ImNodesCol.Pin, variant.color);
+		setNodesStyleCol(ImNodesCol.PinHovered, variant.hoverColor);
 	}
 
 	default void setNodesLink(ImColorVariant variant) {
-		setNodesStyleCol(ImNodesColorStyle.Link, variant.color);
-		setNodesStyleCol(ImNodesColorStyle.LinkHovered, variant.hoverColor);
-		setNodesStyleCol(ImNodesColorStyle.LinkSelected, variant.activeColor);
+		setNodesStyleCol(ImNodesCol.Link, variant.color);
+		setNodesStyleCol(ImNodesCol.LinkHovered, variant.hoverColor);
+		setNodesStyleCol(ImNodesCol.LinkSelected, variant.activeColor);
 	}
 }

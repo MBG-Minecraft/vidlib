@@ -225,9 +225,7 @@ public interface Pins {
 
 		ImGui.sameLine();
 
-		ImGui.pushID("###pin-shape-button");
-
-		if (graphics.imageButton(pin.shape.iconTexture, ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
+		if (graphics.imageButton("###pin-shape-button", pin.shape.iconTexture, ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
 			// pin.shape = PinShape.VALUES[(pin.shape.ordinal() + 1) % PinShape.VALUES.length];
 			ImGui.openPopup("###pin-shape-popup");
 		}
@@ -248,7 +246,7 @@ public interface Pins {
 
 				ImGui.pushID(i);
 
-				if (graphics.imageButton(shape.iconTexture, 40F, 40F, UV.FULL, 2, null)) {
+				if (graphics.imageButton("###select-shape-button", shape.iconTexture, 40F, 40F, UV.FULL, 2, null)) {
 					pin.shape = shape;
 					ImGui.closeCurrentPopup();
 				}
@@ -274,8 +272,6 @@ public interface Pins {
 		if (ImGui.checkbox("Always Loaded###pin-always-loaded", pin.alwaysLoaded)) {
 			pin.alwaysLoaded = !pin.alwaysLoaded;
 		}
-
-		ImGui.popID();
 
 		appearanceSliders(pin);
 	}

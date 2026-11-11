@@ -425,7 +425,7 @@ public class DebugWidgetPanel extends Panel {
 		ImGui.separator();
 		galleryImageBuilder.imguiKey(graphics, "Gallery Image", "gallery-image");
 		var selectedGalleryImage = galleryImageBuilder.isValid() ? galleryImageBuilder.build() : null;
-		graphics.imageButton(selectedGalleryImage == null ? null : selectedGalleryImage.textureId(), 256F, 256F, UV.FULL, 2, null);
+		graphics.imageButton("###gallery-image-button", selectedGalleryImage == null ? null : selectedGalleryImage.textureId(), 256F, 256F, UV.FULL, 2, null);
 
 		/*
 		if (mc.player != null) {
@@ -451,9 +451,11 @@ public class DebugWidgetPanel extends Panel {
 			ItemIcons.render(mc, currentStackKey);
 		}
 
-		var sink = new FormattedCharSinkPartBuilder();
-		graphics.mc.font.split(currentStack.getHoverName(), Integer.MAX_VALUE).getFirst().accept(sink);
-		graphics.text(sink.build());
+		if (graphics.mc.level != null) {
+			var sink = new FormattedCharSinkPartBuilder();
+			graphics.mc.font.split(currentStack.getHoverName(), Integer.MAX_VALUE).getFirst().accept(sink);
+			graphics.text(sink.build());
+		}
 
 		graphics.pushStack();
 		graphics.setFontScale(0.75F);
@@ -461,7 +463,7 @@ public class DebugWidgetPanel extends Panel {
 		graphics.popStack();
 
 		var currentStackTex = ItemIcons.getTexture(mc, currentStackKey);
-		graphics.imageButton(currentStackTex.getTexture(), 48F, 48F, UV.FULL, 2, null);
+		graphics.imageButton("###current-stack-button", currentStackTex.getTexture(), 48F, 48F, UV.FULL, 2, null);
 
 		ImGui.separator();
 
@@ -473,15 +475,17 @@ public class DebugWidgetPanel extends Panel {
 
 		// ImPlot.fitNextPlotAxes();
 
-		if (ImPlot.beginPlot("Line Plot###line-plot", "X", "Y", new ImVec2(300F, 300F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
-			var xdata = new Double[100];
-			var ydata = new Double[100];
+		if (ImPlot.beginPlot("Line Plot###line-plot", new ImVec2(300F, 300F), ImPlotFlags.CanvasOnly)) {
+			ImPlot.setupAxes("X", "Y", ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel);
+
+			var xdata = new double[100];
+			var ydata = new double[100];
 
 			for (int i = 0; i < 100; i++) {
 				float t = i / 100F;
 
-				xdata[i] = (double) t * 100D;
-				ydata[i] = (double) KMath.linearizedBezierY(t, bezierP1Data.x, bezierP1Data.y, bezierP2Data.x, bezierP2Data.y) * 100D;
+				xdata[i] = t * 100D;
+				ydata[i] = KMath.linearizedBezierY(t, bezierP1Data.x, bezierP1Data.y, bezierP2Data.x, bezierP2Data.y) * 100D;
 			}
 
 			ImPlot.plotLine("Y###1", xdata, ydata);
@@ -662,12 +666,13 @@ public class DebugWidgetPanel extends Panel {
 
 		var screenShakeInterpolation = ScreenShake.DEFAULT.ease();
 
-		if (ImPlot.beginPlot("Default Screen Shake Interpolation###default-screen-shake-interpolation-plot", "X", "Y", new ImVec2(300F, 150F), ImPlotFlags.CanvasOnly, ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel)) {
-			var xdata = new Double[100];
-			var ydata = new Double[100];
+		if (ImPlot.beginPlot("Default Screen Shake Interpolation###default-screen-shake-interpolation-plot", new ImVec2(300F, 150F), ImPlotFlags.CanvasOnly)) {
+			ImPlot.setupAxes("X", "Y", ImPlotAxisFlags.NoLabel, ImPlotAxisFlags.NoLabel);
+			var xdata = new double[100];
+			var ydata = new double[100];
 
 			for (int i = 0; i < 100; i++) {
-				xdata[i] = (double) i;
+				xdata[i] = i;
 				ydata[i] = screenShakeInterpolation.apply(i / 100F) * 100D;
 			}
 

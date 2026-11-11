@@ -155,8 +155,8 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 
 		var currentStackTex = ItemIcons.getTexture(graphics.mc, result.visualKey());
 
-		if (graphics.imageButton(currentStackTex.getTexture(), 16F, 16F, UV.FULL, 3, null)) {
-			ImGui.openPopup("###select-item");
+		if (graphics.imageButton("###select-item", currentStackTex.getTexture(), 16F, 16F, UV.FULL, 3, null)) {
+			ImGui.openPopup("###select-item-popup");
 			cachedItems = null;
 		}
 
@@ -172,7 +172,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 			graphics.endTooltip();
 		}
 
-		if (ImGui.beginPopup("###select-item", ImGuiWindowFlags.AlwaysAutoResize)) {
+		if (ImGui.beginPopup("###select-item-popup", ImGuiWindowFlags.AlwaysAutoResize)) {
 			if (enableListItemButtons != -1) {
 				graphics.redTextIf("#" + (enableListItemButtons + 1), !isValid());
 				ImGui.sameLine();
@@ -286,6 +286,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 						var tex = ItemIcons.getTexture(graphics.mc, item.cachedItem.visualKey());
 
 						if (graphics.imageButton(
+							"###button",
 							tex.getTexture(),
 							48F, 48F, UV.FULL, 2,
 							item.filtered ? null : ImColorVariant.GRAY,
@@ -335,7 +336,7 @@ public class ItemStackImBuilder implements ImBuilder<ItemStack>, ListButtonImBui
 							ImGui.endPopup();
 						}
 					} else {
-						graphics.imageButton((GpuTexture) null, 48F, 48F, UV.FULL, 2, null);
+						graphics.imageButton("###button", (GpuTexture) null, 48F, 48F, UV.FULL, 2, null);
 					}
 
 					ImGui.popID();

@@ -271,11 +271,9 @@ public class EntityExplorerPanel extends Panel {
 			}
 
 			if (!itemStack.isEmpty()) {
-				ImGui.pushID("###item");
-
 				ImGui.text("Item: ");
 				ImGui.sameLine();
-				graphics.imageButton(ItemIcons.getTexture(graphics.mc, VisualItemKey.of(itemStack)).getTexture(), 16F, 16F, UV.FULL, 3, null);
+				graphics.imageButton("###item", ItemIcons.getTexture(graphics.mc, VisualItemKey.of(itemStack)).getTexture(), 16F, 16F, UV.FULL, 3, null);
 
 				if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 					var sink = new FormattedCharSinkPartBuilder();
@@ -290,8 +288,6 @@ public class EntityExplorerPanel extends Panel {
 
 					graphics.endTooltip();
 				}
-
-				ImGui.popID();
 			}
 		}
 

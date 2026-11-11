@@ -722,7 +722,7 @@ public class Prop {
 				if (paused) {
 					ImGuiUtils.INT.set(tick);
 					ImGui.pushItemWidth(-1F);
-					ImGui.dragInt("###value", ImGuiUtils.INT.getData(), 1F, 0F, 1000000F, tickText);
+					ImGui.dragInt("###value", ImGuiUtils.INT.getData(), 1F, 0, 1000000, tickText);
 					ImGui.popItemWidth();
 
 					var update = ImUpdate.itemEdit();
