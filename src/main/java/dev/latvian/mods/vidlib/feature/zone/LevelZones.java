@@ -40,6 +40,10 @@ public class LevelZones implements Iterable<ResolvedZone> {
 
 	@Nullable
 	public ResolvedZone getResolved(Ref<Zone> ref) {
+		if (zones.isEmpty()) {
+			return null;
+		}
+
 		for (var zone : zones) {
 			if (zone.ref.equals(ref)) {
 				return zone;
@@ -69,7 +73,11 @@ public class LevelZones implements Iterable<ResolvedZone> {
 	}
 
 	@Nullable
-	public ResolvedZone getFirst(Vec3 pos) {
+	public ResolvedZone getFirstContaining(Vec3 pos) {
+		if (zones.isEmpty()) {
+			return null;
+		}
+
 		for (var instance : zones) {
 			if (instance.volume.contains(pos)) {
 				return instance;
@@ -79,7 +87,11 @@ public class LevelZones implements Iterable<ResolvedZone> {
 		return null;
 	}
 
-	public List<ResolvedZone> getAll(Vec3 pos) {
+	public List<ResolvedZone> getAllContaining(Vec3 pos) {
+		if (zones.isEmpty()) {
+			return List.of();
+		}
+
 		var list = new ArrayList<ResolvedZone>(1);
 
 		for (var instance : zones) {
@@ -92,7 +104,11 @@ public class LevelZones implements Iterable<ResolvedZone> {
 	}
 
 	@Nullable
-	public ResolvedZone getFirst(AABB box) {
+	public ResolvedZone getFirstIntersecting(AABB box) {
+		if (zones.isEmpty()) {
+			return null;
+		}
+
 		for (var instance : zones) {
 			if (instance.volume.intersects(box)) {
 				return instance;
@@ -102,7 +118,11 @@ public class LevelZones implements Iterable<ResolvedZone> {
 		return null;
 	}
 
-	public List<ResolvedZone> getAll(AABB box) {
+	public List<ResolvedZone> getAllIntersecting(AABB box) {
+		if (zones.isEmpty()) {
+			return List.of();
+		}
+
 		var list = new ArrayList<ResolvedZone>(1);
 
 		for (var instance : zones) {
@@ -116,6 +136,10 @@ public class LevelZones implements Iterable<ResolvedZone> {
 
 	@Nullable
 	public ZoneHit hit(HitBuilder hit) {
+		if (zones.isEmpty()) {
+			return null;
+		}
+
 		ZoneHit result = null;
 
 		for (var zone : zones) {
@@ -129,6 +153,10 @@ public class LevelZones implements Iterable<ResolvedZone> {
 
 	@Nullable
 	public ZoneHit hitLevel(HitBuilder hit) {
+		if (fluidZones.isEmpty()) {
+			return null;
+		}
+
 		ZoneHit result = null;
 
 		for (var zone : fluidZones) {

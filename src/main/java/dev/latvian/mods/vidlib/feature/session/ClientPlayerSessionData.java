@@ -9,7 +9,7 @@ public class ClientPlayerSessionData extends PlayerSessionData {
 		return (ClientPlayerSessionData) PlayerSessionData.of(player);
 	}
 
-	public ClientPlayerSessionData(ClientSessionData worldData, UUID uuid) {
-		super(worldData, uuid);
+	public ClientPlayerSessionData(ClientSessionData globalData, UUID uuid) {
+		super(globalData, uuid);
 	}
 }

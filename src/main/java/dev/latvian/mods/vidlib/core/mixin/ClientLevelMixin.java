@@ -3,6 +3,8 @@ package dev.latvian.mods.vidlib.core.mixin;
 import dev.latvian.mods.vidlib.core.VLClientLevel;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -12,6 +14,7 @@ import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -23,6 +26,18 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 	@Shadow
 	@Final
 	public Minecraft minecraft;
+
+	@Unique
+	private ClientLevelSessionData vl$levelData;
+
+	@Override
+	public ClientLevelSessionData vl$getLevelData() {
+		if (vl$levelData == null) {
+			vl$levelData = ClientSessionData.of(minecraft).getLevel(vl$level().dimension());
+		}
+
+		return vl$levelData;
+	}
 
 	@Inject(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;animateTick(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"))
 	private void vl$doAnimateTick(int posX, int posY, int posZ, int range, RandomSource random, Block block, BlockPos.MutableBlockPos blockPos, CallbackInfo ci) {

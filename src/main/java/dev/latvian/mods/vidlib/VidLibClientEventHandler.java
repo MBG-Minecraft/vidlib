@@ -51,6 +51,7 @@ import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVPropRenderState;
+import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
@@ -249,7 +250,10 @@ public class VidLibClientEventHandler {
 
 		if (mc.player != null) {
 			var session = ClientSessionData.of(mc);
-			session.postTick(session.getPauseType());
+
+			if (session != null) {
+				session.postTick(session.getPauseType());
+			}
 		}
 	}
 
@@ -271,7 +275,7 @@ public class VidLibClientEventHandler {
 
 		if (mc.options.getCameraType() == CameraType.FIRST_PERSON && VidLibClientOptions.getShowZones()) {
 			var rayLine = mc.gameRenderer.mainCamera().klib$ray(512D);
-			session.zoneHit = session.level.zones.hit(new HitBuilder(rayLine.start(), rayLine.end()));
+			session.zoneHit = ClientLevelSessionData.of(mc.level).zones.hit(new HitBuilder(rayLine.start(), rayLine.end()));
 		} else {
 			session.zoneHit = null;
 		}

@@ -27,6 +27,7 @@ public class ServerLevelSessionData extends LevelSessionData<ServerProps> {
 	public ServerLevelSessionData(ServerSessionData worldData, ResourceKey<Level> dimension, ServerLevel level) {
 		super(worldData, dimension);
 		this.level = level;
+		this.props = new ServerProps(this, level);
 	}
 
 	@Override

@@ -86,6 +86,7 @@
 		"BlockEntityRendererMixin",
 		"BlockEntityWithBoundingBoxRendererMixin",
 		"CameraMixin",
+		"ClientConfigurationPacketListenerImplMixin",
 		"ClientLevelMixin",
 		"ClientPacketListenerMixin",
 		"ClientSuggestionProviderMixin",

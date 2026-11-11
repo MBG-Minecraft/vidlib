@@ -111,8 +111,8 @@ public class VLPlatformHelper {
 	public void playerClickedOnZone(Player player, ZoneHit hit) {
 	}
 
-	public ServerSessionData getServerWorldData(MinecraftServer server) {
-		throw new NullPointerException("WorldSessionData storage is not implemented");
+	public ServerSessionData getServerData(MinecraftServer server) {
+		throw new NullPointerException("ServerSessionData storage is not implemented");
 	}
 
 	public LevelSessionData<?> getLevelData(Level level) {

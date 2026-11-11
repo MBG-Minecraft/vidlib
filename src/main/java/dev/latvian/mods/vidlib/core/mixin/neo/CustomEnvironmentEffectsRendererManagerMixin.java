@@ -26,7 +26,7 @@ public class CustomEnvironmentEffectsRendererManagerMixin {
 			var atmosphere = session.getAtmosphere();
 
 			if (atmosphere != null && atmosphere.value().skybox().isPresent()) {
-				cir.setReturnValue(session.worldData.getAtmosphere(atmosphere));
+				cir.setReturnValue(session.globalData.getAtmosphere(atmosphere));
 			}
 		}
 	}

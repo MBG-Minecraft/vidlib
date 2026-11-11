@@ -147,7 +147,7 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	}
 
 	@Override
-	public ServerSessionData getServerWorldData(MinecraftServer server) {
+	public ServerSessionData getServerData(MinecraftServer server) {
 		return server.vl$getGlobalData();
 	}
 

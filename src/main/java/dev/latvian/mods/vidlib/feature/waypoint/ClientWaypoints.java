@@ -63,7 +63,7 @@ public interface ClientWaypoints {
 
 		var levelSession = ClientLevelSessionData.of(level);
 
-		var projectedCoordinates = levelSession.worldData.projectedCoordinates;
+		var projectedCoordinates = levelSession.globalData.projectedCoordinates;
 
 		if (projectedCoordinates == null) {
 			return;

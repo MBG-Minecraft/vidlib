@@ -10,18 +10,18 @@ public class ClientLevelSessionData extends LevelSessionData<ClientProps> {
 		return (ClientLevelSessionData) LevelSessionData.of(level);
 	}
 
-	public final ClientSessionData worldData;
+	public final ClientSessionData globalData;
 
-	public ClientLevelSessionData(ClientSessionData worldData, ResourceKey<Level> dimension) {
-		super(worldData, dimension);
-		this.worldData = worldData;
+	public ClientLevelSessionData(ClientSessionData globalData, ResourceKey<Level> dimension) {
+		super(globalData, dimension);
+		this.globalData = globalData;
 	}
 
 	@Override
 	public KNumberContext createGlobalContext() {
-		var ctx = new KNumberContext(worldData.globalVariables);
-		ctx.updateLevelData(worldData.mc.level);
-		ctx.entity = worldData.mc.player;
+		var ctx = new KNumberContext(globalData.globalVariables);
+		ctx.updateLevelData(globalData.mc.level);
+		ctx.entity = globalData.mc.player;
 		return ctx;
 	}
 }

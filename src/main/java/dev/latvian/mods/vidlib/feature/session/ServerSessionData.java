@@ -32,7 +32,7 @@ import java.util.UUID;
 
 public class ServerSessionData extends GlobalSessionData {
 	public static ServerSessionData of(MinecraftServer server) {
-		return VLPlatformHelper.INSTANCE.getServerWorldData(server);
+		return VLPlatformHelper.INSTANCE.getServerData(server);
 	}
 
 	public final MinecraftServer server;

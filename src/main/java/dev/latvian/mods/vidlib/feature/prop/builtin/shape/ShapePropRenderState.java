@@ -14,10 +14,10 @@ import net.minecraft.resources.Identifier;
 import org.joml.Quaternionf;
 
 public class ShapePropRenderState extends PropRenderState<ShapeProp> {
+	public Shape shape;
 	public float width;
 	public float height;
 	public final Quaternionf rotate = new Quaternionf();
-	public Shape shape;
 	public Color color;
 	public Color outlineColor;
 	public RenderLightLayer lightLayer;
@@ -27,6 +27,7 @@ public class ShapePropRenderState extends PropRenderState<ShapeProp> {
 	@Override
 	public void extract(ShapeProp prop, VidLibExtractContext ctx) {
 		var progress = prop.getRelativeTick(ctx.delta(), 1F);
+		shape = prop.shape.value();
 		width = (float) prop.width;
 		height = (float) prop.height;
 

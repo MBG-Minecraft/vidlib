@@ -14,6 +14,7 @@ import dev.latvian.mods.vidlib.feature.progressqueue.BlockExitScreen;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.Packet;
@@ -51,11 +52,12 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 
 	@Override
 	public ClientSessionData vl$getGlobalData() {
-		if (vl$globalData == null) {
-			vl$globalData = ClientSessionData.of(vl$self());
-		}
-
 		return vl$globalData;
+	}
+
+	@Override
+	public void vl$setGlobalData(@Nullable ClientSessionData data) {
+		vl$globalData = data;
 	}
 
 	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"))
@@ -156,5 +158,15 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		if (!BlockExitScreen.preventExit(mc, advanceGameTime)) {
 			original.call(mc);
 		}
+	}
+
+	@Inject(method = "setLevel", at = @At("RETURN"))
+	private void vl$setLevel(ClientLevel level, CallbackInfo ci) {
+		vl$globalData.levelChanged(level);
+	}
+
+	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At("RETURN"))
+	private void vl$close(CallbackInfo ci) {
+		vl$globalData = null;
 	}
 }

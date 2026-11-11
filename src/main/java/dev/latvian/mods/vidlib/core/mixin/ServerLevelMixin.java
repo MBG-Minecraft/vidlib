@@ -5,7 +5,7 @@ import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.vidlib.core.VLServerLevel;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.ServerLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -36,14 +36,14 @@ public abstract class ServerLevelMixin extends Level implements VLServerLevel {
 	private MinecraftServer server;
 
 	@Unique
-	private LevelSessionData<?> vl$levelData;
+	private ServerLevelSessionData vl$levelData;
 
 	protected ServerLevelMixin(WritableLevelData levelData, ResourceKey<Level> dimension, RegistryAccess registryAccess, Holder<DimensionType> dimensionTypeRegistration, boolean isClientSide, boolean isDebug, long biomeZoomSeed, int maxChainedNeighborUpdates) {
 		super(levelData, dimension, registryAccess, dimensionTypeRegistration, isClientSide, isDebug, biomeZoomSeed, maxChainedNeighborUpdates);
 	}
 
 	@Override
-	public LevelSessionData<?> vl$getLevelData() {
+	public ServerLevelSessionData vl$getLevelData() {
 		if (vl$levelData == null) {
 			vl$levelData = ServerSessionData.of(server).getLevel(vl$level().dimension());
 		}

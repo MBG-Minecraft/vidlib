@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class LevelSessionData<P extends Props<?>> {
+public abstract class LevelSessionData<P extends Props<?>> {
 	public static LevelSessionData<?> of(Level level) {
 		return VLPlatformHelper.INSTANCE.getLevelData(level);
 	}
@@ -44,16 +44,16 @@ public class LevelSessionData<P extends Props<?>> {
 	public final GlobalSessionData globalData;
 	public final ResourceKey<Level> dimension;
 	public final DataMap<LevelSessionData<?>> dataMap;
-	public LevelZones zones;
 	public P props;
+	public LevelZones zones;
 	public final List<UndoableModificationHolder> undoable;
 
 	public LevelSessionData(GlobalSessionData globalData, ResourceKey<Level> dimension) {
 		this.globalData = globalData;
 		this.dimension = dimension;
 		this.dataMap = new DataMap<>(globalData, this, DataKey.LEVEL);
-		this.zones = null;
 		this.props = null;
+		this.zones = new LevelZones(dimension, List.of());
 		this.undoable = new ArrayList<>();
 	}
 
@@ -68,9 +68,7 @@ public class LevelSessionData<P extends Props<?>> {
 			props.tick(pauseType.tick());
 		}
 
-		if (zones != null) {
-			zones.tick(level, allEntities);
-		}
+		zones.tick(level, allEntities);
 	}
 
 	public boolean intersectsSolid(@Nullable Entity entity, AABB collisionBox) {
@@ -78,7 +76,7 @@ public class LevelSessionData<P extends Props<?>> {
 			return true;
 		}
 
-		if (zones != null && zones.intersectsSolid(entity, collisionBox)) {
+		if (zones.intersectsSolid(entity, collisionBox)) {
 			return true;
 		}
 
@@ -126,15 +124,13 @@ public class LevelSessionData<P extends Props<?>> {
 			}
 		}
 
-		if (zones != null) {
-			var zoneHit = zones.hitLevel(new HitBuilder(ctx.getFrom(), ctx.getTo()));
+		var zoneHit = zones.hitLevel(new HitBuilder(ctx.getFrom(), ctx.getTo()));
 
-			if (zoneHit != null && zoneHit.distanceSq() < result.getLocation().distanceToSqr(ctx.getFrom())) {
-				var r = zoneHit.asBlockHitResult();
+		if (zoneHit != null && zoneHit.distanceSq() < result.getLocation().distanceToSqr(ctx.getFrom())) {
+			var r = zoneHit.asBlockHitResult();
 
-				if (r != null) {
-					result = r;
-				}
+			if (r != null) {
+				result = r;
 			}
 		}
 

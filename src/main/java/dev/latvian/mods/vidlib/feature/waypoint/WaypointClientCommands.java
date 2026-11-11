@@ -25,7 +25,7 @@ public interface WaypointClientCommands {
 							var mc = Minecraft.getInstance();
 							var session = ClientLevelSessionData.of(mc.level);
 
-							if (mc.level != null && session.worldData.isReplay) {
+							if (mc.level != null && session.globalData.isReplay) {
 								var id = StringArgumentType.getString(ctx, "id");
 								var position = Vec3Argument.getVec3(ctx, "position");
 								var label = ComponentArgument.getResolvedComponent(ctx, "label");
@@ -58,7 +58,7 @@ public interface WaypointClientCommands {
 					var mc = Minecraft.getInstance();
 					var session = ClientLevelSessionData.of(mc.level);
 
-					if (mc.level != null && session.worldData.isReplay) {
+					if (mc.level != null && session.globalData.isReplay) {
 						var id = StringArgumentType.getString(ctx, "id");
 
 						var current = new ArrayList<>(session.dataMap.get(InternalLevelData.WAYPOINTS));

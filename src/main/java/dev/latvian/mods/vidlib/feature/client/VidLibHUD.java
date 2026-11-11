@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.entity.progress.ProgressBarRenderer;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
+import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import dev.latvian.mods.vidlib.util.NameDrawType;
@@ -158,7 +159,7 @@ public interface VidLibHUD {
 			}
 		}
 
-		var props = session.level.props;
+		var props = ClientLevelSessionData.of(mc.level).props;
 
 		for (var prop : props.levelProps) {
 			boolean renderName = prop.shouldRenderDisplayName(self);

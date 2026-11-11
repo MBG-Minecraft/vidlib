@@ -52,6 +52,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesDisplayData;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
+import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
@@ -72,6 +73,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -107,8 +109,8 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 	}
 
 	public final Minecraft mc;
-	public final PlayerSessionData localPlayer;
-	public ClientLevelSessionData level;
+	public final LocalPlayerSessionData localPlayer;
+	public ClientLevelSessionData currentLevel;
 
 	public ZoneHit zoneHit;
 	public final List<ScreenShakeInstance> screenShakeInstances;
@@ -164,14 +166,36 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 		return mc.level == null ? 0L : mc.level.getGameTime();
 	}
 
+	public void levelChanged(@Nullable ClientLevel level) {
+		if (currentLevel != null) {
+			currentLevel.props = null;
+			currentLevel = null;
+		}
+
+		if (level != null) {
+			currentLevel = getLevel(level.dimension());
+			currentLevel.props = new ClientProps(currentLevel, level);
+		}
+	}
+
+	@Override
+	public ClientLevelSessionData getLevel(ResourceKey<Level> dimension) {
+		return (ClientLevelSessionData) super.getLevel(dimension);
+	}
+
 	@Override
 	protected ClientLevelSessionData createLevelData(ResourceKey<Level> dimension) {
 		return new ClientLevelSessionData(this, dimension);
 	}
 
 	@Override
-	protected PlayerSessionData createPlayerData(UUID uuid) {
-		return uuid.equals(localPlayer.uuid) ? localPlayer : new PlayerSessionData(this, uuid);
+	public ClientPlayerSessionData getPlayer(UUID uuid) {
+		return (ClientPlayerSessionData) super.getPlayer(uuid);
+	}
+
+	@Override
+	protected ClientPlayerSessionData createPlayerData(UUID uuid) {
+		return uuid.equals(localPlayer.uuid) ? localPlayer : new RemotePlayerSessionData(this, uuid);
 	}
 
 	@Override
@@ -266,7 +290,7 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 
 		cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Identity.DVEC_2 : new Vector2d(shakeX, shakeY);
 
-		int undo = level.undoAllFutureModifications(mc.level, false);
+		int undo = ClientLevelSessionData.of(mc.level).undoAllFutureModifications(mc.level, false);
 
 		if (undo > 0) {
 			VidLib.LOGGER.info("Undone " + undo + " future modifications");

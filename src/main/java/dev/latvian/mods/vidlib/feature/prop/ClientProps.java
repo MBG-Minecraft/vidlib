@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.multiplayer.ClientLevel;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -128,14 +127,13 @@ public class ClientProps extends Props<ClientLevel> {
 		all.removeIf(pws -> pws.prop.isRemoved());
 	}
 
-	@Nullable
 	public List<PropRenderState<?>> extractAll(VidLibExtractContext ctx) {
 		if (all.isEmpty() || !VISIBLE.get()) {
-			return null;
+			return List.of();
 		}
 
-		List<PropRenderState<?>> states = null;
-		List<PropRenderState<?>> sortedStates = null;
+		List<PropRenderState<?>> states = List.of();
+		List<PropRenderState<?>> sortedStates = List.of();
 
 		boolean renderDebug = ctx.mc().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES) || !ClientProps.OPEN_PROPS.isEmpty();
 
@@ -160,13 +158,13 @@ public class ClientProps extends Props<ClientLevel> {
 				}
 
 				if (state.shouldSort) {
-					if (sortedStates == null) {
+					if (sortedStates.isEmpty()) {
 						sortedStates = new ArrayList<>();
 					}
 
 					sortedStates.add(state);
 				} else {
-					if (states == null) {
+					if (states.isEmpty()) {
 						states = new ArrayList<>(all.size());
 					}
 
@@ -182,12 +180,12 @@ public class ClientProps extends Props<ClientLevel> {
 
 		// Might not be required anymore
 
-		if (sortedStates != null) {
+		if (!sortedStates.isEmpty()) {
 			if (sortedStates.size() >= 2) {
 				sortedStates.sort(PropRenderState.COMPARATOR);
 			}
 
-			if (states == null) {
+			if (states.isEmpty()) {
 				states = sortedStates;
 			} else {
 				states.addAll(sortedStates);

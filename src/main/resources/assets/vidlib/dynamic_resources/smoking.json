@@ -6,6 +6,6 @@
 		"vidlib:smoking/pants": "{path}"
 	},
 	{
-		"vidlib:shoes": "vidlib:black"
+		"vidlib:shoes": "black"
 	}
 ]
