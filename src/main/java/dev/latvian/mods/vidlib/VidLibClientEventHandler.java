@@ -135,7 +135,6 @@ public class VidLibClientEventHandler {
 
 		event.addDependency(ID.klib("gradient"), ID.vidlib("clothing_preset"));
 		// event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
-		// event.addDependency(ID.vidlib("clock_font"), ID.vidlib("clock"));
 	}
 
 	@SubscribeEvent

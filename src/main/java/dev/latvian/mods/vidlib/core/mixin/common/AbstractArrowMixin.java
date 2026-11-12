@@ -43,25 +43,7 @@ public abstract class AbstractArrowMixin {
 			var pos = arrow.getPosition(0F);
 
 			if (vl$prevTrailPos != null) {
-				var delta = vl$prevTrailPos.subtract(pos);
-
-				if (delta.lengthSqr() > 0.0001D) {
-					/* FIXME
-					((ServerLevel) arrow.level()).sendParticles(
-						new LineParticleOptions(20, ClientGradients.TRAIL, ClientGradients.TRAIL, 1),
-						true,
-						true,
-						pos.x,
-						pos.y,
-						pos.z,
-						0,
-						delta.x,
-						delta.y,
-						delta.z,
-						1D
-					);
-					 */
-				}
+				CommonGameEngine.INSTANCE.spawnArrowTrail(arrow, vl$prevTrailPos, pos);
 			}
 
 			vl$prevTrailPos = pos;

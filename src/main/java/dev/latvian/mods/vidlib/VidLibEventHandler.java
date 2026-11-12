@@ -16,6 +16,7 @@ import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.filter.VLEntityFilters;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
+import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
@@ -122,6 +123,7 @@ public class VidLibEventHandler {
 		event.addListener(ID.vidlib("zone"), new Zone.Loader(RefType.SERVER));
 		// event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.SERVER));
 		event.addListener(ID.vidlib("cutscene"), new Cutscene.Loader(RefType.SERVER));
+		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader(RefType.SERVER));
 	}
 
 	@SubscribeEvent

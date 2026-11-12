@@ -22,6 +22,7 @@ import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import dev.latvian.mods.klib.volume.BlockVolume;
 import dev.latvian.mods.klib.volume.JoinedVolume;
 import dev.latvian.mods.klib.volume.Volume;
+import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -48,7 +49,8 @@ public record Zone(
 	List<ZoneTag> tags,
 	boolean anchor,
 	Optional<ZoneFluid> fluid,
-	ZoneDisplayInfo display
+	ZoneDisplayInfo display,
+	Optional<Atmosphere> atmosphere
 ) implements CustomRegistryValue<RegistryFriendlyByteBuf, Zone> {
 	public static final DynamicType<RegistryFriendlyByteBuf, Zone> TYPE = DynamicType.create(
 		"default",
@@ -63,7 +65,8 @@ public record Zone(
 			ZoneTag.CODEC.listOf().optionalFieldOf("tags", List.of()).forGetter(Zone::tags),
 			Codec.BOOL.optionalFieldOf("anchor", false).forGetter(Zone::anchor),
 			ZoneFluid.CODEC.optionalFieldOf("fluid").forGetter(Zone::fluid),
-			ZoneDisplayInfo.CODEC.optionalFieldOf("display", ZoneDisplayInfo.DEFAULT).forGetter(Zone::display)
+			ZoneDisplayInfo.CODEC.optionalFieldOf("display", ZoneDisplayInfo.DEFAULT).forGetter(Zone::display),
+			Atmosphere.DIRECT_MAP_CODEC.codec().optionalFieldOf("atmosphere").forGetter(Zone::atmosphere)
 		).apply(instance, Zone::new)),
 		CompositeStreamCodec.of(
 			KLibStreamCodecs.INT8, Zone::priority,
@@ -77,6 +80,7 @@ public record Zone(
 			ByteBufCodecs.BOOL, Zone::anchor,
 			ByteBufCodecs.optional(ZoneFluid.STREAM_CODEC), Zone::fluid,
 			ZoneDisplayInfo.STREAM_CODEC, Zone::display,
+			ByteBufCodecs.optional(Atmosphere.DIRECT_STREAM_CODEC), Zone::atmosphere,
 			Zone::new
 		)
 	);
@@ -103,6 +107,7 @@ public record Zone(
 		private ZoneFluid fluid = null;
 		private CubeTexturePatch textures = CubeTexturePatch.EMPTY;
 		private ZoneFog fog = ZoneFog.NONE;
+		private Atmosphere atmosphere = null;
 
 		public Zone build() {
 			var display = new ZoneDisplayInfo(
@@ -122,7 +127,8 @@ public record Zone(
 				List.copyOf(tags),
 				anchor,
 				Optional.ofNullable(fluid),
-				display.equals(ZoneDisplayInfo.DEFAULT) ? ZoneDisplayInfo.DEFAULT : display
+				display.equals(ZoneDisplayInfo.DEFAULT) ? ZoneDisplayInfo.DEFAULT : display,
+				Optional.ofNullable(atmosphere)
 			);
 		}
 
@@ -204,6 +210,11 @@ public record Zone(
 
 		public Builder fog(ZoneFog fog) {
 			this.fog = fog;
+			return this;
+		}
+
+		public Builder atmosphere(Atmosphere atmosphere) {
+			this.atmosphere = atmosphere;
 			return this;
 		}
 	}

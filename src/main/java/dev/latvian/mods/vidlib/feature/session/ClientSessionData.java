@@ -11,7 +11,6 @@ import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.particle.ShapeParticleOptions;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.texture.SpriteKey;
-import dev.latvian.mods.klib.util.MiscUtils;
 import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
@@ -78,6 +77,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -136,8 +136,8 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 	public Map<UUID, Note> notes;
 	public final Int2IntMap entityBrightnessOverrides;
 
-	public ClientSessionData(Minecraft mc, UUID localPlayerUUID) {
-		super(MiscUtils.STATIC_REGISTRY_ACCESS);
+	public ClientSessionData(Minecraft mc, RegistryAccess registryAccess, UUID localPlayerUUID) {
+		super(registryAccess);
 		this.mc = mc;
 		this.localPlayer = new LocalPlayerSessionData(this, localPlayerUUID);
 
@@ -171,6 +171,8 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 			currentLevel.props = null;
 			currentLevel = null;
 		}
+
+		updateOps(level == null ? null : level.registryAccess());
 
 		if (level != null) {
 			currentLevel = getLevel(level.dimension());

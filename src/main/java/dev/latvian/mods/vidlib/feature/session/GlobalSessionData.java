@@ -7,6 +7,7 @@ import com.mojang.serialization.JsonOps;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.klib.util.LevelGameTimeProvider;
+import dev.latvian.mods.klib.util.MiscUtils;
 import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
@@ -27,6 +28,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.UUID;
@@ -76,8 +78,8 @@ public abstract class GlobalSessionData implements LevelGameTimeProvider {
 
 	protected abstract PlayerSessionData createPlayerData(UUID uuid);
 
-	public void updateOps(RegistryAccess r) {
-		registryAccess = r;
+	public void updateOps(@Nullable RegistryAccess r) {
+		registryAccess = r == null ? MiscUtils.STATIC_REGISTRY_ACCESS : r;
 		jsonOps = registryAccess.createSerializationContext(JsonOps.INSTANCE);
 		nbtOps = registryAccess.createSerializationContext(NbtOps.INSTANCE);
 		nbtParser = TagParser.create(nbtOps);

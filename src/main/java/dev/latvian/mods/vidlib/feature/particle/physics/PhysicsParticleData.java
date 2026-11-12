@@ -10,7 +10,6 @@ import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.registry.RefType;
-import dev.latvian.mods.klib.registry.UnitType;
 import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -46,8 +45,6 @@ public record PhysicsParticleData(
 		false,
 		8192F
 	);
-
-	public static final UnitType<ByteBuf, PhysicsParticleData> DEFAULT = UnitType.create("default", DEFAULT_VALUE);
 
 	public static class Builder {
 		public float density = DEFAULT_VALUE.density;

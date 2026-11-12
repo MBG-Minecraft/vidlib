@@ -93,9 +93,9 @@ public enum PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 		if (action == PlayerActionType.RELOAD) {
 			PlayerTarget.of(player).s2c(new SpawnClientParticlePayload(
 				List.of(
-					Either.right("vidlib:shape{color:cyan,outline_color:transparent,shape:{type:cube,size:0.2}}"),
-					Either.right("vidlib:shape{color:magenta,outline_color:transparent,shape:{type:cube,size:0.2}}"),
-					Either.right("vidlib:shape{color:yellow,outline_color:transparent,shape:{type:cube,size:0.2}}")
+					Either.right("klib:shape{quads:'cyan',lines:'transparent',shape:{type:'cube',size:0.2}}"),
+					Either.right("klib:shape{quads:'magenta',lines:'transparent',shape:{type:'cube',size:0.2}}"),
+					Either.right("klib:shape{quads:'yellow',lines:'transparent',shape:{type:'cube',size:0.2}}")
 				),                    // particles
 				player.position(),    // pos
 				new Vec3(2D, 1D, 2D), // spread

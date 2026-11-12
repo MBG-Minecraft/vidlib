@@ -12,9 +12,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.permissions.Permissions;
 
 public interface PlayerDataCommand {
@@ -30,8 +30,6 @@ public interface PlayerDataCommand {
 				return 1;
 			})
 		);
-
-		var nbtOps = buildContext.createSerializationContext(NbtOps.INSTANCE);
 
 		var playerCmd = Commands.argument("player", GameProfileArgument.gameProfile());
 		playerCmd.suggests(SESSION_NAMES);
@@ -60,8 +58,13 @@ public interface PlayerDataCommand {
 
 						ctx.getSource().sendSuccess(() -> {
 							var value = playerData.dataMap.get(key);
-							var nbt = key.type.codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
-							return Component.literal(player.name() + ": ").append(NbtUtils.toPrettyComponent(nbt));
+
+							if (value == null) {
+								return Component.literal(player.name() + ": ").append(Component.literal("null").withColor(TextColor.RED));
+							} else {
+								var nbt = key.type.codec().encodeStart(vl.nbtOps, Cast.to(value)).getOrThrow();
+								return Component.literal(player.name() + ": ").append(NbtUtils.toPrettyComponent(nbt));
+							}
 						}, false);
 					}
 

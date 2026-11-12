@@ -19,7 +19,7 @@ public abstract class ClientConfigurationPacketListenerImplMixin implements VLCl
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	protected void vl$init(Minecraft minecraft, Connection connection, CommonListenerCookie cookie, CallbackInfo ci) {
-		vl$globalData = new ClientSessionData(minecraft, cookie.localGameProfile().id());
+		vl$globalData = new ClientSessionData(minecraft, cookie.receivedRegistries(), cookie.localGameProfile().id());
 	}
 
 	@Override

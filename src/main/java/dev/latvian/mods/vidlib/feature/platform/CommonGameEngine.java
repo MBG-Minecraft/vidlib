@@ -144,11 +144,33 @@ public class CommonGameEngine {
 	}
 
 	public boolean getArrowTrail(AbstractArrow arrow) {
-		return true;
+		return arrow.getOwner() instanceof Player;
 	}
 
 	public int getArrowDespawnTime(AbstractArrow arrow) {
 		return 1200;
+	}
+
+	public void spawnArrowTrail(AbstractArrow arrow, Vec3 prevPos, Vec3 pos) {
+		var delta = prevPos.subtract(pos);
+
+		if (delta.lengthSqr() > 0.0001D) {
+			/* FIXME
+			((ServerLevel) arrow.level()).sendParticles(
+				new LineParticleOptions(20, VLGradients.TRAIL, VLGradients.TRAIL, 1),
+				true,
+				true,
+				pos.x,
+				pos.y,
+				pos.z,
+				0,
+				delta.x,
+				delta.y,
+				delta.z,
+				1D
+			);
+			 */
+		}
 	}
 
 	public void handlePacket(Context ctx) {

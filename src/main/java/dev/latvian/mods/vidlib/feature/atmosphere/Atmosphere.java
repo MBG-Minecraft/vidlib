@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.atmosphere;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
@@ -26,24 +27,24 @@ public record Atmosphere(
 	Optional<Boolean> moon,
 	Optional<Rotation> celestialRotation
 ) implements CustomRegistryValue<RegistryFriendlyByteBuf, Atmosphere> {
-	public static final DynamicType<RegistryFriendlyByteBuf, Atmosphere> TYPE = DynamicType.create(
-		"default",
-		RecordCodecBuilder.mapCodec(instance -> instance.group(
-			SkyboxTextureData.CODEC.optionalFieldOf("skybox_texture").forGetter(Atmosphere::skybox),
-			EnvironmentAttributeMap.CODEC.optionalFieldOf("attributes", EnvironmentAttributeMap.EMPTY).forGetter(Atmosphere::attributes),
-			Codec.BOOL.optionalFieldOf("sun").forGetter(Atmosphere::sun),
-			Codec.BOOL.optionalFieldOf("moon").forGetter(Atmosphere::moon),
-			Rotation.CODEC_WITH_ROLL.optionalFieldOf("celestial_rotation").forGetter(Atmosphere::celestialRotation)
-		).apply(instance, Atmosphere::new)),
-		CompositeStreamCodec.of(
-			ByteBufCodecs.optional(SkyboxTextureData.STREAM_CODEC), Atmosphere::skybox,
-			KLibStreamCodecs.optional(ByteBufCodecs.fromCodecTrusted(EnvironmentAttributeMap.NETWORK_CODEC), EnvironmentAttributeMap.EMPTY), Atmosphere::attributes,
-			ByteBufCodecs.optional(ByteBufCodecs.BOOL), Atmosphere::sun,
-			ByteBufCodecs.optional(ByteBufCodecs.BOOL), Atmosphere::moon,
-			ByteBufCodecs.optional(Rotation.STREAM_CODEC_WITH_ROLL), Atmosphere::celestialRotation,
-			Atmosphere::new
-		)
+	public static final MapCodec<Atmosphere> DIRECT_MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+		SkyboxTextureData.CODEC.optionalFieldOf("skybox_texture").forGetter(Atmosphere::skybox),
+		EnvironmentAttributeMap.CODEC.optionalFieldOf("attributes", EnvironmentAttributeMap.EMPTY).forGetter(Atmosphere::attributes),
+		Codec.BOOL.optionalFieldOf("sun").forGetter(Atmosphere::sun),
+		Codec.BOOL.optionalFieldOf("moon").forGetter(Atmosphere::moon),
+		Rotation.CODEC_WITH_ROLL.optionalFieldOf("celestial_rotation").forGetter(Atmosphere::celestialRotation)
+	).apply(instance, Atmosphere::new));
+
+	public static final StreamCodec<RegistryFriendlyByteBuf, Atmosphere> DIRECT_STREAM_CODEC = CompositeStreamCodec.of(
+		ByteBufCodecs.optional(SkyboxTextureData.STREAM_CODEC), Atmosphere::skybox,
+		KLibStreamCodecs.optional(ByteBufCodecs.fromCodecTrusted(EnvironmentAttributeMap.NETWORK_CODEC), EnvironmentAttributeMap.EMPTY), Atmosphere::attributes,
+		ByteBufCodecs.optional(ByteBufCodecs.BOOL), Atmosphere::sun,
+		ByteBufCodecs.optional(ByteBufCodecs.BOOL), Atmosphere::moon,
+		ByteBufCodecs.optional(Rotation.STREAM_CODEC_WITH_ROLL), Atmosphere::celestialRotation,
+		Atmosphere::new
 	);
+
+	public static final DynamicType<RegistryFriendlyByteBuf, Atmosphere> TYPE = DynamicType.create("default", DIRECT_MAP_CODEC, DIRECT_STREAM_CODEC);
 
 	public static final CustomRegistry<RegistryFriendlyByteBuf, Atmosphere> REGISTRY = CustomRegistry.create("atmosphere", TYPE);
 

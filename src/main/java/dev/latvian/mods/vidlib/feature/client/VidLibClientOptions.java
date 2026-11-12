@@ -46,7 +46,7 @@ public interface VidLibClientOptions {
 		"options.vidlib.test_physics_particles.data",
 		PhysicsParticleData.DATA_TYPE.codec(),
 		OptionInstance.noTooltip(),
-		PhysicsParticleData.DEFAULT,
+		PhysicsParticleData.DEFAULT_VALUE.ref(),
 		callback -> {
 		}
 	);

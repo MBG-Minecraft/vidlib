@@ -5,16 +5,15 @@ import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import net.minecraft.commands.Commands;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.server.permissions.Permissions;
 
 public interface ServerDataCommand {
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("server-data", (command, buildContext) -> {
 		command.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
-		var nbtOps = buildContext.createSerializationContext(NbtOps.INSTANCE);
 
 		for (var key : DataKey.GLOBAL.all.values()) {
 			var cmd = Commands.literal(key.id);
@@ -24,8 +23,13 @@ public interface ServerDataCommand {
 					ctx.getSource().sendSuccess(() -> {
 						var vl = ServerSessionData.of(ctx.getSource().getServer());
 						var value = vl.dataMap.get(key);
-						var nbt = key.type.codec().encodeStart(nbtOps, Cast.to(value)).getOrThrow();
-						return Component.literal("Server: ").append(NbtUtils.toPrettyComponent(nbt));
+
+						if (value == null) {
+							return Component.literal("Server: ").append(Component.literal("null").withColor(TextColor.RED));
+						} else {
+							var nbt = key.type.codec().encodeStart(vl.nbtOps, Cast.to(value)).getOrThrow();
+							return Component.literal("Server: ").append(NbtUtils.toPrettyComponent(nbt));
+						}
 					}, false);
 					return 1;
 				})
