@@ -64,7 +64,6 @@
 		"ServerPacksSourceMixin",
 		"ServerPlayerMixin",
 		"ServerScoreboardMixin",
-		"StyleMixin",
 		"SweetBerryBushBlockMixin",
 		"TallGrassBlockMixin",
 		"TeamMsgCommandMixin",
