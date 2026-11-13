@@ -126,9 +126,9 @@ repositories {
 		url "https://maven.neoforged.net/releases"
 	}
 
-	if (findProperty('mrbeastURL') ?: ENV.MBG_MAVEN_URL) {
+	if (ENV.MBG_MAVEN_URL) {
 		maven {
-			url = findProperty('mrbeastURL') ?: ENV.MBG_MAVEN_URL
+			url = ENV.MBG_MAVEN_URL
 			content {
 				includeGroup "com.geckolib"
 				includeGroup "software.bernie.geckolib"
@@ -139,8 +139,8 @@ repositories {
 			}
 
 			credentials {
-				username = findProperty('mrbeastUsername') ?: ENV.MBG_MAVEN_USERNAME
-				password = findProperty('mrbeastPassword') ?: ENV.MBG_MAVEN_PASSWORD
+				username = ENV.MBG_MAVEN_USERNAME
+				password = ENV.MBG_MAVEN_PASSWORD
 			}
 		}
 	}
@@ -285,12 +285,12 @@ publishing {
 	}
 
 	repositories {
-		if (ENV.MAVEN_URL && ENV.MAVEN_USERNAME && ENV.MAVEN_TOKEN) {
+		if (ENV.MBG_PUBLISH_MAVEN_URL && ENV.MBG_PUBLISH_MAVEN_USERNAME && ENV.MBG_PUBLISH_MAVEN_PASSWORD) {
 			maven {
-				url = ENV.MAVEN_URL
+				url = ENV.MBG_PUBLISH_MAVEN_URL
 				credentials {
-					username = ENV.MAVEN_USERNAME
-					password = ENV.MAVEN_TOKEN
+					username = ENV.MBG_PUBLISH_MAVEN_USERNAME
+					password = ENV.MBG_PUBLISH_MAVEN_PASSWORD
 				}
 			}
 		}
