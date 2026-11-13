@@ -1,0 +1,12 @@
+{
+	"providers": [
+		{
+			"type": "bitmap",
+			"file": "vidlib:font/clock/5x7.png",
+			"ascent": 7,
+			"chars": [
+				"0123456789:"
+			]
+		}
+	]
+}
