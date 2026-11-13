@@ -603,6 +603,20 @@ public class VidLibClientEventHandler {
 	public static void gameShuttingDown(GameShuttingDownEvent event) {
 		VidLib.LOGGER.info("Shutting down");
 		HubClientGateway.stopGateway();
+
+		var thread = new Thread(() -> {
+			try {
+				Thread.sleep(30_000L);
+			} catch (InterruptedException ignored) {
+				return;
+			}
+
+			VidLib.LOGGER.warn("Game process did not terminate after shutdown, forcing exit");
+			System.exit(0);
+		}, "VidLib-Exit-SafetyNet");
+
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	@SubscribeEvent

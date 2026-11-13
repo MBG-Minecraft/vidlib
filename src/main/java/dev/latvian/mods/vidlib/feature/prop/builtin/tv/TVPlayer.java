@@ -31,7 +31,7 @@ public class TVPlayer {
 				}));
 
 				textureWrapper = new TextureWrapper(player);
-				Minecraft.getInstance().getTextureManager().register(TEXTURE.id(), textureWrapper);
+				Minecraft.getInstance().getTextureManager().register(TEXTURE.texturePath(), textureWrapper);
 			}
 
 			player.setMuteMode(muted);

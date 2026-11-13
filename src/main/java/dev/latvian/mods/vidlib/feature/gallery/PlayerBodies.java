@@ -48,7 +48,7 @@ public interface PlayerBodies {
 
 		@Override
 		public Identifier getIcon() {
-			return VidLibTextures.DEFAULT_PLAYER_BODY.id();
+			return VidLibTextures.DEFAULT_PLAYER_BODY.texturePath();
 		}
 
 		@Override
@@ -199,7 +199,7 @@ public interface PlayerBodies {
 
 	static AbstractTexture getTexture(Minecraft mc, @Nullable UUID uuid) {
 		if (uuid == null || uuid.equals(Util.NIL_UUID)) {
-			return mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_BODY.id());
+			return mc.getTextureManager().getTexture(VidLibTextures.DEFAULT_PLAYER_BODY.texturePath());
 		}
 
 		return get(mc, uuid).load(mc, false);

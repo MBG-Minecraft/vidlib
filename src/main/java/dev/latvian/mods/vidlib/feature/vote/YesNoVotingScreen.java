@@ -21,13 +21,13 @@ public class YesNoVotingScreen extends BaseVotingScreen {
 			boolean isSelected = selected == (isYes ? 1 : 0);
 
 			if (isYes) {
-				graphics.blit(RenderPipelines.GUI_TEXTURED, isSelected || isHovered ? VidLibTextures.YES.id() : VidLibTextures.YES_OFF.id(), getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(RenderPipelines.GUI_TEXTURED, isSelected || isHovered ? VidLibTextures.YES.texturePath() : VidLibTextures.YES_OFF.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
 			} else {
-				graphics.blit(RenderPipelines.GUI_TEXTURED, isSelected || isHovered ? VidLibTextures.NO.id() : VidLibTextures.NO_OFF.id(), getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(RenderPipelines.GUI_TEXTURED, isSelected || isHovered ? VidLibTextures.NO.texturePath() : VidLibTextures.NO_OFF.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
 			}
 
 			if (isSelected) {
-				graphics.blit(RenderPipelines.GUI_TEXTURED, isYes ? VidLibTextures.YES_OUTLINE.id() : VidLibTextures.NO_OUTLINE.id(), getX(), getY(), 0F, 0F, width, height, width, height);
+				graphics.blit(RenderPipelines.GUI_TEXTURED, isYes ? VidLibTextures.YES_OUTLINE.texturePath() : VidLibTextures.NO_OUTLINE.texturePath(), getX(), getY(), 0F, 0F, width, height, width, height);
 			}
 
 			graphics.text(font, getMessage(), getX() + (width - font.width(getMessage())) / 2, getY() + height + 6, 0xFFFFFFFF, true);

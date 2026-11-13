@@ -37,7 +37,7 @@ public class ClothingPartImBuilder extends CompoundImBuilder<ClothingPart> {
 
 	@Override
 	public ClothingPart build() {
-		return new ClothingPart(texture.build().id().withPath(s -> s.substring(16)), color.build());
+		return new ClothingPart(texture.build().texturePath().withPath(s -> s.substring(16)), color.build());
 	}
 
 	@Override

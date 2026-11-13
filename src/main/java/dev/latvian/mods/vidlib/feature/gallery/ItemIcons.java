@@ -121,7 +121,7 @@ public interface ItemIcons {
 
 	static AbstractTexture getTexture(Minecraft mc, @Nullable VisualItemKey key) {
 		if (key == null || key == VisualItemKey.AIR) {
-			return mc.getTextureManager().getTexture(VidLibTextures.TRANSPARENT.id());
+			return mc.getTextureManager().getTexture(VidLibTextures.TRANSPARENT.texturePath());
 		}
 
 		var tex = get(mc, key).load(mc, false);

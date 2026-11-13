@@ -130,17 +130,17 @@ public interface Pins {
 				screenPin.image().load(mc, true);
 
 				if (!shape.transparentBackground) {
-					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, color);
+					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.maskTexture.texturePath(), shape.x, shape.y, 0F, 0F, size, size, size, size, color);
 				}
 
 				if (!pin.background.isTransparent()) {
-					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.maskTexture, shape.x, shape.y, 0F, 0F, size, size, size, size, pin.background.withAlpha(pin.background.alphaf() * (pin.alpha / 255F)).argb());
+					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.maskTexture.texturePath(), shape.x, shape.y, 0F, 0F, size, size, size, size, pin.background.withAlpha(pin.background.alphaf() * (pin.alpha / 255F)).argb());
 				}
 
 				graphics.blit(shape.maskedRenderType, screenPin.image().textureId(), shape.x, shape.y, 1F, 1F, size - 2, size - 2, size, size, pinAlpha | 0xFFFFFF);
 
 				if (shape.overlayTexture != null) {
-					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.overlayTexture, 0, 0, 0F, 0F, 512, 512, 512, 512, color);
+					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.overlayTexture.texturePath(), 0, 0, 0F, 0F, 512, 512, 512, 512, color);
 				}
 			}
 		}
@@ -225,14 +225,14 @@ public interface Pins {
 
 		ImGui.sameLine();
 
-		if (graphics.imageButton("###pin-shape-button", pin.shape.iconTexture, ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
+		if (graphics.imageButton("###pin-shape-button", pin.shape.iconTexture.texturePath(), ImGui.getFrameHeight() - 4F, ImGui.getFrameHeight() - 4F, UV.FULL, 2, null)) {
 			// pin.shape = PinShape.VALUES[(pin.shape.ordinal() + 1) % PinShape.VALUES.length];
 			ImGui.openPopup("###pin-shape-popup");
 		}
 
 		if (ImGui.isItemHovered() && graphics.beginTooltip()) {
 			ImGui.text("Shape: " + pin.shape.displayName);
-			ImGui.image(graphics.mc.getTextureManager().getTexture(pin.shape.iconTexture).getTexture().vl$getHandle(), 64F, 64F);
+			ImGui.image(graphics.mc.getTextureManager().getTexture(pin.shape.iconTexture.texturePath()).getTexture().vl$getHandle(), 64F, 64F);
 			graphics.endTooltip();
 		}
 
@@ -246,7 +246,7 @@ public interface Pins {
 
 				ImGui.pushID(i);
 
-				if (graphics.imageButton("###select-shape-button", shape.iconTexture, 40F, 40F, UV.FULL, 2, null)) {
+				if (graphics.imageButton("###select-shape-button", shape.iconTexture.texturePath(), 40F, 40F, UV.FULL, 2, null)) {
 					pin.shape = shape;
 					ImGui.closeCurrentPopup();
 				}

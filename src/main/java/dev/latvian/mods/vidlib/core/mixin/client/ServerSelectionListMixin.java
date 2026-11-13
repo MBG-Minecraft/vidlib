@@ -9,7 +9,6 @@ import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,12 +37,18 @@ public abstract class ServerSelectionListMixin extends ObjectSelectionList<Serve
 		super(mc, width, height, y, itemHeight);
 	}
 
-	@Inject(method = "refreshEntries", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/multiplayer/ServerSelectionList;onlineServers:Ljava/util/List;", opcode = Opcodes.GETFIELD))
+	@Inject(method = "refreshEntries", at = @At("RETURN"))
 	private void vl$refreshEntries(CallbackInfo ci) {
-		vl$hubServers.forEach(this::addEntry);
+		if (vl$hubServers.isEmpty()) {
+			return;
+		}
 
-		if (!vl$hubServers.isEmpty() && !onlineServers.isEmpty()) {
-			addEntry(new OtherServerHeader());
+		if (!onlineServers.isEmpty()) {
+			addEntryToTop(new OtherServerHeader());
+		}
+
+		for (int i = vl$hubServers.size() - 1; i >= 0; i--) {
+			addEntryToTop(vl$hubServers.get(i));
 		}
 	}
 

@@ -36,11 +36,11 @@ public record GalleryImage<K>(
 				tex = loadNow(mc, true);
 
 				if (tex == null) {
-					tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.id());
+					tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.texturePath());
 					mc.getTextureManager().byPath.put(textureId, tex);
 				}
 			} else {
-				tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.id());
+				tex = mc.getTextureManager().getTexture(VidLibTextures.LOADING.texturePath());
 				mc.getTextureManager().byPath.put(textureId, tex);
 				Thread.startVirtualThread(() -> loadNow(mc, false));
 			}

@@ -731,7 +731,7 @@ public class ClientGameEngine {
 
 	@Nullable
 	public List<String> collectGameInformationText(Minecraft mc, DebugScreenOverlay overlay) {
-		if (!mc.showOnlyReducedInfo()) {
+		if (!mc.showOnlyReducedInfo() || mc.getCameraEntity() == null) {
 			return null;
 		}
 

@@ -103,6 +103,7 @@ public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>>
 	private CompletableFuture<?> completedBinaryFuture;
 	WebSocket webSocket;
 	Map<String, BiConsumer<M, HubGatewayEvent>> eventHandlers;
+	private volatile boolean gameStopped;
 	private long reconnect;
 	public String status;
 	public Ping lastPing;
@@ -130,24 +131,39 @@ public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>>
 	public abstract void requestRestart();
 
 	public void start() {
+		if (gameStopped) {
+			return;
+		}
+
 		boolean reconnecting = reconnect != 0L;
 		reconnect = 0L;
 		status = reconnecting ? "Reconnecting..." : "Connecting...";
 
 		HubAPI.WEBSOCKET_EXECUTOR.get().execute(() -> {
 			try {
-				webSocket = info.buildClient(this).get(10L, TimeUnit.SECONDS);
+				var ws = info.buildClient(this).get(10L, TimeUnit.SECONDS);
+
+				if (gameStopped) {
+					ws.abort();
+					return;
+				}
+
+				webSocket = ws;
 				onConnected();
 			} catch (Exception ex) {
-				reconnect = System.currentTimeMillis() + 10000L;
-				VidLib.LOGGER.error("Failed to " + (reconnecting ? "reconnect" : "connect") + " to Gateway, trying again in 10 seconds");
-				status = "Early Error - Reconnecting...";
+				if (!gameStopped) {
+					reconnect = System.currentTimeMillis() + 10000L;
+					VidLib.LOGGER.error("Failed to " + (reconnecting ? "reconnect" : "connect") + " to Gateway, trying again in 10 seconds");
+					status = "Early Error - Reconnecting...";
+				}
 			}
 		});
 	}
 
 	public void stop() {
+		gameStopped = true;
 		var ws = webSocket;
+		webSocket = null;
 
 		if (ws != null) {
 			try {
@@ -159,7 +175,6 @@ public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>>
 
 		reconnect = 0L;
 		status = "Closed";
-		webSocket = null;
 	}
 
 	public void tick() {
@@ -393,17 +408,24 @@ public abstract class HubCommonGateway<M extends ReentrantBlockableEventLoop<?>>
 
 	@Override
 	public CompletionStage<?> onClose(WebSocket ws, int statusCode, String reason) {
-		reconnect = System.currentTimeMillis() + 10000L;
-		status = "Closed - Reconnecting...";
 		webSocket = null;
+
+		if (!gameStopped) {
+			reconnect = System.currentTimeMillis() + 10000L;
+			status = "Closed - Reconnecting...";
+		}
+
 		return null;
 	}
 
 	@Override
 	public void onError(WebSocket ws, Throwable error) {
-		reconnect = System.currentTimeMillis() + 10000L;
-		status = "Late Error - Reconnecting...";
 		webSocket = null;
+
+		if (!gameStopped) {
+			reconnect = System.currentTimeMillis() + 10000L;
+			status = "Late Error - Reconnecting...";
+		}
 	}
 
 	public boolean isConnected() {

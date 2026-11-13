@@ -294,10 +294,12 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 
 		cameraShake = Math.abs(shakeX) <= 0.0001D && Math.abs(shakeY) <= 0.0001D ? Identity.DVEC_2 : new Vector2d(shakeX, shakeY);
 
-		int undo = ClientLevelSessionData.of(mc.level).undoAllFutureModifications(mc.level, false);
+		if (mc.level != null) {
+			int undo = ClientLevelSessionData.of(mc.level).undoAllFutureModifications(mc.level, false);
 
-		if (undo > 0) {
-			VidLib.LOGGER.info("Undone " + undo + " future modifications");
+			if (undo > 0) {
+				VidLib.LOGGER.info("Undone " + undo + " future modifications");
+			}
 		}
 
 		BuiltInImGui.OPEN_PANELS.values().forEach(Panel::tick);
