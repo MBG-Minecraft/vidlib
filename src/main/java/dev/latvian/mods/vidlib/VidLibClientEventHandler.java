@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.latvian.mods.klib.math.HitBuilder;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.platform.PlatformHelper;
+import dev.latvian.mods.klib.registry.CustomRegistryUpdateCallback;
 import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
@@ -55,6 +56,7 @@ import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.util.NameDrawType;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
@@ -118,6 +120,21 @@ public class VidLibClientEventHandler {
 	}
 
 	public static void syncSetup() {
+		Zone.REGISTRY.addUpdateListener((values, type) -> {
+			if (type == CustomRegistryUpdateCallback.Type.REMOTE) {
+				ClientSessionData.of(Minecraft.getInstance()).updateZones(values);
+			}
+		});
+
+		Atmosphere.REGISTRY.addUpdateListener((values, type) -> {
+			if (type == CustomRegistryUpdateCallback.Type.REMOTE || type == CustomRegistryUpdateCallback.Type.CLIENT) {
+				var session = ClientSessionData.of(Minecraft.getInstance());
+
+				if (session != null) {
+					session.updateAtmospheres(values);
+				}
+			}
+		});
 	}
 
 	@SubscribeEvent
@@ -417,7 +434,7 @@ public class VidLibClientEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void RegisterDebugEntriesEvent(RegisterDebugEntriesEvent event) {
+	public static void registerDebugEntries(RegisterDebugEntriesEvent event) {
 		event.register(ID.vidlib("physics_particles"), PhysicsParticleManager::debugInfo);
 	}
 

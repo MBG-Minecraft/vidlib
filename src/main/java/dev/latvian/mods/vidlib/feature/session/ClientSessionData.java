@@ -59,6 +59,8 @@ import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.VidLibSoundInstance;
 import dev.latvian.mods.vidlib.feature.vote.NumberVotingScreen;
 import dev.latvian.mods.vidlib.feature.vote.YesNoVotingScreen;
+import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
+import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneHit;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import io.netty.buffer.Unpooled;
@@ -82,7 +84,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
@@ -97,6 +98,7 @@ import org.joml.Vector4f;
 import java.io.BufferedOutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -116,7 +118,7 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 	public final List<ScreenShakeInstance> screenShakeInstances;
 	public Vector2dc prevCameraShake;
 	public Vector2dc cameraShake;
-	public Map<String, ClientAtmosphere> atmosphereCache;
+	public final Map<String, ClientAtmosphere> clientAtmospheres;
 	public final KNumberVariables globalVariables;
 	public CameraOverride cameraOverride;
 	public ClientCutscene currentCutscene;
@@ -144,7 +146,7 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 		this.zoneHit = null;
 		this.screenShakeInstances = new ArrayList<>();
 		this.prevCameraShake = this.cameraShake = Identity.DVEC_2;
-		this.atmosphereCache = new Reference2ObjectOpenHashMap<>();
+		this.clientAtmospheres = new Reference2ObjectOpenHashMap<>();
 		this.globalVariables = new KNumberVariables();
 		this.debugDecals = new ArrayList<>();
 		this.screenEffects = new ArrayList<>();
@@ -359,11 +361,11 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 	}
 
 	public ClientAtmosphere getAtmosphere(Ref<Atmosphere> ref) {
-		var atmosphere = atmosphereCache.get(ref.key());
+		var atmosphere = clientAtmospheres.get(ref.key());
 
 		if (atmosphere == null) {
 			atmosphere = new ClientAtmosphere(ref);
-			atmosphereCache.put(ref.key(), atmosphere);
+			clientAtmospheres.put(ref.key(), atmosphere);
 		}
 
 		return atmosphere;
@@ -438,6 +440,28 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 		}
 	}
 
+	public void updateZones(Collection<Ref<Zone>> values) {
+		for (var level : levelMap.values()) {
+			var list = new ArrayList<ResolvedZone>();
+
+			for (var ref : values) {
+				if (ref.value().dimension() == level.dimension) {
+					list.add(new ResolvedZone(level.zones, ref));
+				}
+			}
+
+			level.zones.update(list);
+		}
+	}
+
+	public void updateAtmospheres(Collection<Ref<Atmosphere>> values) {
+		clientAtmospheres.clear();
+
+		for (var ref : values) {
+			clientAtmospheres.put(ref.key(), new ClientAtmosphere(ref));
+		}
+	}
+
 	// Packet Handlers
 
 	@Override
@@ -452,11 +476,6 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 				vehicle.setPilotInput(entity, input);
 			}
 		}
-	}
-
-	@Override
-	public void updateAtmospheres() {
-		atmosphereCache.clear();
 	}
 
 	@Override
@@ -591,15 +610,6 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 				}
 			}
 			default -> stopCutscene();
-		}
-	}
-
-	@Override
-	public void setPostEffect(Identifier id) {
-		if (id.equals(Identifier.withDefaultNamespace("empty"))) {
-			mc.player.setActivePostEffects(List.of());
-		} else {
-			mc.player.setActivePostEffects(List.of(id));
 		}
 	}
 

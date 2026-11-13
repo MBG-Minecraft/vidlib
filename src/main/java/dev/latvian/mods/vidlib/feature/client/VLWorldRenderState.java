@@ -24,7 +24,9 @@ import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderState;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.LocalPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
+import dev.latvian.mods.vidlib.feature.zone.ZoneRenderState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -59,9 +61,10 @@ public class VLWorldRenderState {
 	public List<Submittable> submittable = List.of();
 	public List<Decal> decals = List.of();
 	public List<PropRenderState<?>> props = List.of();
-	public List<AAIBB> anchorAreas = List.of();
+	public List<AAIBB> anchorVolumes = List.of();
 	public FluidPlaneRenderState fluidPlane = null;
 	public List<Pair<PhysicsParticleManager, List<PhysicsParticleRenderState>>> physicsParticles = List.of();
+	public List<ZoneRenderState> zones = List.of();
 
 	public void add(Submittable s) {
 		if (submittable.isEmpty()) {
@@ -88,6 +91,7 @@ public class VLWorldRenderState {
 
 		var session = ClientSessionData.of(mc);
 		var levelSession = ClientLevelSessionData.of(mc.level);
+		var playerSession = LocalPlayerSessionData.of(mc.player);
 
 		worldDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		playerDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(!mc.level.tickRateManager().isEntityFrozen(mc.player));
@@ -96,6 +100,8 @@ public class VLWorldRenderState {
 		cameraRotation = event.getCamera().rotation();
 		gameTime = mc.level.getGameTime();
 		numberContext = levelSession.createGlobalContext();
+		numberContext.progress = 1D;
+
 		visualExactContext = new VisualExactContext(
 			mc,
 			cameraPos,
@@ -109,17 +115,33 @@ public class VLWorldRenderState {
 		submittable = List.of();
 		decals = List.of();
 		props = levelSession.props.extractAll(ctx);
-		anchorAreas = List.of();
+		anchorVolumes = List.of();
 
 		if (VidLibClientOptions.getShowAnchor()) {
 			var anchored = levelSession.getAnchor().volumes();
 
 			if (!anchored.isEmpty()) {
-				anchorAreas = new ArrayList<>(anchored.size());
-
 				for (var area : anchored) {
 					if (event.getFrustum().isVisible(area.aabb())) {
-						anchorAreas.add(area);
+						if (anchorVolumes.isEmpty()) {
+							anchorVolumes = new ArrayList<>(anchored.size());
+						}
+
+						anchorVolumes.add(area);
+					}
+				}
+			}
+
+			for (var zone : levelSession.zones.zones) {
+				if (zone.anchor) {
+					var box = zone.volume.intBox();
+
+					if (event.getFrustum().isVisible(box.aabb())) {
+						if (anchorVolumes.isEmpty()) {
+							anchorVolumes = new ArrayList<>(1);
+						}
+
+						anchorVolumes.add(box);
 					}
 				}
 			}
@@ -197,6 +219,24 @@ public class VLWorldRenderState {
 			}
 		}
 
+		zones = List.of();
+
+		if (VidLibClientOptions.getShowZones()) {
+			var zoneOuterLines = VidLibClientOptions.getShowZoneOuterBounds();
+
+			for (var zone : levelSession.zones) {
+				var state = ZoneRenderState.extract(zone, zoneOuterLines);
+
+				if (state != null) {
+					if (zones.isEmpty()) {
+						zones = new ArrayList<>(levelSession.zones.zones.size());
+					}
+
+					zones.add(state);
+				}
+			}
+		}
+
 		NeoForge.EVENT_BUS.post(new VidLibWorldRenderEvent(ctx));
 	}
 
@@ -223,8 +263,8 @@ public class VLWorldRenderState {
 			}
 		}
 
-		if (!anchorAreas.isEmpty()) {
-			for (var a : anchorAreas) {
+		if (!anchorVolumes.isEmpty()) {
+			for (var a : anchorVolumes) {
 				ctx.push(a.minX(), a.minY(), a.minZ());
 
 				ctx.submit(RenderTypes.debugFilledBox(), (pose, buffer) -> {
@@ -268,6 +308,12 @@ public class VLWorldRenderState {
 		if (!physicsParticles.isEmpty()) {
 			for (var pair : physicsParticles) {
 				pair.getFirst().submit(ctx, pair.getSecond());
+			}
+		}
+
+		if (!zones.isEmpty()) {
+			for (var state : zones) {
+				state.submit(ctx);
 			}
 		}
 	}

@@ -16,36 +16,39 @@ public interface VLGradients {
 	Ref<Gradient> SOUL_FIRE_1 = ref("soul_fire/1");
 	Ref<Gradient> SPARK = ref("spark");
 
-	Ref<Gradient> BLACK_BASE = ref("black_base");
-	Ref<Gradient> WHITE_BASE = ref("white_base");
+	interface Fabric {
+		Ref<Gradient> BLACK = ref("fabric/black");
+		Ref<Gradient> BROWN = ref("fabric/brown");
+		Ref<Gradient> BLUE = ref("fabric/blue");
+		Ref<Gradient> CYAN = ref("fabric/cyan");
+		Ref<Gradient> SQUID = ref("fabric/squid");
+		Ref<Gradient> OLIVE = ref("fabric/olive");
+		Ref<Gradient> GREEN = ref("fabric/green");
+		Ref<Gradient> LIME = ref("fabric/lime");
+		Ref<Gradient> YELLOW = ref("fabric/yellow");
+		Ref<Gradient> GRAPEFRUIT = ref("fabric/grapefruit");
+		Ref<Gradient> ORANGE = ref("fabric/orange");
+		Ref<Gradient> RED = ref("fabric/red");
+		Ref<Gradient> MAGENTA = ref("fabric/magenta");
+		Ref<Gradient> PURPLE = ref("fabric/purple");
+		Ref<Gradient> PINK = ref("fabric/pink");
+		Ref<Gradient> WHITE = ref("fabric/white");
+		Ref<Gradient> GRAY = ref("fabric/gray");
 
-	Ref<Gradient> BLACK = ref("black");
-	Ref<Gradient> BROWN = ref("brown");
-	Ref<Gradient> BLUE = ref("blue");
-	Ref<Gradient> CYAN = ref("cyan");
-	Ref<Gradient> SQUID = ref("squid");
-	Ref<Gradient> OLIVE = ref("olive");
-	Ref<Gradient> GREEN = ref("green");
-	Ref<Gradient> LIME = ref("lime");
-	Ref<Gradient> YELLOW = ref("yellow");
-	Ref<Gradient> GRAPEFRUIT = ref("grapefruit");
-	Ref<Gradient> ORANGE = ref("orange");
-	Ref<Gradient> RED = ref("red");
-	Ref<Gradient> MAGENTA = ref("magenta");
-	Ref<Gradient> PURPLE = ref("purple");
-	Ref<Gradient> PINK = ref("pink");
-	Ref<Gradient> WHITE = ref("white");
-	Ref<Gradient> GRAY = ref("gray");
+		interface Dark {
+			Ref<Gradient> BLUE = ref("fabric/dark/blue");
+			Ref<Gradient> GREEN = ref("fabric/dark/green");
+			Ref<Gradient> YELLOW = ref("fabric/dark/yellow");
+			Ref<Gradient> RED = ref("fabric/dark/red");
+		}
 
-	Ref<Gradient> DARK_BLUE = ref("dark_blue");
-	Ref<Gradient> DARK_GREEN = ref("dark_green");
-	Ref<Gradient> DARK_YELLOW = ref("dark_yellow");
-	Ref<Gradient> DARK_RED = ref("dark_red");
-
-	Ref<Gradient> SHINY_BLUE = ref("shiny_blue");
-	Ref<Gradient> SHINY_GREEN = ref("shiny_green");
-	Ref<Gradient> SHINY_YELLOW = ref("shiny_yellow");
-	Ref<Gradient> SHINY_RED = ref("shiny_red");
-	Ref<Gradient> SHINY_PURPLE = ref("shiny_purple");
-	Ref<Gradient> SHINY_WHITE = ref("shiny_white");
+		interface Shiny {
+			Ref<Gradient> BLUE = ref("fabric/shiny/blue");
+			Ref<Gradient> GREEN = ref("fabric/shiny/green");
+			Ref<Gradient> YELLOW = ref("fabric/shiny/yellow");
+			Ref<Gradient> RED = ref("fabric/shiny/red");
+			Ref<Gradient> PURPLE = ref("fabric/shiny/purple");
+			Ref<Gradient> WHITE = ref("fabric/shiny/white");
+		}
+	}
 }

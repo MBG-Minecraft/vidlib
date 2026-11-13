@@ -24,6 +24,7 @@ import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
+import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.mrbeastgaming.mods.hub.api.HubServerSession;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
@@ -67,6 +68,8 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+
+import java.util.ArrayList;
 
 @EventBusSubscriber(modid = VidLib.ID)
 public class VidLibEventHandler {
@@ -154,6 +157,18 @@ public class VidLibEventHandler {
 
 			for (var player : event.getPlayerList().getPlayers()) {
 				VidLib.sync(player, 0);
+			}
+
+			for (var level : ServerSessionData.of(event.getPlayerList().getServer()).levelMap.values()) {
+				var list = new ArrayList<ResolvedZone>();
+
+				for (var zone : Zone.REGISTRY) {
+					if (zone.value().dimension() == level.dimension) {
+						list.add(new ResolvedZone(level.zones, zone));
+					}
+				}
+
+				level.zones.update(list);
 			}
 		}
 	}

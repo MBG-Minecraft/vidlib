@@ -46,11 +46,9 @@ public class ServerLevelSessionData extends LevelSessionData<ServerProps> {
 	public LongOpenHashSet getChunksToLoad() {
 		var toLoad = new LongOpenHashSet();
 
-		if (zones != null) {
-			for (var zone : zones) {
-				if (zone.anchor) {
-					zone.volume.collectChunkPositions(toLoad);
-				}
+		for (var zone : zones) {
+			if (zone.anchor) {
+				zone.volume.intBox().collectChunkPositions(toLoad);
 			}
 		}
 

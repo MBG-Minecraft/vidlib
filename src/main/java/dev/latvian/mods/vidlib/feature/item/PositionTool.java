@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.item;
 
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.gradient.Gradient;
 import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.math.KMath;
@@ -121,7 +120,8 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 				)
 			);
 
-			player.level().addParticle(new ShapeParticleOptions(60, Color.CYAN.toGradient().ref(), Color.WHITE.toGradient().ref()), clientPos.x, clientPos.y, clientPos.z, 0D, 0D, 0D);
+			var shape = clientMode == Type.PLANE ? SphereShape.UNIT_SPHERE : new CubeShape(1.001F).ref();
+			player.level().addParticle(new ShapeParticleOptions(60, shape, Gradient.CYAN, Gradient.WHITE), clientPos.x, clientPos.y, clientPos.z, 0D, 0D, 0D);
 		}
 
 		return true;
@@ -174,14 +174,13 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 		if (clientPos != null) {
 			if (clientMode == Type.PLANE) {
 				var center = KVector.of(clientPos).ref();
-				var endColor = Color.WHITE.withAlpha(0).toGradient().ref();
-				visuals.addLine(center, KVector.of(clientPos.x + 0.5D, clientPos.y, clientPos.z).ref(), Gradient.WHITE, endColor);
-				visuals.addLine(center, KVector.of(clientPos.x, clientPos.y + 0.5D, clientPos.z).ref(), Gradient.WHITE, endColor);
-				visuals.addLine(center, KVector.of(clientPos.x, clientPos.y, clientPos.z + 0.5D).ref(), Gradient.WHITE, endColor);
-				visuals.add(new ColoredShape(SphereShape.UNIT_SPHERE, Gradient.EMPTY, Color.CYAN.toGradient().ref()).at(clientPos));
-				visuals.addOutline(new ColoredShape(SphereShape.UNIT_SPHERE, Gradient.EMPTY, Color.WHITE.toGradient().ref()).at(clientPos));
+				visuals.addLine(center, KVector.of(clientPos.x + 0.5D, clientPos.y, clientPos.z).ref(), Gradient.WHITE, Gradient.EMPTY_WHITE);
+				visuals.addLine(center, KVector.of(clientPos.x, clientPos.y + 0.5D, clientPos.z).ref(), Gradient.WHITE, Gradient.EMPTY_WHITE);
+				visuals.addLine(center, KVector.of(clientPos.x, clientPos.y, clientPos.z + 0.5D).ref(), Gradient.WHITE, Gradient.EMPTY_WHITE);
+				visuals.add(new ColoredShape(SphereShape.UNIT_SPHERE, Gradient.EMPTY, Gradient.CYAN).at(clientPos));
+				// visuals.addOutline(new ColoredShape(SphereShape.UNIT_SPHERE, Gradient.EMPTY, Gradient.WHITE).at(clientPos));
 			} else {
-				visuals.add(new ColoredShape(CubeShape.UNIT_CUBE, Gradient.EMPTY, Color.CYAN.toGradient().ref()).at(clientPos));
+				visuals.add(new ColoredShape(new CubeShape(1.001F).ref(), Gradient.EMPTY, Gradient.CYAN).at(clientPos));
 			}
 		}
 	}

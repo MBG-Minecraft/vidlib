@@ -17,17 +17,17 @@
 		"vidlib:pink": {},
 		"vidlib:white": {},
 		"vidlib:gray": {},
-		"vidlib:dark_blue": {},
-		"vidlib:dark_green": {},
-		"vidlib:dark_yellow": {},
-		"vidlib:dark_red": {},
-		"vidlib:shiny_black": {},
-		"vidlib:shiny_blue": {},
-		"vidlib:shiny_green": {},
-		"vidlib:shiny_yellow": {},
-		"vidlib:shiny_red": {},
-		"vidlib:shiny_purple": {},
-		"vidlib:shiny_white": {}
+		"vidlib:dark/blue": {},
+		"vidlib:dark/green": {},
+		"vidlib:dark/yellow": {},
+		"vidlib:dark/red": {},
+		"vidlib:shiny/black": {},
+		"vidlib:shiny/blue": {},
+		"vidlib:shiny/green": {},
+		"vidlib:shiny/yellow": {},
+		"vidlib:shiny/red": {},
+		"vidlib:shiny/purple": {},
+		"vidlib:shiny/white": {}
 	},
 	"files": [
 		{

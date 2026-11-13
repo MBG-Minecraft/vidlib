@@ -23,7 +23,6 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -62,9 +61,6 @@ public interface VLFeatures {
 		toast("", 5000L, title, description);
 	}
 
-	default void updateAtmospheres() {
-	}
-
 	default void createNote(Note note) {
 	}
 
@@ -93,9 +89,6 @@ public interface VLFeatures {
 	}
 
 	default void setCameraMode(int mode) {
-	}
-
-	default void setPostEffect(Identifier id) {
 	}
 
 	default void closeScreen() {

@@ -1,11 +1,11 @@
 [
 	{
-		"vidlib:smoking/top": "{path}"
+		"vidlib:smoking/top": "fabric/{path}"
 	},
 	{
-		"vidlib:smoking/pants": "{path}"
+		"vidlib:smoking/pants": "fabric/{path}"
 	},
 	{
-		"vidlib:shoes": "black"
+		"vidlib:shoes": "fabric/black"
 	}
 ]

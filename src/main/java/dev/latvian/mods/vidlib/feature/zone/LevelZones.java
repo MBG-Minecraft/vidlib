@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.zone;
 import dev.latvian.mods.klib.math.HitBuilder;
 import dev.latvian.mods.klib.registry.Ref;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -18,16 +19,24 @@ import java.util.List;
 
 public class LevelZones implements Iterable<ResolvedZone> {
 	public final ResourceKey<Level> dimension;
-	public final List<ResolvedZone> zones;
+	public List<ResolvedZone> zones;
 	public final Int2ObjectOpenHashMap<List<ResolvedZone>> entityZones;
-	public final List<ResolvedZone> visibleZones;
-	public final List<ResolvedZone> solidZones;
-	public final List<ResolvedZone> fluidZones;
+	public List<ResolvedZone> visibleZones;
+	public List<ResolvedZone> solidZones;
+	public List<ResolvedZone> fluidZones;
 
-	public LevelZones(ResourceKey<Level> dimension, List<ResolvedZone> zones) {
+	public LevelZones(ResourceKey<Level> dimension) {
 		this.dimension = dimension;
+		this.zones = List.of();
+		this.entityZones = new Int2ObjectOpenHashMap<>(0);
+		this.visibleZones = List.of();
+		this.solidZones = List.of();
+		this.fluidZones = List.of();
+	}
+
+	public void update(List<ResolvedZone> zones) {
 		this.zones = List.copyOf(zones);
-		this.entityZones = new Int2ObjectOpenHashMap<>();
+		this.entityZones.clear();
 		this.visibleZones = List.copyOf(this.zones.stream().filter(ResolvedZone::isVisible).toList());
 		this.solidZones = List.copyOf(this.zones.stream().filter(ResolvedZone::isSolid).toList());
 		this.fluidZones = List.copyOf(this.zones.stream().filter(ResolvedZone::isFluid).toList());
@@ -144,7 +153,7 @@ public class LevelZones implements Iterable<ResolvedZone> {
 
 		for (var zone : zones) {
 			if (zone.volume.hit(hit) && hit.hit != null && (result == null || hit.distanceSq < result.distanceSq())) {
-				result = new ZoneHit(zone.ref, zone, hit.hit, hit.distanceSq, hit.direction);
+				result = new ZoneHit(zone.ref, zone, hit.hit, hit.distanceSq, hit.direction, BlockPos.containing(hit.hit));
 			}
 		}
 
@@ -161,7 +170,7 @@ public class LevelZones implements Iterable<ResolvedZone> {
 
 		for (var zone : fluidZones) {
 			if (zone.volume.hit(hit) && hit.hit != null && (result == null || hit.distanceSq < result.distanceSq())) {
-				result = new ZoneHit(zone.ref, zone, hit.hit, hit.distanceSq, hit.direction);
+				result = new ZoneHit(zone.ref, zone, hit.hit, hit.distanceSq, hit.direction, BlockPos.containing(hit.hit));
 			}
 		}
 

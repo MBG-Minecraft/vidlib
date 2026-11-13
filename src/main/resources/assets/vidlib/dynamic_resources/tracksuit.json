@@ -1,12 +1,12 @@
 [
 	{
-		"vidlib:tracksuit/shirt": "{path}"
+		"vidlib:tracksuit/shirt": "fabric/{path}"
 	},
 	{
-		"vidlib:tracksuit/top": "{path}"
+		"vidlib:tracksuit/top": "fabric/{path}"
 	},
 	{
-		"vidlib:tracksuit/bottoms": "{path}"
+		"vidlib:tracksuit/bottoms": "fabric/{path}"
 	},
 	"vidlib:sneakers"
 ]

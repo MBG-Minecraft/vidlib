@@ -53,8 +53,8 @@ public class ShapePropRenderState extends PropRenderState<ShapeProp> {
 			ctx.poseStack().scale(width, height, width);
 		}
 
-		ctx.submitQuads(Identity.VEC_3, shape, color);
-		ctx.submitLines(Identity.VEC_3, shape, outlineColor);
+		ctx.submitQuads(shape, Identity.VEC_3, color);
+		ctx.submitLines(shape, Identity.VEC_3, outlineColor);
 		ms.popPose();
 	}
 }

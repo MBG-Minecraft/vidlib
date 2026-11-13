@@ -45,7 +45,7 @@ public abstract class LevelSessionData<P extends Props<?>> {
 	public final ResourceKey<Level> dimension;
 	public final DataMap<LevelSessionData<?>> dataMap;
 	public P props;
-	public LevelZones zones;
+	public final LevelZones zones;
 	public final List<UndoableModificationHolder> undoable;
 
 	public LevelSessionData(GlobalSessionData globalData, ResourceKey<Level> dimension) {
@@ -53,7 +53,7 @@ public abstract class LevelSessionData<P extends Props<?>> {
 		this.dimension = dimension;
 		this.dataMap = new DataMap<>(globalData, this, DataKey.LEVEL);
 		this.props = null;
-		this.zones = new LevelZones(dimension, List.of());
+		this.zones = new LevelZones(dimension);
 		this.undoable = new ArrayList<>();
 	}
 
@@ -89,9 +89,7 @@ public abstract class LevelSessionData<P extends Props<?>> {
 			props.levelProps.collectShapesIntersecting(entity, collisionBox, shapes);
 		}
 
-		if (zones != null) {
-			zones.collectShapesIntersecting(entity, collisionBox, shapes);
-		}
+		zones.collectShapesIntersecting(entity, collisionBox, shapes);
 	}
 
 	@Nullable
