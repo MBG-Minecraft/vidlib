@@ -5,50 +5,98 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.renderer.AngledChromaticAberrationEffectRenderer;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.renderer.FocusedChromaticAberrationEffectRenderer;
 import imgui.ImGui;
-import net.minecraft.world.phys.Vec2;
+import imgui.type.ImBoolean;
 
 public class ChromaticAberrationPanel extends Panel {
 	public static final ChromaticAberrationPanel INSTANCE = new ChromaticAberrationPanel();
 
 	public static final MenuItem MENU_ITEM = MenuItem.item(ImIcons.ANIMATION, "Chromatic Aberration", INSTANCE);
 
+	public final ImBoolean isAngled;
+
 	private ChromaticAberrationPanel() {
 		super("chromatic-aberration", "Chromatic Aberration");
+		this.isAngled = new ImBoolean(false);
 	}
 
 	@Override
 	public void content(ImGraphics graphics) {
 		ImGui.pushItemWidth(-1F);
+		ImGui.checkbox("Angled###angled", isAngled);
 
-		ImGuiUtils.FLOAT.set(ChromaticAberration.strength);
-		ImGui.text("Strength");
-		ImGui.sliderFloat("###strength", ImGuiUtils.FLOAT.getData(), -1F, 1F);
-		ChromaticAberration.strength = ImGuiUtils.FLOAT.get();
+		if (isAngled.get()) {
+			ImGui.text("Strength");
 
-		ImGuiUtils.BOOLEAN.set(ChromaticAberration.isAngled);
-		ImGui.checkbox("Angled###angled", ImGuiUtils.BOOLEAN);
-		ChromaticAberration.isAngled = ImGuiUtils.BOOLEAN.get();
-
-		if (ChromaticAberration.isAngled) {
-			ImGuiUtils.FLOAT.set(ChromaticAberration.angle);
-			ImGui.dragFloat("###angle", ImGuiUtils.FLOAT.getData(), 1F, 0F, 360F);
-			ChromaticAberration.angle = ImGuiUtils.FLOAT.get();
-		} else {
-			ImGui.text("Focus");
-
-			if (ChromaticAberration.screenFocus.x != 0F || ChromaticAberration.screenFocus.y != 0F) {
+			if (AngledChromaticAberrationEffectRenderer.strength != 0F) {
 				ImGui.sameLine();
 
-				if (ImGui.smallButton(ImIcons.UNDO + "###undo-focus")) {
-					ChromaticAberration.screenFocus = Vec2.ZERO;
+				if (ImGui.smallButton(ImIcons.UNDO + "###undo-strength")) {
+					AngledChromaticAberrationEffectRenderer.strength = 0F;
+					AngledChromaticAberrationEffectRenderer.UNIFORMS.update();
 				}
 			}
 
-			ImGuiUtils.FLOAT2[0] = ChromaticAberration.screenFocus.x;
-			ImGuiUtils.FLOAT2[1] = ChromaticAberration.screenFocus.y;
-			ImGui.dragFloat2("###focus", ImGuiUtils.FLOAT2, 0.01F, -1F, 1F);
-			ChromaticAberration.screenFocus = new Vec2(ImGuiUtils.FLOAT2[0], ImGuiUtils.FLOAT2[1]);
+			ImGuiUtils.FLOAT.set(AngledChromaticAberrationEffectRenderer.strength);
+			if (ImGui.sliderFloat("###strength", ImGuiUtils.FLOAT.getData(), -1F, 1F)) {
+				AngledChromaticAberrationEffectRenderer.strength = ImGuiUtils.FLOAT.get();
+				AngledChromaticAberrationEffectRenderer.UNIFORMS.update();
+			}
+
+			ImGui.text("Angle");
+
+			if (AngledChromaticAberrationEffectRenderer.angle != 0F) {
+				ImGui.sameLine();
+
+				if (ImGui.smallButton(ImIcons.UNDO + "###undo-angle")) {
+					AngledChromaticAberrationEffectRenderer.angle = 0F;
+					AngledChromaticAberrationEffectRenderer.UNIFORMS.update();
+				}
+			}
+
+			ImGuiUtils.FLOAT.set(AngledChromaticAberrationEffectRenderer.angle);
+			if (ImGui.dragFloat("###angle", ImGuiUtils.FLOAT.getData(), 1F, 0F, 360F)) {
+				AngledChromaticAberrationEffectRenderer.angle = ImGuiUtils.FLOAT.get();
+				AngledChromaticAberrationEffectRenderer.UNIFORMS.update();
+			}
+		} else {
+			ImGui.text("Strength");
+
+			if (FocusedChromaticAberrationEffectRenderer.strength != 0F) {
+				ImGui.sameLine();
+
+				if (ImGui.smallButton(ImIcons.UNDO + "###undo-strength")) {
+					FocusedChromaticAberrationEffectRenderer.strength = 0F;
+					FocusedChromaticAberrationEffectRenderer.UNIFORMS.update();
+				}
+			}
+
+			ImGuiUtils.FLOAT.set(FocusedChromaticAberrationEffectRenderer.strength);
+			if (ImGui.sliderFloat("###strength", ImGuiUtils.FLOAT.getData(), -1F, 1F)) {
+				FocusedChromaticAberrationEffectRenderer.strength = ImGuiUtils.FLOAT.get();
+				FocusedChromaticAberrationEffectRenderer.UNIFORMS.update();
+			}
+
+			ImGui.text("Focus");
+
+			if (FocusedChromaticAberrationEffectRenderer.focus.x != 0F || FocusedChromaticAberrationEffectRenderer.focus.y != 0F) {
+				ImGui.sameLine();
+
+				if (ImGui.smallButton(ImIcons.UNDO + "###undo-focus")) {
+					FocusedChromaticAberrationEffectRenderer.focus.set(0F, 0F);
+					FocusedChromaticAberrationEffectRenderer.UNIFORMS.update();
+				}
+			}
+
+			ImGuiUtils.FLOAT2[0] = FocusedChromaticAberrationEffectRenderer.focus.x;
+			ImGuiUtils.FLOAT2[1] = FocusedChromaticAberrationEffectRenderer.focus.y;
+
+			if (ImGui.dragFloat2("###focus", ImGuiUtils.FLOAT2, 0.01F, -1F, 1F)) {
+				FocusedChromaticAberrationEffectRenderer.focus.set(ImGuiUtils.FLOAT2[0], ImGuiUtils.FLOAT2[1]);
+				FocusedChromaticAberrationEffectRenderer.UNIFORMS.update();
+			}
 		}
 
 		ImGui.popItemWidth();

@@ -4,11 +4,14 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.core.api.client.VLGameRenderer;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRenderer;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.PlayerRenderState;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Final;
@@ -19,6 +22,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.List;
 
 @Mixin(value = GameRenderer.class, priority = 1002)
 public abstract class GameRendererMixin implements VLGameRenderer {
@@ -40,6 +45,10 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@Shadow
 	protected abstract void renderItemInHand(net.minecraft.client.renderer.state.level.CameraRenderState cameraState, net.minecraft.client.renderer.state.level.PlayerRenderState playerState, com.mojang.renderpearl.api.textures.GpuTextureView target);
+
+	@Shadow
+	@Final
+	private List<Identifier> requestedPostEffects;
 
 	@Unique
 	private boolean bobViewport;
@@ -108,5 +117,10 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		if (bobViewport) {
 			ci.cancel();
 		}
+	}
+
+	@Inject(method = "update", at = @At("RETURN"))
+	private void vl$update(DeltaTracker deltaTracker, CallbackInfo ci) {
+		ScreenEffectRenderer.applyEffect(requestedPostEffects);
 	}
 }

@@ -62,6 +62,7 @@
 		"PlayerTabOverlayMixin",
 		"PostChainConfigFixedSizeTargetMixin",
 		"PostChainMixin",
+		"PostPassMixin",
 		"RemotePlayerMixin",
 		"RenderSystemMixin",
 		"RenderTypeMixin",

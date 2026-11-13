@@ -1,7 +1,57 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.vidlib.feature.client.CustomPostPassUniforms;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BooleanSupplier;
+
 public class ScreenEffectRenderer {
-	private static int uCount = 0;
+	@Nullable
+	public static ScreenEffectRenderer get(DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type) {
+		return type.getProperty(ScreenEffect.PROPERTY_RENDERER) instanceof ScreenEffectRenderer r ? r : null;
+	}
+
+	public static void applyEffect(List<Identifier> effects) {
+		for (var type : ScreenEffect.REGISTRY.typeList()) {
+			if (type instanceof DynamicType<?, ?> t && t.getProperty(ScreenEffect.PROPERTY_RENDERER) instanceof ScreenEffectRenderer r) {
+				if (r.postEffect != null && r.postEffectEnabled.getAsBoolean()) {
+					effects.add(r.postEffect);
+				}
+			}
+		}
+	}
+
+	public final DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type;
+	public final List<CustomPostPassUniforms> uniforms;
+	public Identifier postEffect;
+	public BooleanSupplier postEffectEnabled;
+
+	public ScreenEffectRenderer(DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type) {
+		this.type = type;
+		this.uniforms = new ArrayList<>(1);
+		this.postEffect = null;
+		this.postEffectEnabled = () -> true;
+	}
+
+	public void addUniforms(CustomPostPassUniforms uniforms) {
+		this.uniforms.add(uniforms);
+	}
+
+	public void setPostEffect(Identifier id, BooleanSupplier enabled) {
+		this.postEffect = id;
+		this.postEffectEnabled = enabled;
+	}
+
+	public void update() {
+		for (var uniform : uniforms) {
+			uniform.update();
+		}
+	}
 
 	/*
 	@ClientAutoRegister

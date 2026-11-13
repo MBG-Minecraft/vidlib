@@ -52,6 +52,11 @@ import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVPropRenderState;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRenderingRegistryEvent;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberrationEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.FocusedChromaticAberrationEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.renderer.AngledChromaticAberrationEffectRenderer;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.renderer.FocusedChromaticAberrationEffectRenderer;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
@@ -79,6 +84,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -135,6 +141,8 @@ public class VidLibClientEventHandler {
 				}
 			}
 		});
+
+		ModLoader.postEvent(new ScreenEffectRenderingRegistryEvent());
 	}
 
 	@SubscribeEvent
@@ -202,6 +210,12 @@ public class VidLibClientEventHandler {
 		event.register(TextProp.TYPE, TextPropRenderState::new);
 		event.register(TVProp.TYPE, TVPropRenderState::new);
 		event.register(MannequinProp.TYPE, MannequinPropRenderState::new);
+	}
+
+	@SubscribeEvent
+	public static void screenEffectRenderingRegistry(ScreenEffectRenderingRegistryEvent event) {
+		event.register(FocusedChromaticAberrationEffect.TYPE, FocusedChromaticAberrationEffectRenderer::build);
+		event.register(AngledChromaticAberrationEffect.TYPE, AngledChromaticAberrationEffectRenderer::build);
 	}
 
 	@SubscribeEvent

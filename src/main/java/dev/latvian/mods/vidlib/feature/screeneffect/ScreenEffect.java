@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.registry.CustomRegistry;
 import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.klib.registry.CustomRegistryValue;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberrationEffect;
@@ -20,6 +21,8 @@ public interface ScreenEffect extends CustomRegistryValue<RegistryFriendlyByteBu
 	Codec<Ref<ScreenEffect>> CODEC = REGISTRY.codec();
 	StreamCodec<RegistryFriendlyByteBuf, Ref<ScreenEffect>> STREAM_CODEC = REGISTRY.streamCodec();
 	DataType<Ref<ScreenEffect>> DATA_TYPE = REGISTRY.dataType();
+
+	int PROPERTY_RENDERER = DynamicType.newPropertyId();
 
 	static void builtInTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenEffect> registry) {
 		registry.register(ColorEffect.TYPE);
