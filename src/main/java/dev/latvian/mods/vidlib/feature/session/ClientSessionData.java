@@ -52,7 +52,7 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesDisplayD
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
-import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
+import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectState;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.ScreenFadeInstance;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
@@ -126,7 +126,7 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 	public ProjectedCoordinates projectedCoordinates;
 	public ActorRecording actorRecording;
 	public final List<Decal> debugDecals;
-	public final List<ScreenEffectInstance> screenEffects;
+	public final List<ScreenEffectState> screenEffects;
 	public Component topInfoBarOverride;
 	public Component bottomInfoBarOverride;
 

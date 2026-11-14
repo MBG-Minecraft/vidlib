@@ -67,7 +67,7 @@ public enum PhysicsParticlesTool implements VidLibTool, PlayerActionHandler {
 		}
 
 		PlayerTarget.of(player).c2s(new TestPhysicsParticlesPayload(new PhysicsParticlesDisplayData(
-			VidLibClientOptions.TEST_PHYSICS_PARTICLE_DATA.get(),
+			VidLibClientOptions.TEST_PHYSICS_PARTICLE_DATA.get().ref(),
 			0L,
 			new PositionedBlockCollection(blocks).ref()
 		)));

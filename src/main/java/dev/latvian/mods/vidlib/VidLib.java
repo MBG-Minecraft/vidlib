@@ -63,7 +63,7 @@ public class VidLib {
 	public static void sync(ServerPlayer player, int syncType) {
 		var session = PlayerSessionData.of(player);
 
-		if (session.worldData.isReplay) {
+		if (session.globalData.isReplay) {
 			return;
 		}
 

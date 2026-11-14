@@ -1,56 +1,39 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
 import dev.latvian.mods.klib.registry.DynamicType;
-import dev.latvian.mods.vidlib.feature.client.CustomPostPassUniforms;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
-public class ScreenEffectRenderer {
+public class ScreenEffectClientInfo<SE extends ScreenEffect> {
 	@Nullable
-	public static ScreenEffectRenderer get(DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type) {
-		return type.getProperty(ScreenEffect.PROPERTY_RENDERER) instanceof ScreenEffectRenderer r ? r : null;
-	}
-
-	public static void applyEffect(List<Identifier> effects) {
-		for (var type : ScreenEffect.REGISTRY.typeList()) {
-			if (type instanceof DynamicType<?, ?> t && t.getProperty(ScreenEffect.PROPERTY_RENDERER) instanceof ScreenEffectRenderer r) {
-				if (r.postEffect != null && r.postEffectEnabled.getAsBoolean()) {
-					effects.add(r.postEffect);
-				}
-			}
-		}
+	public static ScreenEffectClientInfo<?> get(DynamicType<?, ?> type) {
+		return type.getProperty(ScreenEffect.PROPERTY_EXTRACTOR) instanceof ScreenEffectClientInfo<?> r ? r : null;
 	}
 
 	public final DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type;
-	public final List<CustomPostPassUniforms> uniforms;
-	public Identifier postEffect;
-	public BooleanSupplier postEffectEnabled;
+	public ImIcon icon;
+	public String displayName;
+	public Supplier<? extends ScreenEffectState> stateFactory;
+	public ScreenEffectStateExtractor<SE, ? extends ScreenEffectState> stateExtractor;
 
-	public ScreenEffectRenderer(DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type) {
+	public ScreenEffectClientInfo(DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type) {
 		this.type = type;
-		this.uniforms = new ArrayList<>(1);
-		this.postEffect = null;
-		this.postEffectEnabled = () -> true;
+		this.icon = ImIcons.PALETTE;
+		this.displayName = type.key();
 	}
 
-	public void addUniforms(CustomPostPassUniforms uniforms) {
-		this.uniforms.add(uniforms);
+	public void setDisplayInfo(ImIcon icon, String displayName) {
+		this.icon = icon;
+		this.displayName = displayName;
 	}
 
-	public void setPostEffect(Identifier id, BooleanSupplier enabled) {
-		this.postEffect = id;
-		this.postEffectEnabled = enabled;
-	}
-
-	public void update() {
-		for (var uniform : uniforms) {
-			uniform.update();
-		}
+	public <S extends ScreenEffectState> void setState(Supplier<S> stateFactory, ScreenEffectStateExtractor<SE, S> stateExtractor) {
+		this.stateFactory = stateFactory;
+		this.stateExtractor = stateExtractor;
 	}
 
 	/*

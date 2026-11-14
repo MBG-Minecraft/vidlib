@@ -10,27 +10,21 @@ layout(std140) uniform SamplerInfo {
 	vec2 InSize;
 };
 
-layout(std140) uniform FocusedChromaticAberration {
+layout(std140) uniform VidLibFocusedChromaticAberration {
 	float Strength;
-	vec2 Focus;
+	vec2 FocusPos;
+	vec3 Shift;
 };
 
 layout(location = 0) out vec4 fragColor;
 
 void main() {
-	vec2 toCenter = (Focus - (texCoord * 2.0 - 1.0)) * abs(Strength);
+	vec2 toCenter = (FocusPos - (texCoord * 2.0 - 1.0)) * abs(Strength);
 
-	if (Strength > 0.0) {
-		fragColor = vec4(
-				texture(InSampler, texCoord).r,
-				texture(InSampler, texCoord + toCenter).g,
-				texture(InSampler, texCoord + toCenter * 2.0).b,
-				1.0);
-	} else {
-		fragColor = vec4(
-				texture(InSampler, texCoord + toCenter * 2.0).r,
-				texture(InSampler, texCoord + toCenter).g,
-				texture(InSampler, texCoord).b,
-				1.0);
-	}
+	fragColor = vec4(
+			texture(InSampler, texCoord + toCenter * Shift.x).r,
+			texture(InSampler, texCoord + toCenter * Shift.y).g,
+			texture(InSampler, texCoord + toCenter * Shift.z).b,
+			1.0
+	);
 }

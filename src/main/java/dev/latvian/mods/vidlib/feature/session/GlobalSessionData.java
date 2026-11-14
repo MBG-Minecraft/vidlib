@@ -27,6 +27,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,6 +35,14 @@ import java.util.Map;
 import java.util.UUID;
 
 public abstract class GlobalSessionData implements LevelGameTimeProvider {
+	public static GlobalSessionData of(Level level) {
+		return LevelSessionData.of(level).globalData;
+	}
+
+	public static GlobalSessionData of(Player player) {
+		return PlayerSessionData.of(player).globalData;
+	}
+
 	public final Map<ResourceKey<Level>, LevelSessionData<?>> levelMap;
 	public final Map<UUID, PlayerSessionData> playerMap;
 	public final KNumberVariables globalVariables;

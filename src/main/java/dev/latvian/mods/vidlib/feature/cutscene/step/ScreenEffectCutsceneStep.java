@@ -5,9 +5,10 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.registry.Ref;
+import dev.latvian.mods.klib.util.ColorBlendMode;
 import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.ScreenTintEffect;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -26,7 +27,7 @@ public class ScreenEffectCutsceneStep extends CutsceneStep {
 	}
 
 	public ScreenEffectCutsceneStep() {
-		this.effect = new ColorEffect(Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref(), false).ref();
+		this.effect = new ScreenTintEffect(Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref(), ColorBlendMode.MULTIPLICATIVE).ref();
 	}
 
 	@Override

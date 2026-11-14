@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.client;
+package dev.latvian.mods.vidlib.feature.canvas;
 
 import dev.latvian.mods.klib.util.FloatSupplier;
 import net.minecraft.client.renderer.UniformValue;

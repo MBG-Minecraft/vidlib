@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.serialization.Codec;
-import dev.latvian.mods.klib.block.filter.BlockFilter;
-import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.client.UnconfigurableValueSet;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderType;
@@ -31,22 +29,13 @@ public interface VidLibClientOptions {
 		}
 	);
 
-	OptionInstance<Ref<BlockFilter>> ZONE_BLOCK_FILTER = UnconfigurableValueSet.create(
-		"options.vidlib.zone_block_filter",
-		BlockFilter.DATA_TYPE.codec(),
-		OptionInstance.noTooltip(),
-		BlockFilter.ANY,
-		callback -> {
-		}
-	);
-
 	// OptionInstance<ExplosionData> TEST_EXPLOSION = DataKey.PLAYER.buildDefault("options.vidlib.test_explosion", ExplosionData.DATA_TYPE, ExplosionData.DEFAULT);
 
-	OptionInstance<Ref<PhysicsParticleData>> TEST_PHYSICS_PARTICLE_DATA = UnconfigurableValueSet.create(
+	OptionInstance<PhysicsParticleData> TEST_PHYSICS_PARTICLE_DATA = UnconfigurableValueSet.create(
 		"options.vidlib.test_physics_particles.data",
-		PhysicsParticleData.DATA_TYPE.codec(),
+		PhysicsParticleData.DIRECT_CODEC,
 		OptionInstance.noTooltip(),
-		PhysicsParticleData.DEFAULT_VALUE.ref(),
+		PhysicsParticleData.DEFAULT_VALUE,
 		callback -> {
 		}
 	);
@@ -92,10 +81,6 @@ public interface VidLibClientOptions {
 		return ZONE_RENDER_TYPE.get();
 	}
 
-	static Ref<BlockFilter> getZoneBlockFilter() {
-		return ZONE_BLOCK_FILTER.get();
-	}
-
 	static boolean getShowCoordinates() {
 		return SHOW_COORDINATES.get();
 	}
@@ -110,7 +95,6 @@ public interface VidLibClientOptions {
 		accessor.process("vidlib.show_zones", SHOW_ZONES);
 		accessor.process("vidlib.show_zone_outer_bounds", SHOW_ZONE_OUTER_BOUNDS);
 		accessor.process("vidlib.zone_render_type", ZONE_RENDER_TYPE);
-		accessor.process("vidlib.zone_block_filter", ZONE_BLOCK_FILTER);
 		accessor.process("vidlib.show_coordinates", SHOW_COORDINATES);
 		accessor.process("vidlib.lock_gui_scale", LOCK_GUI_SCALE);
 		accessor.process("vidlib.lock_imgui_scroll", LOCK_IMGUI_SCROLL);

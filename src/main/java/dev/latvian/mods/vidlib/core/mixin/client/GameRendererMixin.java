@@ -3,8 +3,8 @@ package dev.latvian.mods.vidlib.core.mixin.client;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.latvian.mods.vidlib.core.api.client.VLGameRenderer;
+import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -121,6 +121,6 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@Inject(method = "update", at = @At("RETURN"))
 	private void vl$update(DeltaTracker deltaTracker, CallbackInfo ci) {
-		ScreenEffectRenderer.applyEffect(requestedPostEffects);
+		Canvas.appendPostEffects(requestedPostEffects);
 	}
 }

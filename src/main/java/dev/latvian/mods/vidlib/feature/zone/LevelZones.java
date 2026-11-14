@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.zone;
 import dev.latvian.mods.klib.math.HitBuilder;
 import dev.latvian.mods.klib.registry.Ref;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -153,7 +152,7 @@ public class LevelZones implements Iterable<ResolvedZone> {
 
 		for (var zone : zones) {
 			if (zone.volume.hit(hit) && hit.hit != null && (result == null || hit.distanceSq < result.distanceSq())) {
-				result = new ZoneHit(zone.ref, zone, hit.hit, hit.distanceSq, hit.direction, BlockPos.containing(hit.hit));
+				result = ZoneHit.from(zone.ref, zone, hit);
 			}
 		}
 
@@ -170,7 +169,7 @@ public class LevelZones implements Iterable<ResolvedZone> {
 
 		for (var zone : fluidZones) {
 			if (zone.volume.hit(hit) && hit.hit != null && (result == null || hit.distanceSq < result.distanceSq())) {
-				result = new ZoneHit(zone.ref, zone, hit.hit, hit.distanceSq, hit.direction, BlockPos.containing(hit.hit));
+				result = ZoneHit.from(zone.ref, zone, hit);
 			}
 		}
 

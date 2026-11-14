@@ -22,6 +22,7 @@ public class ClientLevelSessionData extends LevelSessionData<ClientProps> {
 		var ctx = new KNumberContext(globalData.globalVariables);
 		ctx.updateLevelData(globalData.mc.level);
 		ctx.entity = globalData.mc.player;
+		ctx.delta = globalData.mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		return ctx;
 	}
 }

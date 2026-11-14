@@ -161,6 +161,8 @@ public record PhysicsParticleData(
 		Codec.FLOAT.optionalFieldOf("render_distance", DEFAULT_VALUE.renderDistance).forGetter(PhysicsParticleData::renderDistance)
 	).apply(i, PhysicsParticleData::new));
 
+	public static final Codec<PhysicsParticleData> DIRECT_CODEC = DIRECT_MAP_CODEC.codec();
+
 	public static final StreamCodec<ByteBuf, PhysicsParticleData> DIRECT_STREAM_CODEC = ByteBufCodecs.fromCodecTrusted(RecordCodecBuilder.create(i -> i.group(
 		Codec.FLOAT.optionalFieldOf("d", DEFAULT_VALUE.density).forGetter(PhysicsParticleData::density),
 		Range.CODEC.optionalFieldOf("l", DEFAULT_VALUE.lifespan).forGetter(PhysicsParticleData::lifespan),

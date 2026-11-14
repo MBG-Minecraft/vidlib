@@ -14,6 +14,10 @@ import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.auto.EntityRendererHolder;
+import dev.latvian.mods.vidlib.feature.canvas.AngledChromaticAberrationCanvas;
+import dev.latvian.mods.vidlib.feature.canvas.CanvasRegistryEvent;
+import dev.latvian.mods.vidlib.feature.canvas.DepthOfFieldCanvas;
+import dev.latvian.mods.vidlib.feature.canvas.FocusedChromaticAberrationCanvas;
 import dev.latvian.mods.vidlib.feature.client.VLWorldRenderState;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
@@ -22,6 +26,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresetLoader;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.RainbowItemTint;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.ClientModListPayload;
@@ -54,9 +59,14 @@ import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVPropRenderState;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRenderingRegistryEvent;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberrationEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.DepthOfFieldEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.FocusedChromaticAberrationEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.renderer.AngledChromaticAberrationEffectRenderer;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.renderer.FocusedChromaticAberrationEffectRenderer;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.OverlayColorEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.RippleEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.ScreenTintEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.renderer.AngledChromaticAberrationEffectState;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.renderer.DepthOfFieldEffectState;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.renderer.FocusedChromaticAberrationEffectState;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
@@ -213,9 +223,40 @@ public class VidLibClientEventHandler {
 	}
 
 	@SubscribeEvent
+	public static void canvasRegistry(CanvasRegistryEvent event) {
+		event.register(DepthOfFieldCanvas.CANVAS);
+		event.register(FocusedChromaticAberrationCanvas.CANVAS);
+		event.register(AngledChromaticAberrationCanvas.CANVAS);
+	}
+
+	@SubscribeEvent
 	public static void screenEffectRenderingRegistry(ScreenEffectRenderingRegistryEvent event) {
-		event.register(FocusedChromaticAberrationEffect.TYPE, FocusedChromaticAberrationEffectRenderer::build);
-		event.register(AngledChromaticAberrationEffect.TYPE, AngledChromaticAberrationEffectRenderer::build);
+		// event.register(BlurEffect.TYPE, ImIcons.BLUR, "Blur");
+		// event.register(AngledBlurEffect.TYPE, ImIcons.BLUR, "Angled Blur");
+		// event.register(ZoomBlurEffect.TYPE, ImIcons.BLUR, "Zoom Blur");
+		event.register(ScreenTintEffect.TYPE, ImIcons.PALETTE, "Screen Tint"); // Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref(), ColorBlendMode.MULTIPLICATIVE
+		event.register(OverlayColorEffect.TYPE, ImIcons.PALETTE, "Overlay Color"); // Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref())
+		event.register(FocusedChromaticAberrationEffect.TYPE, ImIcons.BLUR, "Focused Chromatic Aberration", FocusedChromaticAberrationEffectState::new, FocusedChromaticAberrationEffectState::extract);
+		event.register(AngledChromaticAberrationEffect.TYPE, ImIcons.BLUR, "Angled Chromatic Aberration", AngledChromaticAberrationEffectState::new, AngledChromaticAberrationEffectState::extract);
+		event.register(DepthOfFieldEffect.TYPE, ImIcons.APERTURE, "Depth of Field", DepthOfFieldEffectState::new, DepthOfFieldEffectState::extract);
+		event.register(RippleEffect.TYPE, ImIcons.ANIMATION, "Ripple");
+		// event.register(ScreenShakeEffect.TYPE, ImIcons.ANIMATION, "Screen Shake");
+		// event.register(ColorBurnEffect.TYPE, ImIcons.FIRE, "Color Burn");
+		// event.register(CRTEffect.TYPE, ImIcons.HIVE, "CRT");
+
+		/*
+		add(graphics, ImIcons.BLUR, "blur", "Blur", null);
+		add(graphics, ImIcons.BLUR, "a-blur", "Angled Blur", null);
+		add(graphics, ImIcons.BLUR, "z-blur", "Zoom Blur", null);
+		add(graphics, ImIcons.BLUR, "dof", "Depth of Field", null);
+
+		add(graphics, ImIcons.PALETTE, "color", "Color", () -> new ColorEffect.Inst(Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref(), false));
+		add(graphics, ImIcons.PALETTE, "overlay-color", "Overlay Color", () -> new ColorOverlayEffect.Inst(Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref()));
+		add(graphics, ImIcons.STACKS, "f-ca", "Focused Chromatic Aberration", () -> new FocusedChromaticAberrationEffect.Inst(KNumber.of(0.1D).ref(), FocusPoint.Screen.CENTER));
+		add(graphics, ImIcons.STACKS, "a-ca", "Angled Chromatic Aberration", () -> new AngledChromaticAberrationEffect.Inst(KNumber.of(0.1D).ref(), KNumber.ZERO));
+		add(graphics, ImIcons.FIRE, "color-burn", "Color Burn", null);
+		add(graphics, ImIcons.HIVE, "crt", "CRT", null);
+		 */
 	}
 
 	@SubscribeEvent

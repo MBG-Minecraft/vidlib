@@ -2,97 +2,38 @@ package dev.latvian.mods.vidlib.feature.screeneffect.effect;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
+import dev.latvian.mods.klib.codec.JOMLCodecs;
+import dev.latvian.mods.klib.codec.JOMLStreamCodecs;
+import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.knumber.KNumber;
-import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
-import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.screeneffect.FocusPoint;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectInstance;
-import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectShaderType;
-import dev.latvian.mods.vidlib.math.knumber.KNumberFloatInstance;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec2;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
-public record FocusedChromaticAberrationEffect(Ref<KNumber> strength, FocusPoint focus) implements ScreenEffect {
+public record FocusedChromaticAberrationEffect(FocusPoint focus, Ref<KNumber> strength, Vector3fc shift) implements ScreenEffect {
+	public static final Vector3fc DEFAULT_SHIFT = new Vector3f(0F, 0.5F, 1F);
+
 	public static final DynamicType<RegistryFriendlyByteBuf, ScreenEffect> TYPE = DynamicType.create(
 		"focused_chromatic_aberration",
 		RecordCodecBuilder.mapCodec(instance -> instance.group(
-			KNumber.CODEC.fieldOf("strength").forGetter(FocusedChromaticAberrationEffect::strength),
-			FocusPoint.CODEC.fieldOf("focus").forGetter(FocusedChromaticAberrationEffect::focus)
+			FocusPoint.CODEC.optionalFieldOf("focus", FocusPoint.Screen.CENTER).forGetter(FocusedChromaticAberrationEffect::focus),
+			KNumber.CODEC.optionalFieldOf("strength", KNumber.of(0.1D).ref()).forGetter(FocusedChromaticAberrationEffect::strength),
+			JOMLCodecs.VEC3C.optionalFieldOf("shift", DEFAULT_SHIFT).forGetter(FocusedChromaticAberrationEffect::shift)
 		).apply(instance, FocusedChromaticAberrationEffect::new)),
 		CompositeStreamCodec.of(
-			KNumber.STREAM_CODEC, FocusedChromaticAberrationEffect::strength,
-			FocusPoint.STREAM_CODEC, FocusedChromaticAberrationEffect::focus,
+			KLibStreamCodecs.optional(FocusPoint.STREAM_CODEC, FocusPoint.Screen.CENTER), FocusedChromaticAberrationEffect::focus,
+			KLibStreamCodecs.optional(KNumber.STREAM_CODEC, KNumber.of(0.1D).ref()), FocusedChromaticAberrationEffect::strength,
+			KLibStreamCodecs.optional(JOMLStreamCodecs.VEC3C, DEFAULT_SHIFT), FocusedChromaticAberrationEffect::shift,
 			FocusedChromaticAberrationEffect::new
 		)
 	);
 
-	public static class Inst extends ScreenEffectInstance {
-		public final KNumberFloatInstance strength;
-		public FocusPoint vFocus;
-
-		private Vec2 focus, prevFocus;
-
-		public Inst(Ref<KNumber> strength, FocusPoint vFocus) {
-			this.strength = new KNumberFloatInstance(strength);
-			this.vFocus = vFocus;
-		}
-
-		@Override
-		public ScreenEffectShaderType shaderType() {
-			return ScreenEffectShaderType.FOCUSED_CHROMATIC_ABERRATION;
-		}
-
-		@Override
-		public void snap() {
-			super.snap();
-			strength.snap();
-			prevFocus = focus;
-		}
-
-		@Override
-		public void update(KNumberContext ctx) {
-			strength.update(ctx);
-			focus = vFocus.get(ctx);
-		}
-
-		@Override
-		public void upload(IntArrayList arr, float delta) {
-			arr.add(Float.floatToIntBits(strength.get(delta))); // 1
-			arr.add(Float.floatToIntBits(Mth.lerp(delta, prevFocus.x, focus.x))); // 2
-			arr.add(Float.floatToIntBits(Mth.lerp(delta, prevFocus.y, focus.y))); // 3
-		}
-
-		@Override
-		public void imgui(ImGraphics graphics) {
-			super.imgui(graphics);
-			strength.imgui(graphics, "Strength", "strength");
-		}
-	}
-
-	@Override
-	public String getName() {
-		return "Focused Chromatic Aberration";
-	}
-
-	@Override
-	public ImIcon getIcon() {
-		return ImIcons.BLUR;
-	}
-
 	@Override
 	public DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type() {
 		return TYPE;
-	}
-
-	@Override
-	public ScreenEffectInstance createInstance() {
-		return new Inst(strength, focus);
 	}
 }

@@ -12,6 +12,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec2;
+import org.joml.Matrix4fc;
 
 import java.util.function.Function;
 
@@ -26,7 +27,7 @@ public sealed interface FocusPoint permits FocusPoint.Screen, FocusPoint.World {
 		v -> v instanceof Screen s ? Either.left(s) : Either.right((World) v)
 	);
 
-	Vec2 get(KNumberContext ctx);
+	Vec2 get(KNumberContext ctx, Matrix4fc worldMatrix);
 
 	record Screen(Ref<KNumber> x, Ref<KNumber> y) implements FocusPoint {
 		public static final Codec<Screen> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -40,11 +41,11 @@ public sealed interface FocusPoint permits FocusPoint.Screen, FocusPoint.World {
 			Screen::new
 		);
 
-		public static final Screen CENTER = new Screen(KNumber.HALF, KNumber.HALF);
+		public static final Screen CENTER = new Screen(KNumber.ZERO, KNumber.ZERO);
 
 		@Override
-		public Vec2 get(KNumberContext ctx) {
-			return new Vec2((float) x.value().getOr(ctx, 0D), (float) y.value().getOr(ctx, 0D));
+		public Vec2 get(KNumberContext ctx, Matrix4fc worldMatrix) {
+			return new Vec2(x.value().getFloatOr(ctx, 0F), y.value().getFloatOr(ctx, 0F));
 		}
 	}
 
@@ -59,7 +60,7 @@ public sealed interface FocusPoint permits FocusPoint.Screen, FocusPoint.World {
 		);
 
 		@Override
-		public Vec2 get(KNumberContext ctx) {
+		public Vec2 get(KNumberContext ctx, Matrix4fc worldMatrix) {
 			return Vec2.ZERO;
 		}
 	}

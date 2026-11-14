@@ -14,16 +14,21 @@
 			],
 			"output": "swap",
 			"uniforms": {
-				"FocusedChromaticAberration": [
+				"VidLibFocusedChromaticAberration": [
 					{
 						"name": "Strength",
 						"type": "float",
 						"value": 0.0
 					},
 					{
-						"name": "Focus",
+						"name": "FocusPos",
 						"type": "vec2",
 						"value": [0.0, 0.0]
+					},
+					{
+						"name": "Shift",
+						"type": "vec3",
+						"value": [0.0, 0.5, 1.0]
 					}
 				]
 			}

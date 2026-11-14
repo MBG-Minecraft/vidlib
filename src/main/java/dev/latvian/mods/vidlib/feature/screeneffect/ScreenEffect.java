@@ -7,11 +7,12 @@ import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberrationEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorOverlayEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.DepthOfFieldEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.FocusedChromaticAberrationEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.OverlayColorEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.RippleEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.effect.ScreenTintEffect;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -22,23 +23,19 @@ public interface ScreenEffect extends CustomRegistryValue<RegistryFriendlyByteBu
 	StreamCodec<RegistryFriendlyByteBuf, Ref<ScreenEffect>> STREAM_CODEC = REGISTRY.streamCodec();
 	DataType<Ref<ScreenEffect>> DATA_TYPE = REGISTRY.dataType();
 
-	int PROPERTY_RENDERER = DynamicType.newPropertyId();
+	int PROPERTY_EXTRACTOR = DynamicType.newPropertyId();
 
 	static void builtInTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, ScreenEffect> registry) {
-		registry.register(ColorEffect.TYPE);
-		registry.register(ColorOverlayEffect.TYPE);
+		registry.register(ScreenTintEffect.TYPE);
+		registry.register(OverlayColorEffect.TYPE);
 		registry.register(FocusedChromaticAberrationEffect.TYPE);
 		registry.register(AngledChromaticAberrationEffect.TYPE);
+		registry.register(DepthOfFieldEffect.TYPE);
+		registry.register(RippleEffect.TYPE);
 	}
 
 	@Override
 	default CustomRegistry<RegistryFriendlyByteBuf, ScreenEffect> getRegistry() {
 		return REGISTRY;
 	}
-
-	String getName();
-
-	ImIcon getIcon();
-
-	ScreenEffectInstance createInstance();
 }

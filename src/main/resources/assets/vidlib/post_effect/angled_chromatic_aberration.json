@@ -14,7 +14,7 @@
 			],
 			"output": "swap",
 			"uniforms": {
-				"AngledChromaticAberration": [
+				"VidLibAngledChromaticAberration": [
 					{
 						"name": "Strength",
 						"type": "float",
@@ -24,6 +24,11 @@
 						"name": "Angle",
 						"type": "float",
 						"value": 0.0
+					},
+					{
+						"name": "Shift",
+						"type": "vec3",
+						"value": [-1.0, 0.0, 1.0]
 					}
 				]
 			}

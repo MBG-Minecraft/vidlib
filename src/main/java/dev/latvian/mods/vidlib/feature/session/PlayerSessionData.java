@@ -38,7 +38,7 @@ public class PlayerSessionData implements Comparable<PlayerSessionData> {
 		return VLPlatformHelper.INSTANCE.getPlayerData(player);
 	}
 
-	public final GlobalSessionData worldData;
+	public final GlobalSessionData globalData;
 	public final UUID uuid;
 	public final DataMap<PlayerSessionData> dataMap;
 	public final long startTime;
@@ -47,10 +47,10 @@ public class PlayerSessionData implements Comparable<PlayerSessionData> {
 	public List<ResolvedZone> zonesIn;
 	public Set<ZoneTag> zoneTagsIn;
 
-	public PlayerSessionData(GlobalSessionData worldData, UUID uuid) {
-		this.worldData = worldData;
+	public PlayerSessionData(GlobalSessionData globalData, UUID uuid) {
+		this.globalData = globalData;
 		this.uuid = uuid;
-		this.dataMap = new DataMap<>(worldData, this, DataKey.PLAYER);
+		this.dataMap = new DataMap<>(globalData, this, DataKey.PLAYER);
 		this.startTime = System.currentTimeMillis();
 		this.prevInput = PlayerInput.NONE;
 		this.input = PlayerInput.NONE;
@@ -78,7 +78,7 @@ public class PlayerSessionData implements Comparable<PlayerSessionData> {
 
 		CustomRegistry.syncAll(player, packets);
 
-		packets.s2c(new SyncGlobalNumberVariablesPayload(worldData.globalVariables));
+		packets.s2c(new SyncGlobalNumberVariablesPayload(globalData.globalVariables));
 
 		if (syncType > 0) {
 			player.refreshDisplayName();
@@ -88,11 +88,11 @@ public class PlayerSessionData implements Comparable<PlayerSessionData> {
 			}
 		}
 
-		worldData.sync(packets);
+		globalData.sync(packets);
 
 		dataMap.syncAll(packets, SyncPlayerDataPayload::new);
 
-		for (var s : worldData.playerMap.values()) {
+		for (var s : globalData.playerMap.values()) {
 			if (s != this) {
 				packets.s2c(new SyncPlayerInputToClient(s.uuid, s.input));
 				s.dataMap.syncAll(packets, SyncPlayerDataPayload::new);

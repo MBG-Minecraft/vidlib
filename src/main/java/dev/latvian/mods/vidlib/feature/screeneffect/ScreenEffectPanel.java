@@ -1,22 +1,14 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
-import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.knumber.KNumber;
 import dev.latvian.mods.klib.math.KMath;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
-import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberrationEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.ColorOverlayEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.FocusedChromaticAberrationEffect;
-import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import imgui.ImGui;
-
-import java.util.function.Supplier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 
 public class ScreenEffectPanel extends Panel {
 	public static final ScreenEffectPanel INSTANCE = new ScreenEffectPanel();
@@ -27,33 +19,38 @@ public class ScreenEffectPanel extends Panel {
 		super("screen-effects", "Screen Effects");
 	}
 
-	private void add(ImGraphics graphics, ImIcon icon, String id, String tooltip, Supplier<ScreenEffectInstance> effect) {
-		if (effect == null) {
+	private void add(ImGraphics graphics, DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type, ScreenEffectClientInfo<?> clientInfo) {
+		if (clientInfo.stateFactory == null) {
 			ImGui.beginDisabled();
 		}
 
-		if (ImGui.button(icon + "###add-" + id)) {
-			if (effect != null) {
+		if (ImGui.button(clientInfo.icon + "###add-" + type.key())) {
+			if (clientInfo.stateFactory != null) {
+				/*
 				var inst = effect.get();
 				inst.duration = duration[0];
 				inst.name = tooltip;
 				var ctx = LevelSessionData.of(graphics.mc.level).createGlobalContext().fork(inst.variables);
 				ctx.progress = 0D;
-				inst.update(ctx);
-				inst.snap();
+				inst.extract(ctx);
 				graphics.session.screenEffects.add(inst);
+				 */
 			}
 		}
 
-		if (effect == null) {
+		if (clientInfo.stateFactory == null) {
 			ImGui.endDisabled();
 		}
 
-		graphics.hoveredTooltip(tooltip);
+		graphics.hoveredTooltip(clientInfo.displayName);
 	}
 
 	@Override
 	public void content(ImGraphics graphics) {
+		if (graphics.session == null) {
+			return;
+		}
+
 		ImGui.pushItemWidth(-1F);
 
 		ImGui.alignTextToFramePadding();
@@ -62,29 +59,20 @@ public class ScreenEffectPanel extends Panel {
 		ImGui.sliderInt("###duration", duration, 0, 1200, KMath.NumberFormat.VERY_SHORT.format(duration[0] / 20F) + " s");
 		graphics.hoveredTooltip("Duration");
 
-		add(graphics, ImIcons.BLUR, "blur", "Blur", null);
-		ImGui.sameLine();
-		add(graphics, ImIcons.BLUR, "a-blur", "Angled Blur", null);
-		ImGui.sameLine();
-		add(graphics, ImIcons.BLUR, "z-blur", "Zoom Blur", null);
-		ImGui.sameLine();
-		add(graphics, ImIcons.BLUR, "dof", "Depth of Field", null);
-		ImGui.sameLine();
-		add(graphics, ImIcons.ANIMATION, "ripple", "Ripple", null);
-		ImGui.sameLine();
-		add(graphics, ImIcons.ANIMATION, "screen-shake", "Screen Shake", null);
+		int count = 0;
 
-		add(graphics, ImIcons.PALETTE, "color", "Color", () -> new ColorEffect.Inst(Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref(), false));
-		ImGui.sameLine();
-		add(graphics, ImIcons.PALETTE, "overlay-color", "Overlay Color", () -> new ColorOverlayEffect.Inst(Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref()));
-		ImGui.sameLine();
-		add(graphics, ImIcons.STACKS, "f-ca", "Focused Chromatic Aberration", () -> new FocusedChromaticAberrationEffect.Inst(KNumber.of(0.1D).ref(), FocusPoint.Screen.CENTER));
-		ImGui.sameLine();
-		add(graphics, ImIcons.STACKS, "a-ca", "Angled Chromatic Aberration", () -> new AngledChromaticAberrationEffect.Inst(KNumber.of(0.1D).ref(), KNumber.ZERO));
-		ImGui.sameLine();
-		add(graphics, ImIcons.FIRE, "color-burn", "Color Burn", null);
-		ImGui.sameLine();
-		add(graphics, ImIcons.HIVE, "crt", "CRT", null);
+		for (var type : ScreenEffect.REGISTRY.typeList()) {
+			var clientInfo = type instanceof DynamicType<?, ?> dynamicType ? ScreenEffectClientInfo.get(dynamicType) : null;
+
+			if (clientInfo != null) {
+				if (count % 5 != 0) {
+					ImGui.sameLine();
+				}
+
+				add(graphics, (DynamicType<RegistryFriendlyByteBuf, ScreenEffect>) type, clientInfo);
+				count++;
+			}
+		}
 
 		ImGui.separator();
 

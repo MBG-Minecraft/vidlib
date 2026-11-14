@@ -1,27 +1,15 @@
 package dev.latvian.mods.vidlib.feature.screeneffect;
 
-import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 
-public abstract class ScreenEffectInstance {
+public class ScreenEffectState {
+	public ScreenEffect effect;
 	public int tick = 0;
 	public int duration = 1;
 	public boolean paused = false;
 	public String name = "Unknown";
 	public KNumberVariables variables = null;
-
-	public abstract ScreenEffectShaderType shaderType();
-
-	public void snap() {
-	}
-
-	public void update(KNumberContext ctx) {
-	}
-
-	public void upload(IntArrayList arr, float delta) {
-	}
 
 	public void imgui(ImGraphics graphics) {
 	}
