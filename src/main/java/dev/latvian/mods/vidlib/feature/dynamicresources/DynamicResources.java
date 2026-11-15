@@ -53,16 +53,17 @@ public record DynamicResources(
 			VidLib.LOGGER.info("Loading " + dynamicResourcesId);
 			var path = PlatformHelper.INSTANCE.findFile(packType, dynamicResourcesId.withSuffix(".json"));
 
-			if (path != null) {
-				try {
-					var json = JsonUtils.read(path);
-					var dynamicResources = CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
-					load(packType, packResources, dynamicResources);
-				} catch (Exception ex) {
-					throw new RuntimeException("Failed to load dynamic resources " + dynamicResourcesId, ex);
-				}
-			} else {
-				throw new RuntimeException("Failed to load dynamic resources " + dynamicResourcesId + ": File not found");
+			if (path == null) {
+				VidLib.LOGGER.warn("Dynamic resource file not found for {} — skipping", dynamicResourcesId);
+				return;
+			}
+
+			try {
+				var json = JsonUtils.read(path);
+				var dynamicResources = CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+				load(packType, packResources, dynamicResources);
+			} catch (Exception ex) {
+				VidLib.LOGGER.error("Failed to load dynamic resources {}", dynamicResourcesId, ex);
 			}
 		});
 
