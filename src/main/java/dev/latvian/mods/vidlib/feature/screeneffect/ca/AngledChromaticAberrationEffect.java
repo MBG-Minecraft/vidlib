@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.screeneffect.effect;
+package dev.latvian.mods.vidlib.feature.screeneffect.ca;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;

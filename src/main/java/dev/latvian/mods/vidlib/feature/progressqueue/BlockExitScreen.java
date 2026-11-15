@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.progressqueue;
 
+import com.mojang.blaze3d.platform.Window;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -32,8 +33,9 @@ public class BlockExitScreen extends ConfirmScreen {
 		return false;
 	}
 
-	public static boolean cancelExit(Minecraft mc) {
-		return !bypass && (mc.gui.screen() instanceof BlockExitScreen || mc.level != null || ProgressQueue.isBlockingExit());
+	public static boolean preventExit(Window window) {
+		var mc = Minecraft.getInstance();
+		return window == mc.getWindow() && preventExit(mc, true);
 	}
 
 	private static void handle(boolean confirm) {

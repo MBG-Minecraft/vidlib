@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 
+import dev.latvian.mods.vidlib.feature.canvas.DepthOfFieldCanvas;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.MenuItem;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
@@ -18,33 +19,7 @@ public class DepthOfFieldPanel extends Panel {
 	@Override
 	public void content(ImGraphics graphics) {
 		ImGui.pushItemWidth(-1F);
-		boolean update = false;
-
-		if (ImGui.checkbox("Override", DepthOfField.OVERRIDE_ENABLED) && DepthOfField.OVERRIDE_ENABLED.get()) {
-			if (graphics.player != null) {
-				/*
-				var pos = KVector.following(graphics.player, PositionType.EYES);
-				builder.set(DepthOfField.OVERRIDE.withFocus(pos.ref()));
-				builder.focus.set(pos);
-				update = true;
-				 */
-			}
-		}
-
-		if (DepthOfField.OVERRIDE_ENABLED.get()) {
-			/*if ((builder.imgui(graphics).isAny() || update) && builder.isValid()) {
-				DepthOfField.OVERRIDE = builder.build();
-			}
-			 */
-		}
-
-		ImGui.checkbox("Debug", DepthOfField.DEBUG_ENABLED);
-
-		if (DepthOfField.DEBUG_ENABLED.get()) {
-			DepthOfField.DEBUG_NEAR_COLOR.imguiKey(graphics, "Near Color", "near-color");
-			DepthOfField.DEBUG_FAR_COLOR.imguiKey(graphics, "Far Color", "far-color");
-		}
-
+		DepthOfFieldCanvas.imgui(graphics);
 		ImGui.popItemWidth();
 	}
 }

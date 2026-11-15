@@ -26,8 +26,9 @@ import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueueImGui;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
-import dev.latvian.mods.vidlib.feature.screeneffect.chromaticaberration.ChromaticAberrationPanel;
+import dev.latvian.mods.vidlib.feature.screeneffect.ca.ChromaticAberrationPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
+import dev.latvian.mods.vidlib.feature.screeneffect.ripple.RipplePanel;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.feature.sound.SoundEventImBuilder;
@@ -70,7 +71,7 @@ public class BuiltInImGui {
 		if (!graphics.inGame) {
 			list.add(MenuItem.SEPARATOR);
 
-			list.add(MenuItem.item(ImIcons.ACCOUNT, ColoredText.error("Link Profile"), g -> {
+			list.add(MenuItem.item(ImIcons.ACCOUNT, ColoredText.error("Link Profile"), _ -> {
 				var session = HubClientSession.CURRENT;
 
 				if (session.user == null) {
@@ -95,8 +96,8 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.TEXT_DOCUMENT, "Notes", NotePanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.SLASH, "Command History", CommandHistoryPanel.INSTANCE));
 		list.add(MenuItem.item(ImIcons.TIMELAPSE, "Server Stopwatch", GlobalStopwatchPanel.INSTANCE).enabled(graphics.inGame));
-		list.add(MenuItem.item(ImIcons.TIMELAPSE, "New Stopwatch", g -> StopwatchPanel.openNew()));
-		list.add(MenuItem.item(ImIcons.MUSIC_NOTE, "Sounds", BuiltInImGui.showSounds != null, g -> BuiltInImGui.showSounds = false));
+		list.add(MenuItem.item(ImIcons.TIMELAPSE, "New Stopwatch", _ -> StopwatchPanel.openNew()));
+		list.add(MenuItem.item(ImIcons.MUSIC_NOTE, "Sounds", BuiltInImGui.showSounds != null, _ -> BuiltInImGui.showSounds = false));
 		list.add(MenuItem.SEPARATOR);
 		list.add(MenuItem.item(ImIcons.CAMERA, "Cutscene Builder", CutsceneBuilderPanel.INSTANCE).enabled(graphics.isAdmin));
 		list.add(MenuItem.item(ImIcons.PAW, "Entity Explorer", EntityExplorerPanel.INSTANCE).enabled(graphics.isAdmin));
@@ -111,21 +112,26 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.WRENCH, "Server Data", ServerDataConfigPanel.INSTANCE).enabled(graphics.isAdmin));
 
 		if (graphics.mc.level != null) {
-			list.add(MenuItem.item(ImIcons.WRENCH, "Level Data (" + graphics.mc.level.dimension().identifier() + ")", g1 -> new LevelDataConfigPanel(graphics.mc.level.dimension(), LevelSessionData.of(graphics.mc.level).dataMap).open()).enabled(graphics.isAdmin));
+			list.add(MenuItem.item(ImIcons.WRENCH, "Level Data (" + graphics.mc.level.dimension().identifier() + ")", _ -> new LevelDataConfigPanel(graphics.mc.level.dimension(), LevelSessionData.of(graphics.mc.level).dataMap).open()).enabled(graphics.isAdmin));
 		}
 
 		if (graphics.player != null) {
-			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", g1 -> new PlayerDataConfigPanel(new NameAndId(graphics.player.getGameProfile()), PlayerSessionData.of(graphics.player).dataMap).open()).enabled(graphics.isAdmin));
+			list.add(MenuItem.item(ImIcons.WRENCH, "Player Data (Self)", _ -> new PlayerDataConfigPanel(new NameAndId(graphics.player.getGameProfile()), PlayerSessionData.of(graphics.player).dataMap).open()).enabled(graphics.isAdmin));
 		}
 
 		// list.add(ClientAtmosphere.MENU_ITEM.enabled(graphics.isAdmin));
-		list.add(DepthOfFieldPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
-		list.add(ChromaticAberrationPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
+
+		list.add(MenuItem.menu(ImIcons.ANIMATION, "Legacy Screen Effects", _ -> List.of(
+			DepthOfFieldPanel.MENU_ITEM,
+			ChromaticAberrationPanel.MENU_ITEM,
+			RipplePanel.MENU_ITEM
+		)).enabled(graphics.isSinglePlayer));
+
 		list.add(FluidPlanePanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(WorldBorderPanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 		list.add(MapTextureOverridePanel.MENU_ITEM.enabled(graphics.isSinglePlayer));
 
-		list.add(MenuItem.menu(ImIcons.VISIBLE, "Level of Detail", (g1, menuItems) -> {
+		list.add(MenuItem.menu(ImIcons.VISIBLE, "Level of Detail", (_, menuItems) -> {
 			menuItems.add(MenuItem.menu(ImIcons.SHIELD, "Player Armor", LevelOfDetailValue.PLAYER_ARMOR));
 			menuItems.add(MenuItem.item(ImIcons.SHIELD, "Player Headwear", MiscClientUtils.PLAYER_HEADWEAR).remainOpen(true));
 			menuItems.add(MenuItem.menu(ImIcons.SWORDS, "Held Item", LevelOfDetailValue.HELD_ITEM));
@@ -147,6 +153,7 @@ public class BuiltInImGui {
 	public static final MenuItem DEBUG = MenuItem.menu(ImIcons.BUG, "Debug", (graphics, list) -> {
 		list.add(MenuItem.item(ImIcons.RELOAD, "Reload Assets", g -> g.mc.reloadResourcePacks()));
 		list.add(MenuItem.item(ImIcons.RELOAD, "Reload Data", g -> g.mc.runClientCommand("reload")).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.RELOAD, "Reload Shaders", g -> MiscClientUtils.reloadShaders(g.mc)));
 
 		list.add(MenuItem.SEPARATOR);
 
@@ -159,8 +166,6 @@ public class BuiltInImGui {
 				camera.captureFrustum();
 			}
 		}).enabled(graphics.inGame));
-
-		list.add(MenuItem.item(ImIcons.RELOAD, "Reload Shaders", g -> MiscClientUtils.reloadShaders(g.mc)));
 
 		list.add(MenuItem.item(ImIcons.STOP, "Stop all Sounds", g -> g.mc.getSoundManager().stop()));
 
@@ -238,9 +243,9 @@ public class BuiltInImGui {
 		list.add(MenuItem.item(ImIcons.FLAG, "Props", ClientProps.VISIBLE).enabled(graphics.isAdmin));
 
 		if (ClientProps.VISIBLE.get()) {
-			list.add(MenuItem.menu(ImIcons.FLAG, "Prop Types", (graphics2, propTypes) -> {
+			list.add(MenuItem.menu(ImIcons.FLAG, "Prop Types", (_, propTypes) -> {
 				for (var type : PropType.SORTED.get()) {
-					propTypes.add(MenuItem.item(type.id().toString(), !ClientProps.HIDDEN_PROP_TYPES.contains(type), graphics3 -> {
+					propTypes.add(MenuItem.item(type.id().toString(), !ClientProps.HIDDEN_PROP_TYPES.contains(type), _ -> {
 						if (ClientProps.HIDDEN_PROP_TYPES.contains(type)) {
 							ClientProps.HIDDEN_PROP_TYPES.remove(type);
 						} else {
@@ -257,7 +262,7 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.SEPARATOR);
 
-		list.add(MenuItem.item(ImIcons.LOCATION, "Coordinates", VidLibClientOptions.getShowCoordinates(), g -> VidLibClientOptions.setShowCoordinates(!VidLibClientOptions.getShowCoordinates())).enabled(graphics.isAdmin));
+		list.add(MenuItem.item(ImIcons.LOCATION, "Coordinates", VidLibClientOptions.getShowCoordinates(), _ -> VidLibClientOptions.setShowCoordinates(!VidLibClientOptions.getShowCoordinates())).enabled(graphics.isAdmin));
 
 		NeoForge.EVENT_BUS.post(new AdminPanelEvent.ShowDropdown(graphics, list));
 	}).remainOpen(true);

@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.screeneffect.effect;
+package dev.latvian.mods.vidlib.feature.screeneffect.dof;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -7,8 +7,6 @@ import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldBlurMode;
-import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldShape;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 

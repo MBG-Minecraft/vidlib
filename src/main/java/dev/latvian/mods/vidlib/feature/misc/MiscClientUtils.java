@@ -11,7 +11,9 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class MiscClientUtils {
@@ -37,8 +40,15 @@ public class MiscClientUtils {
 	));
 
 	public static void reloadShaders(Minecraft mc) {
-		mc.reloadResourcePacks().thenRunAsync(() -> {
-			mc.player.sendSystemMessage(Component.literal("Shaders reloaded!").withStyle(ChatFormatting.GREEN));
+		mc.getShaderManager().reload(
+			new PreparableReloadListener.SharedState(mc.getResourceManager()),
+			Util.backgroundExecutor().forName("resourceLoad"),
+			CompletableFuture::completedFuture,
+			mc
+		).thenRunAsync(() -> {
+			if (mc.player != null) {
+				mc.player.sendSystemMessage(Component.literal("Shaders reloaded!").withStyle(ChatFormatting.GREEN));
+			}
 		}, mc);
 	}
 

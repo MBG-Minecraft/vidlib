@@ -1,0 +1,92 @@
+{
+	"targets": {
+		"swap": {}
+	},
+	"passes": [
+		{
+			"vertex_shader": "minecraft:core/screenquad",
+			"fragment_shader": "vidlib:post/depth_of_field",
+			"inputs": [
+				{
+					"sampler_name": "In",
+					"target": "minecraft:main"
+				},
+				{
+					"sampler_name": "InDepth",
+					"target": "minecraft:main",
+					"use_depth_buffer": true
+				}
+			],
+			"output": "swap",
+			"uniforms": {
+				"VidLibDepthOfField": [
+					{
+						"name": "InverseViewProjectionMat",
+						"type": "matrix4x4",
+						"value": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+					},
+					{
+						"name": "FocusPos",
+						"type": "vec3",
+						"value": [0.0, 0.0, 0.0]
+					},
+					{
+						"name": "FocusRange",
+						"type": "float",
+						"value": 0.0
+					},
+					{
+						"name": "BlurRange",
+						"type": "float",
+						"value": 0.0
+					},
+					{
+						"name": "Strength",
+						"type": "float",
+						"value": 0.0
+					},
+					{
+						"name": "Shape",
+						"type": "int",
+						"value": 0
+					},
+					{
+						"name": "BlurMode",
+						"type": "int",
+						"value": 0
+					},
+					{
+						"name": "DebugNearCol",
+						"type": "vec4",
+						"value": [0.0, 1.0, 0.0, 0.5]
+					},
+					{
+						"name": "DebugFarCol",
+						"type": "vec4",
+						"value": [1.0, 0.0, 0.0, 0.5]
+					}
+				]
+			}
+		},
+		{
+			"vertex_shader": "minecraft:core/screenquad",
+			"fragment_shader": "minecraft:post/blit",
+			"inputs": [
+				{
+					"sampler_name": "In",
+					"target": "swap"
+				}
+			],
+			"output": "minecraft:main",
+			"uniforms": {
+				"BlitConfig": [
+					{
+						"name": "ColorModulate",
+						"type": "vec4",
+						"value": [1.0, 1.0, 1.0, 1.0]
+					}
+				]
+			}
+		}
+	]
+}

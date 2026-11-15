@@ -1,9 +1,11 @@
 package dev.latvian.mods.vidlib.feature.canvas;
 
 import dev.latvian.mods.klib.util.FloatSupplier;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.UniformValue;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4f;
@@ -14,14 +16,14 @@ import java.util.function.Supplier;
 public record UniformSupplier(String name, Supplier<? extends UniformValue> value) {
 	public static UniformSupplier of(String name, FloatSupplier value) {
 		var p = new float[]{value.getAsFloat()};
-		var v = new UniformValue.FloatUniform[]{new UniformValue.FloatUniform(p[0])};
+		var v = new UniformValue[]{null};
 
 		return new UniformSupplier(name, () -> {
-			float pv = value.getAsFloat();
+			var nv = value.getAsFloat();
 
-			if (pv != p[0]) {
-				p[0] = pv;
-				v[0] = new UniformValue.FloatUniform(pv);
+			if (v[0] == null || p[0] != nv) {
+				p[0] = nv;
+				v[0] = new UniformValue.FloatUniform(nv);
 			}
 
 			return v[0];
@@ -29,20 +31,29 @@ public record UniformSupplier(String name, Supplier<? extends UniformValue> valu
 	}
 
 	public static UniformSupplier of(String name, Vector3i value) {
-		var v = new UniformValue.IVec3Uniform(value);
-		return new UniformSupplier(name, () -> v);
+		var p = new Vector3i(value);
+		var v = new UniformValue[]{null};
+
+		return new UniformSupplier(name, () -> {
+			if (v[0] == null || !p.equals(value)) {
+				p.set(value);
+				v[0] = new UniformValue.IVec3Uniform(p);
+			}
+
+			return v[0];
+		});
 	}
 
 	public static UniformSupplier of(String name, IntSupplier value) {
-		var p = new int[]{value.getAsInt()};
-		var v = new UniformValue.IntUniform[]{new UniformValue.IntUniform(p[0])};
+		var p = new float[]{value.getAsInt()};
+		var v = new UniformValue[]{null};
 
 		return new UniformSupplier(name, () -> {
-			int pv = value.getAsInt();
+			var nv = value.getAsInt();
 
-			if (pv != p[0]) {
-				p[0] = pv;
-				v[0] = new UniformValue.IntUniform(pv);
+			if (v[0] == null || p[0] != nv) {
+				p[0] = nv;
+				v[0] = new UniformValue.IntUniform(nv);
 			}
 
 			return v[0];
@@ -50,22 +61,76 @@ public record UniformSupplier(String name, Supplier<? extends UniformValue> valu
 	}
 
 	public static UniformSupplier of(String name, Vector2f value) {
-		var v = new UniformValue.Vec2Uniform(value);
-		return new UniformSupplier(name, () -> v);
+		var p = new Vector2f(value);
+		var v = new UniformValue[]{null};
+
+		return new UniformSupplier(name, () -> {
+			if (v[0] == null || !p.equals(value)) {
+				p.set(value);
+				v[0] = new UniformValue.Vec2Uniform(p);
+			}
+
+			return v[0];
+		});
 	}
 
 	public static UniformSupplier of(String name, Vector3f value) {
-		var v = new UniformValue.Vec3Uniform(value);
-		return new UniformSupplier(name, () -> v);
+		var p = new Vector3f(value);
+		var v = new UniformValue[]{null};
+
+		return new UniformSupplier(name, () -> {
+			if (v[0] == null || !p.equals(value)) {
+				p.set(value);
+				v[0] = new UniformValue.Vec3Uniform(p);
+			}
+
+			return v[0];
+		});
+	}
+
+	public static UniformSupplier of(String name, Vector3d value) {
+		var p = new Vector3f(0F, 0F, 0F);
+		var op = new Vector3f(0F, 0F, 0F);
+		var v = new UniformValue[]{null};
+
+		return new UniformSupplier(name, () -> {
+			var cam = Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState.pos;
+			op.set(value.x - cam.x, value.y - cam.y, value.z - cam.z);
+
+			if (v[0] == null || !p.equals(op)) {
+				p.set(op);
+				v[0] = new UniformValue.Vec3Uniform(p);
+			}
+
+			return v[0];
+		});
 	}
 
 	public static UniformSupplier of(String name, Vector4f value) {
-		var v = new UniformValue.Vec4Uniform(value);
-		return new UniformSupplier(name, () -> v);
+		var p = new Vector4f(value);
+		var v = new UniformValue[]{null};
+
+		return new UniformSupplier(name, () -> {
+			if (v[0] == null || !p.equals(value)) {
+				p.set(value);
+				v[0] = new UniformValue.Vec4Uniform(p);
+			}
+
+			return v[0];
+		});
 	}
 
 	public static UniformSupplier of(String name, Matrix4f value) {
-		var v = new UniformValue.Matrix4x4Uniform(value);
-		return new UniformSupplier(name, () -> v);
+		var p = new Matrix4f(value);
+		var v = new UniformValue[]{null};
+
+		return new UniformSupplier(name, () -> {
+			if (v[0] == null || !p.equals(value)) {
+				p.set(value);
+				v[0] = new UniformValue.Matrix4x4Uniform(p);
+			}
+
+			return v[0];
+		});
 	}
 }

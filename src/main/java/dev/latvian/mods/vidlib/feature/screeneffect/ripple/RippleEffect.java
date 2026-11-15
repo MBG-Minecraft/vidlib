@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.screeneffect.effect;
+package dev.latvian.mods.vidlib.feature.screeneffect.ripple;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -10,21 +10,20 @@ import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 
-// https://www.shadertoy.com/view/ldBXDD
-public record RippleEffect(FocusPoint focus, float scale, float intensity, float speed) implements ScreenEffect {
+public record RippleEffect(FocusPoint focus, float detail, float intensity, float speed) implements ScreenEffect {
 	public static final DynamicType<RegistryFriendlyByteBuf, ScreenEffect> TYPE = DynamicType.create(
 		"ripple",
 		RecordCodecBuilder.mapCodec(instance -> instance.group(
 			FocusPoint.CODEC.optionalFieldOf("focus", FocusPoint.Screen.CENTER).forGetter(RippleEffect::focus),
-			Codec.FLOAT.optionalFieldOf("scale", 0F).forGetter(RippleEffect::scale),
-			Codec.FLOAT.optionalFieldOf("intensity", 0F).forGetter(RippleEffect::intensity),
-			Codec.FLOAT.optionalFieldOf("speed", 0F).forGetter(RippleEffect::speed)
+			Codec.FLOAT.optionalFieldOf("intensity", 1F).forGetter(RippleEffect::intensity),
+			Codec.FLOAT.optionalFieldOf("scale", 50F).forGetter(RippleEffect::detail),
+			Codec.FLOAT.optionalFieldOf("speed", 4F).forGetter(RippleEffect::speed)
 		).apply(instance, RippleEffect::new)),
 		CompositeStreamCodec.of(
 			KLibStreamCodecs.optional(FocusPoint.STREAM_CODEC, FocusPoint.Screen.CENTER), RippleEffect::focus,
-			ByteBufCodecs.FLOAT, RippleEffect::scale,
-			ByteBufCodecs.FLOAT, RippleEffect::intensity,
-			ByteBufCodecs.FLOAT, RippleEffect::speed,
+			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 1F), RippleEffect::intensity,
+			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 50F), RippleEffect::detail,
+			KLibStreamCodecs.optional(ByteBufCodecs.FLOAT, 4F), RippleEffect::speed,
 			RippleEffect::new
 		)
 	);

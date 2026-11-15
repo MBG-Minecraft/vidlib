@@ -21,6 +21,7 @@ import imgui.ImGui;
 import imgui.ImGuiStyle;
 import imgui.extension.imnodes.ImNodes;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiColorEditFlags;
 import imgui.flag.ImGuiDir;
 import imgui.flag.ImGuiHoveredFlags;
 import imgui.flag.ImGuiInputTextFlags;
@@ -38,6 +39,7 @@ import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector4f;
 
 import java.util.Arrays;
 import java.util.List;
@@ -658,5 +660,31 @@ public class ImGraphics implements ImStyleVarConsumer, ImStyleColorConsumer, ImN
 		if (coloredText.color() != null) {
 			popStack();
 		}
+	}
+
+	public ImUpdate color3f(String label, Vector4f color) {
+		color.get(ImGuiUtils.FLOAT3);
+		ImGui.colorEdit3(label, ImGuiUtils.FLOAT3, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.PickerHueWheel);
+
+		var update = ImUpdate.itemEdit();
+
+		if (update.isAny()) {
+			color.set(ImGuiUtils.FLOAT3);
+		}
+
+		return update;
+	}
+
+	public ImUpdate color4f(String label, Vector4f color) {
+		color.get(ImGuiUtils.FLOAT4);
+		ImGui.colorEdit4(label, ImGuiUtils.FLOAT4, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.PickerHueWheel);
+
+		var update = ImUpdate.itemEdit();
+
+		if (update.isAny()) {
+			color.set(ImGuiUtils.FLOAT4);
+		}
+
+		return update;
 	}
 }

@@ -7,12 +7,12 @@ import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.AngledChromaticAberrationEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.DepthOfFieldEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.FocusedChromaticAberrationEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.ca.AngledChromaticAberrationEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.ca.FocusedChromaticAberrationEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.OverlayColorEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.RippleEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.effect.ScreenTintEffect;
+import dev.latvian.mods.vidlib.feature.screeneffect.ripple.RippleEffect;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 

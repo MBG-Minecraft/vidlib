@@ -188,7 +188,7 @@ public class WindowMixin implements VLWindow {
 
 	@Inject(method = "requestClose", at = @At("HEAD"), cancellable = true)
 	private void vl$windowCloseCallback(CallbackInfo ci) {
-		if (BlockExitScreen.cancelExit(Minecraft.getInstance())) {
+		if (BlockExitScreen.preventExit((Window) (Object) this)) {
 			ci.cancel();
 		}
 	}

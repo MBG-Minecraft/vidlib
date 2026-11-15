@@ -5,6 +5,7 @@ import dev.latvian.mods.klib.util.Lazy;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.Identifier;
 import net.neoforged.fml.ModLoader;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,11 @@ public record Canvas(Identifier postEffect, BooleanSupplier active, List<CustomP
 		return map;
 	});
 
+	public static final Matrix4f worldMatrix = new Matrix4f();
+	public static final Matrix4f inverseWorldMatrix = new Matrix4f();
+	public static float gameTimeDay = 0F;
+	public static float gameTimeSecond = 0F;
+
 	public static boolean replaceUniforms(RenderPass instance, String key) {
 		var r = UNIFORMS.get().get(key);
 		var b = r == null ? null : r.getBuffer();
@@ -52,11 +58,5 @@ public record Canvas(Identifier postEffect, BooleanSupplier active, List<CustomP
 
 	public Canvas(Identifier postEffect, BooleanSupplier active, String uniformName, List<UniformSupplier> uniformSuppliers) {
 		this(postEffect, active, List.of(new CustomPostPassUniforms(uniformName, uniformSuppliers)));
-	}
-
-	public void update() {
-		for (var it : uniforms) {
-			it.update();
-		}
 	}
 }
