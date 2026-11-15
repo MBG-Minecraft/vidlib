@@ -42,3 +42,7 @@ config = "vidlib.neoforge.mixins.json"
 [[mixins]]
 config = "vidlib.voicechat.mixins.json"
 requiredMods = ["voicechat"]
+
+[[mixins]]
+config = "vidlib.lithium.mixins.json"
+requiredMods = ["lithium"]

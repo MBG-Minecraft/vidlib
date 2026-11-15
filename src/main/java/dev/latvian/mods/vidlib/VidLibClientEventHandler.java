@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.math.HitBuilder;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.platform.PlatformHelper;
@@ -8,6 +9,7 @@ import dev.latvian.mods.klib.registry.CustomRegistryUpdateCallback;
 import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
+import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
@@ -55,6 +57,8 @@ import dev.latvian.mods.vidlib.feature.prop.builtin.mannequin.MannequinProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.mannequin.MannequinPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.shape.ShapeProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.shape.ShapePropRenderState;
+import dev.latvian.mods.vidlib.feature.prop.builtin.structure.StructureProp;
+import dev.latvian.mods.vidlib.feature.prop.builtin.structure.StructurePropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextProp;
 import dev.latvian.mods.vidlib.feature.prop.builtin.text.TextPropRenderState;
 import dev.latvian.mods.vidlib.feature.prop.builtin.tv.TVProp;
@@ -72,6 +76,9 @@ import dev.latvian.mods.vidlib.feature.screeneffect.ripple.RippleEffect;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
+import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
+import dev.latvian.mods.vidlib.feature.structure.StructureRenderer;
+import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.util.NameDrawType;
@@ -164,14 +171,14 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void addReloadListeners(AddClientReloadListenersEvent event) {
-		// event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.CLIENT));
-		// event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.ClientLoader());
+		event.addListener(ID.vidlib("structure"), new StructureStorage(RefType.CLIENT));
+		event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.Loader());
 		event.addListener(ID.vidlib("clothing_preset"), new ClothingPresetLoader());
 		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader(RefType.CLIENT));
 		event.addListener(ID.vidlib("atmosphere"), new Atmosphere.Loader(RefType.CLIENT));
 
 		event.addDependency(ID.klib("gradient"), ID.vidlib("clothing_preset"));
-		// event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
+		event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
 	}
 
 	@SubscribeEvent
@@ -219,6 +226,7 @@ public class VidLibClientEventHandler {
 		event.register(DecalProp.TYPE, DecalPropRenderState::new);
 		event.register(ImageProp.TYPE, ImagePropRenderState::new);
 		event.register(ShapeProp.TYPE, ShapePropRenderState::new);
+		event.register(StructureProp.TYPE, StructurePropRenderState::new);
 		event.register(TextProp.TYPE, TextPropRenderState::new);
 		event.register(TVProp.TYPE, TVPropRenderState::new);
 		event.register(MannequinProp.TYPE, MannequinPropRenderState::new);
@@ -380,24 +388,12 @@ public class VidLibClientEventHandler {
 		int width = event.getGuiGraphics().guiWidth();
 		int height = event.getGuiGraphics().guiHeight();
 
-		/*
 		int renderingStructures = StructureRenderer.getRenderingAll();
 
-		if (renderingStructures != 0) {
-			if (!ReplayAPI.getActive().isExporting()) {
-				var component = Component.empty().append(BATIcons.ERROR).append(BATIcons.SMALL_SPACE).append("Rendering " + renderingStructures + " structures...");
-
-				if (mc.player.isReplayCamera()) {
-					int x = 1;
-					int y = 2;
-					graphics.fill(x, y, x + mc.font.width(component) + 3, y + 11, 0xA0000000);
-					graphics.text(mc.font, component, x + 2, y + 2, 0xFFFFFFFF, true);
-				} else {
-					ScreenText.RENDER.topLeft.add(component);
-				}
-			}
+		if (renderingStructures != 0 && !ReplayAPI.getActive().isExporting()) {
+			var component = Component.empty().append(BATIcons.ERROR).append(BATIcons.SMALL_SPACE).append("Rendering " + renderingStructures + " structures...");
+			ScreenText.RENDER.topLeft.add(component);
 		}
-		 */
 
 		boolean primitiveF3Open = mc.gui.hud.getDebugOverlay().showDebugScreen() && ClientGameEngine.INSTANCE.primitiveF3(mc);
 

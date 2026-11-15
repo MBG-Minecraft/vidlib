@@ -47,6 +47,7 @@ import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.prop.ReplayProp;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.waypoint.ClientWaypoints;
 import imgui.ImGui;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
@@ -276,7 +277,7 @@ public class VLReplayIntegration {
 				ImGui.checkbox("Show Status Bar###show-bottom-info-bar", BuiltInImGui.SHOW_BOTTOM_INFO_BAR);
 				ImGui.checkbox("Props###props", ClientProps.VISIBLE);
 				ImGui.checkbox("Physics Particles###physics-particles", PhysicsParticleManager.VISIBLE);
-				// ImGui.checkbox("Ghost Structures###ghost-structures", GhostStructure.VISIBLE_CONFIG);
+				ImGui.checkbox("Ghost Structures###ghost-structures", GhostStructure.VISIBLE_CONFIG);
 				ImGui.sliderFloat("Name Scale###name-scale", VidLibHUD.NAME_SCALE.getData(), 0F, 4F);
 				event.endSection();
 			}

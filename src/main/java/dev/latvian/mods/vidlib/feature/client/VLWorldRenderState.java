@@ -25,6 +25,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropRenderState;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.session.LocalPlayerSessionData;
+import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderState;
 import net.minecraft.client.Minecraft;
@@ -237,6 +238,8 @@ public class VLWorldRenderState {
 			}
 		}
 
+		GhostStructure.preRender(this);
+
 		NeoForge.EVENT_BUS.post(new VidLibWorldRenderEvent(ctx));
 	}
 
@@ -316,6 +319,8 @@ public class VLWorldRenderState {
 				state.submit(ctx);
 			}
 		}
+
+		GhostStructure.submit(ctx);
 	}
 
 	/*

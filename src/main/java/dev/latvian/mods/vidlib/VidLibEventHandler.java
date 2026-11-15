@@ -23,6 +23,7 @@ import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
+import dev.latvian.mods.vidlib.feature.structure.StructureStorage;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
@@ -124,7 +125,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void addReloadListeners(AddServerReloadListenersEvent event) {
 		event.addListener(ID.vidlib("zone"), new Zone.Loader(RefType.SERVER));
-		// event.addListener(ID.vidlib("structure"), new StructureStorage(StructureStorage.SERVER));
+		event.addListener(ID.vidlib("structure"), new StructureStorage(RefType.SERVER));
 		event.addListener(ID.vidlib("cutscene"), new Cutscene.Loader(RefType.SERVER));
 		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader(RefType.SERVER));
 	}
