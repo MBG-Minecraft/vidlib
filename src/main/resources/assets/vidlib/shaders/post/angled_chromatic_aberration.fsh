@@ -19,7 +19,7 @@ layout(std140) uniform VidLibAngledChromaticAberration {
 layout(location = 0) out vec4 fragColor;
 
 void main() {
-	vec2 toCenter = vec2(cos(Angle), sin(Angle)) * Strength;
+	vec2 toCenter = vec2(cos(Angle), sin(Angle)) * Strength * 0.1;
 
 	fragColor = vec4(
 			texture(InSampler, texCoord + toCenter * Shift.x).r,

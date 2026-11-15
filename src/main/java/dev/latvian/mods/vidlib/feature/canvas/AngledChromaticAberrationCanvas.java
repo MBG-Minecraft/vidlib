@@ -6,34 +6,39 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.screeneffect.ca.AngledChromaticAberrationEffect;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import org.joml.Vector3f;
 
 import java.util.List;
 
 public class AngledChromaticAberrationCanvas {
-	public static float strength = 0F;
+	public static final ImBoolean ENABLED = new ImBoolean(false);
+
+	public static float strength = 0.1F;
 	public static float angle = 0F;
 	public static final Vector3f shift = new Vector3f(AngledChromaticAberrationEffect.DEFAULT_SHIFT);
 
 	public static final Canvas CANVAS = new Canvas(
 		ID.vidlib("angled_chromatic_aberration"),
-		() -> strength != 0F,
+		ENABLED::get,
 		"VidLibAngledChromaticAberration",
 		List.of(
-			UniformSupplier.of("Strength", () -> strength / 10F),
+			UniformSupplier.of("Strength", () -> strength),
 			UniformSupplier.of("Angle", () -> (float) Math.toRadians(angle)),
 			UniformSupplier.of("Shift", shift)
 		)
 	);
 
 	public static void imgui(ImGraphics graphics) {
+		ImGui.checkbox("Enabled###enabled", ENABLED);
+
 		ImGui.text("Strength");
 
-		if (strength != 0F) {
+		if (strength != 0.1F) {
 			ImGui.sameLine();
 
 			if (ImGui.smallButton(ImIcons.UNDO + "###undo-strength")) {
-				strength = 0F;
+				strength = 0.1F;
 			}
 		}
 

@@ -19,7 +19,7 @@ layout(std140) uniform VidLibFocusedChromaticAberration {
 layout(location = 0) out vec4 fragColor;
 
 void main() {
-	vec2 toCenter = (FocusPos - (texCoord * 2.0 - 1.0)) * abs(Strength);
+	vec2 toCenter = (FocusPos - (texCoord * 2.0 - 1.0)) * abs(Strength * 0.1);
 
 	fragColor = vec4(
 			texture(InSampler, texCoord + toCenter * Shift.x).r,

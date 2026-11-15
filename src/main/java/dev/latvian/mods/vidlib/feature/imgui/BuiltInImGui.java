@@ -26,7 +26,8 @@ import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueueImGui;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectPanel;
-import dev.latvian.mods.vidlib.feature.screeneffect.ca.ChromaticAberrationPanel;
+import dev.latvian.mods.vidlib.feature.screeneffect.ca.AngledChromaticAberrationPanel;
+import dev.latvian.mods.vidlib.feature.screeneffect.ca.FocusedChromaticAberrationPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfFieldPanel;
 import dev.latvian.mods.vidlib.feature.screeneffect.ripple.RipplePanel;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
@@ -123,7 +124,8 @@ public class BuiltInImGui {
 
 		list.add(MenuItem.menu(ImIcons.ANIMATION, "Legacy Screen Effects", _ -> List.of(
 			DepthOfFieldPanel.MENU_ITEM,
-			ChromaticAberrationPanel.MENU_ITEM,
+			AngledChromaticAberrationPanel.MENU_ITEM,
+			FocusedChromaticAberrationPanel.MENU_ITEM,
 			RipplePanel.MENU_ITEM
 		)).enabled(graphics.isSinglePlayer));
 

@@ -5,19 +5,22 @@ import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import org.joml.Vector2f;
 
 import java.util.List;
 
 public class RippleCanvas {
+	public static final ImBoolean ENABLED = new ImBoolean(false);
+
 	public static final Vector2f focusPos = new Vector2f(0F, 0F);
-	public static float intensity = 0F;
+	public static float intensity = 0.3F;
 	public static float detail = 50F;
 	public static float speed = 4F;
 
 	public static final Canvas CANVAS = new Canvas(
 		ID.vidlib("ripple"),
-		() -> intensity > 0F,
+		ENABLED::get,
 		"VidLibRipple",
 		List.of(
 			UniformSupplier.of("GameTimeSecond", () -> Canvas.gameTimeSecond),
@@ -29,13 +32,15 @@ public class RippleCanvas {
 	);
 
 	public static void imgui(ImGraphics graphics) {
+		ImGui.checkbox("Enabled###enabled", ENABLED);
+
 		ImGui.text("Intensity");
 
-		if (intensity != 0F) {
+		if (intensity != 0.3F) {
 			ImGui.sameLine();
 
 			if (ImGui.smallButton(ImIcons.UNDO + "###undo-intensity")) {
-				intensity = 0F;
+				intensity = 0.3F;
 			}
 		}
 

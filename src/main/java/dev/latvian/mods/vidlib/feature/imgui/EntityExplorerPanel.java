@@ -6,12 +6,12 @@ import dev.latvian.mods.klib.entity.filter.PlayerProfileEntityFilter;
 import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.vidlib.feature.canvas.DepthOfFieldCanvas;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.VisualItemKey;
 import dev.latvian.mods.vidlib.feature.pin.Pins;
-import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
@@ -152,18 +152,17 @@ public class EntityExplorerPanel extends Panel {
 			ImGui.popID();
 		}
 		if (ImGui.collapsingHeader("Vidlib")) {
-
 			if (entity instanceof Player player) {
 				if (ImGui.button("Edit Player Data###vidlib-edit-player-data", -1F, 0F)) {
 					new PlayerDataConfigPanel(new NameAndId(player.getGameProfile()), PlayerSessionData.of(player).dataMap).open();
 				}
 			}
 
-			if (DepthOfField.OVERRIDE_ENABLED.get() && ImGui.button(ImIcons.APERTURE + " Focus DoF###focus-dof")) {
+			if (DepthOfFieldCanvas.ENABLED.get() && ImGui.button(ImIcons.APERTURE + " Focus DoF###focus-dof")) {
 				if (entity instanceof Player player) {
-					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(new PlayerProfileEntityFilter(new NameAndId(player.getGameProfile())).ref(), PositionType.EYES).ref());
+					DepthOfFieldCanvas.focusPosKVector = KVector.following(new PlayerProfileEntityFilter(new NameAndId(player.getGameProfile())).ref(), PositionType.EYES).ref();
 				} else {
-					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(KVector.following(entity, PositionType.EYES).ref());
+					DepthOfFieldCanvas.focusPosKVector = KVector.following(entity, PositionType.EYES).ref();
 				}
 			}
 

@@ -10,6 +10,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import org.joml.Vector4f;
 
+import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
@@ -74,6 +75,23 @@ public record UniformSupplier(String name, Supplier<? extends UniformValue> valu
 		});
 	}
 
+	public static UniformSupplier ofVec2(String name, Consumer<Vector2f> callback) {
+		var value = new Vector2f(0F, 0F);
+		var p = new Vector2f(0F, 0F);
+		var v = new UniformValue[]{null};
+
+		return new UniformSupplier(name, () -> {
+			callback.accept(value);
+
+			if (v[0] == null || !p.equals(value)) {
+				p.set(value);
+				v[0] = new UniformValue.Vec2Uniform(p);
+			}
+
+			return v[0];
+		});
+	}
+
 	public static UniformSupplier of(String name, Vector3f value) {
 		var p = new Vector3f(value);
 		var v = new UniformValue[]{null};
@@ -88,12 +106,14 @@ public record UniformSupplier(String name, Supplier<? extends UniformValue> valu
 		});
 	}
 
-	public static UniformSupplier of(String name, Vector3d value) {
+	public static UniformSupplier ofVec3(String name, Consumer<Vector3d> callback) {
+		var value = new Vector3d(0D, 0D, 0D);
 		var p = new Vector3f(0F, 0F, 0F);
 		var op = new Vector3f(0F, 0F, 0F);
 		var v = new UniformValue[]{null};
 
 		return new UniformSupplier(name, () -> {
+			callback.accept(value);
 			var cam = Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState.pos;
 			op.set(value.x - cam.x, value.y - cam.y, value.z - cam.z);
 

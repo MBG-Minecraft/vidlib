@@ -18,6 +18,7 @@ import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
+import dev.latvian.mods.vidlib.feature.canvas.DepthOfFieldCanvas;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
@@ -25,7 +26,6 @@ import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
 import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
-import dev.latvian.mods.vidlib.feature.screeneffect.dof.DepthOfField;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
@@ -630,16 +630,14 @@ public class Prop {
 			ImGui.endDisabled();
 		}
 
-		if (graphics.isReplay) {
-			if (DepthOfField.OVERRIDE_ENABLED.get()) {
-				ImGui.sameLine();
+		if (DepthOfFieldCanvas.ENABLED.get()) {
+			ImGui.sameLine();
 
-				if (ImGui.button(ImIcons.APERTURE + "###focus-dof")) {
-					DepthOfField.OVERRIDE = DepthOfField.OVERRIDE.withFocus(new FollowingPropKVector(id, PositionType.EYES).ref());
-				}
-
-				graphics.hoveredTooltip("Focus DoF");
+			if (ImGui.button(ImIcons.APERTURE + "###focus-dof")) {
+				DepthOfFieldCanvas.focusPosKVector = new FollowingPropKVector(id, PositionType.EYES).ref();
 			}
+
+			graphics.hoveredTooltip("Focus DoF");
 		}
 
 		ImGui.sameLine();
