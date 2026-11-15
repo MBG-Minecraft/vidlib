@@ -37,6 +37,7 @@ public final class GhostStructureCollision {
 	private static boolean empty = true;
 	private static Thread updateThread;
 	private static boolean fedThisMove;
+
 	private GhostStructureCollision() {
 	}
 

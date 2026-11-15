@@ -70,6 +70,7 @@ public class StructureProp extends Prop {
 
 	@Nullable
 	private Identifier builderValue;
+
 	public StructureProp(PropContext<?> ctx) {
 		super(ctx);
 		this.structure = ID.EMPTY;

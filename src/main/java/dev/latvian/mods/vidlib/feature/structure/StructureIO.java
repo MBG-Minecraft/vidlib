@@ -68,6 +68,7 @@ public final class StructureIO {
 	private static final int SECTION_SINGLE = 0;
 	private static final int SECTION_SPARSE = 1;
 	private static final int SECTION_DENSE = 2;
+
 	private StructureIO() {
 	}
 
