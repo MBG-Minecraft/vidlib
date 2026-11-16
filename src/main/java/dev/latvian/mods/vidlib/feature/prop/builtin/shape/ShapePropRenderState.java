@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.shape;
 
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.render.SubmitContext;
 import dev.latvian.mods.klib.shape.Shape;
@@ -18,8 +17,8 @@ public class ShapePropRenderState extends PropRenderState<ShapeProp> {
 	public float width;
 	public float height;
 	public final Quaternionf rotate = new Quaternionf();
-	public Color color;
-	public Color outlineColor;
+	public int color;
+	public int outlineColor;
 	public RenderLightLayer lightLayer;
 	public Identifier texture;
 	public UV uv;
@@ -35,8 +34,8 @@ public class ShapePropRenderState extends PropRenderState<ShapeProp> {
 		rotate.rotateY((float) Math.toDegrees(prop.getYaw(ctx.delta())));
 		rotate.rotateX((float) Math.toDegrees(prop.getPitch(ctx.delta())));
 
-		color = prop.color.value().get(progress);
-		outlineColor = prop.canInteract && ctx.mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? Color.WHITE : prop.outlineColor.value().get(progress);
+		color = prop.color.value().get(progress).argb();
+		outlineColor = prop.canInteract && ctx.mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? 0xFFFFFFFF : prop.outlineColor.value().get(progress).argb();
 		lightLayer = prop.lightLayer;
 		texture = prop.texture == SpriteKey.EMPTY ? null : prop.texture.getTexture().texturePath();
 		uv = texture == null ? UV.FULL : ctx.mc().getSpriteUV(prop.texture);

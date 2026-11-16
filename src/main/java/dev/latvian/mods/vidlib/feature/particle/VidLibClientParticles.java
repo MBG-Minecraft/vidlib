@@ -1,14 +1,10 @@
 package dev.latvian.mods.vidlib.feature.particle;
 
-import dev.latvian.mods.klib.particle.CustomParticleGroup;
 import dev.latvian.mods.vidlib.feature.actor.ActorParticle;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.neoforged.neoforge.client.event.RegisterParticleGroupsEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
 public interface VidLibClientParticles {
-	ParticleRenderType CUSTOM_RENDER_TYPE = new ParticleRenderType("VIDLIB_CUSTOM", "VL_C");
-
 	static void registerParticleProviders(RegisterParticleProvidersEvent event) {
 		event.registerSpecial(VidLibParticles.ACTOR.get(), ActorParticle::create);
 		// event.registerSpecial(VidLibParticles.LIGHTNING.get(), LightningParticle::new);
@@ -19,6 +15,5 @@ public interface VidLibClientParticles {
 	}
 
 	static void registerParticleGroups(RegisterParticleGroupsEvent event) {
-		event.register(CUSTOM_RENDER_TYPE, CustomParticleGroup::new);
 	}
 }

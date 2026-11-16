@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.block.BlockUtils;
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.icon.Icon;
 import dev.latvian.mods.klib.icon.renderer.IconRenderer;
 import dev.latvian.mods.klib.icon.renderer.IconWorldExactContext;
@@ -271,7 +270,7 @@ public class VLWorldRenderState {
 				ctx.push(a.minX(), a.minY(), a.minZ());
 
 				ctx.submit(RenderTypes.debugFilledBox(), (pose, buffer) -> {
-					var callback = pose.transform(buffer).withColor(Color.YELLOW.withAlpha(80));
+					var callback = pose.transform(buffer).withColor(0x50FFFF00);
 					float minX = 0.5F;
 					float minY = 0.5F;
 					float minZ = 0.5F;
@@ -282,7 +281,7 @@ public class VLWorldRenderState {
 				});
 
 				ctx.submit(RenderTypes.lines(), (pose, buffer) -> {
-					var callback = pose.transform(buffer).withColor(Color.YELLOW).withLineWidth(ctx.lineWidth());
+					var callback = pose.transform(buffer).withColor(0xFFFFFF00).withLineWidth(ctx.lineWidth());
 					float minX = 0.5F;
 					float minY = 0.5F;
 					float minZ = 0.5F;
