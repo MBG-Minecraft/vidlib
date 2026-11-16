@@ -8,8 +8,8 @@ import dev.latvian.mods.klib.icon.renderer.IconRenderer;
 import dev.latvian.mods.klib.icon.renderer.IconWorldExactContext;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.particle.CustomParticle;
-import dev.latvian.mods.klib.particle.CustomParticleState;
 import dev.latvian.mods.klib.render.SubmitContext;
+import dev.latvian.mods.klib.render.Submittable;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresets;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
@@ -33,7 +33,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class ActorParticle extends CustomParticle {
-	public static class State implements CustomParticleState {
+	public static class State implements Submittable {
 		public double x;
 		public double y;
 		public double z;

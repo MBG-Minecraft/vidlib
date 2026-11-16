@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.structure;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.entity.filter.EntityFilter;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.kvector.KVector;
@@ -278,7 +277,7 @@ public record GhostStructure(
 			if (structure.slice != null && Minecraft.getInstance().gui.hud.getDebugOverlay().showDebugScreen()) {
 				var b = structure.slice;
 				ctx.submit(RenderTypes.lines(), (pose, buffer) -> {
-					var callback = pose.transform(buffer).withColor(Color.RED).withLineWidth(ctx.lineWidth());
+					var callback = pose.transform(buffer).withColor(0xFFFF0000).withLineWidth(ctx.lineWidth());
 					callback.frameLines(
 						(float) b.minX(), (float) b.minY(), (float) b.minZ(),
 						(float) (b.maxX() + 1D), (float) (b.maxY() + 1D), (float) (b.maxZ() + 1D),
