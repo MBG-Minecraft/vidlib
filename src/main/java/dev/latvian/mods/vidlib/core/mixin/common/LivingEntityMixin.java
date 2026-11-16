@@ -49,6 +49,11 @@ public abstract class LivingEntityMixin implements VLLivingEntity {
 		return original * CommonGameEngine.INSTANCE.getSpeedModifier(vl$self());
 	}
 
+	@ModifyReturnValue(method = "isTransmittingWaypoint", at = @At("RETURN"))
+	private boolean vl$isTransmittingWaypoint(boolean original) {
+		return CommonGameEngine.INSTANCE.isTrackedByLocatorBar(vl$self(), original);
+	}
+
 	@Inject(method = "isPushable", at = @At("HEAD"), cancellable = true)
 	private void vl$isPushable(CallbackInfoReturnable<Boolean> cir) {
 		if (CommonGameEngine.INSTANCE.isUnpushable(vl$self())) {
