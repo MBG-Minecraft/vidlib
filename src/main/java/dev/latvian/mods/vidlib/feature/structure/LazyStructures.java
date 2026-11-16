@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
-import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
@@ -11,7 +10,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class LazyStructures implements WithCache, Supplier<List<StructureHolder>> {
+public class LazyStructures implements Supplier<List<StructureHolder>> {
 	public final Identifier id;
 	@Nullable
 	public final Path path;
@@ -42,10 +41,5 @@ public class LazyStructures implements WithCache, Supplier<List<StructureHolder>
 		}
 
 		return structures;
-	}
-
-	@Override
-	public void clearCache() {
-		structures = null;
 	}
 }

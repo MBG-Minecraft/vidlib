@@ -74,9 +74,19 @@ public record GhostStructure(
 
 		mc.execute(() -> {
 			for (var ghostStructure : LIST) {
-				if (ghostStructure.preload || ghostStructure.preloadRenderer) {
-					for (var part : ghostStructure.structures) {
-						part.structure().preRender(ghostStructure.rendererData());
+				if (!ghostStructure.preload && !ghostStructure.preloadRenderer) {
+					continue;
+				}
+
+				var data = ghostStructure.rendererData();
+
+				for (var part : ghostStructure.structures) {
+					if (ghostStructure.preload) {
+						part.structure().getStructure();
+					}
+
+					if (ghostStructure.preloadRenderer) {
+						part.structure().preRender(data);
 					}
 				}
 			}

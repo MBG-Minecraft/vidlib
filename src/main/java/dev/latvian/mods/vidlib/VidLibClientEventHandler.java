@@ -565,6 +565,7 @@ public class VidLibClientEventHandler {
 	@SubscribeEvent
 	public static void loggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
 		PlayerProfiles.cache(event.getPlayer().getGameProfile());
+		ClientSessionData.of(Minecraft.getInstance()).updateReplayState();
 
 		if (!ClientSessionData.of(Minecraft.getInstance()).clientModListSentDuringConfig) {
 			event.getPlayer().c2s(new ClientModListPayload(PlatformHelper.INSTANCE.getModList()));

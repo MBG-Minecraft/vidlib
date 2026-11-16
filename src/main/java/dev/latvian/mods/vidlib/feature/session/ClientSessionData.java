@@ -158,6 +158,10 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 
 		VidLib.LOGGER.info("Client Session Data Initialized");
 
+		updateReplayState();
+	}
+
+	public void updateReplayState() {
 		if (mc.player != null) {
 			isReplay = mc.player.getClass() != LocalPlayer.class || mc.player.getScoreboardName().equals("Replay_Viewer") || mc.player.getGameProfile().properties().containsKey("IsReplayViewer");
 		}

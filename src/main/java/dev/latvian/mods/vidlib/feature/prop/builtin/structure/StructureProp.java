@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.structure;
 
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -105,7 +104,7 @@ public class StructureProp extends Prop {
 	}
 
 	public StructureRendererData createRendererData() {
-		return new StructureRendererData(centerX, centerY, centerZ, cull, Color.TRANSPARENT, skyLight, blockLight, false);
+		return new StructureRendererData(centerX, centerY, centerZ, cull, skyLight, blockLight);
 	}
 
 	@Override
