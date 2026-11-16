@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.prop.builtin.decal;
 
 import dev.latvian.mods.klib.math.FrustumCheck;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
@@ -12,7 +11,7 @@ import org.joml.Vector3d;
 
 public class DecalProp extends Prop {
 	@AutoRegister
-	public static final PropType<DecalProp> TYPE = PropType.create(ID.vidlib("decal"), DecalProp::new,
+	public static final PropType<DecalProp> TYPE = PropType.create("decal", DecalProp::new,
 		TICK,
 		LIFESPAN,
 		POSITION,

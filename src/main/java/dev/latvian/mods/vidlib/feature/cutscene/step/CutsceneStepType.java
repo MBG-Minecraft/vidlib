@@ -47,8 +47,8 @@ public enum CutsceneStepType implements StringRepresentable {
 		this.factory = Cast.to(factory);
 
 		this.mapCodec = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			Codec.INT.fieldOf("start").forGetter(o -> o.start),
-			Codec.INT.optionalFieldOf("length", 0).forGetter(o -> o.length),
+			Codec.FLOAT.fieldOf("start").forGetter(o -> o.start),
+			Codec.FLOAT.optionalFieldOf("length", 0F).forGetter(o -> o.length),
 			Codec.BOOL.optionalFieldOf("snap", true).forGetter(o -> o.snap),
 			codec.fieldOf("value").forGetter(Cast::to)
 		).apply(instance, (start, length, snap, value) -> {
@@ -59,8 +59,8 @@ public enum CutsceneStepType implements StringRepresentable {
 		}));
 
 		this.streamCodec = CompositeStreamCodec.of(
-			ByteBufCodecs.VAR_INT, o -> o.start,
-			ByteBufCodecs.VAR_INT, o -> o.length,
+			ByteBufCodecs.FLOAT, o -> o.start,
+			ByteBufCodecs.FLOAT, o -> o.length,
 			ByteBufCodecs.VAR_INT, CutsceneStep::getFlags,
 			Cast.to(streamCodec), o -> o,
 			(start, length, flags, value) -> {

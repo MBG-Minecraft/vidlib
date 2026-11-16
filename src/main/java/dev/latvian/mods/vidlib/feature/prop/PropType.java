@@ -8,7 +8,6 @@ import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -19,15 +18,15 @@ import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -36,7 +35,7 @@ import java.util.function.Predicate;
 
 @AutoInit
 public record PropType<P extends Prop>(
-	Identifier id,
+	String id,
 	Factory<? extends P> factory,
 	List<PropData<?, ?>> unsortedData,
 	List<PropDataEntry> data,
@@ -51,7 +50,7 @@ public record PropType<P extends Prop>(
 		P create(PropContext<?> ctx);
 	}
 
-	public static final Lazy<Map<Identifier, PropType<?>>> ALL = Lazy.map(map -> {
+	public static final Lazy<Map<String, PropType<?>>> ALL = Lazy.map(map -> {
 		for (var s : AutoRegister.SCANNED.get()) {
 			if (s.value() instanceof PropType<?> propType) {
 				map.put(propType.id, propType);
@@ -60,10 +59,12 @@ public record PropType<P extends Prop>(
 	});
 
 	public static final Lazy<List<PropType<?>>> SORTED = ALL.map(map -> {
-		return List.copyOf(map.values().stream().sorted((a, b) -> a.id.compareTo(b.id)).toList());
+		return List.copyOf(map.values().stream().sorted(Comparator.comparing(PropType::id)).toList());
 	});
 
-	public static <P extends Prop> PropType<P> create(Identifier id, Factory<? extends P> factory, PropTypeInfo... info) {
+	public static final Lazy<List<String>> KEYS = SORTED.<List<String>>map(list -> list.stream().map(PropType::id).toList());
+
+	public static <P extends Prop> PropType<P> create(String id, Factory<? extends P> factory, PropTypeInfo... info) {
 		var dataMap = new Object2ObjectLinkedOpenHashMap<String, PropData<?, ?>>();
 		var packetSet = new ObjectLinkedOpenHashSet<PropPacketType<?, ?>>();
 
@@ -106,11 +107,12 @@ public record PropType<P extends Prop>(
 			packets.add(p);
 		}
 
-		return new PropType<>(id, factory, unsortedData, List.copyOf(data), Collections.unmodifiableMap(reverseData), Set.copyOf(packetSet), List.copyOf(packets), Collections.unmodifiableMap(reversePackets), Util.makeDescriptionId("prop", id));
+		id = id.toLowerCase(Locale.ROOT).intern();
+		return new PropType<>(id, factory, unsortedData, List.copyOf(data), Collections.unmodifiableMap(reverseData), Set.copyOf(packetSet), List.copyOf(packets), Collections.unmodifiableMap(reversePackets), id);
 	}
 
-	public static final Codec<PropType<?>> CODEC = KLibCodecs.map(ALL, ID.CODEC, PropType::id);
-	public static final StreamCodec<ByteBuf, PropType<?>> STREAM_CODEC = KLibStreamCodecs.map(ALL, ID.STREAM_CODEC, PropType::id);
+	public static final Codec<PropType<?>> CODEC = KLibCodecs.map(ALL, KLibCodecs.INTERN_PATH, PropType::id);
+	public static final StreamCodec<ByteBuf, PropType<?>> STREAM_CODEC = KLibStreamCodecs.map(ALL, KLibStreamCodecs.INTERN_STRING, PropType::id);
 	public static final DataType<PropType<?>> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	@Override

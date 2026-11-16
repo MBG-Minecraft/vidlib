@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.SkinTexture;
 import dev.latvian.mods.klib.util.SpreadType;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
@@ -38,7 +37,7 @@ public class MannequinProp extends Prop {
 	public static final Pose[] VALID_POSES = {Pose.STANDING, Pose.CROUCHING, Pose.SLEEPING, Pose.SWIMMING, Pose.SITTING};
 
 	@AutoRegister
-	public static final PropType<MannequinProp> TYPE = PropType.create(ID.vidlib("mannequin"), MannequinProp::new,
+	public static final PropType<MannequinProp> TYPE = PropType.create("mannequin", MannequinProp::new,
 		TICK,
 		POSITION,
 		HEIGHT,

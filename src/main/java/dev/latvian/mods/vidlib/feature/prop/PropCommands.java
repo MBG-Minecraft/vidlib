@@ -10,16 +10,16 @@ import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.CompoundTagArgument;
-import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.NbtTagArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -27,31 +27,31 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 
 public interface PropCommands {
-	SuggestionProvider<CommandSourceStack> TYPE_SUGGESTION_PROVIDER = ID.registerSuggestionProvider(ID.vidlib("prop_type"), () -> PropType.ALL.get().keySet());
+	SuggestionProvider<CommandSourceStack> TYPE_SUGGESTION_PROVIDER = SuggestionProviders.register(ID.vidlib("prop_type"), (_, builder) -> SharedSuggestionProvider.suggest(PropType.KEYS.get(), builder));
 
 	@AutoRegister
 	ServerCommandHolder COMMAND = new ServerCommandHolder("prop", (command, buildContext) -> command
 		.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
 		.then(Commands.literal("spawn")
-			.then(Commands.argument("prop", IdentifierArgument.id())
+			.then(Commands.argument("prop", StringArgumentType.string())
 				.suggests(TYPE_SUGGESTION_PROVIDER)
-				.executes(ctx -> spawn(ctx.getSource(), IdentifierArgument.getId(ctx, "prop"), ctx.getSource().getPosition(), null))
+				.executes(ctx -> spawn(ctx.getSource(), StringArgumentType.getString(ctx, "prop"), ctx.getSource().getPosition(), null))
 				.then(Commands.argument("pos", Vec3Argument.vec3())
-					.executes(ctx -> spawn(ctx.getSource(), IdentifierArgument.getId(ctx, "prop"), Vec3Argument.getVec3(ctx, "pos"), null))
+					.executes(ctx -> spawn(ctx.getSource(), StringArgumentType.getString(ctx, "prop"), Vec3Argument.getVec3(ctx, "pos"), null))
 					.then(Commands.argument("data", CompoundTagArgument.compoundTag())
-						.executes(ctx -> spawn(ctx.getSource(), IdentifierArgument.getId(ctx, "prop"), Vec3Argument.getVec3(ctx, "pos"), CompoundTagArgument.getCompoundTag(ctx, "data")))
+						.executes(ctx -> spawn(ctx.getSource(), StringArgumentType.getString(ctx, "prop"), Vec3Argument.getVec3(ctx, "pos"), CompoundTagArgument.getCompoundTag(ctx, "data")))
 					)
 				)
 			)
 		)
 		.then(Commands.literal("remove")
 			.then(Commands.literal("all")
-				.executes(ctx -> remove(ctx.getSource(), prop -> true))
+				.executes(ctx -> remove(ctx.getSource(), _ -> true))
 			)
 			.then(Commands.literal("type")
-				.then(Commands.argument("type", IdentifierArgument.id())
+				.then(Commands.argument("type", StringArgumentType.string())
 					.suggests(TYPE_SUGGESTION_PROVIDER)
-					.executes(ctx -> remove(ctx.getSource(), PropType.ALL.get().get(IdentifierArgument.getId(ctx, "type"))))
+					.executes(ctx -> remove(ctx.getSource(), PropType.ALL.get().get(StringArgumentType.getString(ctx, "type"))))
 				)
 			)
 			.then(Commands.literal("id")
@@ -134,7 +134,7 @@ public interface PropCommands {
 		)
 	);
 
-	static int spawn(CommandSourceStack source, Identifier typeId, Vec3 pos, @Nullable CompoundTag initialData) {
+	static int spawn(CommandSourceStack source, String typeId, Vec3 pos, @Nullable CompoundTag initialData) {
 		var type = PropType.ALL.get().get(typeId);
 
 		if (type == null) {

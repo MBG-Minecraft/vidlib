@@ -5,7 +5,6 @@ import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.RotatedQuadData;
 import dev.latvian.mods.klib.math.Rotation;
 import dev.latvian.mods.klib.texture.SpriteKey;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
@@ -17,7 +16,7 @@ import net.minecraft.client.Minecraft;
 
 public class ImageProp extends Prop {
 	@AutoRegister
-	public static final PropType<ImageProp> TYPE = PropType.create(ID.vidlib("image"), ImageProp::new,
+	public static final PropType<ImageProp> TYPE = PropType.create("image", ImageProp::new,
 		POSITION,
 		YAW,
 		PITCH,

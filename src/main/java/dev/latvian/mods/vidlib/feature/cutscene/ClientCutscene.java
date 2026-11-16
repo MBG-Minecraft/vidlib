@@ -8,31 +8,35 @@ import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.function.Supplier;
 
 public class ClientCutscene implements CameraOverride {
 	public final Minecraft mc;
+	public final Instant start;
 	public final boolean overrideCamera;
 	public final Cutscene cutscene;
 	public final KNumberVariables variables;
 	public final Supplier<Vec3> sourcePos;
 	public final Vec3 originPos;
-	public int prevTotalTick;
-	public int totalTick;
-	public int totalLength;
+	public float prevTotalSecond;
+	public float totalSecond;
+	public float totalLength;
 	public final CutsceneState state;
 
 	public ClientCutscene(Minecraft mc, boolean overrideCamera, Cutscene cutscene, KNumberVariables variables, Supplier<Vec3> sourcePos) {
 		this.mc = mc;
+		this.start = Instant.now();
 		this.overrideCamera = overrideCamera;
 		this.cutscene = cutscene;
 		this.variables = variables;
 		this.sourcePos = sourcePos;
 		this.originPos = sourcePos.get();
 
-		this.prevTotalTick = 0;
-		this.totalTick = 0;
-		this.totalLength = 0;
+		this.prevTotalSecond = 0F;
+		this.totalSecond = 0F;
+		this.totalLength = 0F;
 		this.state = new CutsceneState();
 
 		var session = ClientLevelSessionData.of(mc.level);
@@ -45,13 +49,13 @@ public class ClientCutscene implements CameraOverride {
 			this.totalLength = Math.max(totalLength, c.start + c.length);
 		}
 
-		ctx.maxTick = (double) totalLength;
+		ctx.lifespan = (double) totalLength;
 
 		for (var step : cutscene.steps()) {
 			if (step.start == 0) {
+				ctx.time = 0D;
+				ctx.lifespan = (double) step.length;
 				ctx.progress = 0D;
-				ctx.tick = 0D;
-				ctx.maxTick = (double) step.length;
 
 				step.start(state, ctx);
 			}
@@ -69,7 +73,7 @@ public class ClientCutscene implements CameraOverride {
 	}
 
 	public boolean tick() {
-		prevTotalTick = totalTick;
+		prevTotalSecond = totalSecond;
 		state.snap();
 		state.topBar.clear();
 		state.bottomBar.clear();
@@ -82,27 +86,28 @@ public class ClientCutscene implements CameraOverride {
 		ctx.targetPos = state.target;
 
 		for (var step : cutscene.steps()) {
-			if (totalTick == step.start + step.length) {
+			if (totalSecond == step.start + step.length) {
+				ctx.time = (double) step.length;
+				ctx.lifespan = (double) step.length;
 				ctx.progress = 1D;
-				ctx.tick = (double) step.length;
-				ctx.maxTick = (double) step.length;
 
 				step.exit(state, ctx);
 			}
 		}
 
 		for (var step : cutscene.steps()) {
-			if (totalTick >= step.start && totalTick < step.start + step.length) {
-				ctx.tick = (double) (totalTick - step.start);
-				ctx.maxTick = (double) step.length;
-				ctx.progress = ctx.tick / ctx.maxTick;
+			if (totalSecond >= step.start && totalSecond < step.start + step.length) {
+				ctx.time = (double) (totalSecond - step.start);
+				ctx.lifespan = (double) step.length;
+				ctx.progress = ctx.time / ctx.lifespan;
 
 				step.tick(state, ctx);
 			}
 		}
 
-		totalTick++;
-		return totalTick >= totalLength;
+		var duration = Duration.between(start, Instant.now());
+		totalSecond = duration.toSeconds() + duration.toNanosPart() / 1_000_000_000F;
+		return totalSecond >= totalLength;
 	}
 
 	@Override

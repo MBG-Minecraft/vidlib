@@ -24,6 +24,7 @@ import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
+import dev.latvian.mods.vidlib.feature.item.PositionTool;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
@@ -621,14 +622,12 @@ public class ClientGameEngine {
 	}
 
 	public boolean hideGui(Minecraft mc) {
-		if (mc.gui.hud.isHidden()) {
-			return true;
-		} else if (mc.player == null) {
-			return false;
-		}
-
 		var session = ClientSessionData.of(mc);
-		return session.cameraOverride != null && session.cameraOverride.hideGui();
+		return session != null && session.cameraOverride != null && session.cameraOverride.hideGui();
+	}
+
+	public boolean hideBlockOutline(Minecraft mc) {
+		return mc.player != null && VidLibTool.isHolding(mc.player, PositionTool.INSTANCE);
 	}
 
 	public boolean renderHardcoreHearts(boolean original) {
@@ -647,7 +646,7 @@ public class ClientGameEngine {
 			return true;
 		}
 
-		return hideGui(mc);
+		return mc.gui.hud.isHidden();
 	}
 
 	public boolean renderSpectatedUI(Minecraft mc) {
@@ -966,7 +965,7 @@ public class ClientGameEngine {
 			return false;
 		}
 
-		return mc.player == null || mc.player.getVehicle() == null || mc.player.getVehicle().shouldRenderPassengerHand(mc.player);
+		return mc.player != null && (mc.player.getVehicle() == null || mc.player.getVehicle().shouldRenderPassengerHand(mc.player));
 	}
 
 	public boolean hideVoiceChatPlayerList() {

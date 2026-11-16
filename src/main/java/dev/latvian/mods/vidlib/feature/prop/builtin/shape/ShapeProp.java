@@ -7,7 +7,6 @@ import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.shape.CubeShape;
 import dev.latvian.mods.klib.shape.Shape;
 import dev.latvian.mods.klib.texture.SpriteKey;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.client.RenderLightLayer;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
@@ -17,7 +16,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 
 public class ShapeProp extends Prop {
 	@AutoRegister
-	public static final PropType<ShapeProp> TYPE = PropType.create(ID.vidlib("shape"), ShapeProp::new,
+	public static final PropType<ShapeProp> TYPE = PropType.create("shape", ShapeProp::new,
 		TICK,
 		LIFESPAN,
 		POSITION,

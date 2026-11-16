@@ -420,7 +420,7 @@ public class VidLibClientEventHandler {
 			ScreenText.RENDER.topLeft.add(comp);
 		}
 
-		if (!ClientGameEngine.INSTANCE.hideGui(mc) && !session.isReplay) {
+		if (!mc.gui.hud.isHidden() && !session.isReplay) {
 			ScreenText.RENDER.addAll(ScreenText.CLIENT_TICK);
 			ScreenText.RENDER.ops = session.jsonOps;
 

@@ -248,7 +248,7 @@ public class BuiltInImGui {
 		if (ClientProps.VISIBLE.get()) {
 			list.add(MenuItem.menu(ImIcons.FLAG, "Prop Types", (_, propTypes) -> {
 				for (var type : PropType.SORTED.get()) {
-					propTypes.add(MenuItem.item(type.id().toString(), !ClientProps.HIDDEN_PROP_TYPES.contains(type), _ -> {
+					propTypes.add(MenuItem.item(type.id(), !ClientProps.HIDDEN_PROP_TYPES.contains(type), _ -> {
 						if (ClientProps.HIDDEN_PROP_TYPES.contains(type)) {
 							ClientProps.HIDDEN_PROP_TYPES.remove(type);
 						} else {

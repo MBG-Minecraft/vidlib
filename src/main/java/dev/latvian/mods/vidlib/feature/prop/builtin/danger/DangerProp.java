@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.danger;
 
 import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.math.FrustumCheck;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
@@ -11,7 +10,7 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 
 public class DangerProp extends Prop {
 	@AutoRegister
-	public static final PropType<DangerProp> TYPE = PropType.create(ID.vidlib("danger"), DangerProp::new,
+	public static final PropType<DangerProp> TYPE = PropType.create("danger", DangerProp::new,
 		POSITION,
 		WIDTH,
 		PropData.createFloat(DangerProp.class, "width_mod", p -> p.widthMod, (p, v) -> p.widthMod = v, 0F, 1F),

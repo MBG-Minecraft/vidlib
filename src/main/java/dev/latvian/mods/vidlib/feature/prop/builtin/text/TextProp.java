@@ -4,7 +4,6 @@ import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
@@ -16,7 +15,7 @@ import net.minecraft.network.chat.Component;
 
 public class TextProp extends Prop {
 	@AutoRegister
-	public static final PropType<TextProp> TYPE = PropType.create(ID.vidlib("text"), TextProp::new,
+	public static final PropType<TextProp> TYPE = PropType.create("text", TextProp::new,
 		POSITION,
 		YAW,
 		PITCH,

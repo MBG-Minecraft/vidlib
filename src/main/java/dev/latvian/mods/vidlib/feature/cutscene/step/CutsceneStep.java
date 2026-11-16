@@ -10,8 +10,8 @@ public abstract class CutsceneStep {
 	public static final Codec<CutsceneStep> CODEC = CutsceneStepType.DATA_TYPE.codec().dispatch("type", CutsceneStep::type, t -> t.mapCodec);
 	public static final StreamCodec<RegistryFriendlyByteBuf, CutsceneStep> STREAM_CODEC = CutsceneStepType.STREAM_CODEC.dispatch(CutsceneStep::type, t -> t.streamCodec);
 
-	public int start = 0;
-	public int length = 20;
+	public float start = 0;
+	public float length = 1F;
 	public boolean snap = true;
 
 	public abstract CutsceneStepType type();

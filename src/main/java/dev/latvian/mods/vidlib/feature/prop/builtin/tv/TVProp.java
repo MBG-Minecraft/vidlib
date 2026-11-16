@@ -3,7 +3,6 @@ package dev.latvian.mods.vidlib.feature.prop.builtin.tv;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.RotatedQuadData;
 import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
 import dev.latvian.mods.vidlib.feature.prop.PropContext;
@@ -14,7 +13,7 @@ import net.minecraft.client.Minecraft;
 
 public class TVProp extends Prop {
 	@AutoRegister
-	public static final PropType<TVProp> TYPE = PropType.create(ID.vidlib("tv"), TVProp::new,
+	public static final PropType<TVProp> TYPE = PropType.create("tv", TVProp::new,
 		POSITION,
 		YAW,
 		PITCH,

@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.Hud;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.GameType;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -67,9 +68,14 @@ public abstract class HudMixin {
 		}
 	}
 
-	@ModifyExpressionValue(method = "extractRenderState", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/Hud;isHidden:Z"))
+	@ModifyExpressionValue(method = {
+		"isHidden",
+		"lambda$registerVanillaLayers$0",
+		"lambda$registerVanillaLayers$8",
+		"extractRenderState"
+	}, at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/Hud;isHidden:Z", opcode = Opcodes.GETFIELD))
 	private boolean vl$hideGui(boolean original) {
-		return ClientGameEngine.INSTANCE.hideGui(minecraft);
+		return original || ClientGameEngine.INSTANCE.hideGui(minecraft);
 	}
 
 	@ModifyExpressionValue(method = "extractHearts", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelData;isHardcore()Z"))

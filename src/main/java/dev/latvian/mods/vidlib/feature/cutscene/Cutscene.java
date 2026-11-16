@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.registry.CustomRegistry;
+import dev.latvian.mods.klib.registry.CustomRegistryValue;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.registry.RefType;
@@ -22,7 +23,7 @@ public record Cutscene(
 	boolean openPreviousScreen,
 	boolean hidePlayer,
 	List<CutsceneStep> steps
-) {
+) implements CustomRegistryValue<RegistryFriendlyByteBuf, Cutscene> {
 	public static final DynamicType<RegistryFriendlyByteBuf, Cutscene> TYPE = DynamicType.create(
 		"default",
 		RecordCodecBuilder.mapCodec(i -> i.group(
@@ -57,6 +58,16 @@ public record Cutscene(
 			(flags & 4) != 0,
 			steps
 		);
+	}
+
+	@Override
+	public CustomRegistry<RegistryFriendlyByteBuf, Cutscene> getRegistry() {
+		return REGISTRY;
+	}
+
+	@Override
+	public DynamicType<RegistryFriendlyByteBuf, Cutscene> type() {
+		return TYPE;
 	}
 
 	public int getFlags() {

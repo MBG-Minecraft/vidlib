@@ -38,7 +38,7 @@ public interface VidLibHUD {
 		var level = mc.level;
 		var self = mc.player;
 
-		if (level == null || self == null || ClientGameEngine.INSTANCE.hideGui(mc) || mc.gui.screen() != null && mc.gui.screen().hidePlayerNames()) {
+		if (level == null || self == null || mc.gui.hud.isHidden() || mc.gui.screen() != null && mc.gui.screen().hidePlayerNames()) {
 			return;
 		}
 

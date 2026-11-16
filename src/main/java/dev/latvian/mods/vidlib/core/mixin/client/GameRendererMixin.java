@@ -1,18 +1,19 @@
 package dev.latvian.mods.vidlib.core.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import dev.latvian.mods.vidlib.core.api.client.VLGameRenderer;
 import dev.latvian.mods.vidlib.feature.canvas.Canvas;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.PlayerRenderState;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,25 +34,10 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@Shadow
 	@Final
-	private Camera mainCamera;
-
-	@Shadow
-	@Final
-	private com.mojang.blaze3d.pipeline.RenderTarget mainRenderTarget;
-
-	@Shadow
-	@Final
-	private com.mojang.blaze3d.pipeline.RenderTarget hud3DTarget;
-
-	@Shadow
-	protected abstract void renderItemInHand(net.minecraft.client.renderer.state.level.CameraRenderState cameraState, net.minecraft.client.renderer.state.level.PlayerRenderState playerState, com.mojang.renderpearl.api.textures.GpuTextureView target);
-
-	@Shadow
-	@Final
 	private List<Identifier> requestedPostEffects;
 
 	@Unique
-	private boolean bobViewport;
+	private boolean vl$bobViewport;
 
 	/**
 	 * 1.21.5 redirected {@code LivingEntity.getHurtDir()} away from the hurt-camera bob.
@@ -80,41 +66,33 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 		}
 	}
 
-	/**
-	 * 1.21.5 replaced the {@code Options.hideGui} read across {@code render},
-	 * {@code renderItemInHand} and {@code shouldRenderBlockOutline}. 26.3 no longer reads that
-	 * option from the render path - the only remaining equivalent read is
-	 * {@code Hud.isHidden()} inside {@code shouldRenderBlockOutline} - so the engine decision
-	 * now only has to replace that one.
-	 */
-	@ModifyExpressionValue(method = "shouldRenderBlockOutline", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Hud;isHidden()Z"))
-	private boolean vl$hideGui(boolean original) {
-		return ClientGameEngine.INSTANCE.hideGui(minecraft);
+	@Inject(method = "shouldRenderBlockOutline", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getCameraEntity()Lnet/minecraft/world/entity/Entity;"), cancellable = true)
+	private void vl$hideGui(CallbackInfoReturnable<Boolean> cir) {
+		if (ClientGameEngine.INSTANCE.hideBlockOutline(minecraft)) {
+			cir.setReturnValue(false);
+		}
 	}
 
-	@Inject(method = "render3dHud", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemInHand(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lnet/minecraft/client/renderer/state/level/PlayerRenderState;Lcom/mojang/renderpearl/api/textures/GpuTextureView;)V", shift = At.Shift.BY))
-	private void vl$render(CameraRenderState cameraState, PlayerRenderState playerState, net.minecraft.client.renderer.state.OptionsRenderState optionsState, boolean hud3d, CallbackInfo ci) {
-		if (minecraft.isGameLoadFinished() && this.minecraft.level != null && ClientGameEngine.INSTANCE.shouldRenderHand(minecraft)) {
-			var profilerfiller = Profiler.get();
-			profilerfiller.push("hand");
-			renderItemInHand(cameraState, playerState, (hud3d ? hud3DTarget : mainRenderTarget).getDepthTextureView());
-			profilerfiller.pop();
+	@WrapOperation(method = "render3dHud", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;renderItemInHand(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lnet/minecraft/client/renderer/state/level/PlayerRenderState;Lcom/mojang/renderpearl/api/textures/GpuTextureView;)V"))
+	private void vl$render(GameRenderer instance, CameraRenderState cameraState, PlayerRenderState playerState, GpuTextureView depthTextureView, Operation<Void> original) {
+		if (ClientGameEngine.INSTANCE.shouldRenderHand(minecraft)) {
+			original.call(instance, cameraState, playerState, depthTextureView);
 		}
 	}
 
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
 	private void vl$bobViewport(CallbackInfo ci) {
-		bobViewport = true;
+		vl$bobViewport = true;
 	}
 
 	@Inject(method = "renderItemInHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
 	private void vl$bobItem(CameraRenderState cameraState, PlayerRenderState playerState, com.mojang.renderpearl.api.textures.GpuTextureView target, CallbackInfo ci) {
-		bobViewport = false;
+		vl$bobViewport = false;
 	}
 
 	@Inject(method = "bobView", at = @At("HEAD"), cancellable = true)
 	private void vl$bobView(CameraRenderState cameraState, PoseStack poseStack, CallbackInfo ci) {
-		if (bobViewport) {
+		if (vl$bobViewport) {
 			ci.cancel();
 		}
 	}

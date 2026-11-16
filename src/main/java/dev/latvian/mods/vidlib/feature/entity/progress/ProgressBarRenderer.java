@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.entity.progress;
 
-import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -10,7 +9,7 @@ import net.minecraft.util.Mth;
 
 public interface ProgressBarRenderer {
 	static void draw(Minecraft mc, GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
-		if (mc.level == null || ClientGameEngine.INSTANCE.hideGui(mc) || ClientSessionData.of(mc).isReplay) {
+		if (mc.level == null || mc.gui.hud.isHidden() || ClientSessionData.of(mc).isReplay) {
 			return;
 		}
 

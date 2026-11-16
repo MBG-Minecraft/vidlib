@@ -35,7 +35,7 @@ public class StructureProp extends Prop {
 	public static final PropData<StructureProp, Integer> BLOCK_LIGHT = PropData.createInt(StructureProp.class, "block_light", p -> p.blockLight, (p, v) -> p.blockLight = v, 0, 15);
 
 	@AutoRegister
-	public static final PropType<StructureProp> TYPE = PropType.create(ID.vidlib("structure"), StructureProp::new,
+	public static final PropType<StructureProp> TYPE = PropType.create("structure", StructureProp::new,
 		TICK,
 		LIFESPAN,
 		POSITION,

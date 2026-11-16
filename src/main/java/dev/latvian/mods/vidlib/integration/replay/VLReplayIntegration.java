@@ -298,7 +298,7 @@ public class VLReplayIntegration {
 				for (var propType : PropType.SORTED.get()) {
 					boolean visible = !ClientProps.HIDDEN_PROP_TYPES.contains(propType);
 
-					if (ImGui.selectable((visible ? ImIcons.VISIBLE : ImIcons.INVISIBLE) + " " + propType.id().toString(), visible)) {
+					if (ImGui.selectable((visible ? ImIcons.VISIBLE : ImIcons.INVISIBLE) + " " + propType.id(), visible)) {
 						if (visible) {
 							ClientProps.HIDDEN_PROP_TYPES.add(propType);
 						} else {
