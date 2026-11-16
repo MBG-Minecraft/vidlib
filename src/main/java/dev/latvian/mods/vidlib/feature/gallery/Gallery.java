@@ -185,20 +185,14 @@ public class Gallery<K> {
 		);
 	}
 
-	/**
-	 * 26.3 replacement for {@code DynamicTexture#setClamp} / {@code DynamicTexture#setFilter}:
-	 * {@code AbstractTexture} now exposes a single (protected) {@code sampler}, so the requested
-	 * address/filter mode has to be baked into an overriding {@link #getSampler()}.
-	 */
 	public static DynamicTexture samplerTexture(Supplier<String> label, NativeImage image, boolean blur) {
 		FilterMode filter = blur ? FilterMode.LINEAR : FilterMode.NEAREST;
-		GpuSampler sampler = RenderSystem.getSamplerCache()
+		GpuSampler s = RenderSystem.getSamplerCache()
 			.getSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, filter, filter, false);
 
 		return new DynamicTexture(label, image) {
-			@Override
-			public GpuSampler getSampler() {
-				return sampler;
+			{
+				this.sampler = s;
 			}
 		};
 	}

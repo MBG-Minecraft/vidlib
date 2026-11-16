@@ -1,17 +1,21 @@
 package dev.latvian.mods.vidlib.core.api.client;
 
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.util.ID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.BlitRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import org.joml.Matrix3x2f;
 
 import java.util.List;
 
@@ -25,6 +29,30 @@ public interface VLGuiGraphics {
 
 	default Minecraft vl$mc() {
 		return Minecraft.getInstance();
+	}
+
+	// Draw a texture masked by a second texture. Minecraft's GuiGraphicsExtractor#blit does a single texture
+	default void vl$blitMasked(RenderPipeline pipeline, Identifier texture, Identifier mask, int x, int y, float u, float v, int width, int height, int textureWidth, int textureHeight, int color) {
+		var graphics = vl$self();
+		var manager = vl$mc().getTextureManager();
+		var tex = manager.getTexture(texture);
+		var maskTex = manager.getTexture(mask);
+
+		graphics.submitGuiElementRenderState(new BlitRenderState(
+			pipeline,
+			TextureSetup.doubleTexture(tex.getTextureView(), tex.getSampler(), maskTex.getTextureView(), maskTex.getSampler()),
+			new Matrix3x2f(graphics.pose()),
+			x,
+			y,
+			x + width,
+			y + height,
+			u / textureWidth,
+			(u + width) / textureWidth,
+			v / textureHeight,
+			(v + height) / textureHeight,
+			color,
+			graphics.peekScissorStack()
+		));
 	}
 
 	default void healthBar(int x, int y, int w, int h, float hp, int alpha) {

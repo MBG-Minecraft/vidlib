@@ -118,7 +118,7 @@ public interface Pins {
 				int pinAlpha = pin.alpha << 24;
 				int pinSize = (int) (pin.size * mc.getEffectScale());
 
-				;
+				graphics.pose().pushMatrix();
 				graphics.pose().translate(wpos.x(), wpos.y() - 2F);
 				graphics.pose().translate(-pinSize / 2F, -pinSize * (1F + pin.offset));
 				graphics.pose().scale(pinSize / 512F, pinSize / 512F);
@@ -137,11 +137,13 @@ public interface Pins {
 					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.maskTexture.texturePath(), shape.x, shape.y, 0F, 0F, size, size, size, size, pin.background.withAlpha(pin.background.alphaf() * (pin.alpha / 255F)).argb());
 				}
 
-				graphics.blit(shape.maskedRenderType, screenPin.image().textureId(), shape.x, shape.y, 1F, 1F, size - 2, size - 2, size, size, pinAlpha | 0xFFFFFF);
+				graphics.vl$blitMasked(shape.maskedRenderType, screenPin.image().textureId(), shape.maskTexture.texturePath(), shape.x, shape.y, 1F, 1F, size - 2, size - 2, size, size, pinAlpha | 0xFFFFFF);
 
 				if (shape.overlayTexture != null) {
 					graphics.blit(RenderPipelines.GUI_TEXTURED, shape.overlayTexture.texturePath(), 0, 0, 0F, 0F, 512, 512, 512, 512, color);
 				}
+
+				graphics.pose().popMatrix();
 			}
 		}
 	}
