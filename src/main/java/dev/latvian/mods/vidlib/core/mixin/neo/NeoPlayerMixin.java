@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(Player.class)
 public abstract class NeoPlayerMixin extends LivingEntity implements VLPlayer {
 	@Shadow
-	private Component displayname;
+	private Component displayName;
 
 	protected NeoPlayerMixin(EntityType<? extends LivingEntity> type, Level level) {
 		super(type, level);
@@ -25,6 +25,6 @@ public abstract class NeoPlayerMixin extends LivingEntity implements VLPlayer {
 	 */
 	@Overwrite
 	public void refreshDisplayName() {
-		displayname = null;
+		displayName = null;
 	}
 }
