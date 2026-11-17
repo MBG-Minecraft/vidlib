@@ -35,6 +35,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiTableFlags;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -56,6 +57,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -108,6 +110,7 @@ public class Prop {
 	public boolean canCollide;
 	public boolean canInteract;
 	public boolean paused;
+	public long lastPlayerCollisionTime = -1L;
 
 	public Prop(PropContext<?> ctx) {
 		this.props = ctx.props();
@@ -507,7 +510,15 @@ public class Prop {
 		double w = width / 2D;
 		double d = getDepth() / 2D;
 
-		return collisionBox.intersects(pos.x - w, pos.y, pos.z - d, pos.x + w, pos.y + height, pos.z + d);
+		if (collisionBox.intersects(pos.x - w, pos.y, pos.z - d, pos.x + w, pos.y + height, pos.z + d)) {
+			if (level.isClientSide() && entity instanceof LocalPlayer player) {
+				onClientPlayerCollision(player);
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public void addCollisionShapes(@Nullable Entity entity, List<VoxelShape> shapes) {
@@ -530,15 +541,14 @@ public class Prop {
 
 	@Nullable
 	public PropHitResult clip(ClipContext ctx) {
-		// 26.3 made ClipContext#collisionContext private with no accessor; the entity was only ever
-		// forwarded to canInteract/getClipBoxes, both of which ignore it.
-		var entity = (Entity) null;
-
-		if (canInteract(entity)) {
-			var hit = AABB.clip(getClipBoxes(entity), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
-
-			if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
-				return new PropHitResult(this, hit.getLocation(), hit.getDirection(), BlockPos.containing(hit.getLocation()), false);
+		var collisionContext = ctx.collisionContext;
+		if (collisionContext instanceof EntityCollisionContext entityContext) {
+			var entity = entityContext.getEntity();
+			if (canInteract(entity)) {
+				var hit = AABB.clip(getClipBoxes(entity), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
+				if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
+					return new PropHitResult(this, hit.getLocation(), hit.getDirection(), BlockPos.containing(hit.getLocation()), false);
+				}
 			}
 		}
 
@@ -563,6 +573,28 @@ public class Prop {
 		if (button == 0) {
 			player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
 		}
+	}
+
+	public void onClientPlayerCollision(LocalPlayer player) {
+		// Not needed in a Flashback context, because the server isn't real, and this event already happened in the recording.
+		if (clientSideOnly || props.levelData.globalData.isReplay) {
+			return;
+		}
+
+		var time = level.getGameTime();
+		var last = lastPlayerCollisionTime;
+		lastPlayerCollisionTime = time;
+		if (last >= 0L && time - last <= 2L) {
+			return;
+		}
+
+		double w = width / 2D;
+		double d = getDepth() / 2D;
+		var inside = player.getBoundingBox().intersects(pos.x - w, pos.y, pos.z - d, pos.x + w, pos.y + height, pos.z + d);
+		PlayerTarget.of(player).c2s(new PropCollisionPayload(id, player.position(), inside));
+	}
+
+	public void onServerCollision(ServerPlayer player, Vec3 at, boolean inside) {
 	}
 
 	public void imgui(ImGraphics graphics, float delta) {
