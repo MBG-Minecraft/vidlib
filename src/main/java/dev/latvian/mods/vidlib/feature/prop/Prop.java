@@ -511,7 +511,7 @@ public class Prop {
 		double d = getDepth() / 2D;
 
 		if (collisionBox.intersects(pos.x - w, pos.y, pos.z - d, pos.x + w, pos.y + height, pos.z + d)) {
-			if (level.isClientSide() && entity instanceof LocalPlayer player) {
+			if (level.isClientSide() && entity instanceof Player player) {
 				onClientPlayerCollision(player);
 			}
 
@@ -575,7 +575,7 @@ public class Prop {
 		}
 	}
 
-	public void onClientPlayerCollision(LocalPlayer player) {
+	public void onClientPlayerCollision(Player player) {
 		// Not needed in a Flashback context, because the server isn't real, and this event already happened in the recording.
 		if (clientSideOnly || props.levelData.globalData.isReplay) {
 			return;
