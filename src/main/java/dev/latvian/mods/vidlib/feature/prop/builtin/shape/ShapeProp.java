@@ -15,6 +15,12 @@ import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 
 public class ShapeProp extends Prop {
+	public static final PropData<ShapeProp, Ref<Shape>> SHAPE = PropData.create(ShapeProp.class, "shape", Shape.DATA_TYPE, p -> p.shape, (p, v) -> p.shape = v);
+	public static final PropData<ShapeProp, Ref<Gradient>> COLOR = PropData.create(ShapeProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v);
+	public static final PropData<ShapeProp, Ref<Gradient>> OUTLINE_COLOR = PropData.create(ShapeProp.class, "outline_color", Gradient.DATA_TYPE, p -> p.outlineColor, (p, v) -> p.outlineColor = v);
+	public static final PropData<ShapeProp, RenderLightLayer> LIGHT_LAYER = PropData.create(ShapeProp.class, "light_layer", RenderLightLayer.DATA_TYPE, p -> p.lightLayer, (p, v) -> p.lightLayer = v);
+	public static final PropData<ShapeProp, SpriteKey> TEXTURE = PropData.create(ShapeProp.class, "texture", SpriteKey.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v);
+
 	@AutoRegister
 	public static final PropType<ShapeProp> TYPE = PropType.create("shape", ShapeProp::new,
 		TICK,
@@ -26,11 +32,11 @@ public class ShapeProp extends Prop {
 		HEIGHT,
 		CAN_COLLIDE,
 		CAN_INTERACT,
-		PropData.create(ShapeProp.class, "shape", Shape.DATA_TYPE, p -> p.shape, (p, v) -> p.shape = v),
-		PropData.create(ShapeProp.class, "color", Gradient.DATA_TYPE, p -> p.color, (p, v) -> p.color = v),
-		PropData.create(ShapeProp.class, "outline_color", Gradient.DATA_TYPE, p -> p.outlineColor, (p, v) -> p.outlineColor = v),
-		PropData.create(ShapeProp.class, "light_layer", RenderLightLayer.DATA_TYPE, p -> p.lightLayer, (p, v) -> p.lightLayer = v),
-		PropData.create(ShapeProp.class, "texture", SpriteKey.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v)
+		SHAPE,
+		COLOR,
+		OUTLINE_COLOR,
+		LIGHT_LAYER,
+		TEXTURE
 	);
 
 	public Ref<Shape> shape;
@@ -43,7 +49,7 @@ public class ShapeProp extends Prop {
 		super(ctx);
 		this.shape = CubeShape.UNIT_CUBE;
 		this.color = Color.CYAN.withAlpha(50).toGradient().ref();
-		this.outlineColor = Color.WHITE.toGradient().ref();
+		this.outlineColor = Gradient.WHITE;
 		this.lightLayer = RenderLightLayer.NORMAL;
 		this.texture = SpriteKey.EMPTY;
 		this.canCollide = false;

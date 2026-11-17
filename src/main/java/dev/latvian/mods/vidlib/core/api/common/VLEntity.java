@@ -1,11 +1,9 @@
 package dev.latvian.mods.vidlib.core.api.common;
 
 import dev.latvian.mods.klib.entity.PlayerInput;
-import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.net.S2CPacketConsumer;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
-import dev.latvian.mods.vidlib.feature.entity.ForceEntityVelocityPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
@@ -21,23 +19,6 @@ import java.util.List;
 public interface VLEntity extends PlayerActionHandler {
 	default Entity vl$self() {
 		return (Entity) this;
-	}
-
-	default void forceSetVelocity(Vec3 velocity) {
-		var e = vl$self();
-		e.setDeltaMovement(velocity);
-
-		if (!e.level().isClientSide()) {
-			PlayerTarget.of(e.level()).s2c(new ForceEntityVelocityPayload(e.getId(), velocity));
-		}
-	}
-
-	default void forceAddVelocity(Vec3 velocity) {
-		forceAddVelocity(velocity.x, velocity.y, velocity.z);
-	}
-
-	default void forceAddVelocity(double dx, double dy, double dz) {
-		forceSetVelocity(vl$self().getDeltaMovement().add(dx, dy, dz));
 	}
 
 	default void playSound(SoundData data, boolean looping, boolean stopImmediately) {

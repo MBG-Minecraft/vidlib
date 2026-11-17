@@ -14,24 +14,37 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
 public class TextProp extends Prop {
+	public static final PropData<TextProp, Component> TEXT = PropData.create(TextProp.class, "text", DataTypes.TEXT_COMPONENT, p -> p.text, TextProp::setText);
+	public static final PropData<TextProp, Color> COLOR = PropData.create(TextProp.class, "color", Color.DATA_TYPE, p -> p.color, (p, v) -> p.color = v);
+	public static final PropData<TextProp, Boolean> SHADOW = PropData.createBoolean(TextProp.class, "shadow", p -> p.shadow, (p, v) -> p.shadow = v);
+	public static final PropData<TextProp, Boolean> SEE_THROUGH = PropData.createBoolean(TextProp.class, "see_through", p -> p.seeThrough, (p, v) -> p.seeThrough = v);
+	public static final PropData<TextProp, Integer> WRAP = PropData.createInt(TextProp.class, "wrap", p -> p.wrap, (p, v) -> p.wrap = v, 0, 1000);
+	public static final PropData<TextProp, Boolean> FULL_BRIGHT = PropData.createBoolean(TextProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v);
+	public static final PropData<TextProp, Color> BACKGROUND_COLOR = PropData.create(TextProp.class, "background_color", Color.DATA_TYPE, p -> p.backgroundColor, (p, v) -> p.backgroundColor = v);
+	public static final PropData<TextProp, Boolean> CENTERED = PropData.createBoolean(TextProp.class, "centered", p -> p.centered, (p, v) -> p.centered = v);
+	public static final PropData<TextProp, Boolean> AUTO_ROTATE_YAW = PropData.createBoolean(TextProp.class, "auto_rotate_yaw", p -> p.autoRotateYaw, (p, v) -> p.autoRotateYaw = v);
+	public static final PropData<TextProp, Boolean> AUTO_ROTATE_PITCH = PropData.createBoolean(TextProp.class, "auto_rotate_pitch", p -> p.autoRotatePitch, (p, v) -> p.autoRotatePitch = v);
+	public static final PropData<TextProp, Float> LINE_HEIGHT = PropData.createFloat(TextProp.class, "line_height", p -> p.lineHeight, (p, v) -> p.lineHeight = v, 0F, 30F);
+	public static final PropData<TextProp, Float> SHADOW_DISTANCE = PropData.createFloat(TextProp.class, "shadow_distance", p -> p.shadowDistance, (p, v) -> p.shadowDistance = v, 0F, 1F);
+
 	@AutoRegister
 	public static final PropType<TextProp> TYPE = PropType.create("text", TextProp::new,
 		POSITION,
 		YAW,
 		PITCH,
 		HEIGHT,
-		PropData.create(TextProp.class, "text", DataTypes.TEXT_COMPONENT, p -> p.text, TextProp::setText),
-		PropData.create(TextProp.class, "color", Color.DATA_TYPE, p -> p.color, (p, v) -> p.color = v),
-		PropData.createBoolean(TextProp.class, "shadow", p -> p.shadow, (p, v) -> p.shadow = v),
-		PropData.createBoolean(TextProp.class, "see_through", p -> p.seeThrough, (p, v) -> p.seeThrough = v),
-		PropData.createInt(TextProp.class, "wrap", p -> p.wrap, (p, v) -> p.wrap = v, 0, 1000),
-		PropData.createBoolean(TextProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v),
-		PropData.create(TextProp.class, "background_color", Color.DATA_TYPE, p -> p.backgroundColor, (p, v) -> p.backgroundColor = v),
-		PropData.createBoolean(TextProp.class, "centered", p -> p.centered, (p, v) -> p.centered = v),
-		PropData.createBoolean(TextProp.class, "auto_rotate_yaw", p -> p.autoRotateYaw, (p, v) -> p.autoRotateYaw = v),
-		PropData.createBoolean(TextProp.class, "auto_rotate_pitch", p -> p.autoRotatePitch, (p, v) -> p.autoRotatePitch = v),
-		PropData.createFloat(TextProp.class, "line_height", p -> p.lineHeight, (p, v) -> p.lineHeight = v, 0F, 30F),
-		PropData.createFloat(TextProp.class, "shadow_distance", p -> p.shadowDistance, (p, v) -> p.shadowDistance = v, 0F, 1F)
+		TEXT,
+		COLOR,
+		SHADOW,
+		SEE_THROUGH,
+		WRAP,
+		FULL_BRIGHT,
+		BACKGROUND_COLOR,
+		CENTERED,
+		AUTO_ROTATE_YAW,
+		AUTO_ROTATE_PITCH,
+		LINE_HEIGHT,
+		SHADOW_DISTANCE
 	);
 
 	private Component text;

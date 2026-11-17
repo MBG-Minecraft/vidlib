@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -60,6 +61,11 @@ public class ServerSessionData extends GlobalSessionData {
 	@Override
 	public long getLevelGameTime() {
 		return server.overworld().getGameTime();
+	}
+
+	@Override
+	public ResourceManager getResourceManager() {
+		return server.getResourceManager();
 	}
 
 	@Override

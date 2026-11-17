@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.imgui;
 
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.Prop;
+import dev.latvian.mods.vidlib.feature.prop.PropUI;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
@@ -68,7 +69,7 @@ public class PropExplorerPanel extends Panel {
 
 			if (graphics.collapsingHeader(prop.toString(), ImGuiTreeNodeFlags.NoTreePushOnOpen)) {
 				ClientProps.OPEN_PROPS.add(prop.id);
-				prop.imgui(graphics, delta);
+				PropUI.of(prop).imgui(graphics, delta);
 			}
 
 			if (ImGui.isItemHovered()) {

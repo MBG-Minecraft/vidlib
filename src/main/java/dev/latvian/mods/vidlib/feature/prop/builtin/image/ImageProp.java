@@ -15,6 +15,15 @@ import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.client.Minecraft;
 
 public class ImageProp extends Prop {
+	public static final PropData<ImageProp, SpriteKey> TEXTURE = PropData.create(ImageProp.class, "texture", SpriteKey.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v);
+	public static final PropData<ImageProp, Color> TINT = PropData.create(ImageProp.class, "tint", Color.DATA_TYPE, p -> p.tint, (p, v) -> p.tint = v);
+	public static final PropData<ImageProp, Boolean> SEE_THROUGH = PropData.createBoolean(ImageProp.class, "see_through", p -> p.seeThrough, (p, v) -> p.seeThrough = v);
+	public static final PropData<ImageProp, Boolean> FULL_BRIGHT = PropData.createBoolean(ImageProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v);
+	public static final PropData<ImageProp, Boolean> CENTERED = PropData.createBoolean(ImageProp.class, "centered", p -> p.centered, (p, v) -> p.centered = v);
+	public static final PropData<ImageProp, Boolean> AUTO_ROTATE_YAW = PropData.createBoolean(ImageProp.class, "auto_rotate_yaw", p -> p.autoRotateYaw, (p, v) -> p.autoRotateYaw = v);
+	public static final PropData<ImageProp, Boolean> AUTO_ROTATE_PITCH = PropData.createBoolean(ImageProp.class, "auto_rotate_pitch", p -> p.autoRotatePitch, (p, v) -> p.autoRotatePitch = v);
+	public static final PropData<ImageProp, Boolean> TRANSLUCENT = PropData.createBoolean(ImageProp.class, "translucent", p -> p.translucent, (p, v) -> p.translucent = v);
+
 	@AutoRegister
 	public static final PropType<ImageProp> TYPE = PropType.create("image", ImageProp::new,
 		POSITION,
@@ -22,14 +31,14 @@ public class ImageProp extends Prop {
 		PITCH,
 		WIDTH,
 		HEIGHT,
-		PropData.create(ImageProp.class, "texture", SpriteKey.DATA_TYPE, p -> p.texture, (p, v) -> p.texture = v),
-		PropData.create(ImageProp.class, "tint", Color.DATA_TYPE, p -> p.tint, (p, v) -> p.tint = v),
-		PropData.createBoolean(ImageProp.class, "see_through", p -> p.seeThrough, (p, v) -> p.seeThrough = v),
-		PropData.createBoolean(ImageProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v),
-		PropData.createBoolean(ImageProp.class, "centered", p -> p.centered, (p, v) -> p.centered = v),
-		PropData.createBoolean(ImageProp.class, "auto_rotate_yaw", p -> p.autoRotateYaw, (p, v) -> p.autoRotateYaw = v),
-		PropData.createBoolean(ImageProp.class, "auto_rotate_pitch", p -> p.autoRotatePitch, (p, v) -> p.autoRotatePitch = v),
-		PropData.createBoolean(ImageProp.class, "translucent", p -> p.translucent, (p, v) -> p.translucent = v)
+		TEXTURE,
+		TINT,
+		SEE_THROUGH,
+		FULL_BRIGHT,
+		CENTERED,
+		AUTO_ROTATE_YAW,
+		AUTO_ROTATE_PITCH,
+		TRANSLUCENT
 	);
 
 	public SpriteKey texture;

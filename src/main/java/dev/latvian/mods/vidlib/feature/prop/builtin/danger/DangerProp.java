@@ -9,13 +9,17 @@ import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
 
 public class DangerProp extends Prop {
+	public static final PropData<DangerProp, Float> WIDTH_MOD = PropData.createFloat(DangerProp.class, "width_mod", p -> p.widthMod, (p, v) -> p.widthMod = v, 0F, 1F);
+	public static final PropData<DangerProp, Float> MAX_HEIGHT = PropData.createFloat(DangerProp.class, "max_height", p -> p.maxHeight, (p, v) -> p.maxHeight = v, 0F, 200F);
+	public static final PropData<DangerProp, Boolean> BLINK = PropData.createBoolean(DangerProp.class, "blink", p -> p.blink, (p, v) -> p.blink = v);
+
 	@AutoRegister
 	public static final PropType<DangerProp> TYPE = PropType.create("danger", DangerProp::new,
 		POSITION,
 		WIDTH,
-		PropData.createFloat(DangerProp.class, "width_mod", p -> p.widthMod, (p, v) -> p.widthMod = v, 0F, 1F),
-		PropData.createFloat(DangerProp.class, "max_height", p -> p.maxHeight, (p, v) -> p.maxHeight = v, 0F, 200F),
-		PropData.createBoolean(DangerProp.class, "blink", p -> p.blink, (p, v) -> p.blink = v)
+		WIDTH_MOD,
+		MAX_HEIGHT,
+		BLINK
 	);
 
 	public double groundY = Double.NaN;

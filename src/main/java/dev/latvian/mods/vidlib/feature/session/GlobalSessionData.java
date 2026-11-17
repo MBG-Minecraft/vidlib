@@ -27,6 +27,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -65,6 +66,8 @@ public abstract class GlobalSessionData implements LevelGameTimeProvider {
 		this.isReplay = false;
 		this.particleCache = new Object2ObjectOpenHashMap<>();
 	}
+
+	public abstract ResourceManager getResourceManager();
 
 	public abstract PauseType getPauseType();
 

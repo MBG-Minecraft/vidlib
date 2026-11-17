@@ -135,7 +135,7 @@ public class ClientProps extends Props<ClientLevel> {
 		List<PropRenderState<?>> states = List.of();
 		List<PropRenderState<?>> sortedStates = List.of();
 
-		boolean renderDebug = ctx.mc().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES) || !ClientProps.OPEN_PROPS.isEmpty();
+		boolean renderDebug = ctx.mc().debugEntries.isCurrentlyEnabled(DebugScreenEntries.ENTITY_HITBOXES) || !OPEN_PROPS.isEmpty();
 
 		for (var entry : all) {
 			var prop = entry.prop;

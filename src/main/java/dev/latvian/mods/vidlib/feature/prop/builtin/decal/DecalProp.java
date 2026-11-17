@@ -10,6 +10,8 @@ import dev.latvian.mods.vidlib.feature.prop.PropType;
 import org.joml.Vector3d;
 
 public class DecalProp extends Prop {
+	public static final PropData<DecalProp, Decal> DECAL = PropData.create(DecalProp.class, "decal", Decal.DATA_TYPE, p -> p.decal, (p, v) -> p.decal = v);
+
 	@AutoRegister
 	public static final PropType<DecalProp> TYPE = PropType.create("decal", DecalProp::new,
 		TICK,
@@ -22,7 +24,7 @@ public class DecalProp extends Prop {
 		HEIGHT,
 		CAN_COLLIDE,
 		CAN_INTERACT,
-		PropData.create(DecalProp.class, "decal", Decal.DATA_TYPE, p -> p.decal, (p, v) -> p.decal = v)
+		DECAL
 	);
 
 	public Decal decal;

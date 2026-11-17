@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.feature.prop;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.block.BlockUtils;
+import dev.latvian.mods.klib.core.api.common.KLibClipContext;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.data.JOMLDataTypes;
 import dev.latvian.mods.klib.entity.PlayerTarget;
@@ -16,26 +17,12 @@ import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CuboidShape;
 import dev.latvian.mods.klib.util.Cast;
-import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
-import dev.latvian.mods.vidlib.feature.canvas.DepthOfFieldCanvas;
-import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
-import dev.latvian.mods.vidlib.feature.imgui.ImUpdate;
-import dev.latvian.mods.vidlib.feature.imgui.builder.ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.sound.PositionedSoundData;
 import dev.latvian.mods.vidlib.feature.sound.SoundData;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
-import dev.latvian.mods.vidlib.integration.replay.SelectedPropReplaySessionData;
-import dev.latvian.mods.vidlib.math.kvector.FollowingPropKVector;
-import imgui.ImGui;
-import imgui.flag.ImGuiTableFlags;
-import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -66,11 +53,9 @@ import org.joml.Vector3dc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 public class Prop {
@@ -94,9 +79,9 @@ public class Prop {
 	public final Level level;
 	public int id;
 	PropRemoveType removed;
-	private List<Pair<PropData<?, ?>, ImBuilder<?>>> imguiBuilders;
 	Map<PropData<?, ?>, Object> defaultValues = Map.of();
 	public boolean clientSideOnly;
+	Object ui;
 
 	public int prevTick;
 	public int tick;
@@ -541,11 +526,12 @@ public class Prop {
 
 	@Nullable
 	public PropHitResult clip(ClipContext ctx) {
-		var collisionContext = ctx.collisionContext;
-		if (collisionContext instanceof EntityCollisionContext entityContext) {
+		if (ctx instanceof KLibClipContext c && c.klib$getCollisionContext() instanceof EntityCollisionContext entityContext) {
 			var entity = entityContext.getEntity();
+
 			if (canInteract(entity)) {
 				var hit = AABB.clip(getClipBoxes(entity), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
+
 				if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
 					return new PropHitResult(this, hit.getLocation(), hit.getDirection(), BlockPos.containing(hit.getLocation()), false);
 				}
@@ -584,6 +570,7 @@ public class Prop {
 		var time = level.getGameTime();
 		var last = lastPlayerCollisionTime;
 		lastPlayerCollisionTime = time;
+
 		if (last >= 0L && time - last <= 2L) {
 			return;
 		}
@@ -595,256 +582,6 @@ public class Prop {
 	}
 
 	public void onServerCollision(ServerPlayer player, Vec3 at, boolean inside) {
-	}
-
-	public void imgui(ImGraphics graphics, float delta) {
-		graphics.pushStack();
-
-		if (graphics.isReplay && !clientSideOnly) {
-			ImGui.beginDisabled();
-		}
-
-		graphics.setRedButton();
-
-		if (ImGui.button(ImIcons.TRASHCAN + "###remove")) {
-			graphics.mc.runClientCommand((clientSideOnly ? "client-prop remove id " : "prop remove id ") + getIdString());
-		}
-
-		graphics.hoveredTooltip("Remove");
-
-		if (graphics.isReplay && !clientSideOnly) {
-			ImGui.endDisabled();
-		}
-
-		graphics.popStack();
-
-		ImGui.sameLine();
-
-		boolean isHidden = ClientProps.HIDDEN_PROPS.contains(id);
-
-		if (graphics.button((isHidden ? ImIcons.INVISIBLE : ImIcons.VISIBLE) + "###visible", isHidden ? ImColorVariant.RED : null)) {
-			if (isHidden) {
-				ClientProps.HIDDEN_PROPS.remove(id);
-			} else {
-				ClientProps.HIDDEN_PROPS.add(id);
-			}
-		}
-
-		graphics.hoveredTooltip(isHidden ? "Hidden" : "Visible");
-
-		ImGui.sameLine();
-
-		boolean isTypeHidden = ClientProps.HIDDEN_PROP_TYPES.contains(type);
-
-		if (graphics.button((isTypeHidden ? ImIcons.INVISIBLE : ImIcons.VISIBLE) + ImIcons.ASTERIX.toString() + "###type-visible", isTypeHidden ? ImColorVariant.RED : null)) {
-			if (isTypeHidden) {
-				ClientProps.HIDDEN_PROP_TYPES.remove(type);
-			} else {
-				ClientProps.HIDDEN_PROP_TYPES.add(type);
-			}
-		}
-
-		graphics.hoveredTooltip(isTypeHidden ? "Type Hidden" : "Type Visible");
-
-		ImGui.sameLine();
-
-		if (ReplayProp.LIST != null && !clientSideOnly) {
-			ImGui.beginDisabled();
-		}
-
-		if (ImGui.button(ImIcons.PASTE + "###clone")) {
-			graphics.mc.runClientCommand((clientSideOnly ? "client-prop clone " : "prop clone ") + getIdString());
-		}
-
-		graphics.hoveredTooltip("Clone");
-
-		if (ReplayProp.LIST != null && !clientSideOnly) {
-			ImGui.endDisabled();
-		}
-
-		if (DepthOfFieldCanvas.ENABLED.get()) {
-			ImGui.sameLine();
-
-			if (ImGui.button(ImIcons.APERTURE + "###focus-dof")) {
-				DepthOfFieldCanvas.focusPosKVector = new FollowingPropKVector(id, PositionType.EYES).ref();
-			}
-
-			graphics.hoveredTooltip("Focus DoF");
-		}
-
-		ImGui.sameLine();
-
-		if (ImGui.button(ImIcons.DATABASE + "###copy-id")) {
-			ImGui.setClipboardText(getIdString());
-		}
-
-		graphics.hoveredTooltip("Copy ID");
-
-		ImGui.sameLine();
-
-		if (graphics.button(ImIcons.COPY + "###copy-nbt", ImColorVariant.LIME)) {
-			ImGui.setClipboardText(encode(graphics.nbtOps).toString());
-		}
-
-		graphics.hoveredTooltip("Copy NBT");
-
-		ImGui.sameLine();
-
-		if (graphics.smallButton(ImIcons.LOCATION + "###teleport", ImColorVariant.DARK_PURPLE)) {
-			graphics.mc.runClientCommand("tp @s " + pos.x + " " + pos.y + " " + pos.z);
-		}
-
-		graphics.hoveredTooltip("Teleport To");
-
-		if (clientSideOnly) {
-			ImGui.sameLine();
-			graphics.button(ImIcons.WARNING + "###client-only", ImColorVariant.ORANGE);
-			graphics.hoveredTooltip("Client-Side Only!");
-		}
-
-		if (imguiBuilders == null) {
-			imguiBuilders = new ArrayList<>(type.data().size());
-
-			for (var data : type.unsortedData()) {
-				if (data == TICK || data == LIFESPAN || data == PAUSED) {
-					continue;
-				}
-
-				// FIXME if (data.imBuilder() != null) {
-				// 	imguiBuilders.add(Pair.of(data, data.imBuilder().get()));
-				// }
-			}
-
-			imguiBuilders = List.copyOf(imguiBuilders);
-		}
-
-		if (ImGui.beginTable("###data", 3, ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.Borders)) {
-
-			if (hasData(TICK)) {
-				ImGui.tableNextRow();
-				ImGui.pushID("tick");
-				ImGui.tableNextColumn();
-				ImGui.alignTextToFramePadding();
-
-				if (ImGui.smallButton(ImIcons.UNDO + "###reset")) {
-					prevTick = 0;
-					tick = 0;
-					c2sEdit(TICK, 0, true);
-				}
-
-				ImGui.tableNextColumn();
-				ImGui.alignTextToFramePadding();
-
-				if (ImGui.checkbox("tick", !paused)) {
-					if (paused) {
-						graphics.mc.runClientCommand((clientSideOnly ? "client-prop unpause " : "prop unpause ") + getIdString());
-					} else {
-						graphics.mc.runClientCommand((clientSideOnly ? "client-prop pause " : "prop pause ") + getIdString());
-					}
-				}
-
-				ImGui.tableNextColumn();
-				ImGui.alignTextToFramePadding();
-
-				int lifespan1 = lifespan > 0 && hasData(LIFESPAN) ? lifespan : 0;
-				var tickText = lifespan1 > 0 ? "%,d / %,d".formatted(tick, lifespan1) : "%,d".formatted(tick);
-
-				if (paused) {
-					ImGuiUtils.INT.set(tick);
-					ImGui.pushItemWidth(-1F);
-					ImGui.dragInt("###value", ImGuiUtils.INT.getData(), 1F, 0, 1000000, tickText);
-					ImGui.popItemWidth();
-
-					var update = ImUpdate.itemEdit();
-
-					if (update.isAny()) {
-						c2sEdit(TICK, Math.max(0, ImGuiUtils.INT.get()), update.isFull());
-					}
-				} else {
-					ImGui.text(tickText);
-				}
-
-				ImGui.popID();
-
-				if (lifespan1 > 0) {
-					ImGui.tableNextRow();
-					ImGui.pushID("progress");
-					ImGui.tableNextColumn();
-					ImGui.beginDisabled();
-					ImGui.alignTextToFramePadding();
-					ImGui.smallButton(ImIcons.UNDO + "###reset");
-					ImGui.endDisabled();
-					ImGui.tableNextColumn();
-					ImGui.alignTextToFramePadding();
-					ImGui.text("progress");
-					ImGui.tableNextColumn();
-					ImGui.progressBar(getRelativeTick(delta, 0F), 0F, 20F);
-					ImGui.popID();
-				}
-			}
-
-			for (var entry : imguiBuilders) {
-				var data = entry.left();
-				var builder = entry.right();
-
-				ImGui.tableNextRow();
-				ImGui.pushID(data.key());
-				ImGui.tableNextColumn();
-				ImGui.alignTextToFramePadding();
-
-				var value = getData(data);
-
-				try {
-					builder.set(Cast.to(value));
-				} catch (Throwable ex) {
-					graphics.stackTrace(ex);
-				}
-
-				var defaultValue = defaultValues.get(data);
-				var isDefault = Objects.equals(defaultValue, value);
-
-				if (isDefault) {
-					ImGui.beginDisabled();
-				}
-
-				if (ImGui.smallButton(ImIcons.UNDO + "###reset")) {
-					c2sEdit(data, Cast.to(defaultValue), true);
-				}
-
-				if (!isDefault && ImGui.isItemHovered()) {
-					graphics.tooltip("Reset to " + defaultValue);
-				}
-
-				if (isDefault) {
-					ImGui.endDisabled();
-				}
-
-				ImGui.tableNextColumn();
-				ImGui.alignTextToFramePadding();
-				graphics.redTextIf(data.key(), !builder.isValid());
-
-				ImGui.tableNextColumn();
-				ImGui.pushItemWidth(-1F);
-				ImGui.pushID("###value");
-				var update = builder.imgui(graphics);
-				ImGui.popID();
-				ImGui.popItemWidth();
-
-				if (update.isAny() && builder.isValid()) {
-					var selectedPropData = ReplayAPI.getActiveSessionData(SelectedPropReplaySessionData.TYPE);
-
-					if (selectedPropData != null) {
-						selectedPropData.makePropKeyframes.add(this);
-					}
-
-					c2sEdit(data, Cast.to(builder.build()), update.isFull());
-				}
-
-				ImGui.popID();
-			}
-
-			ImGui.endTable();
-		}
 	}
 
 	public void playSound(PositionedSoundData data, KNumberVariables variables) {
