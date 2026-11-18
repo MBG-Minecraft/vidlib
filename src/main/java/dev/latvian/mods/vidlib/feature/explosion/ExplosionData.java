@@ -479,7 +479,8 @@ public class ExplosionData {
 				z *= ad * entity.horizontalKnockback;
 				y += entity.verticalKnockback;
 
-				e.forceAddVelocity(new Vec3(x, y, z));
+				e.addDeltaMovement(new Vec3(x, y, z));
+				e.syncVelocity = true;
 			}
 		}
 	}

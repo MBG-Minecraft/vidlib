@@ -85,6 +85,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -204,6 +205,11 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 	@Override
 	protected ClientPlayerSessionData createPlayerData(UUID uuid) {
 		return uuid.equals(localPlayer.uuid) ? localPlayer : new RemotePlayerSessionData(this, uuid);
+	}
+
+	@Override
+	public ResourceManager getResourceManager() {
+		return mc.getResourceManager();
 	}
 
 	@Override

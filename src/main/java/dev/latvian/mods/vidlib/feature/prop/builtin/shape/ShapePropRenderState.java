@@ -25,14 +25,19 @@ public class ShapePropRenderState extends PropRenderState<ShapeProp> {
 
 	@Override
 	public void extract(ShapeProp prop, VidLibExtractContext ctx) {
+		if (prop.shape == null || prop.color == null || prop.outlineColor == null) {
+			invisible = true;
+			return;
+		}
+
 		var progress = prop.getRelativeTick(ctx.delta(), 1F);
 		shape = prop.shape.value();
 		width = (float) prop.width;
 		height = (float) prop.height;
 
 		rotate.identity();
-		rotate.rotateY((float) Math.toDegrees(prop.getYaw(ctx.delta())));
-		rotate.rotateX((float) Math.toDegrees(prop.getPitch(ctx.delta())));
+		rotate.rotateY((float) Math.toRadians(prop.getYaw(ctx.delta())));
+		rotate.rotateX((float) Math.toRadians(prop.getPitch(ctx.delta())));
 
 		color = prop.color.value().get(progress).argb();
 		outlineColor = prop.canInteract && ctx.mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? 0xFFFFFFFF : prop.outlineColor.value().get(progress).argb();

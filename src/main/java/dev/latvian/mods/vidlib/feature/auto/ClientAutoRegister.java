@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.feature.auto;
 
 import dev.latvian.mods.klib.util.Lazy;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.prop.PropUI;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
@@ -16,8 +17,7 @@ import java.util.List;
  * @see EntityRendererHolder
  * @see BlockEntityRendererHolder
  * @see ClientCommandHolder
- * @see dev.latvian.mods.vidlib.feature.canvas.Canvas
- * @see dev.latvian.mods.vidlib.feature.prop.PropRenderer.Holder
+ * @see PropUI.Factory
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

@@ -12,18 +12,25 @@ import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import net.minecraft.client.Minecraft;
 
 public class TVProp extends Prop {
+	public static final PropData<TVProp, Integer> VIDEO_WIDTH = PropData.createInt(TVProp.class, "video_width", p -> p.videoWidth, (p, v) -> p.videoWidth = v, 1, 1920);
+	public static final PropData<TVProp, Integer> VIDEO_HEIGHT = PropData.createInt(TVProp.class, "video_height", p -> p.videoHeight, (p, v) -> p.videoHeight = v, 1, 1080);
+	public static final PropData<TVProp, Boolean> CENTERED = PropData.createBoolean(TVProp.class, "centered", p -> p.centered, (p, v) -> p.centered = v);
+	public static final PropData<TVProp, Boolean> AUTO_ROTATE_YAW = PropData.createBoolean(TVProp.class, "auto_rotate_yaw", p -> p.autoRotateYaw, (p, v) -> p.autoRotateYaw = v);
+	public static final PropData<TVProp, Boolean> AUTO_ROTATE_PITCH = PropData.createBoolean(TVProp.class, "auto_rotate_pitch", p -> p.autoRotatePitch, (p, v) -> p.autoRotatePitch = v);
+	public static final PropData<TVProp, Boolean> FULL_BRIGHT = PropData.createBoolean(TVProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v);
+
 	@AutoRegister
 	public static final PropType<TVProp> TYPE = PropType.create("tv", TVProp::new,
 		POSITION,
 		YAW,
 		PITCH,
 		HEIGHT,
-		PropData.createInt(TVProp.class, "video_width", p -> p.videoWidth, (p, v) -> p.videoWidth = v, 1, 1920),
-		PropData.createInt(TVProp.class, "video_height", p -> p.videoHeight, (p, v) -> p.videoHeight = v, 1, 1080),
-		PropData.createBoolean(TVProp.class, "centered", p -> p.centered, (p, v) -> p.centered = v),
-		PropData.createBoolean(TVProp.class, "auto_rotate_yaw", p -> p.autoRotateYaw, (p, v) -> p.autoRotateYaw = v),
-		PropData.createBoolean(TVProp.class, "auto_rotate_pitch", p -> p.autoRotatePitch, (p, v) -> p.autoRotatePitch = v),
-		PropData.createBoolean(TVProp.class, "full_bright", p -> p.fullBright, (p, v) -> p.fullBright = v)
+		VIDEO_WIDTH,
+		VIDEO_HEIGHT,
+		CENTERED,
+		AUTO_ROTATE_YAW,
+		AUTO_ROTATE_PITCH,
+		FULL_BRIGHT
 	);
 
 	public int videoWidth;

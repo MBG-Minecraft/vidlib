@@ -43,6 +43,7 @@ import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.prop.PropData;
 import dev.latvian.mods.vidlib.feature.prop.PropHitResult;
 import dev.latvian.mods.vidlib.feature.prop.PropType;
+import dev.latvian.mods.vidlib.feature.prop.PropUI;
 import dev.latvian.mods.vidlib.feature.prop.RemovePropsPayload;
 import dev.latvian.mods.vidlib.feature.prop.ReplayProp;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
@@ -370,7 +371,7 @@ public class VLReplayIntegration {
 			if (prop != null) {
 				ClientProps.OPEN_PROPS.add(prop.id);
 				ImGui.text(prop.toString());
-				prop.imgui(event.getGraphics(), mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
+				PropUI.of(prop).imgui(event.getGraphics(), mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
 			}
 
 			ImGui.endPopup();
