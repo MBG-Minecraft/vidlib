@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.platform;
 
 import de.maxhenkel.voicechat.Voicechat;
 import dev.latvian.mods.klib.platform.PlatformHelper;
-import dev.latvian.mods.vidlib.feature.integration.voicechat.VoiceChatIntegration;
+import dev.latvian.mods.vidlib.integration.voicechat.VoiceChatIntegration;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import dev.mrbeastgaming.mods.hub.api.gateway.AvailableWorldsEvent;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;

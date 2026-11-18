@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.feature.integration.voicechat;
+package dev.latvian.mods.vidlib.integration.voicechat;
 
 import de.maxhenkel.voicechat.Voicechat;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
