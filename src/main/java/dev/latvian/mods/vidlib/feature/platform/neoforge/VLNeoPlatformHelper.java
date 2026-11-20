@@ -9,8 +9,8 @@ import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeTypeRegistryEvent;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.capture.PacketCaptureEvent;
+import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepType;
 import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepTypeRegistryEvent;
-import dev.latvian.mods.vidlib.feature.cutscene.step.NewCutsceneStepType;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.font.TTFFileRegistryEvent;
@@ -96,7 +96,7 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	}
 
 	@Override
-	public void collectCutsceneStepTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, NewCutsceneStepType> registry) {
+	public void collectCutsceneStepTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, CutsceneStepType> registry) {
 		super.collectCutsceneStepTypes(registry);
 		ModLoader.postEvent(new CutsceneStepTypeRegistryEvent(registry));
 	}

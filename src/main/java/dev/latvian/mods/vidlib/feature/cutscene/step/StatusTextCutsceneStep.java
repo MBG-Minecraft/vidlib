@@ -1,55 +1,40 @@
 package dev.latvian.mods.vidlib.feature.cutscene.step;
 
-import com.mojang.serialization.Codec;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
-import net.minecraft.client.Minecraft;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.StreamCodec;
 
-public class StatusTextCutsceneStep extends CutsceneStep {
-	public static final Codec<StatusTextCutsceneStep> CODEC = ComponentSerialization.CODEC.xmap(StatusTextCutsceneStep::new, s -> s.text);
-
-	public static final StreamCodec<RegistryFriendlyByteBuf, StatusTextCutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
-		ComponentSerialization.TRUSTED_STREAM_CODEC, o -> o.text,
-		StatusTextCutsceneStep::new
+public record StatusTextCutsceneStep(Component text) implements CutsceneStepType {
+	public static final DynamicType<RegistryFriendlyByteBuf, CutsceneStepType> TYPE = DynamicType.create(
+		"status_text",
+		"text",
+		ComponentSerialization.CODEC,
+		ComponentSerialization.STREAM_CODEC,
+		StatusTextCutsceneStep::new,
+		StatusTextCutsceneStep::text,
+		Component.empty()
 	);
 
-	public final Component text;
-
-	public StatusTextCutsceneStep(Component text) {
-		this.text = text;
-	}
-
-	public StatusTextCutsceneStep() {
-		this.text = Component.empty();
+	@Override
+	public DynamicType<RegistryFriendlyByteBuf, CutsceneStepType> type() {
+		return TYPE;
 	}
 
 	@Override
-	public CutsceneStepType type() {
-		return CutsceneStepType.STATUS_TEXT;
+	public String getDisplayName() {
+		return "Status Text";
 	}
 
 	@Override
-	public void tick(CutsceneState state, KNumberContext ctx) {
-		var mc = Minecraft.getInstance();
-
-		if (mc.player != null) {
-			mc.player.sendOverlayMessage(text);
-		}
+	public ImIcon getIcon() {
+		return ImIcons.TEXT;
 	}
 
 	@Override
-	public void exit(CutsceneState state, KNumberContext ctx) {
-		if (snap) {
-			var mc = Minecraft.getInstance();
-
-			if (mc.player != null) {
-				mc.player.sendOverlayMessage(Component.empty());
-			}
-		}
+	public boolean getHasSnap() {
+		return true;
 	}
 }

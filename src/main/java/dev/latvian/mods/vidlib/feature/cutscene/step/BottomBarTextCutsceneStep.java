@@ -1,39 +1,35 @@
 package dev.latvian.mods.vidlib.feature.cutscene.step;
 
-import com.mojang.serialization.Codec;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.StreamCodec;
 
-public class BottomBarTextCutsceneStep extends CutsceneStep {
-	public static final Codec<BottomBarTextCutsceneStep> CODEC = ComponentSerialization.CODEC.xmap(BottomBarTextCutsceneStep::new, s -> s.text);
-
-	public static final StreamCodec<RegistryFriendlyByteBuf, BottomBarTextCutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
-		ComponentSerialization.TRUSTED_STREAM_CODEC, s -> s.text,
-		BottomBarTextCutsceneStep::new
+public record BottomBarTextCutsceneStep(Component text) implements CutsceneStepType {
+	public static final DynamicType<RegistryFriendlyByteBuf, CutsceneStepType> TYPE = DynamicType.create(
+		"bottom_bar_text",
+		"text",
+		ComponentSerialization.CODEC,
+		ComponentSerialization.STREAM_CODEC,
+		BottomBarTextCutsceneStep::new,
+		BottomBarTextCutsceneStep::text,
+		Component.empty()
 	);
 
-	public final Component text;
-
-	public BottomBarTextCutsceneStep(Component text) {
-		this.text = text;
-	}
-
-	public BottomBarTextCutsceneStep() {
-		this.text = Component.empty();
+	@Override
+	public DynamicType<RegistryFriendlyByteBuf, CutsceneStepType> type() {
+		return TYPE;
 	}
 
 	@Override
-	public CutsceneStepType type() {
-		return CutsceneStepType.BOTTOM_BAR_TEXT;
+	public String getDisplayName() {
+		return "Bottom Bar Text";
 	}
 
 	@Override
-	public void tick(CutsceneState state, KNumberContext ctx) {
-		state.bottomBar.add(text);
+	public ImIcon getIcon() {
+		return ImIcons.TEXT;
 	}
 }

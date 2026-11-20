@@ -1,39 +1,35 @@
 package dev.latvian.mods.vidlib.feature.cutscene.step;
 
-import com.mojang.serialization.Codec;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.knumber.KNumberContext;
-import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.StreamCodec;
 
-public class TopBarTextCutsceneStep extends CutsceneStep {
-	public static final Codec<TopBarTextCutsceneStep> CODEC = ComponentSerialization.CODEC.xmap(TopBarTextCutsceneStep::new, s -> s.text);
-
-	public static final StreamCodec<RegistryFriendlyByteBuf, TopBarTextCutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
-		ComponentSerialization.TRUSTED_STREAM_CODEC, s -> s.text,
-		TopBarTextCutsceneStep::new
+public record TopBarTextCutsceneStep(Component text) implements CutsceneStepType {
+	public static final DynamicType<RegistryFriendlyByteBuf, CutsceneStepType> TYPE = DynamicType.create(
+		"top_bar_text",
+		"text",
+		ComponentSerialization.CODEC,
+		ComponentSerialization.STREAM_CODEC,
+		TopBarTextCutsceneStep::new,
+		TopBarTextCutsceneStep::text,
+		Component.empty()
 	);
 
-	public final Component text;
-
-	public TopBarTextCutsceneStep(Component text) {
-		this.text = text;
-	}
-
-	public TopBarTextCutsceneStep() {
-		this.text = Component.empty();
+	@Override
+	public DynamicType<RegistryFriendlyByteBuf, CutsceneStepType> type() {
+		return TYPE;
 	}
 
 	@Override
-	public CutsceneStepType type() {
-		return CutsceneStepType.TOP_BAR_TEXT;
+	public String getDisplayName() {
+		return "Top Bar Text";
 	}
 
 	@Override
-	public void tick(CutsceneState state, KNumberContext ctx) {
-		state.topBar.add(text);
+	public ImIcon getIcon() {
+		return ImIcons.TEXT;
 	}
 }

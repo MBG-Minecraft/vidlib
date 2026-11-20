@@ -1,52 +1,40 @@
 package dev.latvian.mods.vidlib.feature.cutscene.step;
 
-import com.mojang.serialization.Codec;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.knumber.KNumber;
-import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 
-public class BarVisibilityCutsceneStep extends CutsceneStep {
-	public static final Codec<BarVisibilityCutsceneStep> CODEC = KNumber.CODEC.xmap(BarVisibilityCutsceneStep::new, s -> s.visibility);
-
-	public static final StreamCodec<RegistryFriendlyByteBuf, BarVisibilityCutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
-		KNumber.STREAM_CODEC, o -> o.visibility,
-		BarVisibilityCutsceneStep::new
+public record BarVisibilityCutsceneStep(Ref<KNumber> visibility) implements CutsceneStepType {
+	public static final DynamicType<RegistryFriendlyByteBuf, CutsceneStepType> TYPE = DynamicType.create(
+		"bar_visibility",
+		"visibility",
+		KNumber.CODEC,
+		KNumber.STREAM_CODEC,
+		BarVisibilityCutsceneStep::new,
+		BarVisibilityCutsceneStep::visibility,
+		KNumber.ONE
 	);
 
-	public final Ref<KNumber> visibility;
-
-	public BarVisibilityCutsceneStep(Ref<KNumber> visibility) {
-		this.visibility = visibility;
-	}
-
-	public BarVisibilityCutsceneStep() {
-		this.visibility = KNumber.ONE;
+	@Override
+	public DynamicType<RegistryFriendlyByteBuf, CutsceneStepType> type() {
+		return TYPE;
 	}
 
 	@Override
-	public CutsceneStepType type() {
-		return CutsceneStepType.BAR_VISIBILITY;
+	public String getDisplayName() {
+		return "Bar Visibility";
 	}
 
 	@Override
-	public void start(CutsceneState state, KNumberContext ctx) {
-		tick(state, ctx);
-
-		if (snap) {
-			state.prevBarVisibility = state.barVisibility;
-		}
+	public ImIcon getIcon() {
+		return ImIcons.SPLIT_SCREEN;
 	}
 
 	@Override
-	public void tick(CutsceneState state, KNumberContext ctx) {
-		var v = visibility.value().getOrNaN(ctx);
-
-		if (!Double.isNaN(v)) {
-			state.barVisibility = (float) v;
-		}
+	public boolean getHasSnap() {
+		return true;
 	}
 }

@@ -1,41 +1,34 @@
 package dev.latvian.mods.vidlib.feature.cutscene.step;
 
-import com.mojang.serialization.Codec;
-import dev.latvian.mods.klib.codec.CompositeStreamCodec;
-import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.klib.util.ColorBlendMode;
-import dev.latvian.mods.vidlib.feature.cutscene.CutsceneState;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
+import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
-import dev.latvian.mods.vidlib.feature.screeneffect.effect.ScreenTintEffect;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 
-public class ScreenEffectCutsceneStep extends CutsceneStep {
-	public static final Codec<ScreenEffectCutsceneStep> CODEC = ScreenEffect.CODEC.xmap(ScreenEffectCutsceneStep::new, s -> s.effect);
-
-	public static final StreamCodec<RegistryFriendlyByteBuf, ScreenEffectCutsceneStep> STREAM_CODEC = CompositeStreamCodec.of(
-		ScreenEffect.STREAM_CODEC, o -> o.effect,
-		ScreenEffectCutsceneStep::new
+public record ScreenEffectCutsceneStep(Ref<ScreenEffect> effect) implements CutsceneStepType {
+	public static final DynamicType<RegistryFriendlyByteBuf, CutsceneStepType> TYPE = DynamicType.create(
+		"screen_effect",
+		"effect",
+		ScreenEffect.CODEC,
+		ScreenEffect.STREAM_CODEC,
+		ScreenEffectCutsceneStep::new,
+		ScreenEffectCutsceneStep::effect
 	);
 
-	public final Ref<ScreenEffect> effect;
-
-	public ScreenEffectCutsceneStep(Ref<ScreenEffect> effect) {
-		this.effect = effect;
-	}
-
-	public ScreenEffectCutsceneStep() {
-		this.effect = new ScreenTintEffect(Color.BLACK.withAlpha(0).gradient(Color.BLACK).ref(), ColorBlendMode.MULTIPLICATIVE).ref();
+	@Override
+	public DynamicType<RegistryFriendlyByteBuf, CutsceneStepType> type() {
+		return TYPE;
 	}
 
 	@Override
-	public CutsceneStepType type() {
-		return CutsceneStepType.SCREEN_EFFECT;
+	public String getDisplayName() {
+		return "Screen Effect";
 	}
 
 	@Override
-	public void tick(CutsceneState state, KNumberContext ctx) {
+	public ImIcon getIcon() {
+		return ImIcons.BLUR;
 	}
 }

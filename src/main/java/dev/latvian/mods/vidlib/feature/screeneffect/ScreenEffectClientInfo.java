@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 public class ScreenEffectClientInfo<SE extends ScreenEffect> {
 	@Nullable
 	public static ScreenEffectClientInfo<?> get(DynamicType<?, ?> type) {
-		return type.getProperty(ScreenEffect.PROPERTY_EXTRACTOR) instanceof ScreenEffectClientInfo<?> r ? r : null;
+		return type.getDynamicTypeProperty(ScreenEffect.PROPERTY_EXTRACTOR, ScreenEffectClientInfo.class);
 	}
 
 	public final DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type;

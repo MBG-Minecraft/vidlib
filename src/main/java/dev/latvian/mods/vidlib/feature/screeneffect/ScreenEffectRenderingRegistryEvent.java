@@ -14,7 +14,7 @@ public class ScreenEffectRenderingRegistryEvent extends Event implements IModBus
 	public <SE extends ScreenEffect> void register(DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type, Consumer<ScreenEffectClientInfo<SE>> builder) {
 		var renderer = new ScreenEffectClientInfo<SE>(type);
 		builder.accept(renderer);
-		type.setProperty(ScreenEffect.PROPERTY_EXTRACTOR, renderer);
+		type.setDynamicTypeProperty(ScreenEffect.PROPERTY_EXTRACTOR, renderer);
 	}
 
 	public void register(DynamicType<RegistryFriendlyByteBuf, ScreenEffect> type, ImIcon icon, String displayName) {

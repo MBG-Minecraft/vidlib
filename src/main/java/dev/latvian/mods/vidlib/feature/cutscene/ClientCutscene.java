@@ -3,6 +3,9 @@ package dev.latvian.mods.vidlib.feature.cutscene;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Rotation;
+import dev.latvian.mods.klib.registry.DynamicType;
+import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepType;
+import dev.latvian.mods.vidlib.feature.cutscene.step.state.CutsceneStepState;
 import dev.latvian.mods.vidlib.feature.misc.CameraOverride;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import net.minecraft.client.Minecraft;
@@ -10,6 +13,8 @@ import net.minecraft.world.phys.Vec3;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class ClientCutscene implements CameraOverride {
@@ -24,6 +29,7 @@ public class ClientCutscene implements CameraOverride {
 	public float totalSecond;
 	public float totalLength;
 	public final CutsceneState state;
+	public final List<CutsceneStepState> steps;
 
 	public ClientCutscene(Minecraft mc, boolean overrideCamera, Cutscene cutscene, KNumberVariables variables, Supplier<Vec3> sourcePos) {
 		this.mc = mc;
@@ -38,6 +44,7 @@ public class ClientCutscene implements CameraOverride {
 		this.totalSecond = 0F;
 		this.totalLength = 0F;
 		this.state = new CutsceneState();
+		this.steps = new ArrayList<>(cutscene.steps().size());
 
 		var session = ClientLevelSessionData.of(mc.level);
 
@@ -46,13 +53,21 @@ public class ClientCutscene implements CameraOverride {
 		ctx.originPos = originPos;
 
 		for (var c : cutscene.steps()) {
-			this.totalLength = Math.max(totalLength, c.start + c.length);
+			var factory = DynamicType.getDynamicTypeProperty(c.type(), CutsceneStepType.STATE_FACTORY, CutsceneStepState.Factory.class);
+
+			if (factory != null && factory.factory().apply(c.type().value()) instanceof CutsceneStepState stepState) {
+				this.steps.add(stepState);
+				stepState.start = c.start();
+				stepState.length = c.length();
+				stepState.snap = c.snap();
+				this.totalLength = Math.max(totalLength, stepState.start + stepState.length);
+			}
 		}
 
 		ctx.lifespan = (double) totalLength;
 
-		for (var step : cutscene.steps()) {
-			if (step.start == 0) {
+		for (var step : steps) {
+			if (step.start == 0F) {
 				ctx.time = 0D;
 				ctx.lifespan = (double) step.length;
 				ctx.progress = 0D;
@@ -85,17 +100,22 @@ public class ClientCutscene implements CameraOverride {
 		ctx.originPos = originPos;
 		ctx.targetPos = state.target;
 
-		for (var step : cutscene.steps()) {
-			if (totalSecond == step.start + step.length) {
+		var stepsItr = steps.iterator();
+
+		while (stepsItr.hasNext()) {
+			var step = stepsItr.next();
+
+			if (totalSecond >= step.start + step.length) {
 				ctx.time = (double) step.length;
 				ctx.lifespan = (double) step.length;
 				ctx.progress = 1D;
 
 				step.exit(state, ctx);
+				stepsItr.remove();
 			}
 		}
 
-		for (var step : cutscene.steps()) {
+		for (var step : steps) {
 			if (totalSecond >= step.start && totalSecond < step.start + step.length) {
 				ctx.time = (double) (totalSecond - step.start);
 				ctx.lifespan = (double) step.length;

@@ -9,7 +9,7 @@ import dev.latvian.mods.replay.api.ReplayMarkerGroup;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
-import dev.latvian.mods.vidlib.feature.cutscene.step.NewCutsceneStepType;
+import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepType;
 import dev.latvian.mods.vidlib.feature.ffmpeg.FFMPEGBinaries;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
@@ -55,7 +55,7 @@ public class VidLib {
 		registry.register(Atmosphere.REGISTRY);
 		registry.register(PhysicsParticleData.REGISTRY);
 		registry.register(Zone.REGISTRY);
-		registry.register(NewCutsceneStepType.REGISTRY, platform::collectCutsceneStepTypes);
+		registry.register(CutsceneStepType.REGISTRY, platform::collectCutsceneStepTypes);
 		registry.register(Cutscene.REGISTRY);
 		registry.register(TTFFile.REGISTRY, platform::collectTTFFiles);
 	}

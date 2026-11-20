@@ -8,7 +8,7 @@ import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
-import dev.latvian.mods.vidlib.feature.cutscene.step.NewCutsceneStepType;
+import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepType;
 import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
@@ -58,8 +58,8 @@ public class VLPlatformHelper {
 		ScreenEffect.builtInTypes(registry);
 	}
 
-	public void collectCutsceneStepTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, NewCutsceneStepType> registry) {
-		NewCutsceneStepType.builtInTypes(registry);
+	public void collectCutsceneStepTypes(CustomRegistryTypeCollector<RegistryFriendlyByteBuf, CutsceneStepType> registry) {
+		CutsceneStepType.builtInTypes(registry);
 	}
 
 	public void collectTTFFiles(CustomRegistryTypeCollector<ByteBuf, TTFFile> registry) {
