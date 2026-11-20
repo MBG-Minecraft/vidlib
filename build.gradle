@@ -416,7 +416,7 @@ tasks.register('webHookUpdate') {
 	group 'other'
 	description 'Send webhook update'
 
-	def content = "New VidLib version: [`${version}`](<${ENV.MBG_PUBLISH_MAVEN_URL}/dev/latvian/mods/vidlib/${version}/vidlib-${version}.jar>) (KLib `${klib_version}`)"
+	def content = "New VidLib version: [`${version}`](<${ENV.MBG_PUBLISH_MAVEN_URL}/dev/latvian/mods/vidlib/${version}/vidlib-${version}.jar>) (KLib `${klib_version}`) ([`Ignite`](<${ENV.MBG_PUBLISH_MAVEN_URL}/dev/latvian/mods/vidlib/${version}/vidlib-${version}-ignite.jar>))"
 
 	doLast {
 		println("Sending webhook update...")
