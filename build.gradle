@@ -283,17 +283,30 @@ tasks.register('buildIgniteJar', Jar) {
 	into('/')
 
 	from(sourceSets.main.output) {
-		include 'dev/latvian/mods/vidlib/core/api/common/**'
+		// include 'dev/latvian/mods/vidlib/core/api/common/**'
 		include 'dev/latvian/mods/vidlib/core/mixin/common/**'
 		include 'dev/latvian/mods/vidlib/core/mixin/bukkit/**'
 	}
 
 	from('src/main/resources') {
 		include 'ignite.mod.json'
-		include 'klib.common.mixins.json'
-		include 'klib.bukkit.mixins.json'
 		include 'vidlib.common.mixins.json'
 		include 'vidlib.bukkit.mixins.json'
+	}
+
+	def klibJars = configurations.runtimeClasspath.incoming.artifactView {
+		componentFilter { id ->
+			id instanceof ModuleComponentIdentifier && id.group == 'dev.latvian.mods' && id.module == 'klib'
+		}
+	}.files
+
+	from(zipTree(klibJars.elements.map { it.first().asFile })) {
+		// include 'dev/latvian/mods/klib/core/*'
+		// include 'dev/latvian/mods/klib/core/api/common/**'
+		include 'dev/latvian/mods/klib/core/mixin/common/**'
+		include 'dev/latvian/mods/klib/core/mixin/bukkit/**'
+		include 'klib.common.mixins.json'
+		include 'klib.bukkit.mixins.json'
 	}
 
 	destinationDirectory = layout.buildDirectory.dir('libs')
