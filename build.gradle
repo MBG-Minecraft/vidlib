@@ -215,7 +215,12 @@ processResources {
 	println("[Process Resources] Replacing properties in resources: " + toReplace)
 
 	inputs.properties toReplace
+
 	filesMatching("META-INF/neoforge.mods.toml") {
+		expand toReplace
+	}
+
+	filesMatching("ignite.mod.json") {
 		expand toReplace
 	}
 }
@@ -258,7 +263,7 @@ tasks.register('buildResourcePack', Zip) {
 	}
 
 	destinationDirectory = layout.buildDirectory.dir('libs')
-	archiveBaseName.set(project.name)
+	archiveBaseName.set(project.archives_base_name)
 	archiveVersion.set(project.version.toString())
 	archiveClassifier.set('resource-pack')
 
@@ -271,6 +276,40 @@ tasks.build {
 	dependsOn tasks.buildResourcePack
 }
 
+tasks.register('buildIgniteJar', Jar) {
+	group "build"
+	description "Builds an Ignite mixins jar"
+	dependsOn tasks.named('processResources')
+	into('/')
+
+	from(sourceSets.main.output) {
+		include 'dev/latvian/mods/vidlib/core/api/common/**'
+		include 'dev/latvian/mods/vidlib/core/mixin/common/**'
+		include 'dev/latvian/mods/vidlib/core/mixin/bukkit/**'
+	}
+
+	from('src/main/resources') {
+		include 'ignite.mod.json'
+		include 'klib.common.mixins.json'
+		include 'klib.bukkit.mixins.json'
+		include 'vidlib.common.mixins.json'
+		include 'vidlib.bukkit.mixins.json'
+	}
+
+	destinationDirectory = layout.buildDirectory.dir('libs')
+	archiveBaseName.set(project.archives_base_name)
+	archiveVersion.set(project.version.toString())
+	archiveClassifier.set('ignite')
+
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+	duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+tasks.build {
+	dependsOn tasks.buildIgniteJar
+}
+
 publishing {
 	publications {
 		mavenNeoForge(MavenPublication) {
@@ -280,6 +319,11 @@ publishing {
 			artifact(tasks.named('buildResourcePack')) {
 				classifier 'resource-pack'
 				extension 'zip'
+			}
+
+			artifact(tasks.named('buildIgniteJar')) {
+				classifier 'ignite'
+				extension 'jar'
 			}
 		}
 	}

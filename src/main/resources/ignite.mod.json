@@ -1,0 +1,10 @@
+{
+	"id": "vidlib",
+	"version": "${version}",
+	"mixins": [
+		"klib.common.mixins.json",
+		"klib.bukkit.mixins.json",
+		"vidlib.common.mixins.json",
+		"vidlib.bukkit.mixins.json"
+	]
+}
