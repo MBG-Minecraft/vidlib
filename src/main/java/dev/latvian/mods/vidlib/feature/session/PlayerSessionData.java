@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.registry.CustomRegistry;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.SkinTexture;
+import dev.latvian.mods.vidlib.core.VLExtensions;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
 import dev.latvian.mods.vidlib.feature.data.DataKey;
 import dev.latvian.mods.vidlib.feature.data.DataMap;
@@ -15,7 +16,6 @@ import dev.latvian.mods.vidlib.feature.data.InternalPlayerData;
 import dev.latvian.mods.vidlib.feature.data.SyncPlayerDataPayload;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.input.SyncPlayerInputToClient;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.PropRemoveType;
 import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
@@ -32,10 +32,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class PlayerSessionData implements Comparable<PlayerSessionData> {
+	private static final Function<Player, PlayerSessionData> FACTORY = player -> LevelSessionData.of(player.level()).globalData.getPlayer(player.getUUID());
+
 	public static PlayerSessionData of(Player player) {
-		return VLPlatformHelper.INSTANCE.getPlayerData(player);
+		return VLExtensions.compute(player, 522, FACTORY);
 	}
 
 	public final GlobalSessionData globalData;

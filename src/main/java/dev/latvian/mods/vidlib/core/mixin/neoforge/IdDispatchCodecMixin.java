@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.core.mixin.common;
+package dev.latvian.mods.vidlib.core.mixin.neoforge;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.EncoderException;

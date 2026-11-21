@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
-import dev.latvian.mods.klib.block.BlockUtils;
+import dev.latvian.mods.klib.block.KLibBlockStateProperties;
 import dev.latvian.mods.klib.math.KMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -75,7 +75,7 @@ public class PhysicsParticle implements Comparable<PhysicsParticle> {
 
 				if (state.getBlock() == Blocks.WATER) {
 					blockStateType = 2;
-				} else if (BlockUtils.getDensity(state) > 0F) {
+				} else if (KLibBlockStateProperties.of(state).density() > 0F) {
 					blockStateType = 1;
 				} else {
 					blockStateType = 0;

@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.core.mixin.neo;
+package dev.latvian.mods.vidlib.core.mixin.neoforge;
 
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import org.spongepowered.asm.mixin.Mixin;

@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.feature.item;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.MCStreamCodecs;
 import dev.latvian.mods.klib.data.DataTypes;
-import dev.latvian.mods.vidlib.core.api.common.VLItem;
+import dev.latvian.mods.klib.item.ItemUtils;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
@@ -27,7 +27,7 @@ public record UpdateItemDataPayload(InteractionHand hand, CompoundTag tag) imple
 	@Override
 	public void handle(Context ctx) {
 		if (ctx.isAdmin()) {
-			VLItem.partiallyMergeCustomData(ctx.player().getItemInHand(hand), tag);
+			ItemUtils.partiallyMergeCustomData(ctx.player().getItemInHand(hand), tag);
 		}
 	}
 }

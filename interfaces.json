@@ -1,28 +1,4 @@
 {
-	"net/minecraft/world/level/block/state/BlockState": [
-		"dev/latvian/mods/vidlib/core/api/common/VLBlockState"
-	],
-	"net/minecraft/server/MinecraftServer": [
-		"dev/latvian/mods/vidlib/core/api/common/VLMinecraftServer"
-	],
-	"net/minecraft/world/level/Level": [
-		"dev/latvian/mods/vidlib/core/api/common/VLLevel"
-	],
-	"net/minecraft/server/level/ServerLevel": [
-		"dev/latvian/mods/vidlib/core/api/common/VLServerLevel"
-	],
-	"net/minecraft/world/entity/Entity": [
-		"dev/latvian/mods/vidlib/core/api/common/VLEntity"
-	],
-	"net/minecraft/world/entity/LivingEntity": [
-		"dev/latvian/mods/vidlib/core/api/common/VLLivingEntity"
-	],
-	"net/minecraft/world/entity/player/Player": [
-		"dev/latvian/mods/vidlib/core/api/common/VLPlayer"
-	],
-	"net/minecraft/server/level/ServerPlayer": [
-		"dev/latvian/mods/vidlib/core/api/common/VLServerPlayer"
-	],
 	"net/minecraft/client/Minecraft": [
 		"dev/latvian/mods/vidlib/core/api/client/VLMinecraftClient"
 	],

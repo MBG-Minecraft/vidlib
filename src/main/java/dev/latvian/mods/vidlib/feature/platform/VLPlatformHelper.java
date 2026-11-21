@@ -13,8 +13,6 @@ import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
-import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
-import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneHit;
@@ -111,15 +109,7 @@ public class VLPlatformHelper {
 	public void playerClickedOnZone(Player player, ZoneHit hit) {
 	}
 
-	public ServerSessionData getServerData(MinecraftServer server) {
-		throw new NullPointerException("ServerSessionData storage is not implemented");
-	}
-
-	public LevelSessionData<?> getLevelData(Level level) {
-		throw new NullPointerException("LevelSessionData storage is not implemented");
-	}
-
-	public PlayerSessionData getPlayerData(Player player) {
-		throw new NullPointerException("PlayerSessionData storage is not implemented");
+	public LevelSessionData<?> getClientSessionData(Level level) {
+		throw new IllegalStateException("Wrong side");
 	}
 }

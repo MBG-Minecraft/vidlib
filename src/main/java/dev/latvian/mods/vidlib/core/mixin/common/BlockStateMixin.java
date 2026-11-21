@@ -1,31 +1,24 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.klib.util.WithCache;
-import dev.latvian.mods.vidlib.core.api.common.VLBlockState;
-import dev.latvian.mods.vidlib.feature.block.VidLibBlockStateClientProperties;
+import dev.latvian.mods.vidlib.core.api.VLObject;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(BlockState.class)
-public class BlockStateMixin implements VLBlockState {
+public class BlockStateMixin implements VLObject {
 	@Unique
 	private Object vl$clientProperties;
 
 	@Override
-	public void vl$clearCache() {
-		if (vl$clientProperties instanceof WithCache cache) {
-			cache.clearCache();
-			vl$clientProperties = null;
-		}
+	public Object vl$get(int id) {
+		return id == 0 ? vl$clientProperties : null;
 	}
 
 	@Override
-	public Object vl$clientProperties() {
-		if (vl$clientProperties == null) {
-			vl$clientProperties = new VidLibBlockStateClientProperties((BlockState) (Object) this);
+	public void vl$set(int id, Object value) {
+		if (id == 0) {
+			vl$clientProperties = value;
 		}
-
-		return vl$clientProperties;
 	}
 }

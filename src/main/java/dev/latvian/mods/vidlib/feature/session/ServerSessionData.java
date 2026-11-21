@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.klib.util.PauseType;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
+import dev.latvian.mods.vidlib.core.VLExtensions;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
 import dev.latvian.mods.vidlib.feature.data.SyncLevelDataPayload;
@@ -30,10 +31,17 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class ServerSessionData extends GlobalSessionData {
+	private static final Function<MinecraftServer, ServerSessionData> FACTORY = server -> {
+		var data = new ServerSessionData(server);
+		data.load();
+		return data;
+	};
+
 	public static ServerSessionData of(MinecraftServer server) {
-		return VLPlatformHelper.INSTANCE.getServerData(server);
+		return VLExtensions.compute(server, 522, FACTORY);
 	}
 
 	public final MinecraftServer server;
@@ -42,7 +50,7 @@ public class ServerSessionData extends GlobalSessionData {
 	public final Map<UUID, ServerPlayerSessionData> serverSessionData;
 	public PacketCapture packetCapture;
 
-	public ServerSessionData(MinecraftServer server) {
+	private ServerSessionData(MinecraftServer server) {
 		super(server.registryAccess());
 		this.server = server;
 		this.random = RandomSource.create();

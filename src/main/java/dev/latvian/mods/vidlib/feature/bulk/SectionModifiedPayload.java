@@ -8,6 +8,7 @@ import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
 import dev.latvian.mods.vidlib.feature.net.SimplePayloadType;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 
@@ -27,6 +28,6 @@ public record SectionModifiedPayload(boolean undoable, SectionPos section, Ref<B
 
 	@Override
 	public void handle(Context ctx) {
-		ctx.level().bulkModify(undoable, modification);
+		LevelSessionData.of(ctx.level()).bulkModify(ctx.level(), undoable, modification);
 	}
 }

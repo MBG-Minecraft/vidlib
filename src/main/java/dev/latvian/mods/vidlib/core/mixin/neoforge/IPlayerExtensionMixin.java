@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.core.mixin.neo;
+package dev.latvian.mods.vidlib.core.mixin.neoforge;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.latvian.mods.vidlib.core.api.common.VLEntity;

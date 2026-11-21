@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.structure;
 
 import dev.latvian.mods.klib.block.BlockUtils;
+import dev.latvian.mods.klib.block.KLibBlockStateProperties;
 import dev.latvian.mods.klib.block.filter.SimpleBlockPredicate;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -84,7 +85,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 		for (var pos : BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ)) {
 			var state = level.getBlockState(pos);
 
-			if (forRendering ? BlockUtils.isVisible(state) : !state.is(Blocks.STRUCTURE_VOID)) {
+			if (forRendering ? KLibBlockStateProperties.of(state).visible() : !state.is(Blocks.STRUCTURE_VOID)) {
 				if (filter == null || filter.test(level, pos, state)) {
 					if (onlyExposed && !BlockUtils.isBlockExposed(level, partialCache, pos.getX(), pos.getY(), pos.getZ(), mutablePos)) {
 						continue;
@@ -123,7 +124,7 @@ public record StructureHolder(Long2ObjectMap<BlockState> blocks, Vec3i size) {
 
 	private boolean isPartial(int x, int y, int z) {
 		var state = blocks.get(BlockPos.asLong(x, y, z));
-		return state == null || BlockUtils.isPartial(state);
+		return state == null || KLibBlockStateProperties.of(state).partial();
 	}
 
 	public StructureHolder visualShell() {

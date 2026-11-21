@@ -21,6 +21,7 @@ import dev.latvian.mods.replay.api.event.ReplayVisualsMenuEvent;
 import dev.latvian.mods.replay.api.event.ReplayWindowsMenuBarEvent;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibClientEventHandler;
+import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.SyncLevelDataPayload;
@@ -251,7 +252,9 @@ public class VLReplayIntegration {
 
 	@SubscribeEvent
 	public static void captureEntitySnapshot(ReplayCaptureEntitySnapshotEvent event) {
-		event.getEntity().replaySnapshot(event.getPackets());
+		if (event.getEntity() instanceof VLEntity entity) {
+			entity.replaySnapshot(event.getPackets());
+		}
 	}
 
 	@SubscribeEvent

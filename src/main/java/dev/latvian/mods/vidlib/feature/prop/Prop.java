@@ -3,9 +3,9 @@ package dev.latvian.mods.vidlib.feature.prop;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import dev.latvian.mods.klib.block.BlockUtils;
-import dev.latvian.mods.klib.core.api.common.KLibClipContext;
 import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.data.JOMLDataTypes;
+import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.entity.PositionType;
 import dev.latvian.mods.klib.gradient.Gradient;
@@ -44,7 +44,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -526,15 +525,13 @@ public class Prop {
 
 	@Nullable
 	public PropHitResult clip(ClipContext ctx) {
-		if (ctx instanceof KLibClipContext c && c.klib$getCollisionContext() instanceof EntityCollisionContext entityContext) {
-			var entity = entityContext.getEntity();
+		var entity = EntityUtils.getEntity(ctx);
 
-			if (canInteract(entity)) {
-				var hit = AABB.clip(getClipBoxes(entity), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
+		if (entity != null && canInteract(entity)) {
+			var hit = AABB.clip(getClipBoxes(entity), ctx.getFrom(), ctx.getTo(), BlockPos.ZERO);
 
-				if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
-					return new PropHitResult(this, hit.getLocation(), hit.getDirection(), BlockPos.containing(hit.getLocation()), false);
-				}
+			if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
+				return new PropHitResult(this, hit.getLocation(), hit.getDirection(), BlockPos.containing(hit.getLocation()), false);
 			}
 		}
 

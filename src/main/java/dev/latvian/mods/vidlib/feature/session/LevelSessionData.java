@@ -1,7 +1,9 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.bulk.BlockModificationBuilder;
+import dev.latvian.mods.klib.bulk.BlockModificationConsumer;
 import dev.latvian.mods.klib.bulk.BulkLevelModification;
+import dev.latvian.mods.klib.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.math.HitBuilder;
@@ -22,6 +24,7 @@ import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.latvian.mods.vidlib.feature.zone.LevelZones;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -35,10 +38,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 public abstract class LevelSessionData<P extends Props<?>> {
 	public static LevelSessionData<?> of(Level level) {
-		return VLPlatformHelper.INSTANCE.getLevelData(level);
+		if (level instanceof ServerLevel serverLevel) {
+			return ServerLevelSessionData.of(serverLevel);
+		} else {
+			return VLPlatformHelper.INSTANCE.getClientSessionData(level);
+		}
 	}
 
 	public final GlobalSessionData globalData;
@@ -135,6 +143,20 @@ public abstract class LevelSessionData<P extends Props<?>> {
 		return result;
 	}
 
+	public int bulkModify(Level level, boolean undoable, Ref<BulkLevelModification> modification) {
+		if (modification == BulkLevelModification.NONE) {
+			return 0;
+		}
+
+		return new BulkLevelModificationHolder().apply(level, modification.value(), undoable, false);
+	}
+
+	public int bulkModify(Level level, boolean undoable, Consumer<BlockModificationConsumer> modifications) {
+		var m = new BulkLevelModificationBundle(new ArrayList<>());
+		modifications.accept(m);
+		return bulkModify(level, undoable, m.ref());
+	}
+
 	public void addUndoable(Level level, UndoableModification modification) {
 		undoable.add(new UndoableModificationHolder(level.getGameTime(), modification));
 	}
@@ -144,7 +166,7 @@ public abstract class LevelSessionData<P extends Props<?>> {
 			var builder = new BlockModificationBuilder();
 			undoable.getLast().modification().undo(level, builder);
 			undoable.removeLast();
-			return level.bulkModify(false, builder.build());
+			return bulkModify(level, false, builder.build());
 		}
 
 		return 0;
@@ -158,7 +180,7 @@ public abstract class LevelSessionData<P extends Props<?>> {
 		}
 
 		undoable.clear();
-		return level.bulkModify(false, builder.build());
+		return bulkModify(level, false, builder.build());
 	}
 
 	public int undoAllFutureModifications(Level level, boolean everything) {

@@ -1,13 +1,14 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.vidlib.core.api.client.VLClientLevel;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 public class ClientLevelSessionData extends LevelSessionData<ClientProps> {
 	public static ClientLevelSessionData of(Level level) {
-		return (ClientLevelSessionData) LevelSessionData.of(level);
+		return ((VLClientLevel) level).vl$getLevelData();
 	}
 
 	public final ClientSessionData globalData;

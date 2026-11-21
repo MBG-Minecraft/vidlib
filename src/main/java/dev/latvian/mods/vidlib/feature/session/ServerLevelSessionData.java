@@ -1,7 +1,12 @@
 package dev.latvian.mods.vidlib.feature.session;
 
+import dev.latvian.mods.klib.bulk.BlockModificationBuilder;
+import dev.latvian.mods.klib.bulk.BulkLevelModification;
+import dev.latvian.mods.klib.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.core.VLExtensions;
 import dev.latvian.mods.vidlib.core.api.common.VLTicketTracker;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
@@ -16,10 +21,13 @@ import net.minecraft.world.level.TicketStorage;
 import net.neoforged.neoforge.common.world.chunk.TicketHelper;
 
 import java.util.UUID;
+import java.util.function.Function;
 
 public class ServerLevelSessionData extends LevelSessionData<ServerProps> {
-	public static ServerLevelSessionData of(Level level) {
-		return (ServerLevelSessionData) LevelSessionData.of(level);
+	private static final Function<ServerLevel, ServerLevelSessionData> FACTORY = level -> ServerSessionData.of(level.getServer()).getLevel(level.dimension());
+
+	public static ServerLevelSessionData of(ServerLevel level) {
+		return VLExtensions.compute(level, 522, FACTORY);
 	}
 
 	public final ServerLevel level;
@@ -111,5 +119,26 @@ public class ServerLevelSessionData extends LevelSessionData<ServerProps> {
 		}
 
 		VidLib.LOGGER.info("Unloaded " + unloaded + "/" + total + " expired force-loaded chunks");
+	}
+
+	@Override
+	public int bulkModify(Level level, boolean undoable, Ref<BulkLevelModification> modification) {
+		var optimized = modification.optimizedRef();
+
+		if (modification == BulkLevelModification.NONE) {
+			return 0;
+		}
+
+		if (optimized.value() instanceof BulkLevelModificationBundle b) {
+			var builder = new BlockModificationBuilder();
+
+			for (var m : b.list()) {
+				m.value().apply(builder);
+			}
+
+			optimized = builder.build();
+		}
+
+		return super.bulkModify(level, undoable, optimized);
 	}
 }

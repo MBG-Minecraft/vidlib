@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.explosion;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.latvian.mods.klib.block.BlockUtils;
+import dev.latvian.mods.klib.block.KLibBlockStateProperties;
 import dev.latvian.mods.klib.block.filter.BlockFilter;
 import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
@@ -367,7 +367,7 @@ public class ExplosionData {
 						pos.setZ(atz + z);
 						var state = level.getBlockState(pos);
 
-						if (BlockUtils.getDensity(state) > 0F && (filter.bypassUnbreakable || state.getDestroySpeed(level, pos) >= 0F) || state.getBlock() instanceof BaseFireBlock) {
+						if (KLibBlockStateProperties.of(state).density() > 0F && (filter.bypassUnbreakable || state.getDestroySpeed(level, pos) >= 0F) || state.getBlock() instanceof BaseFireBlock) {
 							if (filter.blocks.value().test(level, pos, state)) {
 								blocks.add(new DestroyedBlock(pos.immutable(), state, x, y, z, inside, new MutableBoolean(false)));
 							}

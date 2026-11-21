@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib;
 
-import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.block.VidLibBlocks;
 import dev.latvian.mods.vidlib.feature.item.VidLibItems;
@@ -10,12 +9,10 @@ import dev.latvian.mods.vidlib.feature.platform.NeoForgeCommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.platform.neoforge.VLNeoPlatformHelper;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforgespi.language.IModInfo;
 
@@ -56,13 +53,6 @@ public class VidLibMod {
 		}
 
 		VidLibParticles.init();
-	}
-
-	@SubscribeEvent
-	public static void setup(FMLCommonSetupEvent event) {
-		if (PlatformHelper.INSTANCE.getSide().isClient()) {
-			VidLib.initClient();
-		}
 	}
 
 	private static void printDependencies(IModInfo mod, int level) {

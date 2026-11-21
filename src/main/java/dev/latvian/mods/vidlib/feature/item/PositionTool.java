@@ -8,6 +8,7 @@ import dev.latvian.mods.klib.particle.ShapeParticleOptions;
 import dev.latvian.mods.klib.shape.ColoredShape;
 import dev.latvian.mods.klib.shape.CubeShape;
 import dev.latvian.mods.klib.shape.SphereShape;
+import dev.latvian.mods.klib.util.ComponentUtils;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
@@ -99,24 +100,24 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 
 			player.sendSystemMessage(Component.empty()
 				.append(Component.empty()
-					.withStyle(Style.EMPTY.withCopyString(strBlock))
+					.withStyle(ComponentUtils.withCopyString(Style.EMPTY, strBlock))
 					.append(BATIcons.COPY)
 					.append(BATIcons.SMALL_SPACE)
-					.append(Component.literal(strBlock).withStyle(Style.EMPTY.withHoverText("Block Position")))
+					.append(Component.literal(strBlock).withStyle(ComponentUtils.withHoverText(Style.EMPTY, "Block Position")))
 				)
 				.append(" | ")
 				.append(Component.empty()
-					.withStyle(Style.EMPTY.withCopyString(strVec))
+					.withStyle(ComponentUtils.withCopyString(Style.EMPTY, strVec))
 					.append(BATIcons.COPY)
 					.append(BATIcons.SMALL_SPACE)
-					.append(Component.literal(strVec).withStyle(Style.EMPTY.withHoverText("Vec3 Position")))
+					.append(Component.literal(strVec).withStyle(ComponentUtils.withHoverText(Style.EMPTY, "Vec3 Position")))
 				)
 				.append(" | ")
 				.append(Component.empty()
-					.withStyle(Style.EMPTY.withCopyString(strDist))
+					.withStyle(ComponentUtils.withCopyString(Style.EMPTY, strDist))
 					.append(BATIcons.COPY)
 					.append(BATIcons.SMALL_SPACE)
-					.append(Component.literal(strDist).withStyle(Style.EMPTY.withHoverText("Distance from last click")))
+					.append(Component.literal(strDist).withStyle(ComponentUtils.withHoverText(Style.EMPTY, "Distance from last click")))
 				)
 			);
 
@@ -131,7 +132,7 @@ public enum PositionTool implements VidLibTool, PlayerActionHandler {
 	public boolean useOnEntity(Player player, ItemStack item, Entity target) {
 		if (player.level().isClientSide()) {
 			var str = KMath.format(target.position());
-			player.sendSystemMessage(Component.empty().append(target.getName()).append(": " + str).withStyle(Style.EMPTY.withCopyString(str)));
+			player.sendSystemMessage(Component.empty().append(target.getName()).append(": " + str).withStyle(ComponentUtils.withCopyString(Style.EMPTY, str)));
 		}
 
 		return true;

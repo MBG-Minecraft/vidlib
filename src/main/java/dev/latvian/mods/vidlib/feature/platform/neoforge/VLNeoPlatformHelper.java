@@ -18,9 +18,6 @@ import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.progressqueue.ProgressQueue;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectRegistryEvent;
-import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
-import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
-import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.latvian.mods.vidlib.feature.zone.ZoneEvent;
@@ -144,20 +141,5 @@ public class VLNeoPlatformHelper extends VLPlatformHelper {
 	@Override
 	public void playerClickedOnZone(Player player, ZoneHit hit) {
 		NeoForge.EVENT_BUS.post(new ZoneEvent.ClickedOn(player, hit));
-	}
-
-	@Override
-	public ServerSessionData getServerData(MinecraftServer server) {
-		return server.vl$getGlobalData();
-	}
-
-	@Override
-	public LevelSessionData<?> getLevelData(Level level) {
-		return level.vl$getLevelData();
-	}
-
-	@Override
-	public PlayerSessionData getPlayerData(Player player) {
-		return player.vl$getPlayerData();
 	}
 }

@@ -4,6 +4,7 @@ import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
@@ -37,7 +38,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.Markings;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
 public interface VidLibEntityRenderStates {
@@ -47,14 +47,11 @@ public interface VidLibEntityRenderStates {
 	ContextKey<UV> UV = new ContextKey<>(ID.vidlib("uv"));
 	ContextKey<Boolean> TRANSLUCENT = new ContextKey<>(ID.vidlib("translucent"));
 
-	ItemStack DEFAULT_SHIELD = new ItemStack(Items.SHIELD);
-
 	static void extract(Entity entity, EntityRenderState state, float delta) {
 		var mc = Minecraft.getInstance();
 		var camPos = mc.gameRenderer.mainCamera().position();
-		var vehicle = entity.getVehicle();
 
-		if (vehicle != null) {
+		if (entity.getVehicle() instanceof VLEntity vehicle) {
 			var s = vehicle.getPassengerScale(entity);
 
 			if (s <= 0F) {

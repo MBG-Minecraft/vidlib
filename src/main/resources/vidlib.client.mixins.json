@@ -49,6 +49,7 @@
 		"LiquidBlockRendererMixin",
 		"LivingEntityRendererMixin",
 		"LocalPlayerMixin",
+		"LocatorBarMixin",
 		"MapRendererMixin",
 		"MapTextureManagerMixin",
 		"MinecraftClientMixin",

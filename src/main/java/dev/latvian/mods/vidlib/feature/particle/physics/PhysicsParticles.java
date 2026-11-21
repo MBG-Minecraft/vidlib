@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
-import dev.latvian.mods.klib.block.BlockUtils;
+import dev.latvian.mods.klib.block.KLibBlockStateProperties;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.math.Split;
 import dev.latvian.mods.klib.vertex.function.AdditiveRandomVertexFunction;
@@ -62,7 +62,7 @@ public class PhysicsParticles {
 	public void spawn() {
 		var clientProperties = VidLibBlockStateClientProperties.of(state);
 		var manager = clientProperties.getManager();
-		float density1 = data.ignoreBlockDensity() ? data.density() : (data.density() * BlockUtils.getDensity(state));
+		float density1 = data.ignoreBlockDensity() ? data.density() : (data.density() * KLibBlockStateProperties.of(state).density());
 		int count = (int) density1;
 
 		if (density1 - count > 0) {

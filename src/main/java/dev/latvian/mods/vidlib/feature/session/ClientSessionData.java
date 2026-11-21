@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.session;
 
 import dev.latvian.mods.klib.color.Color;
-import dev.latvian.mods.klib.core.api.client.KLibLocalPlayer;
 import dev.latvian.mods.klib.entity.PlayerInput;
 import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.knumber.KNumberVariables;
@@ -12,11 +11,13 @@ import dev.latvian.mods.klib.particle.ShapeParticleOptions;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.util.PauseType;
+import dev.latvian.mods.klib.util.client.InputUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.api.client.VLMinecraftClient;
+import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.actor.ActorParticleOptions;
 import dev.latvian.mods.vidlib.feature.actor.ActorRecording;
@@ -50,7 +51,6 @@ import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticlesDisplayData;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.prop.ClientProps;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffectState;
 import dev.latvian.mods.vidlib.feature.screeneffect.fade.Fade;
@@ -234,11 +234,11 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 		}
 
 		if (mc.level != null) {
-			VLPlatformHelper.INSTANCE.getLevelData(mc.level).tick(mc.level, pauseType);
+			LevelSessionData.of(mc.level).tick(mc.level, pauseType);
 		}
 
 		if (mc.player != null) {
-			localPlayer.input = KLibLocalPlayer.fromInput(mc, mc.player/*, mc.gui.screen() == null && mc.isWindowActive()*/);
+			localPlayer.input = InputUtils.fromInput(mc/*, mc.gui.screen() == null && mc.isWindowActive()*/);
 
 			if (!localPlayer.prevInput.equals(localPlayer.input)) {
 				NeoForge.EVENT_BUS.post(new PlayerInputChangedEvent(mc.player, localPlayer.prevInput, localPlayer.input));
@@ -481,12 +481,8 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 		var data = getPlayer(player);
 		data.prevInput = data.input = input;
 
-		if (level.getEntity(player) instanceof Player entity) {
-			var vehicle = entity.getVehicle();
-
-			if (vehicle != null) {
-				vehicle.setPilotInput(entity, input);
-			}
+		if (level.getEntity(player) instanceof Player entity && entity.getVehicle() instanceof VLEntity vehicle) {
+			vehicle.setPilotInput(entity, input);
 		}
 	}
 

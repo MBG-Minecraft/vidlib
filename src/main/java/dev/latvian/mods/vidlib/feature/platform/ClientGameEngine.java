@@ -14,6 +14,7 @@ import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
@@ -97,6 +98,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.waypoints.TrackedWaypoint;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
@@ -640,9 +642,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean hideCrosshair(Minecraft mc) {
-		var vehicle = mc.player == null ? null : mc.player.getVehicle();
-
-		if (vehicle != null && vehicle.hideCrosshair(mc.player)) {
+		if (mc.player == null && mc.player.getVehicle() instanceof VLEntity vehicle && vehicle.hideCrosshair(mc.player)) {
 			return true;
 		}
 
@@ -965,7 +965,7 @@ public class ClientGameEngine {
 			return false;
 		}
 
-		return mc.player != null && (mc.player.getVehicle() == null || mc.player.getVehicle().shouldRenderPassengerHand(mc.player));
+		return mc.player != null && (mc.player.getVehicle() == null || mc.player.getVehicle() instanceof VLEntity vehicle && vehicle.shouldRenderPassengerHand(mc.player));
 	}
 
 	public boolean hideVoiceChatPlayerList() {
@@ -1081,5 +1081,9 @@ public class ClientGameEngine {
 		}
 
 		return fallback;
+	}
+
+	public boolean isLocatorBarWaypointVisible(TrackedWaypoint waypoint) {
+		return true;
 	}
 }

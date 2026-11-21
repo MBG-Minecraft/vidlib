@@ -314,7 +314,7 @@ public class CommonGameEngine {
 
 			if (regen >= 0) {
 				if (regen == 0) {
-					entity.heal();
+					CommonGameEngine.INSTANCE.heal(entity);
 				} else if (entity.tickCount % regen == 0) {
 					entity.heal(1F);
 				}

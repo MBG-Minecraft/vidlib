@@ -7,8 +7,8 @@ import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.render.SubmitContext;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.core.api.common.VLBlockState;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.block.VidLibBlockStateClientProperties;
 import imgui.type.ImBoolean;
 import it.unimi.dsi.fastutil.longs.Long2IntFunction;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -82,7 +82,7 @@ public class PhysicsParticleManager {
 
 	@AutoInit(AutoInit.Type.ASSETS_LOADED)
 	public static void clearAll() {
-		VLBlockState.vl$clearAllCache();
+		VidLibBlockStateClientProperties.clearAllCache();
 		clearAllParticles();
 	}
 

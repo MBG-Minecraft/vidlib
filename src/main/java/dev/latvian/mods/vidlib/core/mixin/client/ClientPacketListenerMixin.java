@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin.client;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.api.client.VLClientConfigPacketListener;
+import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
@@ -52,7 +53,7 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 
 	@ModifyExpressionValue(method = "handleSetEntityPassengersPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"))
 	private MutableComponent vl$setOverlayMessage(MutableComponent original, @Local(ordinal = 0) Entity entity) {
-		var customMessage = entity.getCustomMountMessage();
+		var customMessage = entity instanceof VLEntity e ? e.getCustomMountMessage() : null;
 		return customMessage == null ? original : (MutableComponent) customMessage;
 	}
 }

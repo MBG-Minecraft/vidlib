@@ -5,18 +5,16 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.klib.util.Empty;
+import dev.latvian.mods.vidlib.core.api.VLObject;
+import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.core.api.common.VLPlayer;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.damagesource.IScalingFunction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,21 +23,20 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Player.class)
-public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
+public abstract class PlayerMixin implements VLPlayer, VLObject {
 	@Unique
-	private PlayerSessionData vl$playerData;
+	private Object vl$sessionData;
 
-	protected PlayerMixin(EntityType<? extends LivingEntity> type, Level level) {
-		super(type, level);
+	@Override
+	public Object vl$get(int id) {
+		return id == 522 ? vl$sessionData : null;
 	}
 
 	@Override
-	public PlayerSessionData vl$getPlayerData() {
-		if (vl$playerData == null) {
-			vl$playerData = LevelSessionData.of(level()).globalData.getPlayer(uuid);
+	public void vl$set(int id, Object value) {
+		if (id == 522) {
+			vl$sessionData = value;
 		}
-
-		return vl$playerData;
 	}
 
 	@Inject(method = "getName", at = @At("HEAD"), cancellable = true)
@@ -77,9 +74,8 @@ public abstract class PlayerMixin extends LivingEntity implements VLPlayer {
 	@Inject(method = "wantsToStopRiding", at = @At("HEAD"), cancellable = true)
 	private void vl$wantsToStopRiding(CallbackInfoReturnable<Boolean> cir) {
 		var self = (Player) (Object) this;
-		var v = self.getVehicle();
 
-		if (v != null && v.preventDismount(self)) {
+		if (self.getVehicle() instanceof VLEntity v && v.preventDismount(self)) {
 			cir.setReturnValue(false);
 		}
 	}

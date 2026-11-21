@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.entity.filter.PlayerProfileEntityFilter;
 import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
+import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.canvas.DepthOfFieldCanvas;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
@@ -290,8 +291,10 @@ public class EntityExplorerPanel extends Panel {
 			}
 		}
 
-		ImGui.pushID("###extra-data");
-		entity.imgui(graphics, delta);
-		ImGui.popID();
+		if (entity instanceof VLEntity e) {
+			ImGui.pushID("###extra-data");
+			e.imgui(graphics, delta);
+			ImGui.popID();
+		}
 	}
 }

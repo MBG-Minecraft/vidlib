@@ -10,6 +10,7 @@ import dev.latvian.mods.klib.particle.ShapeParticleOptions;
 import dev.latvian.mods.klib.particle.TextParticleOptions;
 import dev.latvian.mods.klib.util.DebugColorBlocks;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -203,7 +204,7 @@ public class ExplosionInstance {
 	public int create() {
 		var m = new BlockModificationBuilder();
 		create(m);
-		return level.bulkModify(undoable, m.build());
+		return LevelSessionData.of(level).bulkModify(level, undoable, m.build());
 	}
 
 	public List<PositionedBlock> getDestroyedBlocks() {

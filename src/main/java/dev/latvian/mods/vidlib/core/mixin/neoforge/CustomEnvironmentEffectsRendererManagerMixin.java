@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.core.mixin.neo;
+package dev.latvian.mods.vidlib.core.mixin.neoforge;
 
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import net.minecraft.client.multiplayer.ClientLevel;

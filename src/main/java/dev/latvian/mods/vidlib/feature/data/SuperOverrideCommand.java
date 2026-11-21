@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.data;
 
+import dev.latvian.mods.klib.util.ComponentUtils;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ClientCommandHolder;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
@@ -92,7 +93,7 @@ public interface SuperOverrideCommand {
 		command.then(Commands.literal("time")
 			.executes(ctx -> {
 				var time = Long.toUnsignedString(Minecraft.getInstance().level.getGameTime());
-				ctx.getSource().sendSuccess(() -> Component.literal("Time: " + time).withStyle(Style.EMPTY.withClickToCopyToClipboard(time)), false);
+				ctx.getSource().sendSuccess(() -> Component.literal("Time: " + time).withStyle(ComponentUtils.withClickToCopyToClipboard(Style.EMPTY, time)), false);
 				return 1;
 			})
 		);
