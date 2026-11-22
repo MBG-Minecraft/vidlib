@@ -242,6 +242,18 @@ public class Prop {
 		setPos(pos.x(), pos.y(), pos.z());
 	}
 
+	public void moveTo(double x, double y, double z) {
+		setPos(x, y, z);
+	}
+
+	public final void moveTo(Vector3dc pos) {
+		moveTo(pos.x(), pos.y(), pos.z());
+	}
+
+	public final void moveTo(Position pos) {
+		moveTo(pos.x(), pos.y(), pos.z());
+	}
+
 	public void setRot(float yaw, float pitch, float roll) {
 		rotation.set(pitch, yaw, roll);
 	}

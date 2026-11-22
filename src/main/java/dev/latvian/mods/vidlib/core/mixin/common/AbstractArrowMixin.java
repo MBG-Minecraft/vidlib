@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
@@ -32,18 +32,18 @@ public abstract class AbstractArrowMixin {
 
 	@ModifyConstant(method = "tickDespawn", constant = @Constant(intValue = 1200))
 	private int vl$despawnLife(int o) {
-		return CommonGameEngine.INSTANCE.getArrowDespawnTime((AbstractArrow) (Object) this);
+		return VLBridge.getArrowDespawnTime.applyAsInt((AbstractArrow) (Object) this);
 	}
 
 	@Inject(method = "tick", at = @At("RETURN"))
 	private void vl$tick(CallbackInfo ci) {
 		var arrow = (AbstractArrow) (Object) this;
 
-		if (life == 0 && !arrow.level().isClientSide() && CommonGameEngine.INSTANCE.getArrowTrail(arrow)) {
-			var pos = arrow.getPosition(0F);
+		if (life == 0 && !arrow.level().isClientSide() && VLBridge.getArrowTrail.test(arrow)) {
+			var pos = new Vec3(arrow.xo, arrow.yo, arrow.zo);
 
 			if (vl$prevTrailPos != null) {
-				CommonGameEngine.INSTANCE.spawnArrowTrail(arrow, vl$prevTrailPos, pos);
+				VLBridge.spawnArrowTrail.apply(arrow, vl$prevTrailPos, pos);
 			}
 
 			vl$prevTrailPos = pos;
@@ -52,14 +52,14 @@ public abstract class AbstractArrowMixin {
 
 	@Inject(method = "getPickupItem", at = @At("HEAD"), cancellable = true)
 	private void vl$getPickupItem(CallbackInfoReturnable<ItemStack> cir) {
-		if (CommonGameEngine.INSTANCE.getInfiniteArrows()) {
+		if (!VLBridge.getInfiniteArrows.get().isEmpty()) {
 			cir.setReturnValue(ItemStack.EMPTY);
 		}
 	}
 
 	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
 	private void vl$critParticle(Level instance, ParticleOptions options, double x, double y, double z, double dx, double dy, double dz) {
-		if (!CommonGameEngine.INSTANCE.getArrowTrail((AbstractArrow) (Object) this)) {
+		if (!VLBridge.getArrowTrail.test((AbstractArrow) (Object) this)) {
 			instance.addParticle(options, x, y, z, dx, dy, dz);
 		}
 	}

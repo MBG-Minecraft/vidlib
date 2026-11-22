@@ -6,15 +6,9 @@ import dev.latvian.mods.klib.codec.CompositeStreamCodec;
 import dev.latvian.mods.klib.codec.KLibStreamCodecs;
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.math.AAIBB;
-import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
-import dev.latvian.mods.vidlib.feature.session.ServerLevelSessionData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
-import net.neoforged.neoforge.common.world.chunk.TicketController;
 
 import java.util.List;
 
@@ -39,17 +33,4 @@ public record Anchor(List<AAIBB> volumes) {
 	);
 
 	public static final DataType<Anchor> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
-	public static final TicketController TICKET_CONTROLLER = new TicketController(ID.vidlib("anchor"), (serverLevel, ticketHelper) -> ServerLevelSessionData.of(serverLevel).validateLoadedChunks(ticketHelper));
-
-	public static final TicketController BLOCK_TICKET_CONTROLLER = new TicketController(ID.vidlib("anchor_blocks"), (level, ticketHelper) -> {
-		for (var pos : ticketHelper.getBlockTickets().keySet()) {
-			if (!CommonGameEngine.INSTANCE.isBlockAnchor(level, pos, level.getBlockState(pos))) {
-				ticketHelper.removeTicket(pos, ChunkPos.pack(pos), false);
-			}
-		}
-	});
-
-	public static void setAnchorBlockActive(ServerLevel level, BlockPos pos, boolean active) {
-		BLOCK_TICKET_CONTROLLER.forceChunk(level, pos, pos.getX() >> 4, pos.getZ() >> 4, active, false);
-	}
 }

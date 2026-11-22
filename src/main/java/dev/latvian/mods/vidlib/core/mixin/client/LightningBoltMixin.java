@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.core.mixin.common;
+package dev.latvian.mods.vidlib.core.mixin.client;
 
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.sounds.SoundEvent;

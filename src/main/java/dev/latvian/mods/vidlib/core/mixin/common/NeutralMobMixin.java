@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.NeutralMob;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public interface NeutralMobMixin {
 	@Inject(method = "isAngryAtAllPlayers", at = @At("HEAD"), cancellable = true)
 	default void vl$isAngryAtAllPlayers(ServerLevel level, CallbackInfoReturnable<Boolean> cir) {
-		if (CommonGameEngine.INSTANCE.isAngryByDefault(level, (NeutralMob) this)) {
+		if (VLBridge.isAngryByDefault.test(level, (NeutralMob) this)) {
 			cir.setReturnValue(true);
 		}
 	}

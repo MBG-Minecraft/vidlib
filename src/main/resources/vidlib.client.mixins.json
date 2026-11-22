@@ -46,6 +46,7 @@
 		"LayerDefinitionsMixin",
 		"LevelEventHandlerMixin",
 		"LevelRendererMixin",
+		"LightningBoltMixin",
 		"LiquidBlockRendererMixin",
 		"LivingEntityRendererMixin",
 		"LocalPlayerMixin",

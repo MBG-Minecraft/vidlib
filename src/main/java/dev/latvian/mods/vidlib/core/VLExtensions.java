@@ -3,30 +3,45 @@ package dev.latvian.mods.vidlib.core;
 import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Function4;
 import dev.latvian.mods.klib.core.KLibExtensions;
+import dev.latvian.mods.klib.entity.PlayerTarget;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.api.VLObject;
+import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
@@ -34,12 +49,16 @@ import org.jspecify.annotations.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class VLExtensions {
 	public static MethodHandle getMethodHandle;
@@ -70,6 +89,7 @@ public class VLExtensions {
 			setMethodHandle = lookup.findVirtual(c, "vl$set", MethodType.methodType(void.class, int.class, Object.class));
 
 			var b = findClass("dev.latvian.mods.vidlib.core.api.VLBridge");
+			lookup.findStaticVarHandle(b, "gameDirectory", Supplier.class).set((Supplier<Path>) () -> PlatformHelper.INSTANCE.getGameDirectory());
 			lookup.findStaticVarHandle(b, "disableSleepStatusAnnouncement", Predicate.class).set((Predicate<ServerLevel>) level -> CommonGameEngine.INSTANCE.disableSleepStatusAnnouncement(level));
 			lookup.findStaticVarHandle(b, "tickPrecipitation", Function4.class).set((Function4<ServerLevel, BlockPos, BlockPos, BlockPos, Void>) (level, blockPos, motionBlockedPos, belowMotionBlockedPos) -> {
 				CommonGameEngine.INSTANCE.tickPrecipitation(level, blockPos, motionBlockedPos, belowMotionBlockedPos);
@@ -100,10 +120,47 @@ public class VLExtensions {
 			lookup.findStaticVarHandle(b, "tickCoralBlocks", Function3.class).set((Function3<ScheduledTickAccess, BlockPos, Block, Boolean>) (tickAccess, pos, block) -> CommonGameEngine.INSTANCE.tickCoralBlocks(tickAccess, pos, block));
 			lookup.findStaticVarHandle(b, "getAmbientLight", Float2FloatFunction.class).set((Float2FloatFunction) fallback -> CommonGameEngine.INSTANCE.getAmbientLight(fallback));
 			lookup.findStaticVarHandle(b, "allowEmoteCommand", Predicate.class).set((Predicate<CommandSourceStack>) src -> CommonGameEngine.INSTANCE.allowEmoteCommand(src));
+			lookup.findStaticVarHandle(b, "allowPlayerListCommand", Predicate.class).set((Predicate<CommandSourceStack>) src -> CommonGameEngine.INSTANCE.allowPlayerListCommand(src));
+			lookup.findStaticVarHandle(b, "allowMsgCommand", Predicate.class).set((Predicate<CommandSourceStack>) src -> CommonGameEngine.INSTANCE.allowMsgCommand(src));
+			lookup.findStaticVarHandle(b, "allowTeamMsgCommand", Predicate.class).set((Predicate<CommandSourceStack>) src -> CommonGameEngine.INSTANCE.allowTeamMsgCommand(src));
 			lookup.findStaticVarHandle(b, "disableXP", Predicate.class).set((Predicate<ServerLevel>) level -> CommonGameEngine.INSTANCE.disableXP(level));
 			lookup.findStaticVarHandle(b, "itemInventoryTick", Function3.class).set((Function3<ItemStack, Entity, @Nullable EquipmentSlot, ItemStack>) (stack, entity, slot) -> CommonGameEngine.INSTANCE.itemInventoryTick(stack, entity, slot));
 			lookup.findStaticVarHandle(b, "modifyDroppedItem", BiConsumer.class).set((BiConsumer<LivingEntity, ItemEntity>) (parent, item) -> CommonGameEngine.INSTANCE.modifyDroppedItem(parent, item));
 			lookup.findStaticVarHandle(b, "disableBlockGravity", Function3.class).set((Function3<Level, BlockPos, BlockState, Boolean>) (level, pos, state) -> CommonGameEngine.INSTANCE.disableBlockGravity(level, pos, state));
+			lookup.findStaticVarHandle(b, "replaceFoodTick", BiPredicate.class).set((BiPredicate<ServerPlayer, FoodData>) (player, foodData) -> CommonGameEngine.INSTANCE.replaceFoodTick(player, foodData));
+			lookup.findStaticVarHandle(b, "disableIceMelting", Function3.class).set((Function3<Level, BlockPos, BlockState, Boolean>) (level, pos, state) -> CommonGameEngine.INSTANCE.disableIceMelting(level, pos, state));
+			lookup.findStaticVarHandle(b, "disableLeafDecay", Predicate.class).set((Predicate<BlockState>) state -> CommonGameEngine.INSTANCE.disableLeafDecay(state));
+			lookup.findStaticVarHandle(b, "createFireworks", Function4.class).set((Function4<ServerLevel, Vec3, Vec3, List<FireworkExplosion>, Void>) (level, pos, delta, explosions) -> {
+				PlayerTarget.of(level).s2c(new CreateFireworksPayload(pos.x, pos.y, pos.z, delta.x, delta.y, delta.z, explosions));
+				return null;
+			});
+			lookup.findStaticVarHandle(b, "getAttackBoundingBox", BiFunction.class).set((BiFunction<Mob, AABB, AABB>) (mob, box) -> CommonGameEngine.INSTANCE.getAttackBoundingBox(mob, box));
+			lookup.findStaticVarHandle(b, "isAngryByDefault", BiPredicate.class).set((BiPredicate<ServerLevel, NeutralMob>) (level, mob) -> CommonGameEngine.INSTANCE.isAngryByDefault(level, mob));
+			lookup.findStaticVarHandle(b, "getInfiniteArrows", Supplier.class).set((Supplier<ItemStack>) () -> CommonGameEngine.INSTANCE.getInfiniteArrows());
+			lookup.findStaticVarHandle(b, "getArrowTrail", Predicate.class).set((Predicate<AbstractArrow>) arrow -> CommonGameEngine.INSTANCE.getArrowTrail(arrow));
+			lookup.findStaticVarHandle(b, "spawnArrowTrail", Function3.class).set((Function3<AbstractArrow, Vec3, Vec3, Void>) (arrow, prevPos, pos) -> {
+				CommonGameEngine.INSTANCE.spawnArrowTrail(arrow, prevPos, pos);
+				return null;
+			});
+			lookup.findStaticVarHandle(b, "initialPlayerSync", BiConsumer.class).set((BiConsumer<ServerPlayer, Consumer<Packet<? super ClientGamePacketListener>>>) (player, packets) -> CommonGameEngine.INSTANCE.initialPlayerSync(player, packets));
+			lookup.findStaticVarHandle(b, "playerRespawned", Function3.class).set((Function3<Player, Level, Boolean, Void>) (player, level, login) -> {
+				PlayerSessionData.of(player).respawned(level, login);
+				return null;
+			});
+			lookup.findStaticVarHandle(b, "playerRemoved", BiConsumer.class).set((BiConsumer<MinecraftServer, ServerPlayer>) (server, player) -> {
+				var packetCapture = ServerSessionData.of(server).packetCapture;
+
+				if (packetCapture != null) {
+					packetCapture.disconnect(player.getUUID());
+				}
+			});
+			lookup.findStaticVarHandle(b, "isSmallTallGrassHitbox", Predicate.class).set((Predicate<BlockGetter>) level -> CommonGameEngine.INSTANCE.isSmallTallGrassHitbox(level));
+			lookup.findStaticVarHandle(b, "disablePricklyBerryBushes", Function4.class).set((Function4<Level, BlockPos, BlockState, Entity, Boolean>) (level, pos, state, entity) -> CommonGameEngine.INSTANCE.disablePricklyBerryBushes(level, pos, state, entity));
+			lookup.findStaticVarHandle(b, "intersectsSolid", Function3.class).set((Function3<Level, @Nullable Entity, AABB, Boolean>) (level, entity, collisionBox) -> LevelSessionData.of(level).intersectsSolid(entity, collisionBox));
+			lookup.findStaticVarHandle(b, "collectShapesIntersecting", Function4.class).set((Function4<CollisionGetter, @Nullable Entity, AABB, List<VoxelShape>, Void>) (level, entity, collisionBox, list) -> {
+				CommonGameEngine.INSTANCE.collectShapesIntersecting(level, entity, collisionBox, list);
+				return null;
+			});
 
 			VidLib.LOGGER.info("VLExtensions initialized");
 		} catch (Throwable ex) {

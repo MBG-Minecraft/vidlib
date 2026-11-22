@@ -1,17 +1,18 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.klib.entity.EntityUtils;
+import dev.latvian.mods.klib.particle.LineParticleOptions;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.platform.PlatformModInfo;
 import dev.latvian.mods.klib.util.RuntimeDebugger;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
+import dev.latvian.mods.vidlib.feature.gradient.VLGradients;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
-import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import dev.mrbeastgaming.mods.hub.api.data.HubFileType;
 import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
@@ -46,7 +47,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.CommandBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -136,8 +136,8 @@ public class CommonGameEngine {
 		return null;
 	}
 
-	public boolean getInfiniteArrows() {
-		return false;
+	public ItemStack getInfiniteArrows() {
+		return ItemStack.EMPTY;
 	}
 
 	public boolean getArrowTrail(AbstractArrow arrow) {
@@ -152,7 +152,6 @@ public class CommonGameEngine {
 		var delta = prevPos.subtract(pos);
 
 		if (delta.lengthSqr() > 0.0001D) {
-			/* FIXME
 			((ServerLevel) arrow.level()).sendParticles(
 				new LineParticleOptions(20, VLGradients.TRAIL, VLGradients.TRAIL, 1),
 				true,
@@ -166,7 +165,6 @@ public class CommonGameEngine {
 				delta.z,
 				1D
 			);
-			 */
 		}
 	}
 
@@ -415,21 +413,6 @@ public class CommonGameEngine {
 		return result;
 	}
 
-	public void blockChanged(Level level, BlockPos pos, BlockState from, BlockState to) {
-		if (level instanceof ServerLevel serverLevel) {
-			var fromAnchor = isBlockAnchor(serverLevel, pos, from);
-			var toAnchor = isBlockAnchor(serverLevel, pos, to);
-
-			if (fromAnchor != toAnchor) {
-				Anchor.setAnchorBlockActive(serverLevel, pos, toAnchor);
-			}
-		}
-	}
-
-	public boolean isBlockAnchor(ServerLevel level, BlockPos pos, BlockState state) {
-		return state.getBlock() instanceof CommandBlock;
-	}
-
 	public boolean allowEmoteCommand(CommandSourceStack source) {
 		return source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
@@ -494,7 +477,7 @@ public class CommonGameEngine {
 		return name;
 	}
 
-	public void initialPlayerSync(ServerPlayer player, java.util.function.Consumer<Packet<ClientGamePacketListener>> callback) {
+	public void initialPlayerSync(ServerPlayer player, java.util.function.Consumer<Packet<? super ClientGamePacketListener>> callback) {
 		// callback.accept(new SyncPlayerTagsPayload(player.getUUID(), List.copyOf(player.entityTags())).toS2C(player.level().getGameTime()));
 	}
 

@@ -4,12 +4,15 @@ import dev.latvian.mods.klib.bulk.BlockModificationBuilder;
 import dev.latvian.mods.klib.bulk.BulkLevelModification;
 import dev.latvian.mods.klib.bulk.BulkLevelModificationBundle;
 import dev.latvian.mods.klib.knumber.KNumberContext;
+import dev.latvian.mods.klib.platform.PlatformHelper;
+import dev.latvian.mods.klib.platform.PlatformType;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLExtensions;
 import dev.latvian.mods.vidlib.core.api.neoforge.VLTicketTracker;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
+import dev.latvian.mods.vidlib.feature.zone.AnchorTickets;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.resources.ResourceKey;
@@ -48,7 +51,10 @@ public class ServerLevelSessionData extends LevelSessionData<ServerProps> {
 	@Override
 	public void setAnchor(Anchor anchor) {
 		super.setAnchor(anchor);
-		updateLoadedChunks();
+
+		if (PlatformHelper.INSTANCE.getPlatform() == PlatformType.NEOFORGE) {
+			updateLoadedChunks();
+		}
 	}
 
 	public LongOpenHashSet getChunksToLoad() {
@@ -73,7 +79,7 @@ public class ServerLevelSessionData extends LevelSessionData<ServerProps> {
 
 		for (var entry : ((VLTicketTracker<UUID>) ticketStorage.getEntityForcedChunks()).vl$getTickets().long2ObjectEntrySet()) {
 			for (var ticketOwner : entry.getValue()) {
-				if (ticketOwner.vl$getId().equals(Anchor.TICKET_CONTROLLER.id())) {
+				if (ticketOwner.vl$getId().equals(AnchorTickets.TICKET_CONTROLLER.id())) {
 					currentlyLoaded.add(entry.getLongKey());
 					break;
 				}
@@ -89,11 +95,11 @@ public class ServerLevelSessionData extends LevelSessionData<ServerProps> {
 		VidLib.LOGGER.info("Force-loaded " + toLoad.size() + "/" + toLoadCount + " chunks, unloaded " + toUnload.size() + " chunks (previously " + currentlyLoaded.size() + ")");
 
 		for (var pos : toLoad) {
-			Anchor.TICKET_CONTROLLER.forceChunk(level, Util.NIL_UUID, ChunkPos.getX(pos), ChunkPos.getZ(pos), true, false);
+			AnchorTickets.TICKET_CONTROLLER.forceChunk(level, Util.NIL_UUID, ChunkPos.getX(pos), ChunkPos.getZ(pos), true, false);
 		}
 
 		for (var pos : toUnload) {
-			Anchor.TICKET_CONTROLLER.forceChunk(level, Util.NIL_UUID, ChunkPos.getX(pos), ChunkPos.getZ(pos), false, false);
+			AnchorTickets.TICKET_CONTROLLER.forceChunk(level, Util.NIL_UUID, ChunkPos.getX(pos), ChunkPos.getZ(pos), false, false);
 		}
 	}
 

@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +16,7 @@ public abstract class FoodDataMixin {
 	 */
 	@Inject(method = "tick", at = @At("HEAD"), cancellable = true)
 	public void vl$tick(ServerPlayer player, CallbackInfo ci) {
-		if (CommonGameEngine.INSTANCE.replaceFoodTick(player, (FoodData) (Object) this)) {
+		if (VLBridge.replaceFoodTick.test(player, (FoodData) (Object) this)) {
 			ci.cancel();
 		}
 	}

@@ -23,7 +23,7 @@ import dev.latvian.mods.vidlib.feature.prop.RemoveAllPropsPayload;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
-import dev.latvian.mods.vidlib.feature.zone.Anchor;
+import dev.latvian.mods.vidlib.feature.zone.AnchorTickets;
 import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
 import dev.mrbeastgaming.mods.hub.api.HubServerSession;
@@ -106,8 +106,7 @@ public class VidLibEventHandler {
 
 	@SubscribeEvent
 	public static void registerTicketControllers(RegisterTicketControllersEvent event) {
-		event.register(Anchor.TICKET_CONTROLLER);
-		event.register(Anchor.BLOCK_TICKET_CONTROLLER);
+		event.register(AnchorTickets.TICKET_CONTROLLER);
 	}
 
 	@SubscribeEvent

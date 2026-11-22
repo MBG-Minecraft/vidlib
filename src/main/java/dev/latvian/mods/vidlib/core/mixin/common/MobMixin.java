@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,6 +12,6 @@ public abstract class MobMixin {
 	@ModifyReturnValue(method = "getAttackBoundingBox", at = @At("RETURN"))
 	private AABB vl$getAttackBoundingBox(AABB original) {
 		var mob = (Mob) (Object) this;
-		return CommonGameEngine.INSTANCE.getAttackBoundingBox(mob, original);
+		return VLBridge.getAttackBoundingBox.apply(mob, original);
 	}
 }

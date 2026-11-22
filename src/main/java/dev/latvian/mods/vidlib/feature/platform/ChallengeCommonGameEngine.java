@@ -12,6 +12,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.food.FoodData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
@@ -41,8 +43,8 @@ public class ChallengeCommonGameEngine extends NeoForgeCommonGameEngine {
 	}
 
 	@Override
-	public boolean getInfiniteArrows() {
-		return true;
+	public ItemStack getInfiniteArrows() {
+		return Items.ARROW.getDefaultInstance();
 	}
 
 	@Override

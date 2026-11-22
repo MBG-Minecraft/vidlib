@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.IceBlock;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class IceBlockMixin {
 	@Inject(method = "melt", at = @At("HEAD"), cancellable = true)
 	private void vl$melt(BlockState state, Level level, BlockPos pos, CallbackInfo ci) {
-		if (CommonGameEngine.INSTANCE.disableIceMelting(level, pos, state)) {
+		if (VLBridge.disableIceMelting.apply(level, pos, state)) {
 			ci.cancel();
 		}
 	}

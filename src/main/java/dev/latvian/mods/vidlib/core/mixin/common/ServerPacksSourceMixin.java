@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.klib.platform.PlatformHelper;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
@@ -24,7 +24,7 @@ public abstract class ServerPacksSourceMixin extends BuiltInPackSource {
 	protected void populatePackList(BiConsumer<String, Function<String, Pack>> consumer) {
 		super.populatePackList(consumer);
 
-		var path = PlatformHelper.INSTANCE.getGameDirectory().resolve("datapacks");
+		var path = VLBridge.gameDirectory.get().resolve("datapacks");
 
 		if (Files.notExists(path)) {
 			try {

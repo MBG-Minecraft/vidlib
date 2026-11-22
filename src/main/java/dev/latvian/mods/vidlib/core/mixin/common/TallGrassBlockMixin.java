@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -21,7 +21,7 @@ public class TallGrassBlockMixin {
 
 	@Inject(method = "getShape", at = @At("HEAD"), cancellable = true)
 	private void vl$getShape(BlockState state, BlockGetter blockGetter, BlockPos pos, CollisionContext context, CallbackInfoReturnable<VoxelShape> cir) {
-		if (CommonGameEngine.INSTANCE.isSmallTallGrassHitbox(blockGetter)) {
+		if (VLBridge.isSmallTallGrassHitbox.test(blockGetter)) {
 			cir.setReturnValue(VL$SHAPE.move(state.getOffset(pos)));
 		}
 	}

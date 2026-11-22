@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.InsideBlockEffectApplier;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class SweetBerryBushBlockMixin {
 	@Inject(method = "entityInside", at = @At("HEAD"), cancellable = true)
 	protected void vl$entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier p_405414_, boolean p_57270_, CallbackInfo ci) {
-		if (CommonGameEngine.INSTANCE.disablePricklyBerryBushes(level, pos, state, entity)) {
+		if (VLBridge.disablePricklyBerryBushes.apply(level, pos, state, entity)) {
 			ci.cancel();
 		}
 	}

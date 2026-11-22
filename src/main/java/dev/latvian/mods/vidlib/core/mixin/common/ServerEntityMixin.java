@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -22,9 +23,9 @@ public class ServerEntityMixin {
 	private Entity entity;
 
 	@Inject(method = "sendPairingData", at = @At("RETURN"))
-	private void vl$sendPairingData(ServerPlayer to, Consumer<Packet<ClientGamePacketListener>> callback, CallbackInfo ci) {
+	private void vl$sendPairingData(ServerPlayer to, Consumer<Packet<? super ClientGamePacketListener>> callback, CallbackInfo ci) {
 		if (entity instanceof ServerPlayer p) {
-			CommonGameEngine.INSTANCE.initialPlayerSync(p, callback);
+			VLBridge.initialPlayerSync.accept(p, callback);
 		}
 	}
 

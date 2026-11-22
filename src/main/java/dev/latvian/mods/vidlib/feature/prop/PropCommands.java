@@ -176,7 +176,7 @@ public interface PropCommands {
 		var prop = props.levelProps.get(propId);
 
 		if (prop != null) {
-			prop.setPos(coordinates.getPosition(prop.getCommandSourceAt(source)));
+			prop.moveTo(coordinates.getPosition(prop.getCommandSourceAt(source)));
 			prop.sync(Prop.POSITION);
 			return 1;
 		}
