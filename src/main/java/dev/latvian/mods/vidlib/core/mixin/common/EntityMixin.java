@@ -3,8 +3,6 @@ package dev.latvian.mods.vidlib.core.mixin.common;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.api.VLBridge;
-import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -37,13 +35,11 @@ public abstract class EntityMixin {
 
 	@ModifyReturnValue(method = "getGravity", at = @At("RETURN"))
 	private double vl$getGravity(double original) {
-		return original * CommonGameEngine.INSTANCE.getGravityModifier((Entity) (Object) this);
+		return original * VLBridge.getGravityModifier.applyAsDouble((Entity) (Object) this);
 	}
 
 	@Inject(method = "addPassenger", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableList;copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;"))
 	private void vl$addPassenger(Entity passenger, CallbackInfo ci, @Local List<Entity> list) {
-		if (this instanceof VLVehicle vehicle) {
-			vehicle.sortPassengers(list);
-		}
+		VLBridge.sortPassengers.accept((Entity) (Object) this, list);
 	}
 }

@@ -45,6 +45,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 
 public class VLBridge {
@@ -86,4 +87,6 @@ public class VLBridge {
 	public static Function4<Level, BlockPos, BlockState, Entity, Boolean> disablePricklyBerryBushes;
 	public static Function3<Level, @Nullable Entity, AABB, Boolean> intersectsSolid;
 	public static Function4<CollisionGetter, @Nullable Entity, AABB, List<VoxelShape>, Void> collectShapesIntersecting;
+	public static ToDoubleFunction<Entity> getGravityModifier;
+	public static BiConsumer<Entity, List<Entity>> sortPassengers;
 }

@@ -7,6 +7,7 @@ import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.api.VLObject;
+import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
@@ -59,6 +60,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.ToDoubleFunction;
 
 public class VLExtensions {
 	public static MethodHandle getMethodHandle;
@@ -160,6 +162,12 @@ public class VLExtensions {
 			lookup.findStaticVarHandle(b, "collectShapesIntersecting", Function4.class).set((Function4<CollisionGetter, @Nullable Entity, AABB, List<VoxelShape>, Void>) (level, entity, collisionBox, list) -> {
 				CommonGameEngine.INSTANCE.collectShapesIntersecting(level, entity, collisionBox, list);
 				return null;
+			});
+			lookup.findStaticVarHandle(b, "getGravityModifier", ToDoubleFunction.class).set((ToDoubleFunction<Entity>) entity -> CommonGameEngine.INSTANCE.getGravityModifier(entity));
+			lookup.findStaticVarHandle(b, "sortPassengers", BiConsumer.class).set((BiConsumer<Entity, List<Entity>>) (entity, list) -> {
+				if (entity instanceof VLVehicle vehicle) {
+					vehicle.sortPassengers(list);
+				}
 			});
 
 			VidLib.LOGGER.info("VLExtensions initialized");
