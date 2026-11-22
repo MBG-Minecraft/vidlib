@@ -1,9 +1,9 @@
 package dev.latvian.mods.vidlib.core.mixin.client;
 
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import dev.latvian.mods.vidlib.core.api.client.VLClientLevel;
 import dev.latvian.mods.vidlib.core.mixin.common.LevelMixin;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
@@ -47,7 +47,7 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 
 	@Redirect(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
 	private FluidState vl$getFluidState(ClientLevel level, BlockPos pos) {
-		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
+		return VLBridge.overrideFluidState.apply(level, pos);
 	}
 
 	@Inject(method = "gatherChunkSourceStats", at = @At("RETURN"), cancellable = true)

@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.core.mixin.neoforge;
 
-import dev.latvian.mods.vidlib.core.api.common.VLPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,7 +10,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Player.class)
-public abstract class NeoPlayerMixin extends LivingEntity implements VLPlayer {
+public abstract class NeoPlayerMixin extends LivingEntity {
 	@Shadow
 	private Component displayName;
 

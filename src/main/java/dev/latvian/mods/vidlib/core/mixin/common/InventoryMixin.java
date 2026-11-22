@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -35,7 +35,7 @@ public abstract class InventoryMixin {
 			var stack = items.get(i);
 
 			if (!stack.isEmpty()) {
-				var updated = CommonGameEngine.INSTANCE.itemInventoryTick(stack, player, i == this.selected ? EquipmentSlot.MAINHAND : null);
+				var updated = VLBridge.itemInventoryTick.apply(stack, player, i == this.selected ? EquipmentSlot.MAINHAND : null);
 
 				if (stack != updated || updated.isEmpty()) {
 					items.set(i, updated.isEmpty() ? ItemStack.EMPTY : updated);
@@ -48,7 +48,7 @@ public abstract class InventoryMixin {
 	@ModifyExpressionValue(method = "dropAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;createItemStackToDrop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"))
 	private ItemEntity vl$drop(@Nullable ItemEntity entity) {
 		if (entity != null) {
-			CommonGameEngine.INSTANCE.modifyDroppedItem(player, entity);
+			VLBridge.modifyDroppedItem.accept(player, entity);
 		}
 
 		return entity;

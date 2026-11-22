@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.client;
 
-import dev.latvian.mods.vidlib.core.api.client.VLClientConfigPacketListener;
+import dev.latvian.mods.vidlib.core.api.client.VLClientPacketListener;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientConfigurationPacketListenerImpl;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientConfigurationPacketListenerImpl.class)
-public abstract class ClientConfigurationPacketListenerImplMixin implements VLClientConfigPacketListener {
+public abstract class ClientConfigurationPacketListenerImplMixin implements VLClientPacketListener {
 	@Unique
 	private ClientSessionData vl$globalData;
 

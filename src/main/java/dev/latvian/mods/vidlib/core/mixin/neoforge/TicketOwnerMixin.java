@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.neoforge;
 
-import dev.latvian.mods.vidlib.core.api.common.VLTicketOwner;
+import dev.latvian.mods.vidlib.core.api.neoforge.VLTicketOwner;
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;

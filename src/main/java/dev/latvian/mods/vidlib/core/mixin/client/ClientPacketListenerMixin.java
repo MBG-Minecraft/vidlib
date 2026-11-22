@@ -2,9 +2,10 @@ package dev.latvian.mods.vidlib.core.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.latvian.mods.vidlib.core.api.client.VLClientConfigPacketListener;
-import dev.latvian.mods.vidlib.core.api.common.VLEntity;
+import dev.latvian.mods.vidlib.core.api.client.VLClientPacketListener;
+import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
+import dev.latvian.mods.vidlib.feature.session.GlobalSessionData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -21,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPacketListener.class)
-public abstract class ClientPacketListenerMixin extends ClientCommonPacketListenerImpl {
+public abstract class ClientPacketListenerMixin extends ClientCommonPacketListenerImpl implements VLClientPacketListener {
 	@Shadow
 	private ClientLevel level;
 
@@ -31,9 +32,14 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void vl$init(Minecraft mc, Connection connection, CommonListenerCookie cookie, CallbackInfo ci) {
-		if (connection.getPacketListener() instanceof VLClientConfigPacketListener config) {
+		if (connection.getPacketListener() instanceof VLClientPacketListener config) {
 			mc.vl$setGlobalData((ClientSessionData) config.vl$getGlobalData());
 		}
+	}
+
+	@Override
+	public GlobalSessionData vl$getGlobalData() {
+		return minecraft.vl$getGlobalData();
 	}
 
 	@ModifyExpressionValue(method = {"handleRespawn", "handleLogin"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;isFlat()Z"))
@@ -53,7 +59,7 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 
 	@ModifyExpressionValue(method = "handleSetEntityPassengersPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"))
 	private MutableComponent vl$setOverlayMessage(MutableComponent original, @Local(ordinal = 0) Entity entity) {
-		var customMessage = entity instanceof VLEntity e ? e.getCustomMountMessage() : null;
+		var customMessage = entity instanceof VLVehicle e ? e.getCustomMountMessage() : null;
 		return customMessage == null ? original : (MutableComponent) customMessage;
 	}
 }

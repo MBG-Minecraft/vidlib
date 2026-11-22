@@ -7,7 +7,7 @@ import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.VLExtensions;
-import dev.latvian.mods.vidlib.core.api.common.VLTicketTracker;
+import dev.latvian.mods.vidlib.core.api.neoforge.VLTicketTracker;
 import dev.latvian.mods.vidlib.feature.prop.ServerProps;
 import dev.latvian.mods.vidlib.feature.zone.Anchor;
 import it.unimi.dsi.fastutil.longs.LongArraySet;

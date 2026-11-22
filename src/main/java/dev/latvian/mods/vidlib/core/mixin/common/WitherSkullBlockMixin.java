@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.WitherSkullBlock;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class WitherSkullBlockMixin {
 	@Inject(method = "checkSpawn(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/SkullBlockEntity;)V", at = @At("HEAD"), cancellable = true)
 	private static void vl$checkSpawn(Level level, BlockPos pos, SkullBlockEntity blockEntity, CallbackInfo ci) {
-		if (CommonGameEngine.INSTANCE.disableGolems(level, pos)) {
+		if (VLBridge.disableGolems.test(level, pos)) {
 			ci.cancel();
 		}
 	}

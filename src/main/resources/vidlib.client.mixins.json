@@ -65,7 +65,6 @@
 		"PostChainConfigFixedSizeTargetMixin",
 		"PostChainMixin",
 		"PostPassMixin",
-		"RemotePlayerMixin",
 		"RenderSystemMixin",
 		"RenderTypeMixin",
 		"ScreenMixin",
@@ -80,6 +79,7 @@
 		"TextureAtlasSpriteMixin",
 		"TextureManagerMixin",
 		"TitleScreenMixin",
+		"WaterFluidMixin",
 		"WeatherEffectRendererMixin",
 		"WindowMixin"
 	],

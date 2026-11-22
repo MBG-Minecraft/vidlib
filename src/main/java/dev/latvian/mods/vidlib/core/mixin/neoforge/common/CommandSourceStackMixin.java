@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.core.mixin.common;
+package dev.latvian.mods.vidlib.core.mixin.neoforge.common;
 
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.ChatFormatting;

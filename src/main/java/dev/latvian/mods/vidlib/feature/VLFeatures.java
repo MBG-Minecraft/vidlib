@@ -24,6 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -52,6 +53,14 @@ public interface VLFeatures {
 
 	static VLFeatures of(Player player) {
 		return of(PlayerTarget.of(player));
+	}
+
+	static void playSound(Entity at, SoundData data, boolean looping, boolean stopImmediately) {
+		of(at.level()).playGlobalSound(new PositionedSoundData(data, at, looping, stopImmediately), KNumberVariables.EMPTY);
+	}
+
+	static void playSound(Entity at, SoundData data) {
+		playSound(at, data, false, true);
 	}
 
 	default void updateInput(Level level, UUID player, PlayerInput input) {

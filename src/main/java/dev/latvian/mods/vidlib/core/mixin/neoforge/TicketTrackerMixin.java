@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin.neoforge;
 
-import dev.latvian.mods.vidlib.core.api.common.VLTicketOwner;
-import dev.latvian.mods.vidlib.core.api.common.VLTicketTracker;
+import dev.latvian.mods.vidlib.core.api.neoforge.VLTicketOwner;
+import dev.latvian.mods.vidlib.core.api.neoforge.VLTicketTracker;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.neoforged.neoforge.common.world.chunk.ForcedChunkManager;
 import org.spongepowered.asm.mixin.Final;

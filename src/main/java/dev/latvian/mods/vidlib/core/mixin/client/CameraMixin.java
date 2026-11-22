@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.core.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -74,6 +74,6 @@ public abstract class CameraMixin {
 
 	@Redirect(method = "getFluidInCamera", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
 	private FluidState vl$getFluidState(Level level, BlockPos pos) {
-		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
+		return VLBridge.overrideFluidState.apply(level, pos);
 	}
 }

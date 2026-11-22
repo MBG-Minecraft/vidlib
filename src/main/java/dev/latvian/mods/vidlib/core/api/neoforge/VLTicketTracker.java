@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.core.api.common;
+package dev.latvian.mods.vidlib.core.api.neoforge;
 
 import dev.latvian.mods.klib.core.NoMixinException;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;

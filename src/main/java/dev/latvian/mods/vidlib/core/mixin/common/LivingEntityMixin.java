@@ -3,7 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin.common;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.latvian.mods.vidlib.core.api.common.VLLivingEntity;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin implements VLLivingEntity {
+public abstract class LivingEntityMixin {
 	@Shadow
 	public abstract ItemStack getMainHandItem();
 
@@ -46,35 +46,35 @@ public abstract class LivingEntityMixin implements VLLivingEntity {
 
 	@ModifyReturnValue(method = "getSpeed", at = @At("RETURN"))
 	private float vl$getSpeed(float original) {
-		return original * CommonGameEngine.INSTANCE.getSpeedModifier(vl$self());
+		return original * CommonGameEngine.INSTANCE.getSpeedModifier((LivingEntity) (Object) this);
 	}
 
 	@ModifyReturnValue(method = "isTransmittingWaypoint", at = @At("RETURN"))
 	private boolean vl$isTransmittingWaypoint(boolean original) {
-		return CommonGameEngine.INSTANCE.isTrackedByLocatorBar(vl$self(), original);
+		return CommonGameEngine.INSTANCE.isTrackedByLocatorBar((LivingEntity) (Object) this, original);
 	}
 
 	@Inject(method = "isPushable", at = @At("HEAD"), cancellable = true)
 	private void vl$isPushable(CallbackInfoReturnable<Boolean> cir) {
-		if (CommonGameEngine.INSTANCE.isUnpushable(vl$self())) {
+		if (CommonGameEngine.INSTANCE.isUnpushable((LivingEntity) (Object) this)) {
 			cir.setReturnValue(false);
 		}
 	}
 
 	@Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
 	private FluidState vl$getFluidState(Level level, BlockPos pos) {
-		return CommonGameEngine.INSTANCE.overrideFluidState(level, pos);
+		return VLBridge.overrideFluidState.apply(level, pos);
 	}
 
 	@Inject(method = "isBaby", at = @At("HEAD"), cancellable = true)
 	private void vl$isBaby(CallbackInfoReturnable<Boolean> cir) {
-		if (vl$self().entityTags().contains("baby")) {
+		if (((LivingEntity) (Object) this).entityTags().contains("baby")) {
 			cir.setReturnValue(true);
 		}
 	}
 
 	@ModifyExpressionValue(method = "causeFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;calculateFallDamage(DF)I"))
 	private int vl$ca(int original, @Local(argsOnly = true) double fallDistance, @Local(argsOnly = true) float damageMultiplier, @Local(argsOnly = true) DamageSource damageSource) {
-		return CommonGameEngine.INSTANCE.calculateFallDamage(vl$self(), fallDistance, damageMultiplier, damageSource, original);
+		return CommonGameEngine.INSTANCE.calculateFallDamage((LivingEntity) (Object) this, fallDistance, damageMultiplier, damageSource, original);
 	}
 }

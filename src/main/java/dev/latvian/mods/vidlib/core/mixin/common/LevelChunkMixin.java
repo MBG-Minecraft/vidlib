@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class LevelChunkMixin {
 	@Shadow
 	@Final
-	Level level;
+	private Level level;
 
 	@Nullable
 	@ModifyReturnValue(method = "setBlockState", at = @At("RETURN"))

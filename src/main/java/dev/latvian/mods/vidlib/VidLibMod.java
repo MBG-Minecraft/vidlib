@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib;
 
+import dev.latvian.mods.vidlib.core.VLExtensions;
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.block.VidLibBlocks;
 import dev.latvian.mods.vidlib.feature.item.VidLibItems;
@@ -20,6 +21,7 @@ import net.neoforged.neoforgespi.language.IModInfo;
 @EventBusSubscriber(modid = VidLib.ID)
 public class VidLibMod {
 	public VidLibMod(ModContainer mod, IEventBus bus) {
+		VLExtensions.init();
 		VidLib.VERSION = mod.getModInfo().getVersion().toString();
 		VLPlatformHelper.INSTANCE = new VLNeoPlatformHelper(mod);
 		CommonGameEngine.INSTANCE = new NeoForgeCommonGameEngine();

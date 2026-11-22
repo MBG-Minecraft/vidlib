@@ -17,7 +17,6 @@ import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
 import dev.latvian.mods.vidlib.core.api.client.VLMinecraftClient;
-import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.actor.ActorParticleOptions;
 import dev.latvian.mods.vidlib.feature.actor.ActorRecording;
@@ -36,6 +35,7 @@ import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionHandler;
 import dev.latvian.mods.vidlib.feature.entity.PlayerActionType;
+import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
 import dev.latvian.mods.vidlib.feature.environment.WorldBorderOverride;
 import dev.latvian.mods.vidlib.feature.imgui.BuiltInImGui;
 import dev.latvian.mods.vidlib.feature.imgui.Panel;
@@ -481,8 +481,8 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 		var data = getPlayer(player);
 		data.prevInput = data.input = input;
 
-		if (level.getEntity(player) instanceof Player entity && entity.getVehicle() instanceof VLEntity vehicle) {
-			vehicle.setPilotInput(entity, input);
+		if (level.getEntity(player) instanceof Player entity && entity.getVehicle() instanceof VLVehicle vehicle) {
+			vehicle.setPilotInput(entity, input.flags());
 		}
 	}
 

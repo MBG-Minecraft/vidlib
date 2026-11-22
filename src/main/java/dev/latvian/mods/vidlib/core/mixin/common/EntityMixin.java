@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.core.mixin.common;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.latvian.mods.vidlib.core.api.common.VLEntity;
+import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
 import net.minecraft.world.entity.Entity;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements VLEntity {
+public abstract class EntityMixin {
 	@ModifyReturnValue(method = "collectAllColliders", at = @At("RETURN"))
 	private static List<VoxelShape> vl$collectColliders(List<VoxelShape> parent, @Local(argsOnly = true) @Nullable Entity entity, @Local(argsOnly = true) Level level, @Local(argsOnly = true) AABB collisionBox) {
 		var list = new ArrayList<VoxelShape>(0);
@@ -39,7 +39,7 @@ public abstract class EntityMixin implements VLEntity {
 
 	@ModifyReturnValue(method = "getGravity", at = @At("RETURN"))
 	private double vl$getGravity(double original) {
-		return original * CommonGameEngine.INSTANCE.getGravityModifier(vl$self());
+		return original * CommonGameEngine.INSTANCE.getGravityModifier((Entity) (Object) this);
 	}
 
 	/**
@@ -62,6 +62,8 @@ public abstract class EntityMixin implements VLEntity {
 
 	@Inject(method = "addPassenger", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableList;copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;"))
 	private void vl$addPassenger(Entity passenger, CallbackInfo ci, @Local List<Entity> list) {
-		sortPassengers(list);
+		if (this instanceof VLVehicle vehicle) {
+			vehicle.sortPassengers(list);
+		}
 	}
 }

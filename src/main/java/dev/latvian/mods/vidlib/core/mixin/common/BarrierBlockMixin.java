@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BarrierBlock;
@@ -19,7 +19,7 @@ public abstract class BarrierBlockMixin extends Block {
 
 	@Override
 	protected VoxelShape getCollisionShape(BlockState state, BlockGetter blockGetter, BlockPos pos, CollisionContext context) {
-		var override = CommonGameEngine.INSTANCE.overrideBarrierShape(state, blockGetter, pos, context);
+		var override = VLBridge.overrideBarrierShape == null ? null : VLBridge.overrideBarrierShape.apply(state, blockGetter, pos, context);
 
 		if (override != null) {
 			return override;

@@ -14,7 +14,9 @@
 		"NetworkRegistryMixin",
 		"ReloadableResourceManagerMixin",
 		"TicketOwnerMixin",
-		"TicketTrackerMixin"
+		"TicketTrackerMixin",
+		"common.ButtonBlockMixin",
+		"common.CommandSourceStackMixin"
 	],
 	"client": [
 		"ClientCommandSourceStackMixin"

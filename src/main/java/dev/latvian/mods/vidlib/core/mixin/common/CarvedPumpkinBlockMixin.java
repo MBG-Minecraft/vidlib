@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CarvedPumpkinBlock;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class CarvedPumpkinBlockMixin {
 	@Inject(method = "trySpawnGolem", at = @At("HEAD"), cancellable = true)
 	private void vl$trySpawnGolem(Level level, BlockPos pos, CallbackInfo ci) {
-		if (CommonGameEngine.INSTANCE.disableGolems(level, pos)) {
+		if (VLBridge.disableGolems.test(level, pos)) {
 			ci.cancel();
 		}
 	}

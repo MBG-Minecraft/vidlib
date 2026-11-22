@@ -10,7 +10,6 @@ import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
-import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
@@ -31,6 +30,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresetLoader;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
+import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
 import dev.latvian.mods.vidlib.feature.item.RainbowItemTint;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
@@ -557,7 +557,7 @@ public class VidLibClientEventHandler {
 	public static void calculateDetachedCameraDistance(CalculateDetachedCameraDistanceEvent event) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.player != null && mc.player.getVehicle() instanceof VLEntity vehicle) {
+		if (mc.player != null && mc.player.getVehicle() instanceof VLVehicle vehicle) {
 			event.setDistance(vehicle.getVehicleCameraDistance(mc.player, event.getDistance()));
 		}
 	}
@@ -611,7 +611,7 @@ public class VidLibClientEventHandler {
 	public static void computeCameraAngles(ViewportEvent.ComputeCameraAngles event) {
 		var mc = Minecraft.getInstance();
 
-		if (mc.player != null && mc.player.getVehicle() instanceof VLEntity vehicle) {
+		if (mc.player != null && mc.player.getVehicle() instanceof VLVehicle vehicle) {
 			event.setRoll(vehicle.getPassengerCameraRoll(mc.player, event.getPartialTick(), event.getRoll()));
 		}
 	}

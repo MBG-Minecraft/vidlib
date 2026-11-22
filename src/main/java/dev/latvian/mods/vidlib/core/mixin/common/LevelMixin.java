@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
 import dev.latvian.mods.klib.entity.PlayerTarget;
-import dev.latvian.mods.vidlib.core.api.common.VLLevel;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.component.FireworkExplosion;
@@ -14,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(Level.class)
-public abstract class LevelMixin implements VLLevel {
+public abstract class LevelMixin {
 	@Inject(method = "createFireworks", at = @At("RETURN"))
 	private void vl$createFireworks(double x, double y, double z, double xd, double yd, double zd, List<FireworkExplosion> explosions, boolean playSound, CallbackInfo ci) {
 		var level = (Level) (Object) this;

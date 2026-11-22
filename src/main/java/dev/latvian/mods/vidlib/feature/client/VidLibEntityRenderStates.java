@@ -4,7 +4,7 @@ import dev.latvian.mods.klib.texture.SpriteKey;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.klib.util.ID;
-import dev.latvian.mods.vidlib.core.api.common.VLEntity;
+import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
@@ -51,7 +51,7 @@ public interface VidLibEntityRenderStates {
 		var mc = Minecraft.getInstance();
 		var camPos = mc.gameRenderer.mainCamera().position();
 
-		if (entity.getVehicle() instanceof VLEntity vehicle) {
+		if (entity.getVehicle() instanceof VLVehicle vehicle) {
 			var s = vehicle.getPassengerScale(entity);
 
 			if (s <= 0F) {

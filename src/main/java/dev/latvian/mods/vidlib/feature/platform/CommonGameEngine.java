@@ -17,7 +17,6 @@ import dev.mrbeastgaming.mods.hub.api.data.HubUsedPort;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubWorldDirectory;
 import dev.mrbeastgaming.mods.hub.file.HubFileUploads;
 import net.minecraft.ChatFormatting;
-import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
@@ -40,7 +39,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.CollisionGetter;
@@ -65,7 +63,6 @@ import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -220,14 +217,6 @@ public class CommonGameEngine {
 		return blockGetter instanceof Level level && LevelSessionData.of(level).getSmallGrassHitbox();
 	}
 
-	public boolean disablePOI() {
-		return false;
-	}
-
-	public Collection<AdvancementHolder> overrideAdvancements(Collection<AdvancementHolder> original) {
-		return original;
-	}
-
 	public boolean isLadder(LevelReader level, BlockPos pos, BlockState state, LivingEntity entity) {
 		return false;
 	}
@@ -238,10 +227,6 @@ public class CommonGameEngine {
 
 	public boolean disableBlockGravity(Level level, BlockPos pos, BlockState state) {
 		return false;
-	}
-
-	public Iterable<RecipeHolder<?>> modifyRecipeList(Iterable<RecipeHolder<?>> original) {
-		return original;
 	}
 
 	public int calculateFallDamage(LivingEntity livingEntity, double fallDistance, float damageMultiplier, DamageSource damageSource, int original) {
@@ -410,7 +395,7 @@ public class CommonGameEngine {
 		return overrideFluidState(level, pos).createLegacyBlock();
 	}
 
-	public float overrideFluidHeight(Level level, FluidState state, BlockPos pos, float original) {
+	public Float overrideFluidHeight(Level level, FluidState state, BlockPos pos, Float original) {
 		if (state.getType() instanceof FlowingFluid flowing) {
 			var height = LevelSessionData.of(level).getFluidHeight(flowing, pos);
 

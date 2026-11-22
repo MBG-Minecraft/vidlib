@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.platform;
 
 import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
-import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -19,9 +18,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gamerules.GameRules;
 
-import java.util.Collection;
-import java.util.List;
-
 public class ChallengeCommonGameEngine extends NeoForgeCommonGameEngine {
 	@Override
 	public void setupGameRules(GameRules rules, MinecraftServer server) {
@@ -33,16 +29,6 @@ public class ChallengeCommonGameEngine extends NeoForgeCommonGameEngine {
 		rules.set(GameRules.RANDOM_TICK_SPEED, 0, server);
 		rules.set(GameRules.ADVANCE_WEATHER, false, server);
 		rules.set(GameRules.FALL_DAMAGE, false, server);
-	}
-
-	@Override
-	public boolean disablePOI() {
-		return true;
-	}
-
-	@Override
-	public Collection<AdvancementHolder> overrideAdvancements(Collection<AdvancementHolder> original) {
-		return List.of();
 	}
 
 	@Override

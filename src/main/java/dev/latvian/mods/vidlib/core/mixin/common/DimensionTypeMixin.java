@@ -1,6 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,6 +19,6 @@ public class DimensionTypeMixin {
 	 */
 	@Overwrite
 	public float ambientLight() {
-		return CommonGameEngine.INSTANCE.getAmbientLight(ambientLight);
+		return VLBridge.getAmbientLight.get(ambientLight);
 	}
 }

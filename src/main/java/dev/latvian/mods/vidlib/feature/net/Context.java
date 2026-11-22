@@ -1,7 +1,7 @@
 package dev.latvian.mods.vidlib.feature.net;
 
-import dev.latvian.mods.vidlib.core.api.client.VLClientConfigPacketListener;
-import dev.latvian.mods.vidlib.core.api.common.VLServerConfigPacketListener;
+import dev.latvian.mods.klib.util.GameUtils;
+import dev.latvian.mods.vidlib.core.api.client.VLClientPacketListener;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.session.GlobalSessionData;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
@@ -25,7 +25,9 @@ import java.util.function.Supplier;
 
 public interface Context {
 	@Nullable
-	MinecraftServer server();
+	default MinecraftServer server() {
+		return listener() instanceof ServerCommonPacketListenerImpl lc ? GameUtils.getServer(lc) : null;
+	}
 
 	SimplePayload payload();
 
@@ -41,23 +43,23 @@ public interface Context {
 
 	default GlobalSessionData globalSessionData() {
 		return switch (listener()) {
-			case VLClientConfigPacketListener clientConfigListener -> clientConfigListener.vl$getGlobalData();
-			case ServerCommonPacketListenerImpl _ -> ServerSessionData.of(server());
-			case null, default -> levelSessionData().globalData;
+			case VLClientPacketListener listener -> listener.vl$getGlobalData();
+			case ServerCommonPacketListenerImpl lc -> ServerSessionData.of(GameUtils.getServer(lc));
+			case null, default -> throw new IllegalStateException("Unknown listener type: " + listener());
 		};
 	}
 
 	default LevelSessionData<?> levelSessionData() {
-		if (listener() instanceof ServerConfigurationPacketListenerImpl) {
-			return globalSessionData().getLevel(Level.OVERWORLD);
+		if (listener() instanceof ServerConfigurationPacketListenerImpl lc) {
+			return ServerSessionData.of(GameUtils.getServer(lc)).getLevel(Level.OVERWORLD);
 		}
 
 		return LevelSessionData.of(level());
 	}
 
 	default PlayerSessionData playerSessionData() {
-		if (listener() instanceof ServerConfigurationPacketListenerImpl serverConfigListener) {
-			return globalSessionData().getPlayer(serverConfigListener.getOwner().id());
+		if (listener() instanceof ServerConfigurationPacketListenerImpl lc) {
+			return ServerSessionData.of(GameUtils.getServer(lc)).getPlayer(lc.getOwner().id());
 		}
 
 		return PlayerSessionData.of(player());
@@ -85,8 +87,8 @@ public interface Context {
 	}
 
 	default void finishTask(ConfigurationTask.Type type) {
-		if (listener() instanceof VLServerConfigPacketListener listener) {
-			listener.vl$finishTask(type);
+		if (listener() instanceof ServerConfigurationPacketListenerImpl listener) {
+			listener.finishCurrentTask(type);
 		} else {
 			throw new UnsupportedOperationException("Attempted to complete a configuration task outside of the configuration phase!");
 		}

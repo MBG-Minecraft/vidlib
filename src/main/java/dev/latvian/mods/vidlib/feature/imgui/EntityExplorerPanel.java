@@ -6,7 +6,6 @@ import dev.latvian.mods.klib.entity.filter.PlayerProfileEntityFilter;
 import dev.latvian.mods.klib.kvector.KVector;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.klib.util.FormattedCharSinkPartBuilder;
-import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.canvas.DepthOfFieldCanvas;
 import dev.latvian.mods.vidlib.feature.gallery.ItemIcons;
 import dev.latvian.mods.vidlib.feature.imgui.builder.Color3ImBuilder;
@@ -28,6 +27,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.neoforged.neoforge.client.ClientTooltipFlag;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -291,10 +291,8 @@ public class EntityExplorerPanel extends Panel {
 			}
 		}
 
-		if (entity instanceof VLEntity e) {
-			ImGui.pushID("###extra-data");
-			e.imgui(graphics, delta);
-			ImGui.popID();
-		}
+		ImGui.pushID("###extra-data");
+		NeoForge.EVENT_BUS.post(new EntityExplorerPanelEvent(entity, graphics, delta));
+		ImGui.popID();
 	}
 }

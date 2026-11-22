@@ -14,7 +14,6 @@ import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.core.api.common.VLEntity;
 import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
@@ -22,6 +21,7 @@ import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.client.VidLibTextures;
 import dev.latvian.mods.vidlib.feature.clothing.ClothedPlayerSkinTexture;
 import dev.latvian.mods.vidlib.feature.clothing.PlayerClothing;
+import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
 import dev.latvian.mods.vidlib.feature.imgui.ImColorVariant;
 import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
@@ -642,7 +642,7 @@ public class ClientGameEngine {
 	}
 
 	public boolean hideCrosshair(Minecraft mc) {
-		if (mc.player == null && mc.player.getVehicle() instanceof VLEntity vehicle && vehicle.hideCrosshair(mc.player)) {
+		if (mc.player == null && mc.player.getVehicle() instanceof VLVehicle vehicle && vehicle.hidePassengerCrosshair(mc.player)) {
 			return true;
 		}
 
@@ -965,7 +965,7 @@ public class ClientGameEngine {
 			return false;
 		}
 
-		return mc.player != null && (mc.player.getVehicle() == null || mc.player.getVehicle() instanceof VLEntity vehicle && vehicle.shouldRenderPassengerHand(mc.player));
+		return mc.player != null && (mc.player.getVehicle() == null || mc.player.getVehicle() instanceof VLVehicle vehicle && vehicle.shouldRenderPassengerHand(mc.player));
 	}
 
 	public boolean hideVoiceChatPlayerList() {

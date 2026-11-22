@@ -5,15 +5,6 @@
 	"net/minecraft/client/multiplayer/ClientLevel": [
 		"dev/latvian/mods/vidlib/core/api/client/VLClientLevel"
 	],
-	"net/minecraft/client/player/AbstractClientPlayer": [
-		"dev/latvian/mods/vidlib/core/api/client/VLClientPlayer"
-	],
-	"net/minecraft/client/player/LocalPlayer": [
-		"dev/latvian/mods/vidlib/core/api/client/VLLocalPlayer"
-	],
-	"net/minecraft/client/player/RemotePlayer": [
-		"dev/latvian/mods/vidlib/core/api/client/VLRemotePlayer"
-	],
 	"net/minecraft/client/gui/screens/Screen": [
 		"dev/latvian/mods/vidlib/core/api/client/VLScreen"
 	],
