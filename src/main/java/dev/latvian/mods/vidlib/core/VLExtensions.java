@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core;
 
 import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Function4;
+import com.mojang.datafixers.util.Function5;
 import dev.latvian.mods.klib.core.KLibExtensions;
 import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.platform.PlatformHelper;
@@ -21,6 +22,8 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ToFloatFunction;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -169,6 +172,11 @@ public class VLExtensions {
 					vehicle.sortPassengers(list);
 				}
 			});
+			lookup.findStaticVarHandle(b, "livingTick", Consumer.class).set((Consumer<LivingEntity>) entity -> CommonGameEngine.INSTANCE.livingTick(entity));
+			lookup.findStaticVarHandle(b, "getSpeedModifier", ToFloatFunction.class).set((ToFloatFunction<LivingEntity>) entity -> CommonGameEngine.INSTANCE.getSpeedModifier(entity));
+			lookup.findStaticVarHandle(b, "isTrackedByLocatorBar", Predicate.class).set((Predicate<LivingEntity>) entity -> CommonGameEngine.INSTANCE.isTrackedByLocatorBar(entity));
+			lookup.findStaticVarHandle(b, "isUnpushable", Predicate.class).set((Predicate<LivingEntity>) entity -> CommonGameEngine.INSTANCE.isUnpushable(entity));
+			lookup.findStaticVarHandle(b, "calculateFallDamage", Function5.class).set((Function5<LivingEntity, Double, Float, DamageSource, Integer, Integer>) (entity, fallDistance, damageMultiplier, damageSource, original) -> CommonGameEngine.INSTANCE.calculateFallDamage(entity, fallDistance, damageMultiplier, damageSource, original));
 
 			VidLib.LOGGER.info("VLExtensions initialized");
 		} catch (Throwable ex) {

@@ -325,8 +325,8 @@ public class CommonGameEngine {
 		return entity instanceof Player player && PlayerSessionData.of(player).isSuspended();
 	}
 
-	public boolean isTrackedByLocatorBar(Entity entity, boolean original) {
-		return original;
+	public boolean isTrackedByLocatorBar(LivingEntity entity) {
+		return false;
 	}
 
 	public double getGravityModifier(Entity entity) {

@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib.core.api;
 
 import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Function4;
+import com.mojang.datafixers.util.Function5;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -10,6 +11,8 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ToFloatFunction;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -89,4 +92,9 @@ public class VLBridge {
 	public static Function4<CollisionGetter, @Nullable Entity, AABB, List<VoxelShape>, Void> collectShapesIntersecting;
 	public static ToDoubleFunction<Entity> getGravityModifier;
 	public static BiConsumer<Entity, List<Entity>> sortPassengers;
+	public static Consumer<LivingEntity> livingTick; // CommonGameEngine.INSTANCE.livingTick(entity)
+	public static ToFloatFunction<LivingEntity> getSpeedModifier; // CommonGameEngine.INSTANCE.getSpeedModifier(entity)
+	public static Predicate<LivingEntity> isTrackedByLocatorBar; // CommonGameEngine.INSTANCE.isTrackedByLocatorBar(entity)
+	public static Predicate<LivingEntity> isUnpushable; // CommonGameEngine.INSTANCE.isUnpushable(entity)
+	public static Function5<LivingEntity, Double, Float, DamageSource, Integer, Integer> calculateFallDamage; // CommonGameEngine.INSTANCE.calculateFallDamage(entity, fallDistance, damageMultiplier, damageSource, original)
 }

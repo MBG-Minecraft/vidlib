@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.core.api.VLBridge;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -40,23 +39,22 @@ public abstract class LivingEntityMixin {
 
 	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;aiStep()V"))
 	private void vl$tick(CallbackInfo ci) {
-		var entity = (LivingEntity) (Object) this;
-		CommonGameEngine.INSTANCE.livingTick(entity);
+		VLBridge.livingTick.accept((LivingEntity) (Object) this);
 	}
 
 	@ModifyReturnValue(method = "getSpeed", at = @At("RETURN"))
 	private float vl$getSpeed(float original) {
-		return original * CommonGameEngine.INSTANCE.getSpeedModifier((LivingEntity) (Object) this);
+		return original * VLBridge.getSpeedModifier.applyAsFloat((LivingEntity) (Object) this);
 	}
 
 	@ModifyReturnValue(method = "isTransmittingWaypoint", at = @At("RETURN"))
 	private boolean vl$isTransmittingWaypoint(boolean original) {
-		return CommonGameEngine.INSTANCE.isTrackedByLocatorBar((LivingEntity) (Object) this, original);
+		return original || VLBridge.isTrackedByLocatorBar.test((LivingEntity) (Object) this);
 	}
 
 	@Inject(method = "isPushable", at = @At("HEAD"), cancellable = true)
 	private void vl$isPushable(CallbackInfoReturnable<Boolean> cir) {
-		if (CommonGameEngine.INSTANCE.isUnpushable((LivingEntity) (Object) this)) {
+		if (VLBridge.isUnpushable.test((LivingEntity) (Object) this)) {
 			cir.setReturnValue(false);
 		}
 	}
@@ -66,15 +64,8 @@ public abstract class LivingEntityMixin {
 		return VLBridge.overrideFluidState.apply(level, pos);
 	}
 
-	@Inject(method = "isBaby", at = @At("HEAD"), cancellable = true)
-	private void vl$isBaby(CallbackInfoReturnable<Boolean> cir) {
-		if (((LivingEntity) (Object) this).entityTags().contains("baby")) {
-			cir.setReturnValue(true);
-		}
-	}
-
 	@ModifyExpressionValue(method = "causeFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;calculateFallDamage(DF)I"))
-	private int vl$ca(int original, @Local(argsOnly = true) double fallDistance, @Local(argsOnly = true) float damageMultiplier, @Local(argsOnly = true) DamageSource damageSource) {
-		return CommonGameEngine.INSTANCE.calculateFallDamage((LivingEntity) (Object) this, fallDistance, damageMultiplier, damageSource, original);
+	private int vl$causeFallDamage(int original, @Local(argsOnly = true) double fallDistance, @Local(argsOnly = true) float damageMultiplier, @Local(argsOnly = true) DamageSource damageSource) {
+		return VLBridge.calculateFallDamage.apply((LivingEntity) (Object) this, fallDistance, damageMultiplier, damageSource, original);
 	}
 }
