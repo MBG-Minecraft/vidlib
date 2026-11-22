@@ -15,8 +15,10 @@
 		"ReloadableResourceManagerMixin",
 		"TicketOwnerMixin",
 		"TicketTrackerMixin",
+		"common.AbstractArrowMixin",
 		"common.ButtonBlockMixin",
 		"common.CommandSourceStackMixin",
+		"common.ContainerMixin",
 		"common.PlayerListMixin",
 		"common.PlayerMixin",
 		"common.ServerGamePacketListenerImplMixin"

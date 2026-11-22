@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin.client;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.ChatFormatting;
@@ -17,7 +19,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -40,8 +41,8 @@ public abstract class KeyboardHandlerMixin {
 		return -100000;
 	}
 
-	@Redirect(method = "keyPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/input/KeyEvent;hasControlDownWithQuirk()Z", ordinal = 1))
-	private boolean vl$keyPress$redirHasControlDown(KeyEvent event) {
+	@WrapOperation(method = "keyPress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/input/KeyEvent;hasControlDownWithQuirk()Z", ordinal = 1))
+	private boolean vl$keyPress$redirHasControlDown(KeyEvent instance, Operation<Boolean> original) {
 		return false;
 	}
 

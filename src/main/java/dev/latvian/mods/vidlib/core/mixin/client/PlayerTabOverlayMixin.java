@@ -1,6 +1,8 @@
 package dev.latvian.mods.vidlib.core.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import net.minecraft.client.Minecraft;
@@ -14,7 +16,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.List;
 
@@ -38,8 +39,8 @@ public class PlayerTabOverlayMixin {
 		return ClientGameEngine.INSTANCE.getPlayerListName(minecraft, playerInfo, component);
 	}
 
-	@Redirect(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;text(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;III)V"))
-	private void vl$renderName(GuiGraphicsExtractor instance, Font font, Component text, int x, int y, int color) {
+	@WrapOperation(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;text(Lnet/minecraft/client/gui/Font;Lnet/minecraft/network/chat/Component;III)V"))
+	private void vl$renderName(GuiGraphicsExtractor instance, Font font, Component text, int x, int y, int color, Operation<Void> original) {
 		instance.text(font, text, x, y, color, false);
 	}
 }

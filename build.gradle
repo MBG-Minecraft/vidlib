@@ -286,9 +286,6 @@ tasks.register('buildIgniteJar', Jar) {
 		include 'dev/latvian/mods/vidlib/core/api/*'
 		include 'dev/latvian/mods/vidlib/core/mixin/common/**'
 		include 'dev/latvian/mods/vidlib/core/mixin/bukkit/**'
-	}
-
-	from('src/main/resources') {
 		include 'ignite.mod.json'
 		include 'vidlib.common.mixins.json'
 		include 'vidlib.bukkit.mixins.json'
@@ -307,6 +304,12 @@ tasks.register('buildIgniteJar', Jar) {
 		include 'dev/latvian/mods/klib/core/mixin/bukkit/**'
 		include 'klib.common.mixins.json'
 		include 'klib.bukkit.mixins.json'
+
+		// Paper replaced visibleChunkMap. The Bukkit mixin supplies KLib's lookup instead.
+		exclude 'dev/latvian/mods/klib/core/mixin/common/ChunkMapMixin.class'
+		filesMatching('klib.common.mixins.json') {
+			filter { line -> line.trim() == '"ChunkMapMixin",' ? null : line }
+		}
 	}
 
 	destinationDirectory = layout.buildDirectory.dir('libs')

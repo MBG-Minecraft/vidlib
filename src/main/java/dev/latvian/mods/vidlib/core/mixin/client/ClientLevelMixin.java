@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin.client;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.vidlib.core.api.VLBridge;
 import dev.latvian.mods.vidlib.core.api.client.VLClientLevel;
 import dev.latvian.mods.vidlib.core.mixin.common.LevelMixin;
@@ -18,7 +20,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -45,8 +46,8 @@ public abstract class ClientLevelMixin extends LevelMixin implements VLClientLev
 		ClientGameEngine.INSTANCE.handleEnvironmentalEffects(minecraft, vl$self(), blockPos);
 	}
 
-	@Redirect(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
-	private FluidState vl$getFluidState(ClientLevel level, BlockPos pos) {
+	@WrapOperation(method = "doAnimateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientLevel;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"))
+	private FluidState vl$getFluidState(ClientLevel level, BlockPos pos, Operation<FluidState> original) {
 		return VLBridge.overrideFluidState.apply(level, pos);
 	}
 

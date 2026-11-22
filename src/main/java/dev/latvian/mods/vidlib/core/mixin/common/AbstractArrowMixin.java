@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.vidlib.core.api.VLBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -15,10 +17,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -29,11 +28,6 @@ public abstract class AbstractArrowMixin {
 
 	@Unique
 	private Vec3 vl$prevTrailPos;
-
-	@ModifyConstant(method = "tickDespawn", constant = @Constant(intValue = 1200))
-	private int vl$despawnLife(int o) {
-		return VLBridge.getArrowDespawnTime.applyAsInt((AbstractArrow) (Object) this);
-	}
 
 	@Inject(method = "tick", at = @At("RETURN"))
 	private void vl$tick(CallbackInfo ci) {
@@ -57,15 +51,15 @@ public abstract class AbstractArrowMixin {
 		}
 	}
 
-	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
-	private void vl$critParticle(Level instance, ParticleOptions options, double x, double y, double z, double dx, double dy, double dz) {
+	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
+	private void vl$critParticle(Level instance, ParticleOptions options, double x, double y, double z, double dx, double dy, double dz, Operation<Void> original) {
 		if (!VLBridge.getArrowTrail.test((AbstractArrow) (Object) this)) {
-			instance.addParticle(options, x, y, z, dx, dy, dz);
+			original.call(instance, options, x, y, z, dx, dy, dz);
 		}
 	}
 
-	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/shapes/VoxelShape;"))
-	private VoxelShape vl$getShape(BlockState instance, BlockGetter blockGetter, BlockPos pos) {
+	@WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/shapes/VoxelShape;"))
+	private VoxelShape vl$getShape(BlockState instance, BlockGetter blockGetter, BlockPos pos, Operation<VoxelShape> original) {
 		return instance.getCollisionShape(blockGetter, pos, CollisionContext.of((AbstractArrow) (Object) this));
 	}
 }

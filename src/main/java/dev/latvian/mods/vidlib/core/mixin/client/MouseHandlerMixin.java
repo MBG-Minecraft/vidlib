@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.core.mixin.client;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.latvian.mods.vidlib.core.api.client.VLMouseHandler;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
@@ -15,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MouseHandler.class)
@@ -47,8 +48,8 @@ public abstract class MouseHandlerMixin implements VLMouseHandler {
 		return 3F;
 	}
 
-	@Redirect(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
-	private void vl$turnPlayer(LocalPlayer instance, double yaw, double pitch) {
+	@WrapOperation(method = "turnPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;turn(DD)V"))
+	private void vl$turnPlayer(LocalPlayer instance, double yaw, double pitch, Operation<Void> original) {
 		if (!(ClientSessionData.of(minecraft).cameraOverride instanceof ControlledCameraOverride c) || !c.turn(yaw, pitch)) {
 			instance.turn(yaw, pitch);
 		}
@@ -68,12 +69,12 @@ public abstract class MouseHandlerMixin implements VLMouseHandler {
 		}
 	}
 
-	@ModifyVariable(method = "onMove", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+	@ModifyVariable(method = "onMove", at = @At("HEAD"), argsOnly = true, name = "xpos")
 	public double vl$modifyCursorX(double x) {
 		return Minecraft.getInstance().getWindow().vl$modifyCursorX(x);
 	}
 
-	@ModifyVariable(method = "onMove", at = @At("HEAD"), ordinal = 1, argsOnly = true)
+	@ModifyVariable(method = "onMove", at = @At("HEAD"), argsOnly = true, name = "ypos")
 	public double vl$modifyCursorY(double y) {
 		return Minecraft.getInstance().getWindow().vl$modifyCursorY(y);
 	}

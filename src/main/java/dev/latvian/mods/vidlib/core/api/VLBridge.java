@@ -84,7 +84,6 @@ public class VLBridge {
 	public static Predicate<AbstractArrow> getArrowTrail;
 	public static Function3<AbstractArrow, Vec3, Vec3, Void> spawnArrowTrail;
 	public static BiConsumer<ServerPlayer, Consumer<Packet<? super ClientGamePacketListener>>> initialPlayerSync;
-	public static Function3<Player, Level, Boolean, Void> playerRespawned;
 	public static BiConsumer<MinecraftServer, ServerPlayer> playerRemoved;
 	public static Predicate<BlockGetter> isSmallTallGrassHitbox;
 	public static Function4<Level, BlockPos, BlockState, Entity, Boolean> disablePricklyBerryBushes;
@@ -92,9 +91,9 @@ public class VLBridge {
 	public static Function4<CollisionGetter, @Nullable Entity, AABB, List<VoxelShape>, Void> collectShapesIntersecting;
 	public static ToDoubleFunction<Entity> getGravityModifier;
 	public static BiConsumer<Entity, List<Entity>> sortPassengers;
-	public static Consumer<LivingEntity> livingTick; // CommonGameEngine.INSTANCE.livingTick(entity)
-	public static ToFloatFunction<LivingEntity> getSpeedModifier; // CommonGameEngine.INSTANCE.getSpeedModifier(entity)
-	public static Predicate<LivingEntity> isTrackedByLocatorBar; // CommonGameEngine.INSTANCE.isTrackedByLocatorBar(entity)
-	public static Predicate<LivingEntity> isUnpushable; // CommonGameEngine.INSTANCE.isUnpushable(entity)
-	public static Function5<LivingEntity, Double, Float, DamageSource, Integer, Integer> calculateFallDamage; // CommonGameEngine.INSTANCE.calculateFallDamage(entity, fallDistance, damageMultiplier, damageSource, original)
+	public static Consumer<LivingEntity> livingTick;
+	public static ToFloatFunction<LivingEntity> getSpeedModifier;
+	public static Predicate<LivingEntity> isTrackedByLocatorBar;
+	public static Predicate<LivingEntity> isUnpushable;
+	public static Function5<LivingEntity, Double, Float, DamageSource, Integer, Integer> calculateFallDamage;
 }

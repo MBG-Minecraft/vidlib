@@ -12,7 +12,6 @@ import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
-import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.commands.CommandSourceStack;
@@ -64,6 +63,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
 
 public class VLExtensions {
 	public static MethodHandle getMethodHandle;
@@ -142,16 +142,13 @@ public class VLExtensions {
 			lookup.findStaticVarHandle(b, "getAttackBoundingBox", BiFunction.class).set((BiFunction<Mob, AABB, AABB>) (mob, box) -> CommonGameEngine.INSTANCE.getAttackBoundingBox(mob, box));
 			lookup.findStaticVarHandle(b, "isAngryByDefault", BiPredicate.class).set((BiPredicate<ServerLevel, NeutralMob>) (level, mob) -> CommonGameEngine.INSTANCE.isAngryByDefault(level, mob));
 			lookup.findStaticVarHandle(b, "getInfiniteArrows", Supplier.class).set((Supplier<ItemStack>) () -> CommonGameEngine.INSTANCE.getInfiniteArrows());
+			lookup.findStaticVarHandle(b, "getArrowDespawnTime", ToIntFunction.class).set((ToIntFunction<AbstractArrow>) arrow -> CommonGameEngine.INSTANCE.getArrowDespawnTime(arrow));
 			lookup.findStaticVarHandle(b, "getArrowTrail", Predicate.class).set((Predicate<AbstractArrow>) arrow -> CommonGameEngine.INSTANCE.getArrowTrail(arrow));
 			lookup.findStaticVarHandle(b, "spawnArrowTrail", Function3.class).set((Function3<AbstractArrow, Vec3, Vec3, Void>) (arrow, prevPos, pos) -> {
 				CommonGameEngine.INSTANCE.spawnArrowTrail(arrow, prevPos, pos);
 				return null;
 			});
 			lookup.findStaticVarHandle(b, "initialPlayerSync", BiConsumer.class).set((BiConsumer<ServerPlayer, Consumer<Packet<? super ClientGamePacketListener>>>) (player, packets) -> CommonGameEngine.INSTANCE.initialPlayerSync(player, packets));
-			lookup.findStaticVarHandle(b, "playerRespawned", Function3.class).set((Function3<Player, Level, Boolean, Void>) (player, level, login) -> {
-				PlayerSessionData.of(player).respawned(level, login);
-				return null;
-			});
 			lookup.findStaticVarHandle(b, "playerRemoved", BiConsumer.class).set((BiConsumer<MinecraftServer, ServerPlayer>) (server, player) -> {
 				var packetCapture = ServerSessionData.of(server).packetCapture;
 

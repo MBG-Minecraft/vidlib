@@ -47,16 +47,6 @@ public abstract class ClientPacketListenerMixin extends ClientCommonPacketListen
 		return true;
 	}
 
-	@Inject(method = "handleLogin", at = @At("RETURN"))
-	private void vl$handleLogin(CallbackInfo ci) {
-		ClientSessionData.of(Minecraft.getInstance()).localPlayer.respawned(level, true);
-	}
-
-	@Inject(method = "handleRespawn", at = @At("RETURN"))
-	private void vl$handleRespawn(CallbackInfo ci) {
-		ClientSessionData.of(Minecraft.getInstance()).localPlayer.respawned(level, false);
-	}
-
 	@ModifyExpressionValue(method = "handleSetEntityPassengersPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"))
 	private MutableComponent vl$setOverlayMessage(MutableComponent original, @Local(ordinal = 0) Entity entity) {
 		var customMessage = entity instanceof VLVehicle e ? e.getCustomMountMessage() : null;

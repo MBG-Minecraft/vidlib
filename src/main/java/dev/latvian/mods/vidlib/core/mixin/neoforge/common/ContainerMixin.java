@@ -1,4 +1,4 @@
-package dev.latvian.mods.vidlib.core.mixin.common;
+package dev.latvian.mods.vidlib.core.mixin.neoforge.common;
 
 import net.minecraft.world.Container;
 import org.spongepowered.asm.mixin.Mixin;

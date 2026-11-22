@@ -28,7 +28,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -60,8 +59,8 @@ public abstract class MinecraftClientMixin implements VLMinecraftClient {
 		vl$globalData = data;
 	}
 
-	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"))
-	private void vl$swap(ClientPacketListener instance, Packet packet) {
+	@WrapOperation(method = "handleKeybinds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;send(Lnet/minecraft/network/protocol/Packet;)V"))
+	private void vl$swap(ClientPacketListener instance, Packet<?> packet, Operation<Void> original) {
 		if (!PlayerActionHandler.handle(player, PlayerActionType.SWAP, true)) {
 			instance.send(packet);
 		}

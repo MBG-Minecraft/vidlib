@@ -23,7 +23,6 @@
 		"DefaultPlayerSkinMixin",
 		"DirectStateAccessMixin",
 		"EntityGhostCollisionMixin",
-		"EntityRenderDispatcherMixin",
 		"EntityRendererMixin",
 		"FireworkParticlesStarterMixin",
 		"FrontendRenderPassMixin",

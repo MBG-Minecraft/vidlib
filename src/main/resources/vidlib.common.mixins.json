@@ -12,7 +12,6 @@
 		"CarvedPumpkinBlockMixin",
 		"CollisionGetterMixin",
 		"ConnectionMixin",
-		"ContainerMixin",
 		"CoralBlockMixin",
 		"DataComponentsMixin",
 		"DimensionTypeMixin",

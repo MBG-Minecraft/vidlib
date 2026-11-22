@@ -4,6 +4,7 @@
 	"package": "dev.latvian.mods.vidlib.core.mixin.bukkit",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"PlayerListMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1,
