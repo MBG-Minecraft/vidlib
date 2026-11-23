@@ -24,6 +24,7 @@ import imgui.internal.ImGuiContext;
 import imgui.internal.ImGuiDockNode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -90,7 +91,7 @@ public class ImGuiHooks {
 		io.addConfigFlags(ImGuiConfigFlags.DpiEnableScaleViewports);
 		io.setConfigDockingWithShift(false);
 		io.setConfigWindowsMoveFromTitleBarOnly(true);
-		io.setConfigMacOSXBehaviors(net.minecraft.util.Util.getPlatform() == net.minecraft.util.Util.OS.OSX);
+		io.setConfigMacOSXBehaviors(Util.getPlatform() == Util.OS.OSX);
 
 		imGuiGl3.init();
 		imGuiSdl.init(mc.getWindow().handle(), true);

@@ -2,7 +2,7 @@ package dev.latvian.mods.vidlib.feature.misc.command;
 
 import dev.latvian.mods.vidlib.feature.auto.AutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.ServerCommandHolder;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
+import dev.latvian.mods.vidlib.feature.entity.VLEntityUtils;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.permissions.Permissions;
@@ -25,7 +25,7 @@ public interface HealCommand {
 	private static int heal(Collection<? extends Entity> targets) {
 		for (var entity : targets) {
 			if (entity instanceof LivingEntity living) {
-				CommonGameEngine.INSTANCE.heal(living);
+				VLEntityUtils.heal(living);
 			}
 		}
 

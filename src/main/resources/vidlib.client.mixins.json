@@ -19,7 +19,6 @@
 		"ClientSuggestionProviderMixin",
 		"CompassAngleStateMixin",
 		"ControlsScreenMixin",
-		"DebugScreenOverlayMixin",
 		"DefaultPlayerSkinMixin",
 		"DirectStateAccessMixin",
 		"EntityGhostCollisionMixin",

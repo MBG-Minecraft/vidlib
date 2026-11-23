@@ -3,10 +3,7 @@ package dev.latvian.mods.vidlib.core.mixin.client;
 import com.mojang.blaze3d.platform.Window;
 import dev.latvian.mods.vidlib.core.api.client.VLWindow;
 import dev.latvian.mods.vidlib.feature.imgui.ImGuiHooks;
-import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.progressqueue.BlockExitScreen;
-import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
-import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -14,9 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(Window.class)
+@Mixin(value = Window.class, priority = 900)
 public class WindowMixin implements VLWindow {
 	@Shadow
 	private int framebufferWidth;
@@ -60,7 +56,7 @@ public class WindowMixin implements VLWindow {
 	@Unique
 	private int vl$unscaledHeight = 1;
 
-	@Inject(method = "<init>", at = @At("RETURN"))
+	@Inject(method = "<init>(Lcom/mojang/blaze3d/platform/WindowEventHandler;Lcom/mojang/blaze3d/platform/DisplayData;Ljava/lang/String;ZLjava/lang/String;Lcom/mojang/blaze3d/platform/MonitorManager;Lcom/mojang/renderpearl/api/device/GpuBackend;I)V", at = @At("RETURN"))
 	public void onConstruct(CallbackInfo ci) {
 		ImGuiHooks.trackDpiScale((Window) (Object) this);
 		vl$unscaledFramebufferWidth = framebufferWidth;
@@ -69,12 +65,12 @@ public class WindowMixin implements VLWindow {
 		vl$unscaledHeight = height;
 	}
 
-	@ModifyVariable(method = "setWidth", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
+	@ModifyVariable(method = "setWidth", at = @At("HEAD"), argsOnly = true, name = "width")
 	public int setFramebufferWidth(int width) {
 		return vl$transformNewFramebufferWidth(width);
 	}
 
-	@ModifyVariable(method = "setHeight", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
+	@ModifyVariable(method = "setHeight", at = @At("HEAD"), argsOnly = true, name = "height")
 	public int setFramebufferHeight(int height) {
 		return vl$transformNewFramebufferHeight(height);
 	}
@@ -85,23 +81,23 @@ public class WindowMixin implements VLWindow {
 		framebufferHeight = vl$transformNewFramebufferHeight(framebufferHeight);
 	}
 
-	@ModifyVariable(method = "onFramebufferResize", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
+	@ModifyVariable(method = "onFramebufferResize", at = @At("HEAD"), argsOnly = true, name = "newWidth")
 	public int onFramebufferSizeChanged$width(int width) {
 		return vl$transformNewFramebufferWidth(width);
 	}
 
-	@ModifyVariable(method = "onFramebufferResize", at = @At(value = "HEAD"), ordinal = 1, argsOnly = true)
+	@ModifyVariable(method = "onFramebufferResize", at = @At("HEAD"), argsOnly = true, name = "newHeight")
 	public int onFramebufferSizeChanged$height(int height) {
 		return vl$transformNewFramebufferHeight(height);
 	}
 
-	@ModifyVariable(method = "onResize", at = @At(value = "HEAD"), ordinal = 0, argsOnly = true)
+	@ModifyVariable(method = "onResize", at = @At("HEAD"), argsOnly = true, name = "newWidth")
 	public int onWindowSizeChanged$width(int width) {
 		vl$unscaledWidth = width;
 		return windowedWidth = (int) (vl$unscaledWidth * vl$xScale);
 	}
 
-	@ModifyVariable(method = "onResize", at = @At(value = "HEAD"), ordinal = 1, argsOnly = true)
+	@ModifyVariable(method = "onResize", at = @At("HEAD"), argsOnly = true, name = "newHeight")
 	public int onWindowSizeChanged$height(int height) {
 		vl$unscaledHeight = height;
 		return windowedHeight = (int) (vl$unscaledHeight * vl$yScale);
@@ -169,21 +165,6 @@ public class WindowMixin implements VLWindow {
 	private int vl$transformNewFramebufferHeight(int height) {
 		vl$unscaledFramebufferHeight = height;
 		return (int) (height * vl$yScale);
-	}
-
-	@Inject(method = "calculateScale", at = @At("HEAD"), cancellable = true)
-	private void vl$calculateScale(int guiScale, boolean forceUnicode, CallbackInfoReturnable<Integer> cir) {
-		var mc = Minecraft.getInstance();
-
-		if (mc.level != null && ClientSessionData.of(mc).isReplay) {
-			return;
-		}
-
-		int s = ClientGameEngine.INSTANCE.calculateScale(framebufferWidth, framebufferHeight);
-
-		if (s != -1) {
-			cir.setReturnValue(s);
-		}
 	}
 
 	@Inject(method = "requestClose", at = @At("HEAD"), cancellable = true)
