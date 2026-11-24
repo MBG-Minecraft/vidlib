@@ -1,9 +1,9 @@
 import groovy.json.JsonSlurper
+
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.security.MessageDigest
-import java.util.HexFormat
 
 plugins {
 	id 'base'
@@ -304,7 +304,7 @@ tasks.register('buildIgniteJar', Jar) {
 
 	from(sourceSets.main.output) {
 		include 'dev/latvian/mods/vidlib/**', 'dev/latvian/mods/replay/**', 'dev/mrbeastgaming/**'
-		include 'ignite.mod.json', 'vidlib.common.mixins.json', 'vidlib.bukkit.mixins.json'
+		include 'ignite.mod.json', 'vidlib.accesswidener', 'vidlib.common.mixins.json', 'vidlib.bukkit.mixins.json'
 		exclude igniteClassExcludes
 	}
 
