@@ -184,6 +184,8 @@ public class VLExtensions {
 	public static Object getRaw(Object object, int id) {
 		if (object instanceof VLObject ext) {
 			return ext.vl$get(id);
+		} else if (object == null) {
+			throw new NullPointerException("Can't get property " + id + ", object is null");
 		}
 
 		try {
@@ -201,6 +203,8 @@ public class VLExtensions {
 		if (object instanceof VLObject ext) {
 			ext.vl$set(id, value);
 			return;
+		} else if (object == null) {
+			throw new NullPointerException("Can't set property " + id + ", object is null");
 		}
 
 		try {

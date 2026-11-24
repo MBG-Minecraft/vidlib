@@ -51,6 +51,6 @@ public record PlayerDataKNumber(DataKey<PlayerSessionData, ?> dataKey) implement
 	@Override
 	@NotNull
 	public String toString() {
-		return "$$" + dataKey.id;
+		return "player_data:" + dataKey.id;
 	}
 }

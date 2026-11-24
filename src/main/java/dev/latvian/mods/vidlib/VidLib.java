@@ -6,7 +6,7 @@ import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.registry.CustomRegistryCollector;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.replay.api.ReplayMarkerGroup;
-import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
+import dev.latvian.mods.vidlib.feature.atmosphere.VidLibEnvironmentAttributes;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.cutscene.Cutscene;
 import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepType;
@@ -41,18 +41,14 @@ public class VidLib {
 		}
 
 		HubConfig.load();
+		VidLibEnvironmentAttributes.init();
 		VidLibParticles.init();
-	}
-
-	public static void initClient() {
-		VidLibClient.init();
 	}
 
 	public static void builtInRegistries(CustomRegistryCollector registry) {
 		var platform = VLPlatformHelper.INSTANCE;
 		registry.register(ScreenShakeType.REGISTRY, platform::collectScreenShakeTypes);
 		registry.register(ScreenEffect.REGISTRY, platform::collectScreenEffectTypes);
-		registry.register(Atmosphere.REGISTRY);
 		registry.register(PhysicsParticleData.REGISTRY);
 		registry.register(Zone.REGISTRY);
 		registry.register(CutsceneStepType.REGISTRY, platform::collectCutsceneStepTypes);

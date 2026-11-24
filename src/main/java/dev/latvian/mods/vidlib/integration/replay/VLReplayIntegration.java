@@ -19,7 +19,7 @@ import dev.latvian.mods.replay.api.event.ReplayStyleEvent;
 import dev.latvian.mods.replay.api.event.ReplayVisualsMenuEvent;
 import dev.latvian.mods.replay.api.event.ReplayWindowsMenuBarEvent;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibClientEventHandler;
+import dev.latvian.mods.vidlib.client.VidLibClientEventHandler;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.data.DataMapOverrides;
 import dev.latvian.mods.vidlib.feature.data.SyncLevelDataPayload;

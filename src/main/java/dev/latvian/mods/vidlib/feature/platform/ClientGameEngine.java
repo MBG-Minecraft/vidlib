@@ -14,7 +14,6 @@ import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
@@ -75,6 +74,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
@@ -258,8 +258,7 @@ public class ClientGameEngine {
 		}
 	}
 
-	@Nullable
-	public Ref<Atmosphere> getAtmosphere(Minecraft mc) {
+	public EnvironmentAttributeMap getAtmosphere(Minecraft mc) {
 		return LevelSessionData.of(mc.level).getAtmosphere();
 	}
 

@@ -12,4 +12,7 @@ public interface VLClientLevel {
 	default ClientLevelSessionData vl$getLevelData() {
 		throw new NoMixinException(this);
 	}
+
+	default void vl$updateAttributes() {
+	}
 }

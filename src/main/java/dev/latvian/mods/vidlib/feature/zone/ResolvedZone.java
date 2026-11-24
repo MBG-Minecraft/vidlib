@@ -21,6 +21,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -45,6 +46,7 @@ public class ResolvedZone implements Comparable<ResolvedZone> {
 	public final boolean anchor;
 	public final ZoneFluid fluid;
 	public final Color color;
+	public final EnvironmentAttributeMap atmosphere;
 
 	public final Int2ObjectMap<Entity> entities;
 	public final Int2ObjectMap<Entity> oldEntities;
@@ -66,6 +68,7 @@ public class ResolvedZone implements Comparable<ResolvedZone> {
 		this.anchor = zone.anchor();
 		this.fluid = zone.fluid().orElse(null);
 		this.color = zone.display().color();
+		this.atmosphere = zone.atmosphere();
 
 		this.entities = new Int2ObjectOpenHashMap<>();
 		this.oldEntities = new Int2ObjectOpenHashMap<>();

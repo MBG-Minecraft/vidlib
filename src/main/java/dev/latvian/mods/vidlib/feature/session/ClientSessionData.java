@@ -20,8 +20,6 @@ import dev.latvian.mods.vidlib.core.api.client.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.actor.ActorParticleOptions;
 import dev.latvian.mods.vidlib.feature.actor.ActorRecording;
-import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
-import dev.latvian.mods.vidlib.feature.atmosphere.ClientAtmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.camera.DetachedCamera;
 import dev.latvian.mods.vidlib.feature.camera.FreeCamera;
@@ -69,7 +67,6 @@ import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -90,6 +87,7 @@ import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.client.CustomSkyboxRenderer;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
@@ -106,7 +104,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ClientSessionData extends GlobalSessionData implements VLFeatures {
+public class ClientSessionData extends GlobalSessionData implements VLFeatures, CustomSkyboxRenderer {
 	public static ClientSessionData of(Minecraft mc) {
 		return mc.vl$getGlobalData();
 	}
@@ -119,7 +117,6 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 	public final List<ScreenShakeInstance> screenShakeInstances;
 	public Vector2dc prevCameraShake;
 	public Vector2dc cameraShake;
-	public final Map<String, ClientAtmosphere> clientAtmospheres;
 	public final KNumberVariables globalVariables;
 	public CameraOverride cameraOverride;
 	public ClientCutscene currentCutscene;
@@ -147,7 +144,6 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 		this.zoneHit = null;
 		this.screenShakeInstances = new ArrayList<>();
 		this.prevCameraShake = this.cameraShake = Identity.DVEC_2;
-		this.clientAtmospheres = new Reference2ObjectOpenHashMap<>();
 		this.globalVariables = new KNumberVariables();
 		this.debugDecals = new ArrayList<>();
 		this.screenEffects = new ArrayList<>();
@@ -372,17 +368,6 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 		return overrides == null ? null : overrides.get(id);
 	}
 
-	public ClientAtmosphere getAtmosphere(Ref<Atmosphere> ref) {
-		var atmosphere = clientAtmospheres.get(ref.key());
-
-		if (atmosphere == null) {
-			atmosphere = new ClientAtmosphere(ref);
-			clientAtmospheres.put(ref.key(), atmosphere);
-		}
-
-		return atmosphere;
-	}
-
 	public void startActorRecording(NameAndId profile) {
 		if (actorRecording == null) {
 			actorRecording = new ActorRecording(profile);
@@ -463,14 +448,6 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures {
 			}
 
 			level.zones.update(list);
-		}
-	}
-
-	public void updateAtmospheres(Collection<Ref<Atmosphere>> values) {
-		clientAtmospheres.clear();
-
-		for (var ref : values) {
-			clientAtmospheres.put(ref.key(), new ClientAtmosphere(ref));
 		}
 	}
 

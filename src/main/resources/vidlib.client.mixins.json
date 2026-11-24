@@ -73,6 +73,7 @@
 		"SkinManagerMixin",
 		"SkinTextureDownloaderMixin",
 		"SkyRendererMixin",
+		"SkyRenderStateMixin",
 		"SocialInteractionsPlayerListMixin",
 		"SpriteContentsMixin",
 		"TextureAtlasSpriteMixin",

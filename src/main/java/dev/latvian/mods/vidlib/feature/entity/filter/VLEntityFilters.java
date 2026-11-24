@@ -21,11 +21,11 @@ public interface VLEntityFilters {
 		registry.register(STAFF_OR_TALENT);
 		registry.register(SUSPENDED);
 
-		registry.register(ServerDataEntityFilter.TYPE);
+		registry.register(GlobalDataEntityFilter.TYPE);
 		registry.register(LevelDataEntityFilter.TYPE);
 		registry.register(PlayerDataEntityFilter.TYPE);
 
-		EntityFilter.PREFIX_LIST.add("server_data:", DataKey.GLOBAL.dataKeyCodec, ServerDataEntityFilter::new);
+		EntityFilter.PREFIX_LIST.add("global_data:", DataKey.GLOBAL.dataKeyCodec, GlobalDataEntityFilter::new);
 		EntityFilter.PREFIX_LIST.add("level_data:", DataKey.LEVEL.dataKeyCodec, LevelDataEntityFilter::new);
 		EntityFilter.PREFIX_LIST.add("player_data:", DataKey.PLAYER.dataKeyCodec, PlayerDataEntityFilter::new);
 	}

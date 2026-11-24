@@ -4,6 +4,8 @@ import dev.latvian.mods.klib.command.CustomRegistryRegistryEvent;
 import dev.latvian.mods.klib.data.DataTypeRegistryEvent;
 import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.entity.filter.EntityFilterTypeRegistryEvent;
+import dev.latvian.mods.klib.knumber.KNumberTypeRegistryEvent;
+import dev.latvian.mods.klib.kvector.KVectorTypeRegistryEvent;
 import dev.latvian.mods.klib.math.KMath;
 import dev.latvian.mods.klib.net.S2CPacketBundleBuilder;
 import dev.latvian.mods.klib.registry.RefType;
@@ -26,6 +28,8 @@ import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import dev.latvian.mods.vidlib.feature.zone.AnchorTickets;
 import dev.latvian.mods.vidlib.feature.zone.ResolvedZone;
 import dev.latvian.mods.vidlib.feature.zone.Zone;
+import dev.latvian.mods.vidlib.math.knumber.VLKNumbers;
+import dev.latvian.mods.vidlib.math.kvector.VLKVectors;
 import dev.mrbeastgaming.mods.hub.api.HubServerSession;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubServerGateway;
 import io.netty.util.NettyRuntime;
@@ -140,6 +144,16 @@ public class VidLibEventHandler {
 	@SubscribeEvent
 	public static void entityFilterTypeRegistry(EntityFilterTypeRegistryEvent event) {
 		VLEntityFilters.register(event.getCollector());
+	}
+
+	@SubscribeEvent
+	public static void knumberTypeRegistry(KNumberTypeRegistryEvent event) {
+		VLKNumbers.register(event.getCollector());
+	}
+
+	@SubscribeEvent
+	public static void kvectorTypeRegistry(KVectorTypeRegistryEvent event) {
+		VLKVectors.register(event.getCollector());
 	}
 
 	@SubscribeEvent

@@ -11,14 +11,14 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record ServerDataKNumber(DataKey<GlobalSessionData, ?> dataKey) implements KNumber {
+public record GlobalDataKNumber(DataKey<GlobalSessionData, ?> dataKey) implements KNumber {
 	public static final DynamicType<RegistryFriendlyByteBuf, KNumber> TYPE = DynamicType.create(
-		"player_data",
+		"global_data",
 		"key",
-		DataKey.PLAYER.dataKeyCodec,
-		DataKey.PLAYER.dataKeyStreamCodec,
-		PlayerDataKNumber::new,
-		PlayerDataKNumber::dataKey
+		DataKey.GLOBAL.dataKeyCodec,
+		DataKey.GLOBAL.dataKeyStreamCodec,
+		GlobalDataKNumber::new,
+		GlobalDataKNumber::dataKey
 	);
 
 	@Override
@@ -40,13 +40,13 @@ public record ServerDataKNumber(DataKey<GlobalSessionData, ?> dataKey) implement
 	}
 
 	@Override
-	@NotNull
-	public String toString() {
-		return "$" + dataKey.id;
+	public boolean isStringLiteral() {
+		return true;
 	}
 
 	@Override
-	public boolean isStringLiteral() {
-		return true;
+	@NotNull
+	public String toString() {
+		return "global_data:" + dataKey.id;
 	}
 }

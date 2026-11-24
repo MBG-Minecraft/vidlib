@@ -1,5 +1,6 @@
-package dev.latvian.mods.vidlib;
+package dev.latvian.mods.vidlib.client;
 
+import dev.latvian.mods.vidlib.VidLib;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;
 import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;

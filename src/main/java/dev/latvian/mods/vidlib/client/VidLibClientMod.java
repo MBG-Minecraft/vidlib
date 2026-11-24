@@ -1,5 +1,6 @@
-package dev.latvian.mods.vidlib;
+package dev.latvian.mods.vidlib.client;
 
+import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.platform.neoforge.VLClientNeoPlatformHelper;
 import net.neoforged.api.distmarker.Dist;
@@ -17,6 +18,6 @@ public class VidLibClientMod {
 
 	@SubscribeEvent
 	public static void setup(FMLCommonSetupEvent event) {
-		VidLib.initClient();
+		VidLibClient.init();
 	}
 }

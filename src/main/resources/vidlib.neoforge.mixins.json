@@ -4,7 +4,6 @@
 	"package": "dev.latvian.mods.vidlib.core.mixin.neoforge",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"CustomEnvironmentEffectsRendererManagerMixin",
 		"IBlockExtensionMixin",
 		"IdDispatchCodecMixin",
 		"IEntityExtensionMixin",
