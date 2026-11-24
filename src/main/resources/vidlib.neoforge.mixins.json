@@ -5,13 +5,16 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"CustomEnvironmentEffectsRendererManagerMixin",
+		"GameRulesMixin",
 		"IBlockExtensionMixin",
 		"IdDispatchCodecMixin",
 		"IEntityExtensionMixin",
 		"IPlayerExtensionMixin",
 		"ItemStackHandlerMixin",
+		"MinecraftServerWeatherMixin",
 		"NeoPlayerMixin",
 		"NetworkRegistryMixin",
+		"PlayerScaleDamageMixin",
 		"ReloadableResourceManagerMixin",
 		"TicketOwnerMixin",
 		"TicketTrackerMixin",
@@ -20,7 +23,6 @@
 		"common.CommandSourceStackMixin",
 		"common.ContainerMixin",
 		"common.PlayerListMixin",
-		"common.PlayerMixin",
 		"common.ServerGamePacketListenerImplMixin"
 	],
 	"client": [

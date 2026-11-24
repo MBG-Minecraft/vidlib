@@ -4,6 +4,8 @@
 	"package": "dev.latvian.mods.vidlib.core.mixin.bukkit",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
+		"GameRulesMixin",
+		"MinecraftServerWeatherMixin",
 		"PlayerListMixin"
 	],
 	"injectors": {

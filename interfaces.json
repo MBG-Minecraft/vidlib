@@ -1,4 +1,10 @@
 {
+	"net/minecraft/server/MinecraftServer": [
+		"dev/latvian/mods/vidlib/core/api/VLServer"
+	],
+	"net/minecraft/world/level/gamerules/GameRules": [
+		"dev/latvian/mods/vidlib/core/api/VLGameRules"
+	],
 	"net/minecraft/client/Minecraft": [
 		"dev/latvian/mods/vidlib/core/api/client/VLMinecraftClient"
 	],

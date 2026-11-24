@@ -73,18 +73,9 @@ import java.util.ArrayList;
 
 @EventBusSubscriber(modid = VidLib.ID)
 public class VidLibEventHandler {
-	public static boolean gameLoaded = false;
-
-	public static synchronized void gameLoaded() {
-		if (!gameLoaded) {
-			gameLoaded = true;
-			AutoInit.Type.GAME_LOADED.invoke();
-		}
-	}
-
 	@SubscribeEvent
 	public static void afterLoad(FMLLoadCompleteEvent event) {
-		gameLoaded();
+		VidLib.gameLoaded();
 	}
 
 	@SubscribeEvent
@@ -215,7 +206,7 @@ public class VidLibEventHandler {
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public static void serverStarting(ServerStartingEvent event) {
 		VidLib.LOGGER.info("Netty Threads: " + Math.max(1, SystemPropertyUtil.getInt("io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2)));
-		gameLoaded();
+		VidLib.gameLoaded();
 		HubServerSession.loadAsync(event.getServer());
 	}
 

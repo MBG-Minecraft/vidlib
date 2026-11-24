@@ -3,6 +3,7 @@ package dev.latvian.mods.vidlib.core.api;
 import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Function4;
 import com.mojang.datafixers.util.Function5;
+import dev.latvian.mods.klib.platform.PlatformHelper;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -52,7 +53,7 @@ import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 
 public class VLBridge {
-	public static Supplier<Path> gameDirectory;
+	public static Supplier<Path> gameDirectory = PlatformHelper.INSTANCE::getGameDirectory;
 	public static Predicate<ServerLevel> disableSleepStatusAnnouncement;
 	public static Function4<ServerLevel, BlockPos, BlockPos, BlockPos, Void> tickPrecipitation;
 	public static Predicate<Player> allowFlight;

@@ -1,6 +1,9 @@
+import groovy.json.JsonSlurper
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.security.MessageDigest
+import java.util.HexFormat
 
 plugins {
 	id 'base'
@@ -276,6 +279,23 @@ tasks.build {
 	dependsOn tasks.buildResourcePack
 }
 
+def igniteClassExcludes = [
+		'dev/latvian/mods/vidlib/core/mixin/client/**',
+		'dev/latvian/mods/vidlib/core/mixin/neoforge/**',
+		'dev/latvian/mods/vidlib/core/mixin/lithium/**',
+		'dev/latvian/mods/vidlib/core/mixin/mod/**',
+		'dev/latvian/mods/klib/core/mixin/client/**',
+		'dev/latvian/mods/klib/core/mixin/neoforge/**'
+]
+
+def igniteDependencyJar = { String group, String module ->
+	configurations.runtimeClasspath.incoming.artifactView {
+		componentFilter { id ->
+			id instanceof ModuleComponentIdentifier && id.group == group && id.module == module
+		}
+	}.files.elements.map { it.first().asFile }
+}
+
 tasks.register('buildIgniteJar', Jar) {
 	group "build"
 	description "Builds an Ignite mixins jar"
@@ -283,39 +303,32 @@ tasks.register('buildIgniteJar', Jar) {
 	into('/')
 
 	from(sourceSets.main.output) {
-		include 'dev/latvian/mods/vidlib/core/api/*'
-		include 'dev/latvian/mods/vidlib/core/mixin/common/**'
-		include 'dev/latvian/mods/vidlib/core/mixin/bukkit/**'
-		include 'ignite.mod.json'
-		include 'vidlib.common.mixins.json'
-		include 'vidlib.bukkit.mixins.json'
+		include 'dev/latvian/mods/vidlib/**', 'dev/latvian/mods/replay/**', 'dev/mrbeastgaming/**'
+		include 'ignite.mod.json', 'vidlib.common.mixins.json', 'vidlib.bukkit.mixins.json'
+		exclude igniteClassExcludes
 	}
 
-	def klibJars = configurations.runtimeClasspath.incoming.artifactView {
-		componentFilter { id ->
-			id instanceof ModuleComponentIdentifier && id.group == 'dev.latvian.mods' && id.module == 'klib'
-		}
-	}.files
+	from(zipTree(igniteDependencyJar('dev.latvian.mods', 'klib'))) {
+		include 'dev/latvian/mods/klib/**', 'klib.common.mixins.json', 'klib.bukkit.mixins.json'
+		exclude igniteClassExcludes
+	}
 
-	from(zipTree(klibJars.elements.map { it.first().asFile })) {
-		include 'dev/latvian/mods/klib/core/NoMixinException'
-		include 'dev/latvian/mods/klib/core/api/*'
-		include 'dev/latvian/mods/klib/core/mixin/common/**'
-		include 'dev/latvian/mods/klib/core/mixin/bukkit/**'
-		include 'klib.common.mixins.json'
-		include 'klib.bukkit.mixins.json'
+	from(zipTree(igniteDependencyJar('dev.latvian.apps', 'tiny-http'))) {
+		include 'dev/latvian/apps/**'
+	}
 
-		// Paper replaced visibleChunkMap. The Bukkit mixin supplies KLib's lookup instead.
-		exclude 'dev/latvian/mods/klib/core/mixin/common/ChunkMapMixin.class'
-		filesMatching('klib.common.mixins.json') {
-			filter { line -> line.trim() == '"ChunkMapMixin",' ? null : line }
-		}
+	from(zipTree(igniteDependencyJar('com.github.luben', 'zstd-jni'))) {
+		exclude 'META-INF/**', 'module-info.class'
 	}
 
 	destinationDirectory = layout.buildDirectory.dir('libs')
 	archiveBaseName.set(project.archives_base_name)
 	archiveVersion.set(project.version.toString())
 	archiveClassifier.set('ignite')
+
+	manifest {
+		attributes("Implementation-Version": project.version)
+	}
 
 	preserveFileTimestamps = false
 	reproducibleFileOrder = true
@@ -324,6 +337,85 @@ tasks.register('buildIgniteJar', Jar) {
 
 tasks.build {
 	dependsOn tasks.buildIgniteJar
+}
+
+def igniteRunDir = file("runs/ignite")
+def igniteModsDir = new File(igniteRunDir, "mods")
+def igniteLauncherJar = new File(igniteRunDir, "ignite.jar")
+def ignitePaperJar = new File(igniteRunDir, "paper.jar")
+def igniteMinecraftVersion = project.minecraft_version
+def httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build()
+
+def httpGet = { String url ->
+	def response = httpClient.send(HttpRequest.newBuilder(URI.create(url)).GET().build(), HttpResponse.BodyHandlers.ofString())
+	if (response.statusCode() != 200) throw new GradleException("Failed to read ${url}: HTTP ${response.statusCode()}")
+	response.body()
+}
+
+def httpDownload = { String url, File to ->
+	to.parentFile.mkdirs()
+	def response = httpClient.send(HttpRequest.newBuilder(URI.create(url)).GET().build(), HttpResponse.BodyHandlers.ofFile(to.toPath()))
+	if (response.statusCode() != 200) {
+		to.delete()
+		throw new GradleException("Failed to download ${url}: HTTP ${response.statusCode()}")
+	}
+}
+
+def sha256 = { File file ->
+	HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(file.bytes))
+}
+
+tasks.register('downloadIgniteLauncher') {
+	group "run"
+	description "Downloads the Ignite launcher into ${igniteRunDir}"
+	inputs.property "igniteVersion", project.ignite_version
+	outputs.file igniteLauncherJar
+
+	doLast {
+		httpDownload("https://github.com/vectrix-space/ignite/releases/download/v${project.ignite_version}/ignite.jar", igniteLauncherJar)
+	}
+}
+
+tasks.register('downloadPaperServerJar') {
+	group "run"
+	description "Downloads the latest Paper build for Minecraft ${igniteMinecraftVersion} into ${igniteRunDir}"
+	outputs.file ignitePaperJar
+	outputs.upToDateWhen { false }
+
+	doLast {
+		def build = new JsonSlurper().parseText(httpGet("https://fill.papermc.io/v3/projects/paper/versions/${igniteMinecraftVersion}/builds/latest"))
+		def download = build.downloads["server:default"]
+
+		if (!ignitePaperJar.exists() || sha256(ignitePaperJar) != download.checksums.sha256) {
+			httpDownload(download.url, ignitePaperJar)
+		}
+
+		println("Paper ${igniteMinecraftVersion} build ${build.id}: ${download.name} (${download.size} bytes)")
+	}
+}
+
+tasks.register('setupIgniteRun', Copy) {
+	group "run"
+	description "Sets up the Ignite Paper test run in ${igniteRunDir}"
+	dependsOn tasks.downloadIgniteLauncher, tasks.downloadPaperServerJar
+
+	from tasks.named('buildIgniteJar')
+	into igniteModsDir
+
+	doFirst {
+		igniteModsDir.listFiles()?.findAll { it.name.endsWith("-ignite.jar") }?.each { it.delete() }
+		new File(igniteRunDir, "eula.txt").setText("eula=true", "UTF-8")
+	}
+}
+
+tasks.register('runIgniteServer', Exec) {
+	group "run"
+	description "Runs a Paper ${igniteMinecraftVersion} server through Ignite with the built Ignite mixin jar"
+	dependsOn tasks.setupIgniteRun
+
+	workingDir = igniteRunDir
+	executable = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }.get().executablePath.toString()
+	args "-jar", igniteLauncherJar.absolutePath, "nogui"
 }
 
 publishing {
@@ -364,7 +456,7 @@ idea {
 			downloadJavadoc = true
 			excludeDirs.add(file(".editorconfig"))
 
-			["client", "client2", "server", "server2"].each {
+			["client", "client2", "server", "server2", "ignite"].each {
 				[
 						".architectury-transformer",
 						".fobby",

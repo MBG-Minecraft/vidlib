@@ -269,7 +269,7 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void clientPreTick(ClientTickEvent.Pre event) {
-		VidLibEventHandler.gameLoaded();
+		VidLib.gameLoaded();
 
 		if (!clientLoaded) {
 			clientLoaded = true;

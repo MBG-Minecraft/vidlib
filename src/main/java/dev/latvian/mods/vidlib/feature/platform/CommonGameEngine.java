@@ -7,6 +7,8 @@ import dev.latvian.mods.klib.platform.PlatformModInfo;
 import dev.latvian.mods.klib.util.RuntimeDebugger;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.core.api.VLGameRules;
+import dev.latvian.mods.vidlib.core.api.VLServer;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.gradient.VLGradients;
 import dev.latvian.mods.vidlib.feature.net.Context;
@@ -48,6 +50,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
@@ -59,7 +62,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -69,6 +71,10 @@ import java.util.UUID;
 
 public class CommonGameEngine {
 	public static CommonGameEngine INSTANCE = new CommonGameEngine();
+
+	private static <T> void setRule(GameRules rules, GameRule<T> rule, T value, MinecraftServer server) {
+		((VLGameRules) rules).vl$set(rule, value, server);
+	}
 
 	public boolean privacyMode() {
 		return false;
@@ -80,7 +86,7 @@ public class CommonGameEngine {
 			server.clockManager().setTotalTicks(overworldClock.get(), 6000);
 		}
 
-		server.setWeatherParameters(20000000, 20000000, false, false);
+		((VLServer) server).vl$setWeatherParameters(20000000, 20000000, false, false);
 		// 26.3 removed MinecraftServer#setFlightAllowed: flight is now a per-player ability
 		// (see the mayFly hook in core/mixin/neo/IPlayerExtensionMixin.java).
 
@@ -90,26 +96,26 @@ public class CommonGameEngine {
 			// default permission level to every player.
 		}
 
-		setupGameRules(server.getGameRules(), server);
+		setupGameRules(server.overworld().getGameRules(), server);
 	}
 
 	public void setupGameRules(GameRules rules, MinecraftServer server) {
-		rules.set(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0, server);
-		// rules.set(GameRules.BLOCK_DROPS, false, server);
-		rules.set(GameRules.COMMAND_BLOCK_OUTPUT, false, server);
-		rules.set(GameRules.RESPAWN_RADIUS, 0, server);
-		rules.set(GameRules.PLAYER_MOVEMENT_CHECK, false, server);
-		rules.set(GameRules.ELYTRA_MOVEMENT_CHECK, false, server);
-		rules.set(GameRules.SHOW_ADVANCEMENT_MESSAGES, false, server);
-		rules.set(GameRules.RAIDS, false, server);
-		rules.set(GameRules.PLAYERS_SLEEPING_PERCENTAGE, 0, server);
-		rules.set(GameRules.SPAWN_PATROLS, false, server);
-		rules.set(GameRules.SPAWN_WANDERING_TRADERS, false, server);
-		rules.set(GameRules.SPAWN_WARDENS, false, server);
-		rules.set(GameRules.GLOBAL_SOUND_EVENTS, false, server);
+		setRule(rules, GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0, server);
+		// setRule(rules, GameRules.BLOCK_DROPS, false, server);
+		setRule(rules, GameRules.COMMAND_BLOCK_OUTPUT, false, server);
+		setRule(rules, GameRules.RESPAWN_RADIUS, 0, server);
+		setRule(rules, GameRules.PLAYER_MOVEMENT_CHECK, false, server);
+		setRule(rules, GameRules.ELYTRA_MOVEMENT_CHECK, false, server);
+		setRule(rules, GameRules.SHOW_ADVANCEMENT_MESSAGES, false, server);
+		setRule(rules, GameRules.RAIDS, false, server);
+		setRule(rules, GameRules.PLAYERS_SLEEPING_PERCENTAGE, 0, server);
+		setRule(rules, GameRules.SPAWN_PATROLS, false, server);
+		setRule(rules, GameRules.SPAWN_WANDERING_TRADERS, false, server);
+		setRule(rules, GameRules.SPAWN_WARDENS, false, server);
+		setRule(rules, GameRules.GLOBAL_SOUND_EVENTS, false, server);
 
 		if (privacyMode()) {
-			rules.set(GameRules.SHOW_DEATH_MESSAGES, false, server);
+			setRule(rules, GameRules.SHOW_DEATH_MESSAGES, false, server);
 		}
 	}
 
@@ -119,7 +125,7 @@ public class CommonGameEngine {
 
 	@Nullable
 	public UUID createOfflinePlayerUUID(String name) {
-		if (!FMLLoader.getCurrent().isProduction() && !name.startsWith("Player") && !name.startsWith("Dev")) {
+		if (PlatformHelper.INSTANCE.isDevEnv() && !name.startsWith("Player") && !name.startsWith("Dev")) {
 			try {
 				VidLib.LOGGER.info("Fetching offline UUID for " + name + "...");
 				var profile = PlayerProfiles.get(name);
@@ -280,7 +286,7 @@ public class CommonGameEngine {
 	}
 
 	public float getAmbientLight(float fallback) {
-		if (FMLLoader.getCurrent().getDist().isClient()) {
+		if (PlatformHelper.INSTANCE.getSide().isClient()) {
 			return ClientGameEngine.INSTANCE.getAmbientLight(fallback);
 		}
 
