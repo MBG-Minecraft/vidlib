@@ -6,7 +6,7 @@ import dev.latvian.apps.tinyhttp.http.response.HTTPResponse;
 import dev.latvian.apps.tinyhttp.http.response.error.client.BadRequestError;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibClient;
+import dev.latvian.mods.vidlib.client.VidLibClient;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.mrbeastgaming.mods.hub.HubConfig;
 import dev.mrbeastgaming.mods.hub.api.HubAPI;

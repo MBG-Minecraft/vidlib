@@ -10,14 +10,14 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
-public record ServerDataEntityFilter(DataKey<GlobalSessionData, ?> dataKey) implements EntityFilter {
+public record GlobalDataEntityFilter(DataKey<GlobalSessionData, ?> dataKey) implements EntityFilter {
 	public static final DynamicType<RegistryFriendlyByteBuf, EntityFilter> TYPE = DynamicType.create(
-		"server_data",
+		"global_data",
 		"key",
 		DataKey.GLOBAL.dataKeyCodec,
 		DataKey.GLOBAL.dataKeyStreamCodec,
-		ServerDataEntityFilter::new,
-		ServerDataEntityFilter::dataKey
+		GlobalDataEntityFilter::new,
+		GlobalDataEntityFilter::dataKey
 	);
 
 	@Override
@@ -47,6 +47,6 @@ public record ServerDataEntityFilter(DataKey<GlobalSessionData, ?> dataKey) impl
 	@Override
 	@NotNull
 	public String toString() {
-		return "server_data:" + dataKey.id;
+		return "global_data:" + dataKey.id;
 	}
 }

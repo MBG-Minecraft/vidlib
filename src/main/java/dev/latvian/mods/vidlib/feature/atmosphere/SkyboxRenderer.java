@@ -1,57 +1,38 @@
 package dev.latvian.mods.vidlib.feature.atmosphere;
 
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
-import dev.latvian.mods.klib.math.Rotation;
-import dev.latvian.mods.klib.registry.Ref;
-import dev.latvian.mods.klib.util.ID;
+import dev.latvian.mods.vidlib.core.api.client.VLSkyRenderState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.client.renderer.state.level.SkyRenderState;
 import net.minecraft.util.ARGB;
-import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.neoforged.neoforge.client.CustomSkyboxRenderer;
 import org.joml.Matrix4fc;
 
-public class ClientAtmosphere implements CustomSkyboxRenderer {
-	public final String id;
-	public final SkyboxTextureData skybox;
-	public SkyboxTexture skyboxTexture;
-	public final EnvironmentAttributeMap attributes;
-	public final boolean sun;
-	public final boolean moon;
-	public final Rotation celestialRotation;
-
-	public ClientAtmosphere(Ref<Atmosphere> ref) {
-		this.id = ref.key();
-		var data = ref.value();
-		this.skybox = data.skybox().orElse(null);
-		this.skyboxTexture = null;
-		this.attributes = data.attributes();
-		this.sun = data.sun().orElse(true);
-		this.moon = data.moon().orElse(true);
-		this.celestialRotation = data.celestialRotation().orElse(null);
-	}
-
-	public SkyboxTexture loadTexture(Minecraft mc) {
-		if (skyboxTexture == null) {
-			var texId = ID.vidlib("textures/vidlib/generated/skybox/" + id + ".png");
-
-			if (mc.getTextureManager().byPath.get(texId) instanceof SkyboxTexture tex) {
-				skyboxTexture = tex;
-				return tex;
-			}
-
-			var tex = new SkyboxTexture(texId, this);
-			mc.getTextureManager().registerAndLoad(tex.resourceId(), tex);
-			skyboxTexture = tex;
-			return tex;
-		}
-
-		return skyboxTexture;
-	}
+public enum SkyboxRenderer implements CustomSkyboxRenderer {
+	INSTANCE;
 
 	@Override
 	public boolean renderSky(LevelRenderState levelState, SkyRenderState skyState, Matrix4fc modelViewMatrix, GpuBufferSlice skyFog) {
+		var vl = (VLSkyRenderState) skyState;
+		var skyboxTextureData = vl.vl$skyboxTextureData();
+
+		if (skyboxTextureData == null) {
+			return false;
+		}
+
+		var mc = Minecraft.getInstance();
+		SkyboxTexture skyboxTexture;
+
+		if (mc.getTextureManager().byPath.get(skyboxTextureData.texture().generated().texturePath()) instanceof SkyboxTexture tex) {
+			skyboxTexture = tex;
+		} else {
+			skyboxTexture = new SkyboxTexture(skyboxTextureData.texture());
+			mc.getTextureManager().registerAndLoad(skyboxTexture.resourceId(), skyboxTexture);
+		}
+
+		skyboxTexture.getTexture(); // FIXME
+
 		skyState.skyColor = ARGB.vector3fFromRGB24(0x3D91A9); // FIXME
 		return false;
 	}

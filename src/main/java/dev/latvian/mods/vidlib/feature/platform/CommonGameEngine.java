@@ -10,6 +10,7 @@ import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.api.VLGameRules;
 import dev.latvian.mods.vidlib.core.api.VLServer;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
+import dev.latvian.mods.vidlib.feature.entity.VLEntityUtils;
 import dev.latvian.mods.vidlib.feature.gradient.VLGradients;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
@@ -265,7 +266,8 @@ public class CommonGameEngine {
 		entity.extinguishFire();
 
 		if (entity instanceof ServerPlayer player) {
-			player.getFoodData().eat(20, 20F);
+			player.getFoodData().setFoodLevel(20);
+			player.getFoodData().setSaturation(20F);
 		}
 	}
 
@@ -303,7 +305,7 @@ public class CommonGameEngine {
 
 			if (regen >= 0) {
 				if (regen == 0) {
-					CommonGameEngine.INSTANCE.heal(entity);
+					VLEntityUtils.heal(entity);
 				} else if (entity.tickCount % regen == 0) {
 					entity.heal(1F);
 				}

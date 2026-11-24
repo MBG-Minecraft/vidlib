@@ -11,14 +11,6 @@ import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.registry.DynamicType;
 import dev.latvian.mods.klib.util.ColorBlendMode;
 import dev.latvian.mods.klib.visual.Visual;
-import dev.latvian.mods.vidlib.feature.imgui.ImGraphics;
-import dev.latvian.mods.vidlib.feature.imgui.ImGuiUtils;
-import dev.latvian.mods.vidlib.feature.imgui.SelectedPosition;
-import dev.latvian.mods.vidlib.feature.imgui.builder.Color4ImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.builder.Vector3dImBuilder;
-import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcons;
-import imgui.ImGui;
-import imgui.flag.ImGuiSliderFlags;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.core.Position;
@@ -28,7 +20,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
 
-import java.util.Collection;
 import java.util.List;
 
 public class Decal implements Visual {
@@ -268,124 +259,6 @@ public class Decal implements Visual {
 		arr.add(Float.floatToIntBits(fillSize)); // 11
 		arr.add(Float.floatToIntBits(fillThickness)); // 12
 		arr.add(Float.floatToIntBits(edges)); // 13
-	}
-
-	public void imgui(ImGraphics graphics, Collection<Decal> decals) {
-		ImGui.text("Shape");
-		DecalType.UNIT[0] = type;
-		graphics.combo("###type", DecalType.UNIT, "", DecalType.VALUES);
-		type = DecalType.UNIT[0];
-
-		if (type == DecalType.REGULAR) {
-			ImGuiUtils.FLOAT.set(edges);
-			ImGui.sliderFloat("###edges", ImGuiUtils.FLOAT.getData(), 1F, 16F, "%.01f");
-			edges = ImGuiUtils.FLOAT.get();
-			graphics.hoveredTooltip("Edges");
-		}
-
-		if (parent != null && !decals.contains(parent)) {
-			setPosition(position, false);
-		}
-
-		if (parent != null) {
-			ImGuiUtils.BOOLEAN.set(true);
-
-			if (ImGui.checkbox(ImIcons.LOCK + " Joined Position###joined-position", ImGuiUtils.BOOLEAN)) {
-				setPosition(position, false);
-			}
-		} else {
-			ImGui.text("Position");
-			Vector3dImBuilder.imgui(graphics, position, SelectedPosition.UNIT);
-		}
-
-		ImGuiUtils.BOOLEAN.set(terrain);
-
-		if (ImGui.checkbox("Terrain###terrain", ImGuiUtils.BOOLEAN)) {
-			terrain = ImGuiUtils.BOOLEAN.get();
-		}
-
-		ImGui.text("Blend Mode");
-		var blendModeArr = new ColorBlendMode[]{blendMode};
-		graphics.combo("###blend-mode", blendModeArr, "", ColorBlendMode.VALUES, c -> c.displayName);
-		blendMode = blendModeArr[0];
-
-		ImGui.text("Size");
-		graphics.smallText("Width");
-
-		float[] innerArr = {innerSize};
-		float[] outerArr = {outerSize};
-		ImGuiUtils.FLOAT.set(innerSize);
-		ImGui.dragFloatRange2("###size-range", innerArr, outerArr, 0.0625F, 0F, 100F, "%f");
-		innerSize = innerArr[0];
-		outerSize = outerArr[0];
-
-		graphics.hoveredTooltip("Size Range");
-
-		float diff = outerSize - innerSize;
-		if (ImGui.dragFloat("###size", innerArr, 0.0625F, 0F, 100F, "%f")) {
-			innerSize = innerArr[0];
-			outerSize = innerSize + diff;
-		}
-
-		graphics.hoveredTooltip("Size");
-
-		graphics.smallText("Height");
-
-		ImGuiUtils.FLOAT.set(heightScale);
-		ImGui.sliderFloat("###height-scale", ImGuiUtils.FLOAT.getData(), 0.125F, 8F, "%f", ImGuiSliderFlags.Logarithmic);
-		heightScale = ImGuiUtils.FLOAT.get();
-
-		graphics.hoveredTooltip("Height Scale");
-
-		innerArr[0] = getHeight();
-
-		if (ImGui.dragFloat("###height", innerArr, 0.0625F, 0F, 100F, "%f")) {
-			setHeight(innerArr[0]);
-		}
-
-		graphics.hoveredTooltip("Height");
-
-		// start = starta[0];
-		// end = start + hdiff;
-
-		Color4ImBuilder.UNIT.set(innerColor);
-		Color4ImBuilder.UNIT.imguiKey(graphics, "Inner Color", "inner-color");
-		innerColor = Color4ImBuilder.UNIT.build();
-
-		Color4ImBuilder.UNIT.set(outerColor);
-		Color4ImBuilder.UNIT.imguiKey(graphics, "Outer Color", "outer-color");
-		outerColor = Color4ImBuilder.UNIT.build();
-
-		ImGui.alignTextToFramePadding();
-		ImGui.text("Fill");
-		ImGui.sameLine();
-
-		DecalFillType.UNIT[0] = fillType;
-		graphics.combo("###fill-type", DecalFillType.UNIT, "", DecalFillType.VALUES, t -> t.displayName);
-		fillType = DecalFillType.UNIT[0];
-
-		if (fillType != DecalFillType.SOLID) {
-			ImGui.alignTextToFramePadding();
-			graphics.smallText("Size");
-			ImGui.sameLine();
-			ImGuiUtils.FLOAT.set(fillSize);
-			ImGui.sliderFloat("###fill-size", ImGuiUtils.FLOAT.getData(), 0F, 4F, "%f");
-			fillSize = ImGuiUtils.FLOAT.get();
-
-			ImGui.alignTextToFramePadding();
-			graphics.smallText("Thickness");
-			ImGui.sameLine();
-			ImGuiUtils.FLOAT.set(fillThickness);
-			ImGui.sliderFloat("###fill-thickness", ImGuiUtils.FLOAT.getData(), 0F, 0.5F, "%f");
-			fillThickness = ImGuiUtils.FLOAT.get();
-		}
-
-		ImGui.alignTextToFramePadding();
-		ImGui.text("Rotation");
-		ImGui.sameLine();
-		ImGuiUtils.FLOAT.set(rotation);
-		ImGui.sliderFloat("###rotation", ImGuiUtils.FLOAT.getData(), -180F, 180F, "%f");
-		rotation = ImGuiUtils.FLOAT.get();
 	}
 
 	public float getHeight() {

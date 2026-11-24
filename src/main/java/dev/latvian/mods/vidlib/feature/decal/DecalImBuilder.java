@@ -28,7 +28,7 @@ public class DecalImBuilder implements ImBuilder<Decal> {
 			decal = new Decal(new Vector3d());
 		}
 
-		decal.imgui(graphics, List.of());
+		DecalUI.imgui(decal, graphics, List.of());
 
 		var before = snapshot;
 		snapshot = encode(decal);

@@ -9,7 +9,6 @@ import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.math.HitBuilder;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.util.PauseType;
-import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.bulk.BulkLevelModificationHolder;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModification;
 import dev.latvian.mods.vidlib.feature.bulk.UndoableModificationHolder;
@@ -25,6 +24,7 @@ import dev.latvian.mods.vidlib.feature.zone.LevelZones;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -205,12 +205,11 @@ public abstract class LevelSessionData<P extends Props<?>> {
 		return new BulkLevelModificationHolder().apply(level, result.value(), false, true);
 	}
 
-	@Nullable
-	public Ref<Atmosphere> getAtmosphere() {
-		return dataMap.getOptional(InternalLevelData.ATMOSPHERE);
+	public EnvironmentAttributeMap getAtmosphere() {
+		return dataMap.get(InternalLevelData.ATMOSPHERE);
 	}
 
-	public void setAtmosphere(@Nullable Ref<Atmosphere> value) {
+	public void setAtmosphere(EnvironmentAttributeMap value) {
 		dataMap.set(InternalLevelData.ATMOSPHERE, value);
 	}
 

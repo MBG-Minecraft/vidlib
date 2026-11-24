@@ -6,5 +6,8 @@
 		"klib.bukkit.mixins.json",
 		"vidlib.common.mixins.json",
 		"vidlib.bukkit.mixins.json"
+	],
+	"wideners": [
+		"vidlib.accesswidener"
 	]
 }

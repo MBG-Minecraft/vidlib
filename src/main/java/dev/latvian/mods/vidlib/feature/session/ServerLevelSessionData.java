@@ -23,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.TicketStorage;
 import net.neoforged.neoforge.common.world.chunk.TicketHelper;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -37,8 +38,9 @@ public class ServerLevelSessionData extends LevelSessionData<ServerProps> {
 
 	public ServerLevelSessionData(ServerSessionData worldData, ResourceKey<Level> dimension, ServerLevel level) {
 		super(worldData, dimension);
-		this.level = level;
+		this.level = Objects.requireNonNull(level, "ServerLevel is null");
 		this.props = new ServerProps(this, level);
+		VLExtensions.set(level, 523, new LevelSessionDataEnvironmentAttributeSystem(VLExtensions.get(level, 0), this));
 	}
 
 	@Override

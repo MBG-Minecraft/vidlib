@@ -2,7 +2,6 @@ package dev.latvian.mods.vidlib.feature.atmosphere;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
-import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.feature.imgui.icon.DirectImageImIcon;
 import dev.latvian.mods.vidlib.feature.imgui.icon.ImIcon;
@@ -13,27 +12,24 @@ import net.minecraft.client.renderer.texture.TextureContents;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.ARGB;
-import net.minecraft.world.attribute.EnvironmentAttributes;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.IntUnaryOperator;
 
 public class SkyboxTexture extends ReloadableTexture implements Dumpable {
-	public final ClientAtmosphere atmosphere;
+	public final SkyboxTextureId id;
 	public int resolution;
 	private ImIcon icon;
 
-	public SkyboxTexture(Identifier id, ClientAtmosphere atmosphere) {
-		super(id);
-		this.atmosphere = atmosphere;
+	public SkyboxTexture(SkyboxTextureId id) {
+		super(id.generated().texturePath());
+		this.id = id;
 	}
 
 	@Override
 	public void close() {
 		super.close();
-		atmosphere.skyboxTexture = null;
 		icon = null;
 	}
 
@@ -47,27 +43,9 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 
 	@Override
 	public TextureContents loadContents(ResourceManager manager) throws IOException {
-		if (atmosphere.skybox == null) {
-			var src = new NativeImage(4, 512, false);
-			var topCol = Color.ofRGB(ARGB.colorFromVector3f(atmosphere.attributes.applyModifier(EnvironmentAttributes.SKY_COLOR, ARGB.vector3fFromRGB24(0x000000))));
-			var bottomCol = Color.ofRGB(ARGB.colorFromVector3f(atmosphere.attributes.applyModifier(EnvironmentAttributes.FOG_COLOR, ARGB.vector3fFromRGB24(0xFFFFFF))));
-
-			for (int y = 0; y < 512; y++) {
-				int col = topCol.lerp(y / 511F, bottomCol).argb();
-
-				for (int x = 0; x < 4; x++) {
-					src.setPixel(x, y, col);
-				}
-			}
-
-			var image = process(atmosphere.id, src, src.getWidth(), src.getHeight());
-			resolution = image.getHeight() / 2;
-			return new TextureContents(image, new TextureMetadataSection(false, false, MipmapStrategy.AUTO, 0F));
-		}
-
-		try (var in = manager.getResource(atmosphere.skybox.assetId().texturePath()).orElseThrow().open()) {
+		try (var in = manager.getResource(id.source().texturePath()).orElseThrow().open()) {
 			var src = NativeImage.read(in);
-			var image = process(atmosphere.skybox.assetId().id().toString(), src, src.getWidth(), src.getHeight());
+			var image = process(id.source().id().toString(), src, src.getWidth(), src.getHeight());
 			resolution = image.getHeight() / 2;
 			return new TextureContents(image, new TextureMetadataSection(false, false, MipmapStrategy.AUTO, 0F));
 		}

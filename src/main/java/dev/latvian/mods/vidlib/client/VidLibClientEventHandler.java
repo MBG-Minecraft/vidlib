@@ -1,6 +1,7 @@
-package dev.latvian.mods.vidlib;
+package dev.latvian.mods.vidlib.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.math.Axis;
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.math.HitBuilder;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
@@ -10,7 +11,12 @@ import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
-import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
+import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.VidLibEventHandler;
+import dev.latvian.mods.vidlib.core.api.client.VLSkyRenderState;
+import dev.latvian.mods.vidlib.feature.atmosphere.AtmospherePresets;
+import dev.latvian.mods.vidlib.feature.atmosphere.SkyboxRenderer;
+import dev.latvian.mods.vidlib.feature.atmosphere.VidLibEnvironmentAttributes;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
 import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
@@ -118,6 +124,7 @@ import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterCustomEnvironmentEffectRendererEvent;
 import net.neoforged.neoforge.client.event.RegisterDebugEntriesEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -152,16 +159,6 @@ public class VidLibClientEventHandler {
 			}
 		});
 
-		Atmosphere.REGISTRY.addUpdateListener((values, type) -> {
-			if (type == CustomRegistryUpdateCallback.Type.REMOTE || type == CustomRegistryUpdateCallback.Type.CLIENT) {
-				var session = ClientSessionData.of(Minecraft.getInstance());
-
-				if (session != null) {
-					session.updateAtmospheres(values);
-				}
-			}
-		});
-
 		ModLoader.postEvent(new ScreenEffectRenderingRegistryEvent());
 	}
 
@@ -176,7 +173,6 @@ public class VidLibClientEventHandler {
 		event.addListener(ID.vidlib("ghost_structure"), new GhostStructure.Loader());
 		event.addListener(ID.vidlib("clothing_preset"), new ClothingPresetLoader());
 		event.addListener(ID.vidlib("physics_particle_data"), new PhysicsParticleData.Loader(RefType.CLIENT));
-		event.addListener(ID.vidlib("atmosphere"), new Atmosphere.Loader(RefType.CLIENT));
 
 		event.addDependency(ID.klib("gradient"), ID.vidlib("clothing_preset"));
 		event.addDependency(ID.vidlib("structure"), ID.vidlib("ghost_structure"));
@@ -329,6 +325,9 @@ public class VidLibClientEventHandler {
 			return;
 		}
 
+		var screenDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
+		var worldDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+
 		var session = ClientSessionData.of(mc);
 		session.projectedCoordinates = ProjectedCoordinates.of(mc, event.getCameraState());
 
@@ -340,9 +339,6 @@ public class VidLibClientEventHandler {
 		}
 
 		var tool = VidLibTool.of(player);
-
-		var screenDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
-		var worldDelta = mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 
 		if (tool != null) {
 			tool.getSecond().renderSetup(player, tool.getFirst(), mc.hitResult, screenDelta);
@@ -359,6 +355,17 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void extract(ExtractLevelRenderStateEvent event) {
+		var probe = event.getCamera().attributeProbe();
+		var delta = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		float tilt = probe.getValue(VidLibEnvironmentAttributes.CELESTIAL_TILT.get(), delta);
+
+		((VLSkyRenderState) event.getRenderState().skyRenderState).vl$set(
+			probe.getValue(VidLibEnvironmentAttributes.SUN.get(), delta),
+			probe.getValue(VidLibEnvironmentAttributes.MOON.get(), delta),
+			tilt == 0F ? null : Axis.YP.rotationDegrees(tilt),
+			probe.getValue(VidLibEnvironmentAttributes.SKYBOX.get(), delta)
+		);
+
 		var state = new VLWorldRenderState();
 		state.extract(event);
 		event.getRenderState().setRenderData(VidLibEntityRenderStates.WORLD_KEY, state);
@@ -368,6 +375,11 @@ public class VidLibClientEventHandler {
 	public static void submit(SubmitCustomGeometryEvent event) {
 		var state = VLWorldRenderState.of(event.getLevelRenderState());
 		state.submit(event);
+	}
+
+	@SubscribeEvent
+	public static void registerCustomEnvironmentEffectRenderer(RegisterCustomEnvironmentEffectRendererEvent event) {
+		event.registerSkyboxRenderer(AtmospherePresets.SKYBOX_ID, SkyboxRenderer.INSTANCE);
 	}
 
 	@SubscribeEvent

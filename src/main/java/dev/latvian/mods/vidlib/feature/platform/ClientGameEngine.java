@@ -14,7 +14,6 @@ import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.camera.ControlledCameraOverride;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
@@ -43,15 +42,12 @@ import dev.mrbeastgaming.mods.hub.api.HubClientSession;
 import dev.mrbeastgaming.mods.hub.api.data.HubUserCapabilities;
 import dev.mrbeastgaming.mods.hub.api.gateway.HubClientGateway;
 import imgui.ImGui;
-import net.minecraft.SharedConstants;
-import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.gui.components.toasts.AdvancementToast;
 import net.minecraft.client.gui.components.toasts.RecipeToast;
@@ -71,15 +67,14 @@ import net.minecraft.client.renderer.state.level.WorldBorderRenderState;
 import net.minecraft.client.resources.sounds.BiomeAmbientSoundsHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.ClientAsset;
-import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
@@ -89,9 +84,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
@@ -106,8 +99,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 import java.util.UUID;
 
 public class ClientGameEngine {
@@ -267,8 +258,7 @@ public class ClientGameEngine {
 		}
 	}
 
-	@Nullable
-	public Ref<Atmosphere> getAtmosphere(Minecraft mc) {
+	public EnvironmentAttributeMap getAtmosphere(Minecraft mc) {
 		return LevelSessionData.of(mc.level).getAtmosphere();
 	}
 
@@ -601,20 +591,6 @@ public class ClientGameEngine {
 		return original;
 	}
 
-	public int calculateScale(int w, int h) {
-		if (VidLibClientOptions.LOCK_GUI_SCALE.get()) {
-			int i = 1;
-
-			while (i < w && i < h && w / (i + 1) >= 320 && h / (i + 1) >= 240) {
-				i++;
-			}
-
-			return Math.max(2, i - 1);
-		}
-
-		return -1;
-	}
-
 	public boolean primitiveF3(Minecraft mc) {
 		return false;
 	}
@@ -726,65 +702,6 @@ public class ClientGameEngine {
 
 	public boolean overrideBiomeMoodSounds(BiomeAmbientSoundsHandler handler) {
 		return true;
-	}
-
-	@Nullable
-	public List<String> collectGameInformationText(Minecraft mc, DebugScreenOverlay overlay) {
-		if (!mc.showOnlyReducedInfo() || mc.getCameraEntity() == null) {
-			return null;
-		}
-
-		var list = new ArrayList<String>();
-		list.add("Minecraft " + SharedConstants.getCurrentVersion().name() + " (" + mc.getLaunchedVersion() + "/" + ClientBrandRetriever.getClientModName() + ")");
-		list.add(mc.getFps() + " fps");
-
-		var blockpos = mc.getCameraEntity().blockPosition();
-		var entity = mc.getCameraEntity();
-		var direction = entity.getDirection();
-		var chunkpos = new ChunkPos(blockpos.getX(), blockpos.getZ());
-
-		if (!Objects.equals(overlay.lastPos, chunkpos)) {
-			overlay.lastPos = chunkpos;
-			overlay.clearChunkCache();
-		}
-
-		String s;
-		switch (direction) {
-			case NORTH -> s = "Towards negative Z";
-			case SOUTH -> s = "Towards positive Z";
-			case WEST -> s = "Towards negative X";
-			case EAST -> s = "Towards positive X";
-			default -> s = "Invalid";
-		}
-
-		list.add(String.format(Locale.ROOT, "Facing: %s (%s) (%.1f / %.1f)", direction, s, Mth.wrapDegrees(entity.getYRot()), Mth.wrapDegrees(entity.getXRot())));
-		list.add(String.format(Locale.ROOT, "XYZ: %.3f / %.5f / %.3f", mc.getCameraEntity().getX(), mc.getCameraEntity().getY(), mc.getCameraEntity().getZ()));
-		list.add(String.format(Locale.ROOT, "Chunk: %d %d %d [%d %d in r.%d.%d.mca]", chunkpos.x(), SectionPos.blockToSectionCoord(blockpos.getY()), chunkpos.z(), chunkpos.getRegionLocalX(), chunkpos.getRegionLocalZ(), chunkpos.getRegionX(), chunkpos.getRegionZ()));
-		list.add(String.format(Locale.ROOT, "Block: %d %d %d [%d %d %d]", blockpos.getX(), blockpos.getY(), blockpos.getZ(), blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15));
-
-		var levelchunk = overlay.getClientChunk();
-
-		if (levelchunk == null || levelchunk.isEmpty()) {
-			list.add("Waiting for chunk...");
-		} else {
-			int rawBrightness = mc.level.getChunkSource().getLightEngine().getRawBrightness(blockpos, 0);
-			int skyLight = mc.level.getBrightness(LightLayer.SKY, blockpos);
-			int blockLight = mc.level.getBrightness(LightLayer.BLOCK, blockpos);
-			list.add("Client Light: " + rawBrightness + " (" + skyLight + " sky, " + blockLight + " block)");
-
-			if (mc.level.isInsideBuildHeight(blockpos.getY())) {
-				var biome = mc.level.getBiome(blockpos);
-				list.add("Biome: " + biome.unwrap().map(key -> key.identifier().toString(), l -> "[unregistered " + l + "]"));
-			}
-		}
-
-		var entityStatistics = mc.levelExtractor.entityStatistics();
-
-		if (entityStatistics != null) {
-			list.add(entityStatistics.replace("E:", "Entities:"));
-		}
-
-		return list;
 	}
 
 	@Nullable
@@ -912,10 +829,6 @@ public class ClientGameEngine {
 
 	public List<Waypoint> getWaypoints(Minecraft mc) {
 		return LevelSessionData.of(mc.level).getWaypoints();
-	}
-
-	public boolean hideDebugCharts() {
-		return Minecraft.getInstance().showOnlyReducedInfo();
 	}
 
 	public double overrideCompassAngle(CompassAngleState.CompassTarget type, Entity entity, BlockPos target) {

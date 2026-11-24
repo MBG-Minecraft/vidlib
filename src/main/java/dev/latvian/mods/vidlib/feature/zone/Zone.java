@@ -22,7 +22,6 @@ import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import dev.latvian.mods.klib.volume.BlockVolume;
 import dev.latvian.mods.klib.volume.JoinedVolume;
 import dev.latvian.mods.klib.volume.Volume;
-import dev.latvian.mods.vidlib.feature.atmosphere.Atmosphere;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -30,6 +29,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,7 +50,7 @@ public record Zone(
 	boolean anchor,
 	Optional<ZoneFluid> fluid,
 	ZoneDisplayInfo display,
-	Optional<Atmosphere> atmosphere
+	EnvironmentAttributeMap atmosphere
 ) implements CustomRegistryValue<RegistryFriendlyByteBuf, Zone> {
 	public static final DynamicType<RegistryFriendlyByteBuf, Zone> TYPE = DynamicType.create(
 		"default",
@@ -66,7 +66,7 @@ public record Zone(
 			Codec.BOOL.optionalFieldOf("anchor", false).forGetter(Zone::anchor),
 			ZoneFluid.CODEC.optionalFieldOf("fluid").forGetter(Zone::fluid),
 			ZoneDisplayInfo.CODEC.optionalFieldOf("display", ZoneDisplayInfo.DEFAULT).forGetter(Zone::display),
-			Atmosphere.DIRECT_MAP_CODEC.codec().optionalFieldOf("atmosphere").forGetter(Zone::atmosphere)
+			EnvironmentAttributeMap.CODEC.optionalFieldOf("atmosphere", EnvironmentAttributeMap.EMPTY).forGetter(Zone::atmosphere)
 		).apply(instance, Zone::new)),
 		CompositeStreamCodec.of(
 			KLibStreamCodecs.INT8, Zone::priority,
@@ -80,7 +80,7 @@ public record Zone(
 			ByteBufCodecs.BOOL, Zone::anchor,
 			ByteBufCodecs.optional(ZoneFluid.STREAM_CODEC), Zone::fluid,
 			ZoneDisplayInfo.STREAM_CODEC, Zone::display,
-			ByteBufCodecs.optional(Atmosphere.DIRECT_STREAM_CODEC), Zone::atmosphere,
+			KLibStreamCodecs.optional(ByteBufCodecs.fromCodecTrusted(EnvironmentAttributeMap.NETWORK_CODEC), EnvironmentAttributeMap.EMPTY), Zone::atmosphere,
 			Zone::new
 		)
 	);
@@ -107,7 +107,7 @@ public record Zone(
 		private ZoneFluid fluid = null;
 		private CubeTexturePatch textures = CubeTexturePatch.EMPTY;
 		private ZoneFog fog = ZoneFog.NONE;
-		private Atmosphere atmosphere = null;
+		private EnvironmentAttributeMap atmosphere = EnvironmentAttributeMap.EMPTY;
 
 		public Zone build() {
 			var display = new ZoneDisplayInfo(
@@ -128,7 +128,7 @@ public record Zone(
 				anchor,
 				Optional.ofNullable(fluid),
 				display.equals(ZoneDisplayInfo.DEFAULT) ? ZoneDisplayInfo.DEFAULT : display,
-				Optional.ofNullable(atmosphere)
+				atmosphere
 			);
 		}
 
@@ -213,7 +213,7 @@ public record Zone(
 			return this;
 		}
 
-		public Builder atmosphere(Atmosphere atmosphere) {
+		public Builder atmosphere(EnvironmentAttributeMap atmosphere) {
 			this.atmosphere = atmosphere;
 			return this;
 		}

@@ -45,7 +45,7 @@ public class DecalPanel extends Panel {
 					decals.add(new Decal(decal));
 				}
 
-				decal.imgui(graphics, decals);
+				DecalUI.imgui(decal, graphics, decals);
 			}
 
 			ImGui.popID();
