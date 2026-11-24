@@ -21,7 +21,6 @@
 		"common.CommandSourceStackMixin",
 		"common.ContainerMixin",
 		"common.PlayerListMixin",
-		"common.PlayerMixin",
 		"common.ServerGamePacketListenerImplMixin"
 	],
 	"client": [
