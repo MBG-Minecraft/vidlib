@@ -232,10 +232,19 @@ public class BuiltInImGui {
 		}).enabled(graphics.isAdmin));
 
 		if (VidLibClientOptions.getShowZones()) {
+			list.add(MenuItem.INDENT);
+
+			list.add(MenuItem.item(ImIcons.FRAMED_CUBE, "Zone Walls", VidLibClientOptions.getShowZoneWalls(), g -> {
+				VidLibClientOptions.SHOW_ZONE_WALLS.set(!VidLibClientOptions.getShowZoneWalls());
+				g.mc.options.save();
+			}).enabled(graphics.isAdmin));
+
 			list.add(MenuItem.item(ImIcons.FULLSCREEN, "Zone Outer Bounds", VidLibClientOptions.getShowZoneOuterBounds(), g -> {
 				VidLibClientOptions.SHOW_ZONE_OUTER_BOUNDS.set(!VidLibClientOptions.getShowZoneOuterBounds());
 				g.mc.options.save();
 			}).enabled(graphics.isAdmin));
+
+			list.add(MenuItem.UNINDENT);
 		}
 
 		list.add(MenuItem.item(ImIcons.ANCHOR, "Anchor", VidLibClientOptions.getShowAnchor(), g -> {

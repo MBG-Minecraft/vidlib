@@ -22,6 +22,7 @@ import dev.latvian.mods.klib.util.JsonRegistryReloadListener;
 import dev.latvian.mods.klib.volume.BlockVolume;
 import dev.latvian.mods.klib.volume.JoinedVolume;
 import dev.latvian.mods.klib.volume.Volume;
+import dev.latvian.mods.vidlib.feature.atmosphere.AtmospherePresets;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -66,7 +67,7 @@ public record Zone(
 			Codec.BOOL.optionalFieldOf("anchor", false).forGetter(Zone::anchor),
 			ZoneFluid.CODEC.optionalFieldOf("fluid").forGetter(Zone::fluid),
 			ZoneDisplayInfo.CODEC.optionalFieldOf("display", ZoneDisplayInfo.DEFAULT).forGetter(Zone::display),
-			EnvironmentAttributeMap.CODEC.optionalFieldOf("atmosphere", EnvironmentAttributeMap.EMPTY).forGetter(Zone::atmosphere)
+			AtmospherePresets.CODEC.optionalFieldOf("atmosphere", EnvironmentAttributeMap.EMPTY).forGetter(Zone::atmosphere)
 		).apply(instance, Zone::new)),
 		CompositeStreamCodec.of(
 			KLibStreamCodecs.INT8, Zone::priority,

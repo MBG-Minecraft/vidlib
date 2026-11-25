@@ -14,6 +14,7 @@ import java.util.Arrays;
 public interface VidLibClientOptions {
 	OptionInstance<Boolean> SHOW_ANCHOR = OptionInstance.createBoolean("options.vidlib.show_anchor", false);
 	OptionInstance<Boolean> SHOW_ZONES = OptionInstance.createBoolean("options.vidlib.show_zones", false);
+	OptionInstance<Boolean> SHOW_ZONE_WALLS = OptionInstance.createBoolean("options.vidlib.show_zone_walls", true);
 	OptionInstance<Boolean> SHOW_ZONE_OUTER_BOUNDS = OptionInstance.createBoolean("options.vidlib.show_zone_outer_bounds", true);
 	OptionInstance<Boolean> SHOW_COORDINATES = OptionInstance.createBoolean("options.vidlib.show_coordinates", false);
 	OptionInstance<Boolean> LOCK_IMGUI_SCROLL = OptionInstance.createBoolean("options.vidlib.lock_imgui_scroll", false);
@@ -56,6 +57,7 @@ public interface VidLibClientOptions {
 	OptionInstance<?>[] ACCESSIBILITY_OPTIONS = {
 		SHOW_ANCHOR,
 		SHOW_ZONES,
+		SHOW_ZONE_WALLS,
 		SHOW_ZONE_OUTER_BOUNDS,
 		ZONE_RENDER_TYPE,
 		TEST_SCREEN_SHAKE_MAX_DISTANCE,
@@ -69,6 +71,10 @@ public interface VidLibClientOptions {
 
 	static boolean getShowZones() {
 		return SHOW_ZONES.get();
+	}
+
+	static boolean getShowZoneWalls() {
+		return SHOW_ZONE_WALLS.get();
 	}
 
 	static boolean getShowZoneOuterBounds() {
@@ -91,6 +97,7 @@ public interface VidLibClientOptions {
 	static void process(Options.FieldAccess accessor) {
 		accessor.process("vidlib.show_anchor", SHOW_ANCHOR);
 		accessor.process("vidlib.show_zones", SHOW_ZONES);
+		accessor.process("vidlib.show_zone_walls", SHOW_ZONE_WALLS);
 		accessor.process("vidlib.show_zone_outer_bounds", SHOW_ZONE_OUTER_BOUNDS);
 		accessor.process("vidlib.zone_render_type", ZONE_RENDER_TYPE);
 		accessor.process("vidlib.show_coordinates", SHOW_COORDINATES);

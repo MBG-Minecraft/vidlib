@@ -222,10 +222,11 @@ public class VLWorldRenderState {
 		zones = List.of();
 
 		if (VidLibClientOptions.getShowZones()) {
-			var zoneOuterLines = VidLibClientOptions.getShowZoneOuterBounds();
+			var zoneWalls = VidLibClientOptions.getShowZoneWalls();
+			var zoneOuterBounds = VidLibClientOptions.getShowZoneOuterBounds();
 
 			for (var zone : levelSession.zones) {
-				var state = ZoneRenderState.extract(zone, zoneOuterLines);
+				var state = ZoneRenderState.extract(zone, zoneWalls, zoneOuterBounds);
 
 				if (state != null) {
 					if (zones.isEmpty()) {

@@ -1,8 +1,8 @@
 package dev.latvian.mods.vidlib.feature.data;
 
-import dev.latvian.mods.klib.data.DataTypes;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.platform.PlatformType;
+import dev.latvian.mods.vidlib.feature.atmosphere.AtmospherePresets;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlane;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
@@ -13,7 +13,7 @@ import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import java.util.List;
 
 public interface InternalLevelData {
-	DataKey<LevelSessionData<?>, EnvironmentAttributeMap> ATMOSPHERE = DataKey.LEVEL.createDefault("atmosphere", DataTypes.ENVIRONMENT_ATTRIBUTE_MAP, EnvironmentAttributeMap.EMPTY);
+	DataKey<LevelSessionData<?>, EnvironmentAttributeMap> ATMOSPHERE = DataKey.LEVEL.createDefault("atmosphere", AtmospherePresets.DATA_TYPE, EnvironmentAttributeMap.EMPTY);
 	DataKey<LevelSessionData<?>, Anchor> ANCHOR = DataKey.LEVEL.createDefault("anchor", Anchor.DATA_TYPE, Anchor.NONE);
 	DataKey<LevelSessionData<?>, List<Waypoint>> WAYPOINTS = DataKey.LEVEL.createDefault("waypoints", Waypoint.LIST_DATA_TYPE, List.of());
 	DataKey<LevelSessionData<?>, FluidPlane> FLUID_PLANE = DataKey.LEVEL.createDefault("fluid_plane", FluidPlane.DATA_TYPE, null);

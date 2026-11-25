@@ -40,6 +40,8 @@ public record MenuItem(
 
 	public static final MenuItem SEPARATOR = text(ImIcon.NONE, "").withFlags(FLAG_SEPARATOR);
 	public static final MenuItem SKIP = text(ImIcon.NONE, "").withFlags(FLAG_SKIP);
+	public static final MenuItem INDENT = custom(_ -> ImGui.indent());
+	public static final MenuItem UNINDENT = custom(_ -> ImGui.unindent());
 
 	@FunctionalInterface
 	public interface OnClick {

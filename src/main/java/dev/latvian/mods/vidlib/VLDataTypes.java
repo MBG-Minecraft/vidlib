@@ -2,6 +2,7 @@ package dev.latvian.mods.vidlib;
 
 import dev.latvian.mods.klib.data.DataType;
 import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
+import dev.latvian.mods.vidlib.feature.atmosphere.AtmospherePresets;
 import dev.latvian.mods.vidlib.feature.atmosphere.SkyboxTextureId;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShake;
 import dev.latvian.mods.vidlib.feature.client.RenderLightLayer;
@@ -47,5 +48,6 @@ public interface VLDataTypes {
 		registry.register("render_light_layer", RenderLightLayer.DATA_TYPE);
 		registry.register("fluid_plane", FluidPlane.DATA_TYPE);
 		registry.register("skybox_texture_id", SkyboxTextureId.DATA_TYPE);
+		registry.register("atmosphere_preset", AtmospherePresets.DATA_TYPE);
 	}
 }
