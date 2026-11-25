@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.math.Axis;
 import dev.latvian.mods.betteradvancedtooltips.BATIcons;
 import dev.latvian.mods.klib.math.HitBuilder;
+import dev.latvian.mods.klib.math.Identity;
 import dev.latvian.mods.klib.math.ProjectedCoordinates;
 import dev.latvian.mods.klib.platform.PlatformHelper;
 import dev.latvian.mods.klib.registry.CustomRegistryUpdateCallback;
@@ -13,6 +14,7 @@ import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.api.client.VLSkyRenderState;
+import dev.latvian.mods.vidlib.feature.atmosphere.SkyboxRenderer;
 import dev.latvian.mods.vidlib.feature.atmosphere.SkyboxTexture;
 import dev.latvian.mods.vidlib.feature.atmosphere.SkyboxTextureId;
 import dev.latvian.mods.vidlib.feature.atmosphere.VidLibEnvironmentAttributes;
@@ -368,7 +370,11 @@ public class VidLibClientEventHandler {
 		var skyboxData = probe.getValue(VidLibEnvironmentAttributes.SKYBOX.get(), delta);
 
 		if (!skyboxData.texture().equals(SkyboxTextureId.NONE)) {
-			if (mc.getTextureManager().byPath.get(skyboxData.texture().generated().texturePath()) instanceof SkyboxTexture tex) {
+			var custom = SkyboxRenderer.CUSTOM_TEXTURES.get(skyboxData.texture());
+
+			if (custom != null) {
+				vl.skyboxTexture = custom.apply(mc);
+			} else if (mc.getTextureManager().byPath.get(skyboxData.texture().generated().texturePath()) instanceof SkyboxTexture tex) {
 				vl.skyboxTexture = tex;
 			} else {
 				var tex = new SkyboxTexture(skyboxData.texture());
@@ -383,7 +389,7 @@ public class VidLibClientEventHandler {
 				rotation += 360F * gameTime * skyboxData.rotating();
 			}
 
-			vl.skyboxRotation = Axis.YP.rotationDegrees(rotation);
+			vl.skyboxRotation = rotation == 0F ? Identity.QUATERNION : Axis.YP.rotationDegrees(rotation);
 			vl.skyboxTint.set(ARGB.vector4fFromARGB32(skyboxData.tint().argb()));
 		}
 

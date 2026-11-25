@@ -11,11 +11,19 @@ import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import dev.latvian.mods.klib.texture.UV;
 import dev.latvian.mods.vidlib.core.api.client.VLSkyRenderState;
 import dev.latvian.mods.vidlib.feature.client.VLRenderPipelines;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.level.SkyRenderState;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.util.ARGB;
+import org.joml.Matrix4f;
+
+import java.util.Map;
+import java.util.function.Function;
 
 public class SkyboxRenderer {
 	public static final UV[] UVS = new UV[6];
+	public static final Map<SkyboxTextureId, Function<Minecraft, AbstractTexture>> CUSTOM_TEXTURES = new Object2ObjectOpenHashMap<>(1);
 
 	static {
 		UVS[0] = new UV(0.5F, 0F, 0.75F, 0.5F);
@@ -114,13 +122,12 @@ public class SkyboxRenderer {
 			return false;
 		}
 
-		skyState.shouldRenderDarkDisc = false;
-		skyState.sunriseAndSunsetColor = ARGB.vector4fFromARGB32(0);
-
-
 		var autoIndices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
 		var indexBuffer = autoIndices.getBuffer(36);
-		var dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(RenderSystem.getModelViewMatrixCopy());
+		var modelViewStack = RenderSystem.getModelViewStack();
+		modelViewStack.pushMatrix();
+		modelViewStack.rotate(vl.skyboxRotation);
+		var dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(new Matrix4f(modelViewStack), vl.skyboxTint);
 		renderPass.pushDebugGroup(() -> "VidLib Skybox");
 		renderPass.setPipeline(RenderSystem.getCompiledPipeline(VLRenderPipelines.SKYBOX));
 		RenderSystem.bindDefaultUniforms(renderPass);
@@ -130,7 +137,15 @@ public class SkyboxRenderer {
 		renderPass.setIndexBuffer(indexBuffer, autoIndices.type());
 		renderPass.drawIndexed(36, 1, 0, 0, 0);
 		renderPass.popDebugGroup();
-		return true;
+		modelViewStack.popMatrix();
+
+		if (vl.skyboxTint.w >= 1F) {
+			skyState.shouldRenderDarkDisc = false;
+			skyState.sunriseAndSunsetColor = ARGB.vector4fFromARGB32(0);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public static void close() {
