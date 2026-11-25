@@ -3,10 +3,10 @@ package dev.latvian.mods.vidlib.core.api;
 import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Function4;
 import com.mojang.datafixers.util.Function5;
-import dev.latvian.mods.klib.platform.PlatformHelper;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
@@ -47,13 +47,14 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 
 public class VLBridge {
-	public static Supplier<Path> gameDirectory = PlatformHelper.INSTANCE::getGameDirectory;
+	public static Supplier<Path> gameDirectory;
 	public static Predicate<ServerLevel> disableSleepStatusAnnouncement;
 	public static Function4<ServerLevel, BlockPos, BlockPos, BlockPos, Void> tickPrecipitation;
 	public static Predicate<Player> allowFlight;
@@ -97,4 +98,10 @@ public class VLBridge {
 	public static Predicate<LivingEntity> isTrackedByLocatorBar;
 	public static Predicate<LivingEntity> isUnpushable;
 	public static Function5<LivingEntity, Double, Float, DamageSource, Integer, Integer> calculateFallDamage;
+	public static Function<Player, Component> getPlayerName;
+	public static BiPredicate<Player, Player> allowPVP;
+	public static ToFloatFunction<Player> getPlayerSpeedModifier;
+	public static ToFloatFunction<Player> getPlayerFlightSpeedModifier;
+	public static BiPredicate<Player, Entity> preventDismount;
+	public static Consumer<ServerPlayer> tickPlayerSync;
 }

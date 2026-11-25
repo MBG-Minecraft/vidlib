@@ -18,7 +18,6 @@ import dev.latvian.mods.vidlib.feature.font.TTFFile;
 import dev.latvian.mods.vidlib.feature.misc.ReplayMarkerPayload;
 import dev.latvian.mods.vidlib.feature.particle.VidLibParticles;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleData;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.platform.VLPlatformHelper;
 import dev.latvian.mods.vidlib.feature.screeneffect.ScreenEffect;
 import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
@@ -87,8 +86,12 @@ public class VidLib {
 		LOGGER.info("Netty Threads: " + Math.max(1, SystemPropertyUtil.getInt("io.netty.eventLoopThreads", NettyRuntime.availableProcessors() * 2)));
 		gameLoaded();
 		HubServerSession.loadAsync(server);
-		CommonGameEngine.INSTANCE.setupServer(server);
-		AutoInit.Type.SERVER_STARTED.invoke(server);
+
+		if (server.overworld() == null) {
+			VLPlatformHelper.INSTANCE.scheduleServerReady(server);
+		} else {
+			VLPlatformHelper.INSTANCE.onServerReady(server);
+		}
 	}
 
 	public static void initClient() {

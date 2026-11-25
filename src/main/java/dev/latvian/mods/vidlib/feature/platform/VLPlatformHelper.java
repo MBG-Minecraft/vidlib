@@ -6,6 +6,7 @@ import dev.latvian.mods.klib.platform.PlatformType;
 import dev.latvian.mods.klib.registry.CustomRegistryTypeCollector;
 import dev.latvian.mods.klib.registry.RefType;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.camera.ScreenShakeType;
 import dev.latvian.mods.vidlib.feature.capture.PacketCapture;
 import dev.latvian.mods.vidlib.feature.cutscene.step.CutsceneStepType;
@@ -88,6 +89,15 @@ public class VLPlatformHelper {
 				level.noSave = false;
 			}
 		}
+	}
+
+	public void onServerReady(MinecraftServer server) {
+		CommonGameEngine.INSTANCE.setupServer(server);
+		AutoInit.Type.SERVER_STARTED.invoke(server);
+	}
+
+	public void scheduleServerReady(MinecraftServer server) {
+		onServerReady(server);
 	}
 
 	public void displayProgressQueue(ProgressQueue queue) {

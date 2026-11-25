@@ -6,16 +6,19 @@ import com.mojang.datafixers.util.Function5;
 import dev.latvian.mods.klib.core.KLibExtensions;
 import dev.latvian.mods.klib.entity.PlayerTarget;
 import dev.latvian.mods.klib.platform.PlatformHelper;
+import dev.latvian.mods.klib.util.Empty;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.core.api.VLObject;
 import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
 import dev.latvian.mods.vidlib.feature.misc.CreateFireworksPayload;
 import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import dev.latvian.mods.vidlib.feature.session.LevelSessionData;
+import dev.latvian.mods.vidlib.feature.session.PlayerSessionData;
 import dev.latvian.mods.vidlib.feature.session.ServerSessionData;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.MinecraftServer;
@@ -174,6 +177,16 @@ public class VLExtensions {
 			lookup.findStaticVarHandle(b, "isTrackedByLocatorBar", Predicate.class).set((Predicate<LivingEntity>) entity -> CommonGameEngine.INSTANCE.isTrackedByLocatorBar(entity));
 			lookup.findStaticVarHandle(b, "isUnpushable", Predicate.class).set((Predicate<LivingEntity>) entity -> CommonGameEngine.INSTANCE.isUnpushable(entity));
 			lookup.findStaticVarHandle(b, "calculateFallDamage", Function5.class).set((Function5<LivingEntity, Double, Float, DamageSource, Integer, Integer>) (entity, fallDistance, damageMultiplier, damageSource, original) -> CommonGameEngine.INSTANCE.calculateFallDamage(entity, fallDistance, damageMultiplier, damageSource, original));
+			lookup.findStaticVarHandle(b, "getPlayerName", Function.class).set((Function<Player, Component>) player -> {
+				var nickname = PlayerSessionData.of(player).getNickname();
+
+				return Empty.isEmpty(nickname) ? null : nickname;
+			});
+			lookup.findStaticVarHandle(b, "allowPVP", BiPredicate.class).set((BiPredicate<Player, Player>) (from, to) -> CommonGameEngine.INSTANCE.allowPVP(from, to));
+			lookup.findStaticVarHandle(b, "getPlayerSpeedModifier", ToFloatFunction.class).set((ToFloatFunction<Player>) player -> CommonGameEngine.INSTANCE.getSpeedModifier(player));
+			lookup.findStaticVarHandle(b, "getPlayerFlightSpeedModifier", ToFloatFunction.class).set((ToFloatFunction<Player>) player -> CommonGameEngine.INSTANCE.getFlightSpeedModifier(player));
+			lookup.findStaticVarHandle(b, "preventDismount", BiPredicate.class).set((BiPredicate<Player, Entity>) (player, vehicle) -> vehicle instanceof VLVehicle v && v.preventDismount(player));
+			lookup.findStaticVarHandle(b, "tickPlayerSync", Consumer.class).set((Consumer<ServerPlayer>) player -> CommonGameEngine.INSTANCE.tickPlayerSync(player));
 
 			VidLib.LOGGER.info("VLExtensions initialized");
 		} catch (Throwable ex) {

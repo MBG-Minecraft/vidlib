@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.core.mixin.common;
 
 import dev.latvian.mods.vidlib.core.api.VLBridge;
-import dev.latvian.mods.vidlib.feature.platform.CommonGameEngine;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.level.ServerEntity;
@@ -32,7 +31,7 @@ public class ServerEntityMixin {
 	@Inject(method = "sendChanges", at = @At("RETURN"))
 	private void vl$onTick(CallbackInfo ci) {
 		if (entity instanceof ServerPlayer p) {
-			CommonGameEngine.INSTANCE.tickPlayerSync(p);
+			VLBridge.tickPlayerSync.accept(p);
 		}
 	}
 }

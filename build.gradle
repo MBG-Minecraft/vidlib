@@ -279,15 +279,6 @@ tasks.build {
 	dependsOn tasks.buildResourcePack
 }
 
-def igniteClassExcludes = [
-		'dev/latvian/mods/vidlib/core/mixin/client/**',
-		'dev/latvian/mods/vidlib/core/mixin/neoforge/**',
-		'dev/latvian/mods/vidlib/core/mixin/lithium/**',
-		'dev/latvian/mods/vidlib/core/mixin/mod/**',
-		'dev/latvian/mods/klib/core/mixin/client/**',
-		'dev/latvian/mods/klib/core/mixin/neoforge/**'
-]
-
 def igniteDependencyJar = { String group, String module ->
 	configurations.runtimeClasspath.incoming.artifactView {
 		componentFilter { id ->
@@ -303,22 +294,17 @@ tasks.register('buildIgniteJar', Jar) {
 	into('/')
 
 	from(sourceSets.main.output) {
-		include 'dev/latvian/mods/vidlib/**', 'dev/latvian/mods/replay/**', 'dev/mrbeastgaming/**'
+		include 'dev/latvian/mods/vidlib/core/api/*'
+		include 'dev/latvian/mods/vidlib/core/mixin/common/**'
+		include 'dev/latvian/mods/vidlib/core/mixin/bukkit/**'
 		include 'ignite.mod.json', 'vidlib.accesswidener', 'vidlib.common.mixins.json', 'vidlib.bukkit.mixins.json'
-		exclude igniteClassExcludes
 	}
 
 	from(zipTree(igniteDependencyJar('dev.latvian.mods', 'klib'))) {
-		include 'dev/latvian/mods/klib/**', 'klib.common.mixins.json', 'klib.bukkit.mixins.json'
-		exclude igniteClassExcludes
-	}
-
-	from(zipTree(igniteDependencyJar('dev.latvian.apps', 'tiny-http'))) {
-		include 'dev/latvian/apps/**'
-	}
-
-	from(zipTree(igniteDependencyJar('com.github.luben', 'zstd-jni'))) {
-		exclude 'META-INF/**', 'module-info.class'
+		include 'dev/latvian/mods/klib/core/api/*'
+		include 'dev/latvian/mods/klib/core/mixin/common/**'
+		include 'dev/latvian/mods/klib/core/mixin/bukkit/**'
+		include 'klib.common.mixins.json', 'klib.bukkit.mixins.json'
 	}
 
 	destinationDirectory = layout.buildDirectory.dir('libs')
