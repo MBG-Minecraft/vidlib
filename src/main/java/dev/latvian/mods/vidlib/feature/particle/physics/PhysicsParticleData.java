@@ -15,6 +15,21 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
+/**
+ * @param density base number of particles spawned per block, multiplied by the block's density unless {@code ignoreBlockDensity} is enabled
+ * @param lifespan range of particle lifetimes in ticks
+ * @param scale range of size multipliers applied to the block fragments
+ * @param power range of initial upward velocities
+ * @param spread range of initial outward velocities
+ * @param inertia multiplier applied to horizontal velocity each tick
+ * @param gravity downward acceleration applied each tick
+ * @param speed range sampled into each particle's speed value; this value is currently not used by the simulation
+ * @param direction yaw rotation of the emitter in degrees
+ * @param tilt pitch rotation of the emitter in degrees
+ * @param section range of yaw angles in degrees sampled for individual particles, such as {@code 0} to {@code 360} for a full radial spread
+ * @param ignoreBlockDensity whether {@code density} should be used without multiplying it by the block's density
+ * @param renderDistance maximum horizontal distance in blocks at which particles are rendered
+ */
 public record PhysicsParticleData(
 	float density,
 	Range lifespan,
