@@ -499,6 +499,10 @@ tasks.register('webHookUpdate') {
 
 	def content = "New VidLib version: [`${version}`](<${ENV.MBG_PUBLISH_MAVEN_URL}/dev/latvian/mods/vidlib/${version}/vidlib-${version}.jar>) (KLib `${klib_version}`) ([`Ignite`](<${ENV.MBG_PUBLISH_MAVEN_URL}/dev/latvian/mods/vidlib/${version}/vidlib-${version}-ignite.jar>))"
 
+	if (ENV.MBG_PUBLISH_USERNAME) {
+		content += " - ${ENV.MBG_PUBLISH_USERNAME}"
+	}
+
 	doLast {
 		println("Sending webhook update...")
 		// localBuildFile.setText(localBuildNumber.toString(), "UTF-8")
@@ -509,7 +513,7 @@ tasks.register('webHookUpdate') {
 				.uri(URI.create("${ENV.MBG_PUBLISH_DISCORD_WEBHOOK_URL}"))
 				.header("Content-Type", "application/json")
 				.POST(HttpRequest.BodyPublishers.ofString(
-						'{"content":"' + content + '"}'
+						'{"content":"' + content + '","allowed_mentions":{"parse":[]}}'
 				))
 				.build()
 
