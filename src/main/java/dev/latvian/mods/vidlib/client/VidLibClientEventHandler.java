@@ -12,10 +12,9 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.VidLib;
-import dev.latvian.mods.vidlib.VidLibEventHandler;
 import dev.latvian.mods.vidlib.core.api.client.VLSkyRenderState;
-import dev.latvian.mods.vidlib.feature.atmosphere.AtmospherePresets;
-import dev.latvian.mods.vidlib.feature.atmosphere.SkyboxRenderer;
+import dev.latvian.mods.vidlib.feature.atmosphere.SkyboxTexture;
+import dev.latvian.mods.vidlib.feature.atmosphere.SkyboxTextureId;
 import dev.latvian.mods.vidlib.feature.atmosphere.VidLibEnvironmentAttributes;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
 import dev.latvian.mods.vidlib.feature.auto.BlockEntityRendererHolder;
@@ -104,6 +103,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
 import net.minecraft.world.entity.player.Player;
@@ -124,7 +124,6 @@ import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
-import net.neoforged.neoforge.client.event.RegisterCustomEnvironmentEffectRendererEvent;
 import net.neoforged.neoforge.client.event.RegisterDebugEntriesEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -355,16 +354,38 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void extract(ExtractLevelRenderStateEvent event) {
+		var mc = Minecraft.getInstance();
 		var probe = event.getCamera().attributeProbe();
 		var delta = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-		float tilt = probe.getValue(VidLibEnvironmentAttributes.CELESTIAL_TILT.get(), delta);
 
-		((VLSkyRenderState) event.getRenderState().skyRenderState).vl$set(
-			probe.getValue(VidLibEnvironmentAttributes.SUN.get(), delta),
-			probe.getValue(VidLibEnvironmentAttributes.MOON.get(), delta),
-			tilt == 0F ? null : Axis.YP.rotationDegrees(tilt),
-			probe.getValue(VidLibEnvironmentAttributes.SKYBOX.get(), delta)
-		);
+		var vl = ((VLSkyRenderState) event.getRenderState().skyRenderState).vl$extra();
+
+		vl.sun = probe.getValue(VidLibEnvironmentAttributes.SUN.get(), delta);
+		vl.moon = probe.getValue(VidLibEnvironmentAttributes.MOON.get(), delta);
+		vl.celestialTilt = Axis.YP.rotationDegrees(probe.getValue(VidLibEnvironmentAttributes.CELESTIAL_TILT.get(), delta));
+		vl.skyboxTexture = null;
+
+		var skyboxData = probe.getValue(VidLibEnvironmentAttributes.SKYBOX.get(), delta);
+
+		if (!skyboxData.texture().equals(SkyboxTextureId.NONE)) {
+			if (mc.getTextureManager().byPath.get(skyboxData.texture().generated().texturePath()) instanceof SkyboxTexture tex) {
+				vl.skyboxTexture = tex;
+			} else {
+				var tex = new SkyboxTexture(skyboxData.texture());
+				mc.getTextureManager().registerAndLoad(tex.resourceId(), tex);
+				vl.skyboxTexture = tex;
+			}
+
+			float rotation = skyboxData.rotation();
+
+			if (skyboxData.rotating() != 0F) {
+				float gameTime = mc.level == null ? 0F : ((mc.level.getGameTime() % 24000L) + delta) / 24000F;
+				rotation += 360F * gameTime * skyboxData.rotating();
+			}
+
+			vl.skyboxRotation = Axis.YP.rotationDegrees(rotation);
+			vl.skyboxTint.set(ARGB.vector4fFromARGB32(skyboxData.tint().argb()));
+		}
 
 		var state = new VLWorldRenderState();
 		state.extract(event);
@@ -375,11 +396,6 @@ public class VidLibClientEventHandler {
 	public static void submit(SubmitCustomGeometryEvent event) {
 		var state = VLWorldRenderState.of(event.getLevelRenderState());
 		state.submit(event);
-	}
-
-	@SubscribeEvent
-	public static void registerCustomEnvironmentEffectRenderer(RegisterCustomEnvironmentEffectRendererEvent event) {
-		event.registerSkyboxRenderer(AtmospherePresets.SKYBOX_ID, SkyboxRenderer.INSTANCE);
 	}
 
 	@SubscribeEvent

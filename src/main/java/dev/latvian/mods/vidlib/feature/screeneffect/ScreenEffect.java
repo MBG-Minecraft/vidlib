@@ -38,4 +38,8 @@ public interface ScreenEffect extends CustomRegistryValue<RegistryFriendlyByteBu
 	default CustomRegistry<RegistryFriendlyByteBuf, ScreenEffect> getRegistry() {
 		return REGISTRY;
 	}
+
+	default ScreenEffect withAlpha(float alpha) {
+		return this;
+	}
 }

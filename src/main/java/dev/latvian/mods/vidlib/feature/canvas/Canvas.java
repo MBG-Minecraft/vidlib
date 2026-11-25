@@ -2,7 +2,9 @@ package dev.latvian.mods.vidlib.feature.canvas;
 
 import com.mojang.renderpearl.api.commands.RenderPass;
 import dev.latvian.mods.klib.util.Lazy;
+import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.neoforged.fml.ModLoader;
 import org.joml.Matrix4f;
@@ -48,7 +50,21 @@ public record Canvas(Identifier postEffect, BooleanSupplier active, List<CustomP
 		}
 	}
 
-	public static void appendPostEffects(List<Identifier> list) {
+	public static void appendPostEffects(Minecraft mc, List<Identifier> list) {
+		if (mc.level == null) {
+			return;
+		}
+
+		var session = ClientSessionData.of(mc);
+
+		if (session == null) {
+			return;
+		}
+
+		for (var screenEffect : session.screenEffects) {
+			list.addAll(screenEffect.postEffects);
+		}
+
 		for (var canvas : ALL.get()) {
 			if (canvas.active.getAsBoolean()) {
 				list.add(canvas.postEffect);

@@ -60,19 +60,19 @@ public interface VLRenderPipelines {
 		.withPrimitiveTopology(PrimitiveTopology.QUADS)
 		.build();
 
-	RenderPipeline SKYBOX = RenderPipeline.builder()
+	RenderPipeline SKYBOX = RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET)
 		.withLocation(ID.vidlib("pipeline/skybox"))
-		.withBindGroupLayout(BindGroupLayouts.GLOBALS)
 		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
 		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
-		.withBindGroupLayout(BindGroupLayouts.FOG)
-		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
-		.withColorTargetState(ColorTargetState.DEFAULT)
-		.withCull(true)
+		// .withBindGroupLayout(BindGroupLayouts.FOG)
 		.withVertexShader("core/position_tex_color")
 		.withFragmentShader("core/position_tex_color")
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+		.withColorTargetState(ColorTargetState.DEFAULT)
+		// .withColorTargetState(new ColorTargetState(BlendFunction.OVERLAY))
 		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
 		.withPrimitiveTopology(PrimitiveTopology.QUADS)
+		.withCull(true)
 		.build();
 
 	RenderPipeline SOLID_TERRAIN_NO_CULL = RenderPipeline.builder()

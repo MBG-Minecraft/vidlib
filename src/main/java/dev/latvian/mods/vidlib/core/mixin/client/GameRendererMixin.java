@@ -99,6 +99,6 @@ public abstract class GameRendererMixin implements VLGameRenderer {
 
 	@Inject(method = "update", at = @At("RETURN"))
 	private void vl$update(DeltaTracker deltaTracker, CallbackInfo ci) {
-		Canvas.appendPostEffects(requestedPostEffects);
+		Canvas.appendPostEffects(minecraft, requestedPostEffects);
 	}
 }
