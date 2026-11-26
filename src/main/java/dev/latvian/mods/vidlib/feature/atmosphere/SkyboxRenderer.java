@@ -28,6 +28,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class SkyboxRenderer {
+	private static final int LONGITUDE_SEGMENTS = 64;
+	private static final int LATITUDE_SEGMENTS = 32;
+	private static final int SPHERE_QUADS = LONGITUDE_SEGMENTS * LATITUDE_SEGMENTS;
+
 	public static final Map<SkyboxTextureId, Function<Minecraft, AbstractTexture>> CUSTOM_TEXTURES = new Object2ObjectOpenHashMap<>(1);
 
 	public record ChromaKeyData(Vector4fc keyColor, Vector2fc keyCC, Vector2fc range) implements DynamicGpuDataStorage.DynamicGpuData {
@@ -124,21 +128,38 @@ public class SkyboxRenderer {
 			}
 		}
 
-		/*
-		int totalVertices = 0; // unknown, needs to be implemented
+		int totalVertices = SPHERE_QUADS * 4;
 
 		try (var byteBufferBuilder = ByteBufferBuilder.exactlySized(totalVertices * DefaultVertexFormat.POSITION_TEX_COLOR.getVertexSize())) {
 			var buffer = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 
-			// Implement vertices here mapping equirectangular texture to a sphere with radius 100.0F
+			for (int row = 0; row < LATITUDE_SEGMENTS; row++) {
+				for (int column = 0; column < LONGITUDE_SEGMENTS; column++) {
+					addSphereVertex(buffer, column, row + 1);
+					addSphereVertex(buffer, column + 1, row + 1);
+					addSphereVertex(buffer, column + 1, row);
+					addSphereVertex(buffer, column, row);
+				}
+			}
 
 			try (var meshData = buffer.buildOrThrow()) {
 				equirectangular = RenderSystem.getDevice().createBuffer(() -> "VidLib Skybox equirectangular vertex buffer", GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_VERTEX, meshData.vertexBuffer());
 			}
 		}
-		 */
 
 		chromaKey = new DynamicGpuDataStorageMapped<>("VidLib Skybox Chroma Key UBO", new Std140SizeCalculator().putVec4().putVec2().putVec2().get(), GpuBuffer.USAGE_UNIFORM, 2);
+	}
+
+	private static void addSphereVertex(BufferBuilder buffer, int column, int row) {
+		float u = (float) column / LONGITUDE_SEGMENTS;
+		float v = (float) row / LATITUDE_SEGMENTS;
+		double polarAngle = Math.PI * v;
+		float ringRadius = row == 0 || row == LATITUDE_SEGMENTS ? 0F : 100F * (float) Math.sin(polarAngle);
+		float y = 100F * (float) Math.cos(polarAngle);
+		double longitude = Math.TAU * (column % LONGITUDE_SEGMENTS) / LONGITUDE_SEGMENTS;
+		float x = -ringRadius * (float) Math.sin(longitude);
+		float z = ringRadius * (float) Math.cos(longitude);
+		buffer.addVertex(x, y, z).setUv(u, v).setColor(0xFFFFFFFF);
 	}
 
 	public static boolean render(RenderPass renderPass, SkyRenderState skyState) {
@@ -148,7 +169,7 @@ public class SkyboxRenderer {
 			return false;
 		}
 
-		int indexCount = vl.skyboxEquirectangular ? 0 : 36;
+		int indexCount = vl.skyboxEquirectangular ? (SPHERE_QUADS * 6) : 36;
 
 		var autoIndices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS);
 		var indexBuffer = autoIndices.getBuffer(indexCount);
