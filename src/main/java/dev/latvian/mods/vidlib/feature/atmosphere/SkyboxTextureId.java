@@ -18,7 +18,7 @@ public record SkyboxTextureId(
 	public static final DataType<SkyboxTextureId> DATA_TYPE = DataType.of(CODEC, STREAM_CODEC);
 
 	public static final SkyboxTextureId NONE = new SkyboxTextureId(ID.mc("none"));
-	public static final SkyboxTextureId TEST = new SkyboxTextureId(ID.vidlib("test"));
+	public static final SkyboxTextureId TEMPLATE = new SkyboxTextureId(ID.vidlib("template"));
 
 	public SkyboxTextureId(Identifier id) {
 		this(

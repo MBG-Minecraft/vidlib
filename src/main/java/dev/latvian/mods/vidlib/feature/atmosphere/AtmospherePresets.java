@@ -70,7 +70,7 @@ public interface AtmospherePresets {
 	Lazy<EnvironmentAttributeMap> ASH = Lazy.of(() -> EnvironmentAttributeMap.builder().modify(EnvironmentAttributes.AMBIENT_PARTICLES, ListModifier.append(), AmbientParticle.of(ParticleTypes.WHITE_ASH, 0.118093334F)).build());
 	Lazy<EnvironmentAttributeMap> TILTED_CELESTIALS = Lazy.of(() -> EnvironmentAttributeMap.builder().set(EnvironmentAttributes.MOON_ANGLE, 45F).set(EnvironmentAttributes.SUN_ANGLE, 45F).set(VidLibEnvironmentAttributes.CELESTIAL_TILT.get(), 140F).build());
 
-	Lazy<EnvironmentAttributeMap> TEST_SKYBOX = Lazy.of(() -> skybox(SkyboxTextureId.TEST).build());
+	Lazy<EnvironmentAttributeMap> TEMPLATE_SKYBOX = Lazy.of(() -> skybox(SkyboxTextureId.TEMPLATE).build());
 
 	Map<String, Lazy<EnvironmentAttributeMap>> ALL = new HashMap<>(Map.ofEntries(
 		Map.entry("day", DAY),
@@ -90,7 +90,7 @@ public interface AtmospherePresets {
 		Map.entry("no_fog", NO_FOG),
 		Map.entry("ash", ASH),
 		Map.entry("tilted_celestials", TILTED_CELESTIALS),
-		Map.entry("test_skybox", TEST_SKYBOX)
+		Map.entry("template_skybox", TEMPLATE_SKYBOX)
 	));
 
 	Codec<EnvironmentAttributeMap> DIRECT_CODEC = KLibCodecs.or(Codec.STRING.flatXmap(string -> {

@@ -70,7 +70,7 @@ public abstract class SkyRendererMixin {
 
 	@Inject(method = "renderSunriseAndSunset", at = @At("HEAD"), cancellable = true)
 	private void vl$skybox(RenderPass renderPass, PoseStack poseStack, float sunAngle, Vector4fc sunriseAndSunsetColor, CallbackInfo ci) {
-		if (SkyboxRenderer.render(renderPass, poseStack, vl$skyState)) {
+		if (SkyboxRenderer.render(renderPass, vl$skyState)) {
 			ci.cancel();
 		}
 	}

@@ -122,6 +122,7 @@ import net.neoforged.neoforge.client.event.ClientResourceLoadFinishedEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
+import net.neoforged.neoforge.client.event.FlipFrameEvent;
 import net.neoforged.neoforge.client.event.FrameGraphSetupEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
@@ -377,10 +378,12 @@ public class VidLibClientEventHandler {
 			} else if (mc.getTextureManager().byPath.get(skyboxData.texture().generated().texturePath()) instanceof SkyboxTexture tex) {
 				vl.skyboxTexture = tex;
 			} else {
-				var tex = new SkyboxTexture(skyboxData.texture());
+				var tex = new SkyboxTexture(skyboxData.texture(), skyboxData.equirectangular());
 				mc.getTextureManager().registerAndLoad(tex.resourceId(), tex);
 				vl.skyboxTexture = tex;
 			}
+
+			vl.skyboxEquirectangular = skyboxData.equirectangular();
 
 			float rotation = skyboxData.rotation();
 
@@ -391,6 +394,8 @@ public class VidLibClientEventHandler {
 
 			vl.skyboxRotation = rotation == 0F ? Identity.QUATERNION : Axis.YP.rotationDegrees(rotation);
 			vl.skyboxTint.set(ARGB.vector4fFromARGB32(skyboxData.tint().argb()));
+			vl.skyboxChromaKey.set(ARGB.vector4fFromARGB32(skyboxData.chromaKey().argb()));
+			vl.skyboxChromaKeyRange = skyboxData.chromaKeyRange();
 		}
 
 		var state = new VLWorldRenderState();
@@ -648,6 +653,11 @@ public class VidLibClientEventHandler {
 		if (mc.player != null && mc.player.getVehicle() instanceof VLVehicle vehicle) {
 			event.setRoll(vehicle.getPassengerCameraRoll(mc.player, event.getPartialTick(), event.getRoll()));
 		}
+	}
+
+	@SubscribeEvent
+	public static void flipFrame(FlipFrameEvent event) {
+		SkyboxRenderer.endFrame();
 	}
 
 	@SubscribeEvent

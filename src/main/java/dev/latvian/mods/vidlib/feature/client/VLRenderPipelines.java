@@ -1,6 +1,7 @@
 package dev.latvian.mods.vidlib.feature.client;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.renderpearl.api.pipeline.BindGroupLayout;
 import com.mojang.renderpearl.api.pipeline.BlendEquation;
 import com.mojang.renderpearl.api.pipeline.BlendFunction;
 import com.mojang.renderpearl.api.pipeline.ColorTargetState;
@@ -8,6 +9,7 @@ import com.mojang.renderpearl.api.pipeline.CompareOp;
 import com.mojang.renderpearl.api.pipeline.DepthStencilState;
 import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.UniformType;
 import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.vidlib.VidLib;
 import net.minecraft.client.renderer.BindGroupLayouts;
@@ -64,11 +66,24 @@ public interface VLRenderPipelines {
 		.withLocation(ID.vidlib("pipeline/skybox"))
 		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
 		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
-		// .withBindGroupLayout(BindGroupLayouts.FOG)
-		.withVertexShader("core/position_tex_color")
-		.withFragmentShader("core/position_tex_color")
+		.withVertexShader(ID.vidlib("core/skybox"))
+		.withFragmentShader(ID.vidlib("core/skybox"))
 		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
-		// .withColorTargetState(ColorTargetState.DEFAULT)
+		.withShaderDefine("ALPHA_CUTOUT", 0.03F)
+		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+		.withPrimitiveTopology(PrimitiveTopology.QUADS)
+		.withCull(true)
+		.build();
+
+	RenderPipeline SKYBOX_WITH_CHROMA_KEY = RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET)
+		.withLocation(ID.vidlib("pipeline/skybox_with_chroma_key"))
+		.withBindGroupLayout(BindGroupLayouts.PROJECTION)
+		.withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+		.withBindGroupLayout(BindGroupLayout.builder().withUniform("ChromaKey", UniformType.UNIFORM_BUFFER).build())
+		.withVertexShader(ID.vidlib("core/skybox"))
+		.withFragmentShader(ID.vidlib("core/skybox_with_chroma_key"))
+		.withBindGroupLayout(BindGroupLayouts.SAMPLER0)
 		.withShaderDefine("ALPHA_CUTOUT", 0.03F)
 		.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
 		.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
@@ -181,6 +196,7 @@ public interface VLRenderPipelines {
 		event.registerPipeline(GUI_DEPTH);
 		event.registerPipeline(MASKED_GUI);
 		event.registerPipeline(SKYBOX);
+		event.registerPipeline(SKYBOX_WITH_CHROMA_KEY);
 		event.registerPipeline(SOLID_TERRAIN_NO_CULL);
 		event.registerPipeline(CUTOUT_MIPPED_TERRAIN_NO_CULL);
 		event.registerPipeline(CUTOUT_TERRAIN_NO_CULL);

@@ -19,12 +19,13 @@ import java.util.function.IntUnaryOperator;
 
 public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 	public final SkyboxTextureId id;
-	public int resolution;
+	public final boolean equirectangular;
 	private ImIcon icon;
 
-	public SkyboxTexture(SkyboxTextureId id) {
+	public SkyboxTexture(SkyboxTextureId id, boolean equirectangular) {
 		super(id.generated().texturePath());
 		this.id = id;
+		this.equirectangular = equirectangular;
 	}
 
 	@Override
@@ -45,37 +46,48 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 	public TextureContents loadContents(ResourceManager manager) throws IOException {
 		try (var in = manager.getResource(id.source().texturePath()).orElseThrow().open()) {
 			var src = NativeImage.read(in);
-			var image = process(id.source().id().toString(), src, src.getWidth(), src.getHeight());
-			resolution = image.getHeight() / 2;
+			var image = equirectangular ? src : process(id.source().id().toString(), src, src.getWidth(), src.getHeight());
 			return new TextureContents(image, new TextureMetadataSection(false, false, MipmapStrategy.AUTO, 0F));
 		}
 	}
 
 	@SuppressWarnings({"ConstantValue", "PointlessArithmeticExpression"})
 	public static NativeImage process(String name, NativeImage src, int srcW, int srcH) {
-		if (srcW == srcH * 2) { // Pre-mapped 4x2
+		if (srcW * 2 == srcH * 3) { // Cube Map 3x2
+			// EWU
+			// DNS
 			return src;
-		} else if (srcW == srcH || srcW * 3 == srcH * 4) { // Cube Map 4x4 or 4x3
+		} else if (srcW == srcH * 2) { // Cube Map 4x2
+			// -UD-
+			// WNES
+
 			int s = srcW / 4;
-			var img = new NativeImage(s * 4, s * 2, false);
+			var img = new NativeImage(s * 3, s * 2, false);
+			src.copyRect(img, s * 2, s * 0, s * 0, s, s, s, false, false); // D
+			src.copyRect(img, s * 1, s * 0, s * 2, 0, s, s, false, false); // U
+			src.copyRect(img, s * 1, s * 1, s * 1, s, s, s, false, false); // N
+			src.copyRect(img, s * 3, s * 1, s * 2, s, s, s, false, false); // S
+			src.copyRect(img, s * 0, s * 1, s * 1, 0, s, s, false, false); // W
+			src.copyRect(img, s * 2, s * 1, s * 0, 0, s, s, false, false); // E
+			src.close();
+			return img;
+		} else if (srcW == srcH || srcW * 3 == srcH * 4) { // Cube Map 4x4 or 4x3
+			// -U--
+			// WNES
+			// -D--
 
-			for (int y = 0; y < s; y++) {
-				for (int x = 0; x < s; x++) {
-					img.setPixel(x + s * 0, y + s * 0, 0xFF000000);
-					img.setPixel(x + s * 1, y + s * 0, src.getPixel(x + s * 1, y + s * 0));
-					img.setPixel(x + s * 2, y + s * 0, src.getPixel(x + s * 1, y + s * 2));
-					img.setPixel(x + s * 3, y + s * 0, 0xFF000000);
-					img.setPixel(x + s * 0, y + s * 1, src.getPixel(x + s * 0, y + s * 1));
-					img.setPixel(x + s * 1, y + s * 1, src.getPixel(x + s * 1, y + s * 1));
-					img.setPixel(x + s * 2, y + s * 1, src.getPixel(x + s * 2, y + s * 1));
-					img.setPixel(x + s * 3, y + s * 1, src.getPixel(x + s * 3, y + s * 1));
-				}
-			}
-
+			int s = srcW / 4;
+			var img = new NativeImage(s * 3, s * 2, false);
+			src.copyRect(img, s * 1, s * 2, s * 0, s, s, s, false, false); // D
+			src.copyRect(img, s * 1, s * 0, s * 2, 0, s, s, false, false); // U
+			src.copyRect(img, s * 1, s * 1, s * 1, s, s, s, false, false); // N
+			src.copyRect(img, s * 3, s * 1, s * 2, s, s, s, false, false); // S
+			src.copyRect(img, s * 0, s * 1, s * 1, 0, s, s, false, false); // W
+			src.copyRect(img, s * 2, s * 1, s * 0, 0, s, s, false, false); // E
 			src.close();
 			return img;
 		} else if (srcH > srcW) { // Vertical Gradient
-			var img = new NativeImage(srcH * 4, srcH * 2, false);
+			var c4x2 = new NativeImage(srcH * 4, srcH * 2, false);
 
 			var g = new int[srcH];
 
@@ -89,9 +101,6 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 
 			for (int y = 0; y < s; y++) {
 				for (int x = 0; x < s; x++) {
-					img.setPixel(x + s * 0, y + s * 0, 0xFF000000);
-					img.setPixel(x + s * 3, y + s * 0, 0xFF000000);
-
 					int nx = x - s / 2;
 					int ny = y - s / 2;
 
@@ -116,23 +125,31 @@ public class SkyboxTexture extends ReloadableTexture implements Dumpable {
 						int color = g[colorIndex];
 
 						if (face == 0) {
-							img.setPixel(x + s * 2, y + s * 0, color);
+							c4x2.setPixel(x + s * 2, y + s * 0, color);
 						} else if (face == 1) {
-							img.setPixel(x + s * 1, y + s * 0, color);
+							c4x2.setPixel(x + s * 1, y + s * 0, color);
 						} else if (face == 2) {
-							img.setPixel(y + s * 0, x + s * 1, color);
-							img.setPixel(y + s * 1, x + s * 1, color);
-							img.setPixel(y + s * 2, x + s * 1, color);
-							img.setPixel(y + s * 3, x + s * 1, color);
+							c4x2.setPixel(y + s * 0, x + s * 1, color);
+							c4x2.setPixel(y + s * 1, x + s * 1, color);
+							c4x2.setPixel(y + s * 2, x + s * 1, color);
+							c4x2.setPixel(y + s * 3, x + s * 1, color);
 						}
 					}
 				}
 			}
 
+			var img = new NativeImage(s * 3, s * 2, false);
+			c4x2.copyRect(img, s * 1, s * 2, s * 0, s, s, s, false, false); // D
+			c4x2.copyRect(img, s * 1, s * 0, s * 2, 0, s, s, false, false); // U
+			c4x2.copyRect(img, s * 1, s * 1, s * 1, s, s, s, false, false); // N
+			c4x2.copyRect(img, s * 3, s * 1, s * 2, s, s, s, false, false); // S
+			c4x2.copyRect(img, s * 0, s * 1, s * 1, 0, s, s, false, false); // W
+			c4x2.copyRect(img, s * 2, s * 1, s * 0, 0, s, s, false, false); // E
+			c4x2.close();
 			return img;
 		}
 
-		VidLib.LOGGER.error("Invalid source skybox texture from " + name + " Must be either foldable 4x4, 4x3 or a vertical gradient");
+		VidLib.LOGGER.error("Invalid source skybox texture from " + name + " Must be a cube map 3x2, 4x4, 4x3 or a vertical gradient, resolution was instead " + srcW + " x " + srcH);
 
 		var img = new NativeImage(16, 16, false);
 		img.fillRect(0, 0, 16, 16, 0xFF000000);
