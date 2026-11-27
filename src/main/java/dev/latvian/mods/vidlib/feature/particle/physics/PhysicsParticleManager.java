@@ -1,7 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
 import com.mojang.blaze3d.platform.Transparency;
-import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.math.FrustumCheck;
 import dev.latvian.mods.klib.math.KMath;
@@ -110,28 +109,18 @@ public class PhysicsParticleManager {
 		};
 	}
 
-	public static List<Pair<PhysicsParticleManager, List<PhysicsParticleRenderState>>> extractAll(Minecraft mc, FrustumCheck frustum, Vec3 cameraPos, float delta) {
-		var all = List.<Pair<PhysicsParticleManager, List<PhysicsParticleRenderState>>>of();
-		var list = new ArrayList<PhysicsParticleRenderState>();
-
+	public static void extractAll(Minecraft mc, FrustumCheck frustum, Vec3 cameraPos, float delta, List<PhysicsParticleManager> all) {
 		for (var manager : ALL) {
 			manager.rendered = 0;
 
 			if (!manager.particles.isEmpty() && VISIBLE.get()) {
-				manager.extract(mc, frustum, cameraPos, delta, list);
+				manager.extract(mc, frustum, cameraPos, delta);
 
-				if (!list.isEmpty()) {
-					if (all.isEmpty()) {
-						all = new ArrayList<>();
-					}
-
-					all.add(Pair.of(manager, List.copyOf(list)));
-					list.clear();
+				if (!manager.states.isEmpty()) {
+					all.add(manager);
 				}
 			}
 		}
-
-		return all;
 	}
 
 	private static Transparency vl$transparency(BlockState state) {
@@ -143,20 +132,26 @@ public class PhysicsParticleManager {
 	public final Identifier id;
 	public final List<PhysicsParticle> particles;
 	public final List<PhysicsParticle> queue;
-	private final RenderType renderType;
 	public final String displayName;
+	private final RenderType renderType;
+	public final List<PhysicsParticleRenderState> states;
 	public int rendered;
 
 	public PhysicsParticleManager(String id, String displayName, RenderType renderType) {
 		this.id = ID.vidlib("physics_particles/" + id);
 		this.particles = new ArrayList<>();
 		this.queue = new ArrayList<>();
-
 		this.displayName = displayName;
 		this.renderType = renderType;
+		this.states = new ArrayList<>();
+		this.rendered = 0;
 	}
 
-	public void extract(Minecraft mc, FrustumCheck frustum, Vec3 cameraPos, float delta, List<PhysicsParticleRenderState> states) {
+	public void reset() {
+		states.clear();
+	}
+
+	public void extract(Minecraft mc, FrustumCheck frustum, Vec3 cameraPos, float delta) {
 		var mutablePos = new BlockPos.MutableBlockPos();
 
 		var lightValues = new Long2IntOpenHashMap();
@@ -235,7 +230,11 @@ public class PhysicsParticleManager {
 		}
 	}
 
-	public void submit(SubmitContext ctx, List<PhysicsParticleRenderState> states) {
+	public void submit(SubmitContext ctx) {
+		if (states.isEmpty()) {
+			return;
+		}
+
 		ctx.submit(renderType, (pose, buffer) -> {
 			var tempNormal = new Vector3f();
 			var original = pose.copy();

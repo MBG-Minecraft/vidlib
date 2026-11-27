@@ -41,7 +41,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 public interface VidLibEntityRenderStates {
-	ContextKey<VLWorldRenderState> WORLD_KEY = new ContextKey<>(ID.vidlib("world"));
 	ContextKey<Boolean> CREATIVE = new ContextKey<>(ID.vidlib("creative"));
 	ContextKey<SpriteKey> SPRITE_KEY = new ContextKey<>(ID.vidlib("sprite_key"));
 	ContextKey<UV> UV = new ContextKey<>(ID.vidlib("uv"));

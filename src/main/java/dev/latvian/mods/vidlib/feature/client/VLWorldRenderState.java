@@ -1,6 +1,5 @@
 package dev.latvian.mods.vidlib.feature.client;
 
-import com.mojang.datafixers.util.Pair;
 import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.icon.Icon;
 import dev.latvian.mods.klib.icon.renderer.IconRenderer;
@@ -18,19 +17,16 @@ import dev.latvian.mods.vidlib.feature.decal.Decal;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderState;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
-import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleRenderState;
 import dev.latvian.mods.vidlib.feature.platform.ClientGameEngine;
 import dev.latvian.mods.vidlib.feature.prop.PropRenderState;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
-import dev.latvian.mods.vidlib.feature.session.LocalPlayerSessionData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
@@ -40,13 +36,10 @@ import org.joml.Quaternionf;
 import org.joml.Vector2d;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class VLWorldRenderState {
-	public static VLWorldRenderState of(LevelRenderState state) {
-		return state.getRenderData(VidLibEntityRenderStates.WORLD_KEY);
-	}
+	public static final VLWorldRenderState INSTANCE = new VLWorldRenderState();
 
 	public float worldDelta;
 	public float playerDelta;
@@ -58,19 +51,15 @@ public class VLWorldRenderState {
 	public VisualExactContext visualExactContext;
 	public Visuals visuals = new Visuals();
 
-	public List<Submittable> submittable = List.of();
-	public List<Decal> decals = List.of();
-	public List<PropRenderState<?>> props = List.of();
-	public List<AAIBB> anchorVolumes = List.of();
+	public final List<Submittable> submittable = new ArrayList<>();
+	public final List<Decal> decals = new ArrayList<>();
+	public final List<PropRenderState<?>> props = new ArrayList<>();
+	public final List<AAIBB> anchorVolumes = new ArrayList<>();
 	public FluidPlaneRenderState fluidPlane = null;
-	public List<Pair<PhysicsParticleManager, List<PhysicsParticleRenderState>>> physicsParticles = List.of();
-	public List<ZoneRenderState> zones = List.of();
+	public final List<PhysicsParticleManager> physicsParticles = new ArrayList<>();
+	public final List<ZoneRenderState> zones = new ArrayList<>();
 
 	public void add(Submittable s) {
-		if (submittable.isEmpty()) {
-			submittable = new LinkedList<>();
-		}
-
 		submittable.add(s);
 	}
 
@@ -82,6 +71,21 @@ public class VLWorldRenderState {
 		}
 	}
 
+	public void reset() {
+		submittable.clear();
+		decals.clear();
+		props.clear();
+		anchorVolumes.clear();
+		fluidPlane = null;
+
+		for (var manager : physicsParticles) {
+			manager.reset();
+		}
+
+		physicsParticles.clear();
+		zones.clear();
+	}
+
 	public void extract(ExtractLevelRenderStateEvent event) {
 		var mc = Minecraft.getInstance();
 
@@ -91,7 +95,6 @@ public class VLWorldRenderState {
 
 		var session = ClientSessionData.of(mc);
 		var levelSession = ClientLevelSessionData.of(mc.level);
-		var playerSession = LocalPlayerSessionData.of(mc.player);
 
 		worldDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		playerDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(!mc.level.tickRateManager().isEntityFrozen(mc.player));
@@ -102,7 +105,7 @@ public class VLWorldRenderState {
 		numberContext = levelSession.createGlobalContext();
 		numberContext.progress = 1D;
 
-		visualExactContext = new VisualExactContext(
+		var visualExactContext = new VisualExactContext(
 			mc,
 			cameraPos,
 			worldDelta,
@@ -112,10 +115,7 @@ public class VLWorldRenderState {
 		var ctx = new VidLibExtractContext(mc, this, event);
 		var tempVisuals = new Visuals();
 
-		submittable = List.of();
-		decals = List.of();
-		props = levelSession.props.extractAll(ctx);
-		anchorVolumes = List.of();
+		levelSession.props.extractAll(ctx);
 
 		if (VidLibClientOptions.getShowAnchor()) {
 			var anchored = levelSession.getAnchor().volumes();
@@ -123,10 +123,6 @@ public class VLWorldRenderState {
 			if (!anchored.isEmpty()) {
 				for (var area : anchored) {
 					if (event.getFrustum().isVisible(area.aabb())) {
-						if (anchorVolumes.isEmpty()) {
-							anchorVolumes = new ArrayList<>(anchored.size());
-						}
-
 						anchorVolumes.add(area);
 					}
 				}
@@ -137,10 +133,6 @@ public class VLWorldRenderState {
 					var box = zone.volume.intBox();
 
 					if (event.getFrustum().isVisible(box.aabb())) {
-						if (anchorVolumes.isEmpty()) {
-							anchorVolumes = new ArrayList<>(1);
-						}
-
 						anchorVolumes.add(box);
 					}
 				}
@@ -203,7 +195,7 @@ public class VLWorldRenderState {
 			}
 		}
 
-		physicsParticles = PhysicsParticleManager.extractAll(mc, frustum, cameraPos, worldDelta);
+		PhysicsParticleManager.extractAll(mc, frustum, cameraPos, worldDelta, physicsParticles);
 
 		var tool = VidLibTool.of(mc.player);
 
@@ -219,8 +211,6 @@ public class VLWorldRenderState {
 			}
 		}
 
-		zones = List.of();
-
 		if (VidLibClientOptions.getShowZones()) {
 			var zoneWalls = VidLibClientOptions.getShowZoneWalls();
 			var zoneOuterBounds = VidLibClientOptions.getShowZoneOuterBounds();
@@ -229,10 +219,6 @@ public class VLWorldRenderState {
 				var state = ZoneRenderState.extract(zone, zoneWalls, zoneOuterBounds);
 
 				if (state != null) {
-					if (zones.isEmpty()) {
-						zones = new ArrayList<>(levelSession.zones.zones.size());
-					}
-
 					zones.add(state);
 				}
 			}
@@ -309,8 +295,8 @@ public class VLWorldRenderState {
 		 */
 
 		if (!physicsParticles.isEmpty()) {
-			for (var pair : physicsParticles) {
-				pair.getFirst().submit(ctx, pair.getSecond());
+			for (var manager : physicsParticles) {
+				manager.submit(ctx);
 			}
 		}
 

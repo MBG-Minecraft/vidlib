@@ -398,15 +398,13 @@ public class VidLibClientEventHandler {
 			vl.skyboxChromaKeyRange = skyboxData.chromaKeyRange();
 		}
 
-		var state = new VLWorldRenderState();
-		state.extract(event);
-		event.getRenderState().setRenderData(VidLibEntityRenderStates.WORLD_KEY, state);
+		VLWorldRenderState.INSTANCE.reset();
+		VLWorldRenderState.INSTANCE.extract(event);
 	}
 
 	@SubscribeEvent
 	public static void submit(SubmitCustomGeometryEvent event) {
-		var state = VLWorldRenderState.of(event.getLevelRenderState());
-		state.submit(event);
+		VLWorldRenderState.INSTANCE.submit(event);
 	}
 
 	@SubscribeEvent
