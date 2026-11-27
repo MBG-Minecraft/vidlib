@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record Visuals(List<Visual> visuals) {
-	public static final Visuals NONE = new Visuals(List.of());
-	public static final Visuals EXTRACT = new Visuals();
 	public static final Visuals TICK = new Visuals();
 
 	public Visuals() {
@@ -65,5 +63,11 @@ public record Visuals(List<Visual> visuals) {
 		}
 
 		return false;
+	}
+
+	public void copyFrom(Visuals other) {
+		if (other.hasAny()) {
+			visuals.addAll(other.visuals);
+		}
 	}
 }

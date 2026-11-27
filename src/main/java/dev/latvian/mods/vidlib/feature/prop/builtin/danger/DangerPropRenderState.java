@@ -49,6 +49,6 @@ public class DangerPropRenderState extends PropRenderState<DangerProp> {
 		}
 
 		decal.applyProgress(progress);
-		ctx.vl().addVisual(decal);
+		ctx.visuals().add(decal);
 	}
 }

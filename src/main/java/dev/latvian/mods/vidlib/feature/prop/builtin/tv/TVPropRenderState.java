@@ -34,7 +34,7 @@ public class TVPropRenderState extends PropRenderState<TVProp> {
 
 	@Override
 	public void extract(TVProp prop, VidLibExtractContext ctx) {
-		float delta = ctx.delta();
+		float delta = ctx.worldPartialTick();
 
 		width = (float) prop.width;
 		height = (float) prop.height;

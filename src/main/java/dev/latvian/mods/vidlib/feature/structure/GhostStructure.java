@@ -9,8 +9,10 @@ import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.klib.math.Vec3f;
 import dev.latvian.mods.klib.registry.Ref;
 import dev.latvian.mods.klib.render.SubmitContext;
+import dev.latvian.mods.klib.render.Submittable;
 import dev.latvian.mods.klib.util.JsonCodecReloadListener;
 import dev.latvian.mods.vidlib.feature.client.VLWorldRenderState;
+import dev.latvian.mods.vidlib.feature.client.VidLibExtractContext;
 import dev.latvian.mods.vidlib.feature.prop.builtin.structure.StructureProp;
 import dev.latvian.mods.vidlib.feature.session.ClientLevelSessionData;
 import imgui.type.ImBoolean;
@@ -62,7 +64,6 @@ public record GhostStructure(
 	).apply(instance, GhostStructure::new));
 
 	public static List<GhostStructure> LIST = List.of();
-	private static List<VisibleGhostStructure> VISIBLE = List.of();
 
 	private static void preloadAll() {
 		var mc = Minecraft.getInstance();
@@ -92,22 +93,19 @@ public record GhostStructure(
 		});
 	}
 
-	public static void preRender(VLWorldRenderState vl) {
-		var mc = Minecraft.getInstance();
-
-		if (mc.level == null || mc.player == null) {
+	public static void extract(VLWorldRenderState state, VidLibExtractContext ctx) {
+		if (!VISIBLE_CONFIG.get()) {
 			return;
 		}
 
-		var numberContext = vl.numberContext;
-		var visible = new ArrayList<VisibleGhostStructure>();
+		var numberContext = ctx.numberContext();
 
 		for (var ghostStructure : LIST) {
 			if (ghostStructure.structures.isEmpty() || ghostStructure.locations.isEmpty()) {
 				continue;
 			}
 
-			if (!ghostStructure.visibleTo.value().test(mc.player)) {
+			if (!ghostStructure.visibleTo.value().test(ctx.mc().player)) {
 				continue;
 			}
 
@@ -133,7 +131,7 @@ public record GhostStructure(
 				var rotation = ghostStructure.rotation.value().get(numberContext);
 				var rotation3f = rotation == null ? Vec3f.ZERO : Vec3f.of(rotation);
 				var blockPos = BlockPos.containing(pos);
-				var selectedStructures = selectStructures(ghostStructure, blockPos, vl.worldDelta);
+				var selectedStructures = selectStructures(ghostStructure, blockPos, ctx.worldPartialTick());
 
 				for (var part : selectedStructures) {
 					if (part.bounds().isPresent()) {
@@ -147,25 +145,31 @@ public record GhostStructure(
 							pos.z + b.maxZ() + 1D
 						);
 
-						if (box.distanceToSqr(vl.cameraPos) > 8192D * 8192D) {
+						if (box.distanceToSqr(ctx.cameraPos()) > 8192D * 8192D) {
 							continue;
 						}
 
-						if (!vl.frustum.isVisible(box)) {
+						if (!ctx.isVisible(box)) {
 							continue;
 						}
 					}
 
-					visible.add(new VisibleGhostStructure(ghostStructure, part.structure(), part.bounds().orElse(null), pos, blockPos, scale3f, rotation3f));
+					state.add(new RenderState(
+						ghostStructure.rendererData(),
+						part.structure(),
+						part.bounds().orElse(null),
+						pos,
+						blockPos,
+						scale3f,
+						rotation3f
+					));
 				}
 			}
 		}
 
-		VISIBLE = visible;
-
-		var solidPlacements = collectSolidPlacements(mc, numberContext, vl.worldDelta);
-		appendStructurePropPlacements(mc, solidPlacements);
-		GhostStructureCollision.update(mc.level, solidPlacements);
+		var solidPlacements = collectSolidPlacements(ctx.mc(), numberContext, ctx.worldPartialTick());
+		appendStructurePropPlacements(ctx.mc(), solidPlacements);
+		GhostStructureCollision.update(ctx.mc().level, solidPlacements);
 	}
 
 	private static void appendStructurePropPlacements(Minecraft mc, List<GhostStructureCollision.Placement> placements) {
@@ -268,24 +272,33 @@ public record GhostStructure(
 		return placements;
 	}
 
-	public static void submit(SubmitContext ctx) {
-		if (VISIBLE.isEmpty() || !VISIBLE_CONFIG.get()) {
-			return;
-		}
+	public StructureRendererData rendererData() {
+		return data.orElse(ghostChunks ? StructureRendererData.DEFAULT_GHOST_CHUNKS : StructureRendererData.DEFAULT);
+	}
 
-		for (var structure : VISIBLE) {
-			ctx.push(structure.pos);
+	public record RenderState(
+		StructureRendererData data,
+		StructureRenderer renderer,
+		@Nullable AAIBB slice,
+		Vec3 pos,
+		BlockPos blockPos,
+		Vector3fc scale,
+		Vector3fc rotation
+	) implements Submittable {
+		@Override
+		public void submit(SubmitContext ctx) {
+			ctx.push(pos);
 
-			if (structure.scale != Vec3f.ONE) {
-				ctx.poseStack().scale(structure.scale.x(), structure.scale.y(), structure.scale.z());
+			if (scale != Vec3f.ONE) {
+				ctx.poseStack().scale(scale.x(), scale.y(), scale.z());
 			}
 
-			if (structure.rotation != Vec3f.ZERO) {
-				ctx.rotate(new Quaternionf().rotationY(structure.rotation.y()).rotateX(structure.rotation.x()).rotateZ(structure.rotation.z()));
+			if (rotation != Vec3f.ZERO) {
+				ctx.rotate(new Quaternionf().rotationY(rotation.y()).rotateX(rotation.x()).rotateZ(rotation.z()));
 			}
 
-			if (structure.slice != null && Minecraft.getInstance().gui.hud.getDebugOverlay().showDebugScreen()) {
-				var b = structure.slice;
+			if (slice != null && Minecraft.getInstance().gui.hud.getDebugOverlay().showDebugScreen()) {
+				var b = slice;
 				ctx.submit(RenderTypes.lines(), (pose, buffer) -> {
 					var callback = pose.transform(buffer).withColor(0xFFFF0000).withLineWidth(ctx.lineWidth());
 					callback.frameLines(
@@ -296,26 +309,10 @@ public record GhostStructure(
 				});
 			}
 
-			var renderer = structure.renderer;
-			renderer.origin = structure.blockPos;
-			renderer.submit(ctx, structure.structure.rendererData());
+			renderer.origin = blockPos;
+			renderer.submit(ctx, data);
 			ctx.pop();
 		}
-	}
-
-	public StructureRendererData rendererData() {
-		return data.orElse(ghostChunks ? StructureRendererData.DEFAULT_GHOST_CHUNKS : StructureRendererData.DEFAULT);
-	}
-
-	private record VisibleGhostStructure(
-		GhostStructure structure,
-		StructureRenderer renderer,
-		@Nullable AAIBB slice,
-		Vec3 pos,
-		BlockPos blockPos,
-		Vector3fc scale,
-		Vector3fc rotation
-	) {
 	}
 
 	public static class Loader extends JsonCodecReloadListener<GhostStructure> {

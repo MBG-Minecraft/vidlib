@@ -13,6 +13,7 @@ import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.StringUtils;
 import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.vidlib.VidLib;
+import dev.latvian.mods.vidlib.core.api.client.VLLevelRenderState;
 import dev.latvian.mods.vidlib.core.api.client.VLSkyRenderState;
 import dev.latvian.mods.vidlib.feature.atmosphere.SkyboxRenderer;
 import dev.latvian.mods.vidlib.feature.atmosphere.SkyboxTexture;
@@ -29,12 +30,13 @@ import dev.latvian.mods.vidlib.feature.canvas.CanvasRegistryEvent;
 import dev.latvian.mods.vidlib.feature.canvas.DepthOfFieldCanvas;
 import dev.latvian.mods.vidlib.feature.canvas.FocusedChromaticAberrationCanvas;
 import dev.latvian.mods.vidlib.feature.canvas.RippleCanvas;
-import dev.latvian.mods.vidlib.feature.client.VLWorldRenderState;
+import dev.latvian.mods.vidlib.feature.client.VLBuffers;
 import dev.latvian.mods.vidlib.feature.client.VidLibClientOptions;
 import dev.latvian.mods.vidlib.feature.client.VidLibEntityRenderStates;
 import dev.latvian.mods.vidlib.feature.client.VidLibHUD;
 import dev.latvian.mods.vidlib.feature.client.VidLibKeys;
 import dev.latvian.mods.vidlib.feature.clothing.ClothingPresetLoader;
+import dev.latvian.mods.vidlib.feature.decal.DecalCanvas;
 import dev.latvian.mods.vidlib.feature.dynamicresources.DynamicResourceEvent;
 import dev.latvian.mods.vidlib.feature.entity.PlayerProfiles;
 import dev.latvian.mods.vidlib.feature.entity.VLVehicle;
@@ -139,6 +141,7 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
 import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.event.lifecycle.ClientStoppedEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.GameShuttingDownEvent;
@@ -237,6 +240,7 @@ public class VidLibClientEventHandler {
 		event.register(AngledChromaticAberrationCanvas.CANVAS);
 		event.register(RippleCanvas.CANVAS);
 		event.register(DepthOfFieldCanvas.CANVAS);
+		event.register(DecalCanvas.CANVAS);
 	}
 
 	@SubscribeEvent
@@ -361,7 +365,7 @@ public class VidLibClientEventHandler {
 		var probe = event.getCamera().attributeProbe();
 		var delta = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
 
-		var vl = ((VLSkyRenderState) event.getRenderState().skyRenderState).vl$extra();
+		var vl = ((VLSkyRenderState) event.getRenderState().skyRenderState).vl$state();
 
 		vl.sun = probe.getValue(VidLibEnvironmentAttributes.SUN.get(), delta);
 		vl.moon = probe.getValue(VidLibEnvironmentAttributes.MOON.get(), delta);
@@ -398,13 +402,12 @@ public class VidLibClientEventHandler {
 			vl.skyboxChromaKeyRange = skyboxData.chromaKeyRange();
 		}
 
-		VLWorldRenderState.INSTANCE.reset();
-		VLWorldRenderState.INSTANCE.extract(event);
+		((VLLevelRenderState) event.getRenderState()).vl$state().extract(event);
 	}
 
 	@SubscribeEvent
 	public static void submit(SubmitCustomGeometryEvent event) {
-		VLWorldRenderState.INSTANCE.submit(event);
+		((VLLevelRenderState) event.getLevelRenderState()).vl$state().submit(event);
 	}
 
 	@SubscribeEvent
@@ -655,7 +658,12 @@ public class VidLibClientEventHandler {
 
 	@SubscribeEvent
 	public static void flipFrame(FlipFrameEvent event) {
-		SkyboxRenderer.endFrame();
+		VLBuffers.endFrame();
+	}
+
+	@SubscribeEvent
+	public static void clientStopped(ClientStoppedEvent event) {
+		VLBuffers.close();
 	}
 
 	@SubscribeEvent

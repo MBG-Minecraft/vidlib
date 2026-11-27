@@ -1,12 +1,17 @@
 package dev.latvian.mods.vidlib.core.mixin.client;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import dev.latvian.mods.vidlib.feature.auto.AutoInit;
+import dev.latvian.mods.vidlib.feature.auto.ClientAutoRegister;
 import dev.latvian.mods.vidlib.feature.auto.TextureReloadParams;
+import dev.latvian.mods.vidlib.feature.client.DynamicTextureHolder;
 import dev.latvian.mods.vidlib.feature.visual.EphemeralTexture;
+import dev.latvian.mods.vidlib.util.client.ReloadableDynamicTexture;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,8 +33,15 @@ public abstract class TextureManagerMixin {
 	@Final
 	public Map<Identifier, AbstractTexture> byPath;
 
+	@Shadow
+	public abstract void register(Identifier location, AbstractTexture texture);
+
+	@Shadow
+	@Final
+	private ResourceManager resourceManager;
+
 	@Inject(method = "reload", at = @At("HEAD"))
-	public void vl$reload(PreparableReloadListener.SharedState sharedState, Executor backgroundExecutor, PreparableReloadListener.PreparationBarrier barrier, Executor gameExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+	public void vl$reloadPre(PreparableReloadListener.SharedState sharedState, Executor backgroundExecutor, PreparableReloadListener.PreparationBarrier barrier, Executor gameExecutor, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
 		var list = new ArrayList<Map.Entry<Identifier, AbstractTexture>>();
 
 		for (var entry : byPath.entrySet()) {
@@ -43,5 +55,27 @@ public abstract class TextureManagerMixin {
 		}
 
 		AutoInit.Type.TEXTURES_RELOADED.invoke(new TextureReloadParams((TextureManager) (Object) this, backgroundExecutor, gameExecutor));
+	}
+
+	@ModifyReturnValue(method = "reload", at = @At("RETURN"))
+	private CompletableFuture<Void> vl$reloadPost(CompletableFuture<Void> original) {
+		return original.thenRun(() -> {
+			var reloadable = new ArrayList<ReloadableDynamicTexture>();
+
+			for (var holder : ClientAutoRegister.SCANNED.get()) {
+				if (holder.value() instanceof DynamicTextureHolder<?> h) {
+					h.texture().forget();
+					register(h.asset().texturePath(), h.texture().get());
+
+					if (h.texture().get() instanceof ReloadableDynamicTexture t) {
+						reloadable.add(t);
+					}
+				}
+			}
+
+			for (var t : reloadable) {
+				t.load(resourceManager, (TextureManager) (Object) this);
+			}
+		});
 	}
 }

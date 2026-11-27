@@ -25,7 +25,7 @@ public class TextPropRenderState extends PropRenderState<TextProp> {
 
 	@Override
 	public void extract(TextProp prop, VidLibExtractContext ctx) {
-		float delta = ctx.delta();
+		float delta = ctx.worldPartialTick();
 
 		width = (float) prop.width;
 		float height = (float) prop.height;

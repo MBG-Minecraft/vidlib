@@ -35,10 +35,12 @@ public class StructurePropRenderState extends PropRenderState<StructureProp> {
 		renderer = getRenderer(prop.structure);
 		data = renderer == null ? null : prop.createRendererData();
 
+		float delta = ctx.worldPartialTick();
+
 		rotate.identity();
-		rotate.rotateY((float) Math.toRadians(-prop.getYaw(ctx.delta())));
-		rotate.rotateX((float) Math.toRadians(prop.getPitch(ctx.delta())));
-		rotate.rotateZ((float) Math.toRadians(prop.getRoll(ctx.delta())));
+		rotate.rotateY((float) Math.toRadians(-prop.getYaw(delta)));
+		rotate.rotateX((float) Math.toRadians(prop.getPitch(delta)));
+		rotate.rotateZ((float) Math.toRadians(prop.getRoll(delta)));
 
 		if (renderer != null) {
 			renderer.origin = BlockPos.containing(x, y, z);

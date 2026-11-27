@@ -132,6 +132,8 @@ public class ClientProps extends Props<ClientLevel> {
 			return List.of();
 		}
 
+		float delta = ctx.worldPartialTick();
+
 		List<PropRenderState<?>> states = List.of();
 		List<PropRenderState<?>> sortedStates = List.of();
 
@@ -173,7 +175,7 @@ public class ClientProps extends Props<ClientLevel> {
 
 				if (renderDebug) {
 					boolean selected = !HIDE_OUTLINE.get() && OPEN_PROPS.contains(prop.id);
-					prop.debugVisuals(ctx.vl().visuals, state.x, state.y, state.z, ctx.delta(), selected);
+					prop.debugVisuals(ctx.visuals(), state.x, state.y, state.z, delta, selected);
 				}
 			}
 		}

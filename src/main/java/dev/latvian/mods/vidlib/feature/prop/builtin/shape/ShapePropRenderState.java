@@ -30,14 +30,16 @@ public class ShapePropRenderState extends PropRenderState<ShapeProp> {
 			return;
 		}
 
-		var progress = prop.getRelativeTick(ctx.delta(), 1F);
+		float delta = ctx.worldPartialTick();
+
+		var progress = prop.getRelativeTick(delta, 1F);
 		shape = prop.shape.value();
 		width = (float) prop.width;
 		height = (float) prop.height;
 
 		rotate.identity();
-		rotate.rotateY((float) Math.toRadians(prop.getYaw(ctx.delta())));
-		rotate.rotateX((float) Math.toRadians(prop.getPitch(ctx.delta())));
+		rotate.rotateY((float) Math.toRadians(prop.getYaw(delta)));
+		rotate.rotateX((float) Math.toRadians(prop.getPitch(delta)));
 
 		color = prop.color.value().get(progress).argb();
 		outlineColor = prop.canInteract && ctx.mc().hitResult instanceof PropHitResult hit && hit.prop == prop ? 0xFFFFFFFF : prop.outlineColor.value().get(progress).argb();

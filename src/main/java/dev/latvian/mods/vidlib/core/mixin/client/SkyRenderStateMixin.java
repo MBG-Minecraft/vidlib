@@ -9,10 +9,10 @@ import org.spongepowered.asm.mixin.Unique;
 @Mixin(SkyRenderState.class)
 public class SkyRenderStateMixin implements VLSkyRenderState {
 	@Unique
-	private final VLExtraSkyRenderState vl$extra = new VLExtraSkyRenderState();
+	private final VLExtraSkyRenderState vl$state = new VLExtraSkyRenderState();
 
 	@Override
-	public VLExtraSkyRenderState vl$extra() {
-		return vl$extra;
+	public VLExtraSkyRenderState vl$state() {
+		return vl$state;
 	}
 }

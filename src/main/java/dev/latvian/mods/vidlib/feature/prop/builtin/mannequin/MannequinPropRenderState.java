@@ -45,7 +45,7 @@ public class MannequinPropRenderState extends PropRenderState<MannequinProp> {
 	@Override
 	public void extract(MannequinProp p, VidLibExtractContext ctx) {
 		var mc = ctx.mc();
-		float delta = ctx.delta();
+		float delta = ctx.worldPartialTick();
 		float tick = p.getTick(delta);
 
 		var profile = PlayerProfiles.get(p.profile.id());

@@ -14,8 +14,8 @@ public class DecalPropRenderState extends PropRenderState<DecalProp> {
 
 		var decal = new Decal(prop.decal);
 		decal.parent = null;
-		var pos = prop.getPos(ctx.delta());
+		var pos = prop.getPos(ctx.worldPartialTick());
 		decal.position = new Vector3d(pos.x, pos.y, pos.z);
-		ctx.vl().addVisual(decal);
+		ctx.visuals().add(decal);
 	}
 }

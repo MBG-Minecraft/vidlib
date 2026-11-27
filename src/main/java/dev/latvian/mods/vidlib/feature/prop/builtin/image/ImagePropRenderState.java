@@ -19,7 +19,7 @@ public class ImagePropRenderState extends PropRenderState<ImageProp> {
 
 	@Override
 	public void extract(ImageProp prop, VidLibExtractContext ctx) {
-		float delta = ctx.delta();
+		float delta = ctx.worldPartialTick();
 
 		width = (float) prop.width;
 		float height = (float) prop.height;

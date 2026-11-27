@@ -26,11 +26,6 @@ public abstract class SkyRendererMixin {
 	@Unique
 	private SkyRenderState vl$skyState;
 
-	@Inject(method = "<init>", at = @At("RETURN"))
-	private void vl$init(CallbackInfo ci) {
-		SkyboxRenderer.open();
-	}
-
 	@ModifyReturnValue(method = "shouldRenderDarkDisc", at = @At("RETURN"))
 	private boolean vl$shouldRenderDarkDisc(boolean original, @Local(argsOnly = true, name = "deltaPartialTick") float deltaPartialTick, @Local(argsOnly = true, name = "level") ClientLevel level) {
 		return ClientGameEngine.INSTANCE.shouldRenderDarkDisc(deltaPartialTick, level, original);
@@ -51,19 +46,19 @@ public abstract class SkyRendererMixin {
 		@At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;rotate(Lcom/mojang/math/Axis;F)V", ordinal = 1)
 	})
 	private void vl$renderSunMoonAndStars(RenderPass renderPass, PoseStack ms, float sunAngle, float moonAngle, float starAngle, MoonPhase moonPhase, float rainBrightness, float starBrightness, CallbackInfo ci) {
-		ms.rotate(((VLSkyRenderState) vl$skyState).vl$extra().celestialTilt);
+		ms.rotate(((VLSkyRenderState) vl$skyState).vl$state().celestialTilt);
 	}
 
 	@WrapOperation(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderSun(Lcom/mojang/renderpearl/api/commands/RenderPass;FLcom/mojang/blaze3d/vertex/PoseStack;)V"))
 	private void vl$renderSun(SkyRenderer instance, RenderPass renderPass, float rainBrightness, PoseStack poseStack, Operation<Void> original) {
-		if (((VLSkyRenderState) vl$skyState).vl$extra().sun) {
+		if (((VLSkyRenderState) vl$skyState).vl$state().sun) {
 			original.call(instance, renderPass, rainBrightness, poseStack);
 		}
 	}
 
 	@WrapOperation(method = "renderSunMoonAndStars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderMoon(Lcom/mojang/renderpearl/api/commands/RenderPass;Lnet/minecraft/world/level/MoonPhase;FLcom/mojang/blaze3d/vertex/PoseStack;)V"))
 	private void vl$renderMoon(SkyRenderer instance, RenderPass renderPass, MoonPhase moonPhase, float rainBrightness, PoseStack poseStack, Operation<Void> original) {
-		if (((VLSkyRenderState) vl$skyState).vl$extra().moon) {
+		if (((VLSkyRenderState) vl$skyState).vl$state().moon) {
 			original.call(instance, renderPass, moonPhase, rainBrightness, poseStack);
 		}
 	}
@@ -73,10 +68,5 @@ public abstract class SkyRendererMixin {
 		if (SkyboxRenderer.render(renderPass, vl$skyState)) {
 			ci.cancel();
 		}
-	}
-
-	@Inject(method = "close", at = @At("RETURN"))
-	private void vl$close(CallbackInfo ci) {
-		SkyboxRenderer.close();
 	}
 }

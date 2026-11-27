@@ -26,7 +26,7 @@ public class PropRenderState<P extends Prop> extends BaseRenderState implements 
 
 	public final void extractCore(P prop, VidLibExtractContext ctx) {
 		invisible = false;
-		double delta = ctx.delta();
+		double delta = ctx.worldPartialTick();
 		x = Mth.lerp(delta, prop.prevPos.x, prop.pos.x);
 		y = Mth.lerp(delta, prop.prevPos.y, prop.pos.y);
 		z = Mth.lerp(delta, prop.prevPos.z, prop.pos.z);

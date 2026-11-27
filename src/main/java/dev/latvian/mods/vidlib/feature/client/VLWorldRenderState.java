@@ -4,16 +4,17 @@ import dev.latvian.mods.klib.block.BlockUtils;
 import dev.latvian.mods.klib.icon.Icon;
 import dev.latvian.mods.klib.icon.renderer.IconRenderer;
 import dev.latvian.mods.klib.icon.renderer.IconWorldExactContext;
-import dev.latvian.mods.klib.knumber.KNumberContext;
 import dev.latvian.mods.klib.math.AAIBB;
 import dev.latvian.mods.klib.render.SubmitContext;
 import dev.latvian.mods.klib.render.Submittable;
 import dev.latvian.mods.klib.util.Empty;
-import dev.latvian.mods.klib.visual.Visual;
 import dev.latvian.mods.klib.visual.renderer.VisualExactContext;
 import dev.latvian.mods.klib.visual.renderer.VisualRenderer;
 import dev.latvian.mods.vidlib.feature.data.InternalGlobalData;
 import dev.latvian.mods.vidlib.feature.decal.Decal;
+import dev.latvian.mods.vidlib.feature.decal.DecalCanvas;
+import dev.latvian.mods.vidlib.feature.decal.DecalTexture;
+import dev.latvian.mods.vidlib.feature.decal.DecalType;
 import dev.latvian.mods.vidlib.feature.environment.FluidPlaneRenderState;
 import dev.latvian.mods.vidlib.feature.item.VidLibTool;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
@@ -24,33 +25,19 @@ import dev.latvian.mods.vidlib.feature.session.ClientSessionData;
 import dev.latvian.mods.vidlib.feature.structure.GhostStructure;
 import dev.latvian.mods.vidlib.feature.visual.Visuals;
 import dev.latvian.mods.vidlib.feature.zone.ZoneRenderState;
+import dev.latvian.mods.vidlib.integration.iris.IrisIntegration;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import org.joml.Quaternionf;
 import org.joml.Vector2d;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class VLWorldRenderState {
-	public static final VLWorldRenderState INSTANCE = new VLWorldRenderState();
-
-	public float worldDelta;
-	public float playerDelta;
-	public Frustum frustum;
-	public Vec3 cameraPos;
-	public Quaternionf cameraRotation;
-	public long gameTime;
-	public KNumberContext numberContext;
-	public VisualExactContext visualExactContext;
-	public Visuals visuals = new Visuals();
-
 	public final List<Submittable> submittable = new ArrayList<>();
 	public final List<Decal> decals = new ArrayList<>();
 	public final List<PropRenderState<?>> props = new ArrayList<>();
@@ -58,17 +45,14 @@ public class VLWorldRenderState {
 	public FluidPlaneRenderState fluidPlane = null;
 	public final List<PhysicsParticleManager> physicsParticles = new ArrayList<>();
 	public final List<ZoneRenderState> zones = new ArrayList<>();
+	public final Visuals visuals = new Visuals();
+
+	public VLWorldRenderState() {
+		VLBuffers.build();
+	}
 
 	public void add(Submittable s) {
 		submittable.add(s);
-	}
-
-	public void addVisual(Visual visual) {
-		var state = VisualRenderer.extract(visual, visualExactContext);
-
-		if (state != null) {
-			add(state);
-		}
 	}
 
 	public void reset() {
@@ -84,6 +68,7 @@ public class VLWorldRenderState {
 
 		physicsParticles.clear();
 		zones.clear();
+		visuals.clear();
 	}
 
 	public void extract(ExtractLevelRenderStateEvent event) {
@@ -96,26 +81,33 @@ public class VLWorldRenderState {
 		var session = ClientSessionData.of(mc);
 		var levelSession = ClientLevelSessionData.of(mc.level);
 
-		worldDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-		playerDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(!mc.level.tickRateManager().isEntityFrozen(mc.player));
-		frustum = event.getRenderState().cameraRenderState.cullFrustum;
-		cameraPos = event.getRenderState().cameraRenderState.pos;
-		cameraRotation = event.getCamera().rotation();
-		gameTime = mc.level.getGameTime();
-		numberContext = levelSession.createGlobalContext();
+		var worldDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		var playerDelta = event.getDeltaTracker().getGameTimeDeltaPartialTick(!mc.level.tickRateManager().isEntityFrozen(mc.player));
+		var frustum = event.getRenderState().cameraRenderState.cullFrustum;
+		var cameraPos = event.getRenderState().cameraRenderState.pos;
+		var cameraRotation = event.getCamera().rotation();
+		var gameTime = mc.level.getGameTime();
+		var numberContext = levelSession.createGlobalContext();
 		numberContext.progress = 1D;
 
-		var visualExactContext = new VisualExactContext(
+		var ctx = new VidLibExtractContext(
 			mc,
-			cameraPos,
+			visuals,
 			worldDelta,
+			playerDelta,
+			event.getRenderState().cameraRenderState.cullFrustum,
+			event.getRenderState().cameraRenderState.pos,
+			gameTime,
 			numberContext
 		);
 
-		var ctx = new VidLibExtractContext(mc, this, event);
-		var tempVisuals = new Visuals();
-
 		levelSession.props.extractAll(ctx);
+
+		for (var decal : session.debugDecals) {
+			if (decal.type != DecalType.NONE) {
+				decals.add(decal);
+			}
+		}
 
 		if (VidLibClientOptions.getShowAnchor()) {
 			var anchored = levelSession.getAnchor().volumes();
@@ -200,15 +192,7 @@ public class VLWorldRenderState {
 		var tool = VidLibTool.of(mc.player);
 
 		if (tool != null) {
-			tool.getSecond().visuals(mc.player, tool.getFirst(), tempVisuals, mc.getDeltaTracker().getGameTimeDeltaPartialTick(true));
-
-			for (var visual : tempVisuals.visuals()) {
-				var state = VisualRenderer.extract(visual, visualExactContext);
-
-				if (state != null) {
-					add(state);
-				}
-			}
+			tool.getSecond().visuals(mc.player, tool.getFirst(), visuals, ctx.screenPartialTick());
 		}
 
 		if (VidLibClientOptions.getShowZones()) {
@@ -224,9 +208,31 @@ public class VLWorldRenderState {
 			}
 		}
 
-		GhostStructure.preRender(this);
+		GhostStructure.extract(this, ctx);
 
 		NeoForge.EVENT_BUS.post(new VidLibWorldRenderEvent(ctx));
+
+		visuals.copyFrom(Visuals.TICK);
+
+		if (visuals.hasAny()) {
+			var visualExactContext = new VisualExactContext(
+				mc,
+				cameraPos,
+				worldDelta,
+				numberContext
+			);
+
+			for (var visual : visuals.visuals()) {
+				var state = VisualRenderer.extract(visual, visualExactContext);
+
+				if (state != null) {
+					add(state);
+				}
+			}
+		}
+
+		DecalCanvas.count = DecalTexture.HOLDER.texture().get().update(decals, cameraPos);
+		DecalCanvas.irisCompat = IrisIntegration.INSTANCE.isShaderPackInUse() ? 1 : 0;
 	}
 
 	public void submit(SubmitCustomGeometryEvent event) {
@@ -286,14 +292,6 @@ public class VLWorldRenderState {
 			// FIXME FluidPlaneRenderer.render(frame, session.fluidPlane);
 		}
 
-		/* FIXME
-		if (!decals.isEmpty()) {
-			var texture = DecalTexture.HOLDER.texture().get();
-			// uCount = texture.update(decals, mc.gameRenderer.mainCamera().position());
-			decals.clear();
-		}
-		 */
-
 		if (!physicsParticles.isEmpty()) {
 			for (var manager : physicsParticles) {
 				manager.submit(ctx);
@@ -305,93 +303,5 @@ public class VLWorldRenderState {
 				state.submit(ctx);
 			}
 		}
-
-		GhostStructure.submit(ctx);
 	}
-
-	/*
-	public static void renderWorld(FrameInfo frame) {
-		var mc = frame.mc();
-		var event = frame.stage();
-
-		if (mc.level == null || mc.player == null || event == null) {
-			return;
-		}
-
-		FrameInfo.CURRENT = frame;
-		var session = frame.session();
-
-		if (frame.layer() == TerrainRenderLayer.PARTICLE) {
-			if (VidLibClientOptions.getShowZones()) {
-				ZoneRenderer.renderAll(frame);
-			} else {
-				ZoneRenderer.renderSolid(frame);
-			}
-
-			if (!session.serverDataMap.get(InternalServerData.HIDE_PLUMBOBS)) {
-				PlumbobRenderer.render(mc, frame);
-			}
-
-			var tool = VidLibTool.of(mc.player);
-
-			if (tool != null) {
-				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, frame.screenDelta());
-				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().position(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.TEMP, 1F);
-				Visuals.TEMP.clear();
-			}
-
-			if (mc.debugEntries.isCurrentlyEnabled(net.minecraft.client.gui.components.debug.DebugScreenEntries.ENTITY_HITBOXES) || !ClientProps.OPEN_PROPS.isEmpty()) {
-				mc.level.getProps().renderDebug(frame);
-				ClientProps.OPEN_PROPS.clear();
-			}
-
-			Visuals.FRAME_DEBUG.copyFrom(Visuals.TICK_DEBUG);
-
-			if (Visuals.FRAME_DEBUG.hasAny()) {
-				MiscClientUtils.renderVisuals(frame.poseStack(), frame.camera().position(), frame.buffers(), BufferSupplier.DEBUG_NO_DEPTH, Visuals.FRAME_DEBUG, 1F);
-				Visuals.FRAME_DEBUG.clear();
-			}
-		}
-
-		if (frame.layer() != null) {
-			GhostStructure.render(frame);
-
-			var tool = VidLibTool.of(mc.player);
-			if (tool != null) {
-				tool.getSecond().visuals(mc.player, tool.getFirst(), Visuals.TEMP, frame.screenDelta());
-
-				for (var cube : Visuals.TEMP.texturedCubes()) {
-					TexturedCubeRenderer.render(frame, LightUV.FULLBRIGHT, cube, Color.WHITE);
-				}
-
-				Visuals.TEMP.clear();
-			}
-
-			if (!VidLibClientOptions.getShowZones()) {
-				ZoneRenderer.renderVisible(frame);
-			}
-
-			PhysicsParticleManager.render(frame);
-		}
-	}
-	 */
-
-	/*
-	private static int uCount = 0;
-
-	@ClientAutoRegister
-	public static final Canvas CANVAS = Canvas.createExternal(ID.vidlib("decals"), builder -> {
-		builder.setDrawSetupCallback(DecalRenderer::setup);
-		builder.addUniform(CanvasUniform.int1("Count", () -> uCount));
-		builder.addUniform(CanvasUniform.mat4("InverseViewProjectionMat", () -> ClientMatrices.INVERSE_WORLD));
-		builder.addUniform(CanvasUniform.int1("NoSceneSample", () -> IrisIntegration.INSTANCE.isShaderPackInUse() ? 1 : 0));
-	});
-
-	if (!TEMP_LIST.isEmpty()) {
-			var texture = DecalTexture.HOLDER.texture().get();
-			uCount = texture.update(TEMP_LIST, mc.gameRenderer.mainCamera().position());
-			// CANVAS.markActive();
-			TEMP_LIST.clear();
-		}
-	 */
 }

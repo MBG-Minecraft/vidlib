@@ -25,7 +25,7 @@ public class DecalPanel extends Panel {
 
 		var decals = graphics.session.debugDecals;
 
-		ImGui.text("Decals: %,d".formatted(decals.size()));
+		ImGui.text("Decals: %,d / %,d".formatted(DecalCanvas.count, DecalTexture.maxDecals));
 		ImGui.pushItemWidth(-1F);
 
 		for (int i = 0; i < decals.size(); i++) {
