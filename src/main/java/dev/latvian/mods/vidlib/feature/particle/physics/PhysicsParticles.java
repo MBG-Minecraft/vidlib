@@ -73,7 +73,7 @@ public class PhysicsParticles {
 
 		if (count > 0) {
 			var tintSource = blockColors.getTintSource(state, 0);
-			var tint = tintSource == null ? -1 : tintSource.colorAsTerrainParticle(state, level, at);
+			var tint = tintSource == null ? -1 : tintSource.colorInWorld(state, level, at);
 			var identity = new Matrix4f();
 			identity.rotateY((float) Math.toRadians(data.direction()));
 			identity.rotateX((float) Math.toRadians(-data.tilt()));
@@ -117,13 +117,9 @@ public class PhysicsParticles {
 		p.scaleMul = split.scale * data.scale().sample(random);
 		p.rotationSpeed = (KMath.lerp(random.nextFloat(), 0.25F, 0.4F)) / p.scaleMul * (float) Math.atan2(spread, power);
 		p.tint = tint;
-		p.red = ARGB.red(tint);
-		p.green = ARGB.green(tint);
-		p.blue = ARGB.blue(tint);
-		p.alpha = ARGB.alpha(tint);
 
-		if (p.alpha < 0.1F) {
-			p.alpha = 255;
+		if (ARGB.alpha(p.tint) < 25) {
+			return;
 		}
 
 		p.velocityMultiplier = data.inertia();

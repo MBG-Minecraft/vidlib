@@ -224,12 +224,13 @@ public class PhysicsParticleManager {
 			}
 
 			state.shape = p.shape;
-			state.red = p.red;
-			state.green = p.green;
-			state.blue = p.blue;
-			state.alpha = p.alpha;
-			state.lightU = light & 0xFFFF;
-			state.lightV = (light >> 16) & 0xFFFF;
+			state.baseUV = VidLibBlockStateClientProperties.of(state.shape.state).getBaseUV();
+			state.tint = p.tint;
+
+			if (light > 0) {
+				state.light = light;
+			}
+
 			rendered++;
 
 			states.add(state);
@@ -255,16 +256,12 @@ public class PhysicsParticleManager {
 				}
 
 				state.shape.render(
-					ctx.mc(),
 					buffer,
 					pose,
+					state.baseUV,
 					tempNormal,
-					state.red,
-					state.green,
-					state.blue,
-					state.alpha,
-					state.lightU,
-					state.lightV
+					state.tint,
+					state.light
 				);
 
 				pose.set(original);

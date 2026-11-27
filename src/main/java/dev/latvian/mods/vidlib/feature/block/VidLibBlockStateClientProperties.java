@@ -1,13 +1,19 @@
 package dev.latvian.mods.vidlib.feature.block;
 
 import dev.latvian.mods.klib.math.SplitBox;
+import dev.latvian.mods.klib.texture.UV;
+import dev.latvian.mods.klib.util.ID;
 import dev.latvian.mods.klib.util.WithCache;
 import dev.latvian.mods.vidlib.core.VLExtensions;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleManager;
 import dev.latvian.mods.vidlib.feature.particle.physics.PhysicsParticleShape;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.AtlasIds;
+import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.function.Function;
@@ -31,9 +37,10 @@ public class VidLibBlockStateClientProperties implements WithCache {
 		}
 	}
 
+	public final BlockState state;
 	private Int2ObjectMap<PhysicsParticleShape> blockParticleShapes;
 	public PhysicsParticleManager manager;
-	public final BlockState state;
+	private UV baseUV;
 
 	public VidLibBlockStateClientProperties(BlockState state) {
 		this.state = state;
@@ -49,6 +56,7 @@ public class VidLibBlockStateClientProperties implements WithCache {
 
 		blockParticleShapes = null;
 		manager = null;
+		baseUV = null;
 	}
 
 	public PhysicsParticleShape getPhysicsBlockParticleShape(SplitBox box) {
@@ -72,5 +80,21 @@ public class VidLibBlockStateClientProperties implements WithCache {
 		}
 
 		return manager;
+	}
+
+	public UV getBaseUV() {
+		if (baseUV == null) {
+			TextureAtlasSprite sprite;
+
+			if (state.getBlock() instanceof GrassBlock) {
+				sprite = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS).getSprite(ID.vidlib("block/grass"));
+			} else {
+				sprite = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(state).particleMaterial().sprite();
+			}
+
+			return new UV(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
+		}
+
+		return baseUV;
 	}
 }

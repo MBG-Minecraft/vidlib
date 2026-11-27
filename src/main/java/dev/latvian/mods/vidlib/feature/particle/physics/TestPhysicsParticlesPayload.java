@@ -1,5 +1,6 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
+import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.auto.AutoPacket;
 import dev.latvian.mods.vidlib.feature.net.Context;
 import dev.latvian.mods.vidlib.feature.net.SimplePayload;
@@ -17,7 +18,7 @@ public record TestPhysicsParticlesPayload(PhysicsParticlesDisplayData data) impl
 	@Override
 	public void handle(Context ctx) {
 		if (ctx.isAdmin()) {
-			ctx.features().physicsParticles(data, ctx.level().getGameTime());
+			VLFeatures.of(ctx.level()).physicsParticles(data, ctx.level().getGameTime());
 		}
 	}
 }

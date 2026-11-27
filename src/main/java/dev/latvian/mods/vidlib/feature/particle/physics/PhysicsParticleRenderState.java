@@ -1,5 +1,7 @@
 package dev.latvian.mods.vidlib.feature.particle.physics;
 
+import dev.latvian.mods.klib.texture.UV;
+import net.minecraft.util.LightCoordsUtil;
 import org.joml.Quaternionf;
 
 public class PhysicsParticleRenderState {
@@ -9,7 +11,7 @@ public class PhysicsParticleRenderState {
 	public float scale;
 	public Quaternionf rotation = new Quaternionf();
 	public PhysicsParticleShape shape;
-	public int red, green, blue, alpha;
-	public int lightU;
-	public int lightV;
+	public UV baseUV;
+	public int tint;
+	public int light = LightCoordsUtil.FULL_BRIGHT;
 }

@@ -3,13 +3,7 @@ package dev.latvian.mods.vidlib.feature.particle.physics;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.latvian.mods.klib.math.SplitBox;
-import dev.latvian.mods.klib.texture.OverlayUV;
 import dev.latvian.mods.klib.texture.UV;
-import dev.latvian.mods.klib.util.ID;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -38,28 +32,14 @@ public class PhysicsParticleShape {
 			this(pos.x(), pos.y(), pos.z(), u, v);
 		}
 
-		public void addVertex(VertexConsumer consumer, Matrix4f m, float nx, float ny, float nz, int r, int g, int b, int a, int lightU, int lightV) {
+		public void addVertex(VertexConsumer consumer, Matrix4f m, float nx, float ny, float nz, int color, int light) {
 			consumer.addVertex(m, x, y, z)
-				.setColor(r, g, b, a)
+				.setColor(color)
 				.setUv(u, v)
-				.setUv1(OverlayUV.NORMAL.u(), OverlayUV.NORMAL.v())
-				.setUv2(lightU, lightV)
+				.setOverlay(0xA0000)
+				.setLight(light)
 				.setNormal(nx, ny, nz);
 		}
-	}
-
-	private static final Identifier GRASS = ID.vidlib("block/grass");
-
-	private static UV computeBaseUV(Minecraft mc, BlockState state) {
-		TextureAtlasSprite sprite;
-
-		if (state.getBlock() instanceof GrassBlock) {
-			sprite = mc.getAtlasManager().getAtlasOrThrow(net.minecraft.data.AtlasIds.BLOCKS).getSprite(GRASS);
-		} else {
-			sprite = mc.getModelManager().getBlockStateModelSet().get(state).particleMaterial().sprite();
-		}
-
-		return new UV(sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1());
 	}
 
 	private static UV multiplyUV(UV a, UV b) {
@@ -70,8 +50,8 @@ public class PhysicsParticleShape {
 		return new UV(u0, v0, u1, v1);
 	}
 
-	private final BlockState state;
-	private final SplitBox box;
+	public final BlockState state;
+	public final SplitBox box;
 	private PhysicsParticleFace[] faces;
 
 	public PhysicsParticleShape(BlockState state, SplitBox box) {
@@ -79,13 +59,11 @@ public class PhysicsParticleShape {
 		this.box = box;
 	}
 
-	public void render(Minecraft mc, VertexConsumer consumer, PoseStack.Pose pose, Vector3f tempNormal, int r, int g, int b, int a, int lightU, int lightV) {
+	public void render(VertexConsumer consumer, PoseStack.Pose pose, UV baseUv, Vector3f tempNormal, int color, int light) {
 		var data = faces;
 
 		if (data == null) {
 			data = new PhysicsParticleFace[6];
-
-			var baseUv = computeBaseUV(mc, state);
 
 			for (int face = 0; face < 6; face++) {
 				var faceShape = box.shape().face(face);
@@ -118,10 +96,10 @@ public class PhysicsParticleShape {
 			float nx = tempNormal.x;
 			float ny = tempNormal.y;
 			float nz = tempNormal.z;
-			face.a.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
-			face.b.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
-			face.c.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
-			face.d.addVertex(consumer, m, nx, ny, nz, r, g, b, a, lightU, lightV);
+			face.a.addVertex(consumer, m, nx, ny, nz, color, light);
+			face.b.addVertex(consumer, m, nx, ny, nz, color, light);
+			face.c.addVertex(consumer, m, nx, ny, nz, color, light);
+			face.d.addVertex(consumer, m, nx, ny, nz, color, light);
 		}
 	}
 

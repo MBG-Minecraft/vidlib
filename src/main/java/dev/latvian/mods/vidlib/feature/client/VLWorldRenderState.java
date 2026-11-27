@@ -203,7 +203,7 @@ public class VLWorldRenderState {
 			}
 		}
 
-		physicsParticles = PhysicsParticleManager.extractAll(mc, frustum, cameraPos, 0F);
+		physicsParticles = PhysicsParticleManager.extractAll(mc, frustum, cameraPos, worldDelta);
 
 		var tool = VidLibTool.of(mc.player);
 
