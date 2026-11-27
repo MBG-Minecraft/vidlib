@@ -74,6 +74,15 @@ public class PhysicsParticles {
 		if (count > 0) {
 			var tintSource = blockColors.getTintSource(state, 0);
 			var tint = tintSource == null ? -1 : tintSource.colorInWorld(state, level, at);
+
+			if (tint == -1 && tintSource != null) {
+				tint = tintSource.colorAsTerrainParticle(state, level, at);
+			}
+
+			if (ARGB.alpha(tint) < 25) {
+				return;
+			}
+
 			var identity = new Matrix4f();
 			identity.rotateY((float) Math.toRadians(data.direction()));
 			identity.rotateX((float) Math.toRadians(-data.tilt()));
@@ -86,6 +95,10 @@ public class PhysicsParticles {
 	}
 
 	public void spawnOne(Matrix4f identity, Matrix4f matrix, VidLibBlockStateClientProperties clientProperties, PhysicsParticleManager manager, Split split, int tint) {
+		if (ARGB.alpha(tint) < 25) {
+			return;
+		}
+
 		var p = new PhysicsParticle();
 		p.manager = manager;
 		p.random = new XoroshiroRandomSource(random.nextLong());
@@ -117,11 +130,6 @@ public class PhysicsParticles {
 		p.scaleMul = split.scale * data.scale().sample(random);
 		p.rotationSpeed = (KMath.lerp(random.nextFloat(), 0.25F, 0.4F)) / p.scaleMul * (float) Math.atan2(spread, power);
 		p.tint = tint;
-
-		if (ARGB.alpha(p.tint) < 25) {
-			return;
-		}
-
 		p.velocityMultiplier = data.inertia();
 		p.gravityStrength = data.gravity();
 		p.spin = p.prevSpin = random.nextFloat() * (float) (Math.PI * 2D);

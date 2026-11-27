@@ -14,9 +14,9 @@ import it.unimi.dsi.fastutil.longs.Long2IntFunction;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.debug.DebugScreenDisplayer;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.LightCoordsUtil;
@@ -38,9 +38,9 @@ import java.util.List;
 public class PhysicsParticleManager {
 	public static final Identifier GROUP_TOTAL = ID.vidlib("physics_particles/total");
 
-	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("translucent", "Translucent", RenderTypes.translucentMovingBlock(), true);
-	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("cutout", "Cutout", RenderTypes.cutoutMovingBlock(), false);
-	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("solid", "Solid", RenderTypes.solidMovingBlock(), true);
+	public static final PhysicsParticleManager TRANSLUCENT = new PhysicsParticleManager("translucent", "Translucent", Sheets.translucentBlockItemSheet());
+	public static final PhysicsParticleManager CUTOUT = new PhysicsParticleManager("cutout", "Cutout", Sheets.cutoutBlockItemSheet());
+	public static final PhysicsParticleManager SOLID = new PhysicsParticleManager("solid", "Solid", Sheets.cutoutBlockItemSheet());
 
 	public static final ImBoolean VISIBLE = new ImBoolean(true);
 	public static final double SQRT_2 = Math.sqrt(2);
@@ -145,17 +145,15 @@ public class PhysicsParticleManager {
 	public final List<PhysicsParticle> queue;
 	private final RenderType renderType;
 	public final String displayName;
-	public final boolean mipmaps;
 	public int rendered;
 
-	public PhysicsParticleManager(String id, String displayName, RenderType renderType, boolean mipmaps) {
+	public PhysicsParticleManager(String id, String displayName, RenderType renderType) {
 		this.id = ID.vidlib("physics_particles/" + id);
 		this.particles = new ArrayList<>();
 		this.queue = new ArrayList<>();
 
 		this.displayName = displayName;
 		this.renderType = renderType;
-		this.mipmaps = mipmaps;
 	}
 
 	public void extract(Minecraft mc, FrustumCheck frustum, Vec3 cameraPos, float delta, List<PhysicsParticleRenderState> states) {
