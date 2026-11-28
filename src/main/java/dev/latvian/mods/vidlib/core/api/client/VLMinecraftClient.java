@@ -105,4 +105,24 @@ public interface VLMinecraftClient {
 		mc.gui.setScreen(new TitleScreen());
 		NeoForge.EVENT_BUS.post(new MainMenuOpenedEvent(mc, false));
 	}
+
+	default void vl$toast(String uniqueId, long displayTime, Component title, Component description) {
+		SystemToast.SystemToastId id;
+
+		if (uniqueId.isEmpty()) {
+			id = new SystemToast.SystemToastId(displayTime);
+		} else {
+			try {
+				id = VLMinecraftClient.SYSTEM_TOAST_IDS.get(uniqueId, () -> new SystemToast.SystemToastId(displayTime));
+			} catch (Exception e) {
+				id = new SystemToast.SystemToastId(displayTime);
+			}
+		}
+
+		SystemToast.addOrUpdate(vl$self().gui.toastManager(), id, title, description);
+	}
+
+	default void vl$toast(Component title, Component description) {
+		vl$toast("", 5000L, title, description);
+	}
 }

@@ -16,7 +16,6 @@ import dev.latvian.mods.replay.api.ReplayAPI;
 import dev.latvian.mods.replay.api.ReplayMarkerData;
 import dev.latvian.mods.vidlib.VidLib;
 import dev.latvian.mods.vidlib.VidLibPaths;
-import dev.latvian.mods.vidlib.core.api.client.VLMinecraftClient;
 import dev.latvian.mods.vidlib.feature.VLFeatures;
 import dev.latvian.mods.vidlib.feature.actor.ActorParticleOptions;
 import dev.latvian.mods.vidlib.feature.actor.ActorRecording;
@@ -70,7 +69,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -484,19 +482,7 @@ public class ClientSessionData extends GlobalSessionData implements VLFeatures, 
 
 	@Override
 	public void toast(String uniqueId, long displayTime, Component title, Component description) {
-		SystemToast.SystemToastId id;
-
-		if (uniqueId.isEmpty()) {
-			id = new SystemToast.SystemToastId(displayTime);
-		} else {
-			try {
-				id = VLMinecraftClient.SYSTEM_TOAST_IDS.get(uniqueId, () -> new SystemToast.SystemToastId(displayTime));
-			} catch (Exception e) {
-				id = new SystemToast.SystemToastId(displayTime);
-			}
-		}
-
-		SystemToast.addOrUpdate(mc.gui.toastManager(), id, title, description);
+		mc.vl$toast(uniqueId, displayTime, title, description);
 	}
 
 	@Override

@@ -66,10 +66,6 @@ public interface VLFeatures {
 	default void updateInput(Level level, UUID player, PlayerInput input) {
 	}
 
-	default void toast(Component title, Component description) {
-		toast("", 5000L, title, description);
-	}
-
 	default void createNote(Note note) {
 	}
 
@@ -80,6 +76,10 @@ public interface VLFeatures {
 	}
 
 	default void toast(String uniqueId, long displayTime, Component title, Component description) {
+	}
+
+	default void toast(Component title, Component description) {
+		toast("", 5000L, title, description);
 	}
 
 	default void playCutscene(Ref<Cutscene> cutscene, KNumberVariables variables) {
