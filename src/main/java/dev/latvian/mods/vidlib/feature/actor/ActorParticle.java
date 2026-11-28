@@ -141,7 +141,7 @@ public class ActorParticle extends CustomParticle {
 
 			if (replacement != null) {
 				skin = new PlayerSkin(
-					new net.minecraft.core.ClientAsset.ResourceTexture(replacement, replacement),
+					replacement,
 					skin.cape(),
 					skin.elytra(),
 					skin.model(),

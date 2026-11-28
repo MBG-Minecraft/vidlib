@@ -1,8 +1,6 @@
 package dev.latvian.mods.vidlib.feature.platform;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.blaze3d.buffers.Std140Builder;
-import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import dev.latvian.mods.klib.color.Color;
 import dev.latvian.mods.klib.entity.EntityUtils;
 import dev.latvian.mods.klib.icon.Icon;
@@ -60,7 +58,6 @@ import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.client.renderer.item.properties.numeric.CompassAngleState;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.client.renderer.state.level.WorldBorderRenderState;
@@ -74,7 +71,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.attribute.EnvironmentAttributeMap;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
@@ -88,13 +84,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.waypoints.TrackedWaypoint;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -189,7 +183,7 @@ public class ClientGameEngine {
 	}
 
 	@Nullable
-	public ClientAsset overrideCape(Player player) {
+	public ClientAsset.Texture overrideCape(Player player) {
 		return PlayerSessionData.of(player).getCapeOverride();
 	}
 
@@ -198,21 +192,23 @@ public class ClientGameEngine {
 	}
 
 	@Nullable
-	public ClientAsset overrideElytra(Player player) {
+	public ClientAsset.Texture overrideElytra(Player player) {
 		return PlayerSessionData.of(player).getElytraOverride();
 	}
 
 	public PlayerSkin overridePlayerSkin(AbstractClientPlayer player, PlayerSkin original) {
-		Identifier skinTexture = original.body().id();
+		var mc = ((ClientLevel) player.level()).minecraft;
+
+		var skinTexture = original.body();
 		var skinModel = original.model();
-		Identifier capeTexture = original.cape() == null ? null : original.cape().id();
-		Identifier elytraTexture = original.elytra() == null ? null : original.elytra().id();
+		var capeTexture = original.cape() == null ? null : original.cape();
+		var elytraTexture = original.elytra() == null ? null : original.elytra();
 		var override = false;
 
 		var skinOverride = overrideSkin(player);
 
-		if (skinOverride != null && (!skinOverride.asset().id().equals(skinTexture) || skinOverride.slim() != (original.model() == PlayerModelType.SLIM))) {
-			skinTexture = skinOverride.asset().id();
+		if (skinOverride != null && (!skinOverride.asset().equals(skinTexture) || skinOverride.slim() != (original.model() == PlayerModelType.SLIM))) {
+			skinTexture = skinOverride.asset();
 			skinModel = skinOverride.slim() ? PlayerModelType.SLIM : PlayerModelType.WIDE;
 			override = true;
 		}
@@ -225,20 +221,20 @@ public class ClientGameEngine {
 		} else {
 			var capeOverride = overrideCape(player);
 
-			if (capeOverride != null && !capeOverride.id().equals(capeTexture)) {
-				capeTexture = capeOverride.equals(VidLibTextures.MISSING) ? null : capeOverride.id();
+			if (capeOverride != null && !capeOverride.equals(capeTexture)) {
+				capeTexture = capeOverride.equals(VidLibTextures.MISSING) ? null : capeOverride;
 				override = true;
 			}
 		}
 
 		var elytraOverride = overrideElytra(player);
 
-		if (elytraOverride != null && !elytraOverride.id().equals(elytraTexture)) {
-			elytraTexture = elytraOverride.id();
+		if (elytraOverride != null && !elytraOverride.equals(elytraTexture)) {
+			elytraTexture = elytraOverride;
 			override = true;
 		}
 
-		var replacement = ClothedPlayerSkinTexture.replace(Minecraft.getInstance(), skinTexture, skinModel, getClothing(player));
+		var replacement = ClothedPlayerSkinTexture.replace(mc, skinTexture, skinModel, getClothing(player));
 
 		if (replacement != null) {
 			skinTexture = replacement;
@@ -247,106 +243,14 @@ public class ClientGameEngine {
 
 		if (override) {
 			return new PlayerSkin(
-				new ClientAsset.ResourceTexture(skinTexture),
-				capeTexture == null ? null : new ClientAsset.ResourceTexture(capeTexture),
-				elytraTexture == null ? null : new ClientAsset.ResourceTexture(elytraTexture),
+				skinTexture,
+				capeTexture,
+				elytraTexture,
 				skinModel,
-				true
+				false
 			);
 		} else {
 			return original;
-		}
-	}
-
-	public EnvironmentAttributeMap getAtmosphere(Minecraft mc) {
-		return LevelSessionData.of(mc.level).getAtmosphere();
-	}
-
-	public boolean disableFog() {
-		return false;
-	}
-
-	/**
-	 * 26.3 replaced {@code net.minecraft.client.renderer.fog.FogData} with
-	 * {@link FogData} (see {@code net.minecraft.client.renderer.fog.FogRenderer}), which is
-	 * uploaded into the fog UBO instead of being read by the render system directly.
-	 * <p>
-	 * A {@code null} return value still means "no override — use vanilla fog".
-	 */
-	@Nullable
-	public FogData getFog() {
-		return disableFog() ? disabledFog() : null;
-	}
-
-	@Nullable
-	public FogData getFluidFog() {
-		return null;
-	}
-
-	public FogData getShaderFog(FogData original) {
-		var mc = Minecraft.getInstance();
-
-		if (mc.gameRenderer.mainCamera().getFluidInCamera() != FogType.NONE) {
-			var fg = getFluidFog();
-			return fg == null ? original : fg;
-		}
-
-		var fg = getFog();
-
-		if (mc.player != null && (mc.player.hasEffect(MobEffects.DARKNESS) || mc.player.hasEffect(MobEffects.BLINDNESS))) {
-			return original;
-		}
-
-		return fg != null ? fg : original;
-	}
-
-	/**
-	 * The 26.3 equivalent of the old {@code FogParameters.NO_FOG}: every fog distance is pushed
-	 * out to {@code Float.MAX_VALUE} so that no fog is applied at all.
-	 */
-	public static FogData disabledFog() {
-		var fog = new FogData();
-		fog.environmentalStart = Float.MAX_VALUE;
-		fog.environmentalEnd = Float.MAX_VALUE;
-		fog.renderDistanceStart = Float.MAX_VALUE;
-		fog.renderDistanceEnd = Float.MAX_VALUE;
-		fog.skyEnd = Float.MAX_VALUE;
-		fog.cloudEnd = Float.MAX_VALUE;
-		return fog;
-	}
-
-	/**
-	 * Applies a (possibly overridden) {@link FogData} and re-packs the terrain fog UBO slice.
-	 * <p>
-	 * 26.3 uploads fog data to the GPU through {@code FogRenderer.updateBuffer(FogData)} before
-	 * {@code LevelRenderer.render(...)} is entered, so an override has to be written both back into
-	 * the render state (which drives the sky pass and the main-target clear colour) and into the
-	 * already-uploaded {@link GpuBufferSlice}.
-	 */
-	public static void applyFog(FogData fog, FogData renderStateFog, @Nullable GpuBufferSlice fogBuffer) {
-		renderStateFog.environmentalStart = fog.environmentalStart;
-		renderStateFog.environmentalEnd = fog.environmentalEnd;
-		renderStateFog.renderDistanceStart = fog.renderDistanceStart;
-		renderStateFog.renderDistanceEnd = fog.renderDistanceEnd;
-		renderStateFog.skyEnd = fog.skyEnd;
-		renderStateFog.cloudEnd = fog.cloudEnd;
-		renderStateFog.color.set(fog.color);
-
-		if (fogBuffer == null) {
-			return;
-		}
-
-		try (GpuBufferSlice.MappedView view = fogBuffer.map(false, true)) {
-			ByteBuffer buffer = view.data();
-			buffer.position(0);
-			Std140Builder.intoBuffer(buffer)
-				.putVec4(fog.color)
-				.putFloat(fog.environmentalStart)
-				.putFloat(fog.environmentalEnd)
-				.putFloat(fog.renderDistanceStart)
-				.putFloat(fog.renderDistanceEnd)
-				.putFloat(fog.skyEnd)
-				.putFloat(fog.cloudEnd);
 		}
 	}
 

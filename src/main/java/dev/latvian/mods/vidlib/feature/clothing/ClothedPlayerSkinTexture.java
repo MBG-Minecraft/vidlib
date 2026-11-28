@@ -12,6 +12,7 @@ import dev.latvian.mods.vidlib.feature.client.PersistentPixelTexture;
 import dev.latvian.mods.vidlib.feature.misc.MiscClientUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.PlayerModelType;
 import net.minecraft.world.entity.player.PlayerSkin;
@@ -129,7 +130,7 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 		return img;
 	}
 
-	public static synchronized Identifier computeClothedPlayerSkin(Minecraft mc, Identifier skinId, NativeImage skinImage, PlayerModelType model, ClothingSet clothing) {
+	public static synchronized ClientAsset.Texture computeClothedPlayerSkin(Minecraft mc, ClientAsset skin, NativeImage skinImage, PlayerModelType model, ClothingSet clothing) {
 		var map = CLOTHED_PLAYER_SKIN_CACHE.computeIfAbsent(model, m -> new Object2ObjectOpenHashMap<>());
 		var uniqueId = clothing.getUniqueId();
 		var cache = map.get(uniqueId);
@@ -139,33 +140,33 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 			map.put(uniqueId, cache);
 		}
 
-		var tex = cache.cache.get(skinId);
+		var tex = cache.cache.get(skin.id());
 
 		if (tex == null) {
 			var pixels = ImageUtils.layeredImage(List.of(skinImage, cache.setImage), false);
-			var genTex = new ClothedPlayerSkinTexture(uniqueId.withPath("textures/vidlib/generated/clothed_player/" + skinId.getPath() + "/" + uniqueId.getPath() + "/" + model.getSerializedName() + ".png"), pixels);
+			var genTex = new ClothedPlayerSkinTexture(new ClientAsset.ResourceTexture(uniqueId.withPath("vidlib/generated/clothed_player/" + skin.id().getPath() + "/" + uniqueId.getPath() + "/" + model.getSerializedName())), pixels);
 			mc.execute(() -> mc.getTextureManager().registerAndLoad(genTex.resourceId(), genTex));
 			tex = genTex;
-			cache.cache.put(skinId, tex);
+			cache.cache.put(skin.id(), tex);
 		}
 
-		return tex.resourceId();
+		return tex.asset;
 	}
 
 	@Nullable
-	public static Identifier replace(Minecraft mc, Identifier skinTexture, PlayerModelType model, PlayerClothing playerClothing) {
+	public static ClientAsset.Texture replace(Minecraft mc, ClientAsset skin, PlayerModelType model, PlayerClothing playerClothing) {
 		if (ClothingPresets.ready && playerClothing != PlayerClothing.NONE) {
-			var skinImage = MiscClientUtils.SKIN_IMAGE_MAP.get(skinTexture);
+			var skinImage = MiscClientUtils.SKIN_IMAGE_MAP.get(skin.id());
 
 			if (skinImage == null) {
-				skinImage = MiscClientUtils.BUILTIN_SKIN_IMAGE_MAP.get(skinTexture);
+				skinImage = MiscClientUtils.BUILTIN_SKIN_IMAGE_MAP.get(skin.id());
 			}
 
 			if (skinImage != null) {
 				var clothing = playerClothing.resolve();
 
 				if (!clothing.parts.isEmpty()) {
-					return computeClothedPlayerSkin(mc, skinTexture, skinImage, model, clothing);
+					return computeClothedPlayerSkin(mc, skin, skinImage, model, clothing);
 				}
 			}
 		}
@@ -174,12 +175,15 @@ public class ClothedPlayerSkinTexture extends PersistentPixelTexture {
 	}
 
 	@Nullable
-	public static Identifier replace(Minecraft mc, PlayerSkin playerSkin, PlayerClothing playerClothing) {
-		return replace(mc, playerSkin.body().texturePath(), playerSkin.model(), playerClothing);
+	public static ClientAsset.Texture replace(Minecraft mc, PlayerSkin playerSkin, PlayerClothing playerClothing) {
+		return replace(mc, playerSkin.body(), playerSkin.model(), playerClothing);
 	}
 
-	public ClothedPlayerSkinTexture(Identifier location, NativeImage pixels) {
-		super(location);
+	public final ClientAsset.Texture asset;
+
+	public ClothedPlayerSkinTexture(ClientAsset.Texture asset, NativeImage pixels) {
+		super(asset.texturePath());
+		this.asset = asset;
 		this.pixels = pixels;
 	}
 }
